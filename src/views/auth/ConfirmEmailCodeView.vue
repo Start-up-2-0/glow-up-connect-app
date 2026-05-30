@@ -10,6 +10,8 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import { ROUTE_PATHS } from '@/constants/routes'
 import {
   GLOW_RECOVERY_BTN_SECONDARY_CLASS,
+  GLOW_RECOVERY_INPUT_CLASS,
+  GLOW_RECOVERY_LABEL_CLASS,
   GLOW_RECOVERY_SUBTITLE_CLASS,
   GLOW_RECOVERY_TITLE_CLASS,
 } from '@/constants/designTokens'
@@ -26,14 +28,17 @@ const {
 } = useConfirmEmail()
 
 const email = ref('')
+const resendEmail = ref('')
 const codigo = ref('')
 const verifying = ref(false)
 const resending = ref(false)
 const cooldown = ref(0)
 const invalidCodeError = ref(false)
+const resendEmailError = ref('')
 
 let cooldownTimer: ReturnType<typeof setInterval> | null = null
 
+const hasKnownEmail = computed(() => Boolean(email.value.trim()))
 const maskedEmail = computed(() => maskEmail(email.value))
 const resendLabel = computed(() => {
   if (cooldown.value > 0) {
@@ -53,9 +58,9 @@ onMounted(() => {
     email.value = queryEmail
   } else if (stored) {
     email.value = stored
-  } else {
-    void router.replace(ROUTE_PATHS.LOGIN)
   }
+
+  resendEmail.value = email.value
 })
 
 onUnmounted(() => {
@@ -97,17 +102,32 @@ async function handleCodeComplete(value: string) {
 async function handleResend() {
   if (cooldown.value > 0 || resending.value) return
 
-  resending.value = true
+  resendEmailError.value = ''
   invalidCodeError.value = false
 
+  const targetEmail = hasKnownEmail.value ? email.value.trim() : resendEmail.value.trim()
+  if (!targetEmail) {
+    resendEmailError.value = 'Informe o e-mail para reenviar a confirmação.'
+    return
+  }
+
+  resending.value = true
+
   try {
-    const result = await resendConfirmation()
+    const result = await resendConfirmation(targetEmail)
 
     if (!result.ok) {
+      if (result.missingEmail) {
+        resendEmailError.value = 'Informe o e-mail para reenviar a confirmação.'
+        return
+      }
       notificationsStore.push('error', 'Não foi possível reenviar a confirmação. Tente novamente.')
       return
     }
 
+    setStoredEmail(targetEmail)
+    email.value = targetEmail
+    resendEmail.value = targetEmail
     codigo.value = ''
     notificationsStore.push('info', result.message)
     startCooldown()
@@ -122,8 +142,13 @@ async function handleResend() {
     <header class="mb-10 w-full text-center">
       <h1 :class="GLOW_RECOVERY_TITLE_CLASS">Confirme seu e-mail</h1>
       <p :class="[GLOW_RECOVERY_SUBTITLE_CLASS, 'mt-2']">
-        Insira o código de 6 dígitos enviado para<br />
-        <span class="font-semibold text-[#e4ac04]">{{ maskedEmail }}</span>
+        <template v-if="hasKnownEmail">
+          Insira o código de 6 dígitos enviado para<br />
+          <span class="font-semibold text-[#e4ac04]">{{ maskedEmail }}</span>
+        </template>
+        <template v-else>
+          Insira o código de 6 dígitos enviado para o seu e-mail.
+        </template>
       </p>
     </header>
 
@@ -141,6 +166,20 @@ async function handleResend() {
       <p class="font-inter text-xs font-semibold text-glow-text/60">
         Não recebi o código
       </p>
+
+      <div v-if="!hasKnownEmail" class="flex flex-col gap-2">
+        <label for="confirm-resend-email" :class="GLOW_RECOVERY_LABEL_CLASS">E-mail</label>
+        <input
+          id="confirm-resend-email"
+          v-model="resendEmail"
+          type="email"
+          autocomplete="email"
+          required
+          placeholder="ex: usuario01@exemplo.com"
+          :class="GLOW_RECOVERY_INPUT_CLASS"
+        />
+        <AuthRecoveryAlert v-if="resendEmailError">{{ resendEmailError }}</AuthRecoveryAlert>
+      </div>
 
       <button
         type="button"

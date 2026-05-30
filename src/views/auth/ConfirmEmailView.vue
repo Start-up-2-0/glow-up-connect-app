@@ -60,19 +60,18 @@ async function goToCodeEntry() {
 async function handleResend() {
   if (resending.value) return
 
-  if (!getStoredEmail()) {
-    errorMessage.value = 'Informe o código manualmente na próxima tela ou faça login para reenviar.'
-    await goToCodeEntry()
-    return
-  }
-
   resending.value = true
 
   try {
-    const result = await resendConfirmation()
+    const storedEmail = getStoredEmail()
+    const result = await resendConfirmation(storedEmail ?? undefined)
 
     if (!result.ok) {
-      notificationsStore.push('error', 'Não foi possível reenviar a confirmação. Tente novamente.')
+      notificationsStore.push(
+        'info',
+        'Digite o código na próxima tela. Para reenviar, informe seu e-mail.',
+      )
+      await goToCodeEntry()
       return
     }
 

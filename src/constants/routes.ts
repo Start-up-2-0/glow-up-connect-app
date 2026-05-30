@@ -19,6 +19,8 @@ export const ROUTE_PATHS = {
   CONFIRM_EMAIL: '/auth/confirmar-email',
   CONFIRM_EMAIL_CODE: '/auth/confirmar-email/codigo',
   CONFIRM_EMAIL_SUCCESS: '/auth/confirmar-email/sucesso',
+  /** Alias legado — links gerados pelo backend com FrontendBaseUrl na raiz do app */
+  CONFIRM_EMAIL_LEGACY: '/confirmar-email',
   FORGOT_PASSWORD: '/auth/esqueci-senha',
   FORGOT_PASSWORD_CODE: '/auth/esqueci-senha/codigo',
   RESET_PASSWORD: '/auth/redefinir-senha',
