@@ -1,118 +1,130 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
-import BaseInput from '@/components/ui/BaseInput.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
-import BaseAlert from '@/components/feedback/BaseAlert.vue'
-import { authService } from '@/services/authService'
+import { onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import AuthRecoveryLayout from '@/components/auth/recovery/AuthRecoveryLayout.vue'
+import AuthRecoveryAlert from '@/components/auth/recovery/AuthRecoveryAlert.vue'
+import AuthRecoveryBackLink from '@/components/auth/recovery/AuthRecoveryBackLink.vue'
+import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { ROUTE_PATHS } from '@/constants/routes'
+import {
+  GLOW_BUTTON_PRIMARY_CLASS,
+  GLOW_RECOVERY_BTN_SECONDARY_CLASS,
+  GLOW_RECOVERY_SUBTITLE_CLASS,
+  GLOW_RECOVERY_TITLE_CLASS,
+} from '@/constants/designTokens'
+
+type ConfirmState = 'loading' | 'success' | 'error' | 'idle'
 
 const route = useRoute()
-const { resolveError, resolveErrorCode } = useApiError()
+const router = useRouter()
+const { resolveError } = useApiError()
 const notificationsStore = useNotificationsStore()
+const { confirmByToken, resendConfirmation, getStoredEmail } = useConfirmEmail()
 
-const codigo = ref('')
-const email = ref('')
-const loading = ref(false)
-const reenviando = ref(false)
+const state = ref<ConfirmState>('idle')
 const errorMessage = ref('')
-const successMessage = ref('')
-const confirmed = ref(false)
+const resending = ref(false)
 
 onMounted(async () => {
-  if (typeof route.query.email === 'string') {
-    email.value = route.query.email
+  const token = typeof route.query.token === 'string' ? route.query.token : null
+
+  if (!token) {
+    await router.replace(ROUTE_PATHS.CONFIRM_EMAIL_CODE)
+    return
   }
-  if (typeof route.query.token === 'string') {
-    await confirmarComToken(route.query.token)
+
+  state.value = 'loading'
+
+  try {
+    const result = await confirmByToken(token)
+
+    if (result.ok) {
+      await router.replace(ROUTE_PATHS.CONFIRM_EMAIL_SUCCESS)
+      return
+    }
+
+    state.value = 'error'
+    errorMessage.value = 'Link de confirmação inválido ou expirado.'
+  } catch (err) {
+    state.value = 'error'
+    errorMessage.value = resolveError(err, 'Não foi possível confirmar o e-mail.')
   }
 })
 
-async function confirmarComToken(token: string) {
-  loading.value = true
-  errorMessage.value = ''
-  try {
-    await authService.confirmarEmail({ token })
-    confirmed.value = true
-    successMessage.value = 'E-mail confirmado com sucesso! Você já pode fazer login.'
-    notificationsStore.push('success', successMessage.value)
-  } catch (err) {
-    errorMessage.value = resolveError(err)
-    if (resolveErrorCode(err) === 'CONFIRMACAO_EMAIL_INVALIDA') {
-      codigo.value = ''
-    }
-  } finally {
-    loading.value = false
-  }
+async function goToCodeEntry() {
+  await router.push(ROUTE_PATHS.CONFIRM_EMAIL_CODE)
 }
 
-async function handleSubmit() {
-  errorMessage.value = ''
-  loading.value = true
-  try {
-    await authService.confirmarEmail({ codigo: codigo.value })
-    confirmed.value = true
-    successMessage.value = 'E-mail confirmado com sucesso! Você já pode fazer login.'
-    notificationsStore.push('success', successMessage.value)
-  } catch (err) {
-    errorMessage.value = resolveError(err)
-    if (resolveErrorCode(err) === 'CONFIRMACAO_EMAIL_INVALIDA') {
-      codigo.value = ''
-    }
-  } finally {
-    loading.value = false
-  }
-}
+async function handleResend() {
+  if (resending.value) return
 
-async function reenviar() {
-  if (!email.value) {
-    errorMessage.value = 'Informe o e-mail para reenviar a confirmação.'
+  if (!getStoredEmail()) {
+    errorMessage.value = 'Informe o código manualmente na próxima tela ou faça login para reenviar.'
+    await goToCodeEntry()
     return
   }
-  reenviando.value = true
-  errorMessage.value = ''
+
+  resending.value = true
+
   try {
-    await authService.reenviarConfirmacao({ email: email.value })
-    successMessage.value = 'Se o e-mail existir, enviamos um novo link de confirmação.'
-    notificationsStore.push('info', successMessage.value)
-  } catch (err) {
-    errorMessage.value = resolveError(err)
+    const result = await resendConfirmation()
+
+    if (!result.ok) {
+      notificationsStore.push('error', 'Não foi possível reenviar a confirmação. Tente novamente.')
+      return
+    }
+
+    notificationsStore.push('info', result.message)
+    await goToCodeEntry()
   } finally {
-    reenviando.value = false
+    resending.value = false
   }
 }
 </script>
 
 <template>
-  <div>
-    <h2>Confirmar e-mail</h2>
-    <p>Digite o código recebido ou use o link enviado por e-mail.</p>
+  <AuthRecoveryLayout :step="1" :show-stepper="false">
+    <header class="mb-10 w-full text-center">
+      <h1 :class="GLOW_RECOVERY_TITLE_CLASS">Confirmar e-mail</h1>
+      <p v-if="state === 'loading'" :class="[GLOW_RECOVERY_SUBTITLE_CLASS, 'mt-2']">
+        Confirmando seu e-mail...
+      </p>
+    </header>
 
-    <BaseAlert v-if="errorMessage" variant="error" dismissible @dismiss="errorMessage = ''">
-      {{ errorMessage }}
-    </BaseAlert>
-    <BaseAlert v-if="successMessage" variant="success">
-      {{ successMessage }}
-    </BaseAlert>
-
-    <template v-if="!confirmed">
-      <form @submit.prevent="handleSubmit">
-        <BaseInput v-model="codigo" label="Código de confirmação" placeholder="000000" required />
-        <BaseButton type="submit" block :loading="loading">Confirmar</BaseButton>
-      </form>
-
-      <div>
-        <BaseInput v-model="email" label="E-mail para reenvio" type="email" />
-        <BaseButton block :loading="reenviando" @click="reenviar">Reenviar confirmação</BaseButton>
-      </div>
-    </template>
-
-    <div v-else>
-      <RouterLink :to="ROUTE_PATHS.LOGIN">
-        <BaseButton block>Ir para login</BaseButton>
-      </RouterLink>
+    <div v-if="state === 'loading'" class="flex w-full justify-center py-8">
+      <span
+        class="inline-block size-10 animate-spin rounded-full border-2 border-glow-gold border-t-transparent"
+        aria-hidden="true"
+      />
     </div>
-  </div>
+
+    <div v-else-if="state === 'error'" class="flex w-full flex-col gap-6">
+      <AuthRecoveryAlert>{{ errorMessage }}</AuthRecoveryAlert>
+
+      <button
+        type="button"
+        :class="[GLOW_BUTTON_PRIMARY_CLASS, 'font-inter text-base font-medium']"
+        @click="goToCodeEntry"
+      >
+        Digitar código manualmente
+      </button>
+
+      <button
+        type="button"
+        :disabled="resending"
+        :class="GLOW_RECOVERY_BTN_SECONDARY_CLASS"
+        @click="handleResend"
+      >
+        <span
+          v-if="resending"
+          class="mr-2 inline-block size-4 animate-spin rounded-full border-2 border-glow-text border-t-transparent"
+        />
+        Reenviar confirmação
+      </button>
+    </div>
+
+    <AuthRecoveryBackLink v-if="state !== 'loading'" class="mt-6 self-start" />
+  </AuthRecoveryLayout>
 </template>
