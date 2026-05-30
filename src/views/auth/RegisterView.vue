@@ -8,6 +8,7 @@ import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import { userService } from '@/services/userService'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
+import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { ROUTE_PATHS } from '@/constants/routes'
 import {
   GLOW_AUTH_PANEL_BORDERED_CLASS,
@@ -19,6 +20,7 @@ import {
 } from '@/constants/designTokens'
 
 const router = useRouter()
+const { setStoredEmail } = useConfirmEmail()
 const { resolveError, resolveErrorCode, resolveFieldErrors } = useApiError()
 const notificationsStore = useNotificationsStore()
 
@@ -105,7 +107,8 @@ async function handleSubmit() {
 
     const { data } = await userService.cadastrar(payload)
     notificationsStore.push('success', data.mensagem)
-    await router.push({ path: ROUTE_PATHS.CONFIRM_EMAIL, query: { email: email.value.trim() } })
+    setStoredEmail(email.value.trim())
+    await router.push(ROUTE_PATHS.CONFIRM_EMAIL_CODE)
   } catch (err) {
     if (resolveErrorCode(err) === 'EMAIL_JA_CADASTRADO') {
       emailJaCadastrado.value = true

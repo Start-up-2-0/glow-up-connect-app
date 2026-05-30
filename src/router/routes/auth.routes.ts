@@ -15,6 +15,18 @@ export const authRoutes: RouteRecordRaw[] = [
     meta: { layout: 'auth', guestOnly: true, title: 'Cadastro' },
   },
   {
+    path: ROUTE_PATHS.CONFIRM_EMAIL_CODE,
+    name: ROUTE_NAMES.CONFIRM_EMAIL_CODE,
+    component: () => import('@/views/auth/ConfirmEmailCodeView.vue'),
+    meta: { layout: 'auth', guestOnly: true, title: 'Confirmar e-mail' },
+  },
+  {
+    path: ROUTE_PATHS.CONFIRM_EMAIL_SUCCESS,
+    name: ROUTE_NAMES.CONFIRM_EMAIL_SUCCESS,
+    component: () => import('@/views/auth/ConfirmEmailSuccessView.vue'),
+    meta: { layout: 'auth', guestOnly: true, title: 'E-mail confirmado' },
+  },
+  {
     path: ROUTE_PATHS.CONFIRM_EMAIL,
     name: ROUTE_NAMES.CONFIRM_EMAIL,
     component: () => import('@/views/auth/ConfirmEmailView.vue'),
