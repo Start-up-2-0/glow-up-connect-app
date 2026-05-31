@@ -59,15 +59,19 @@ Publicos (sem `x-glow-token`):
 
 | Chave | Padrao | Efeito |
 |-------|--------|--------|
-| `Auth:FrontendBaseUrl` | `http://localhost:5173` | Base do link no e-mail |
+| `Auth:FrontendBaseUrl` | `http://localhost:5173` | Base do link no e-mail (raiz do app) |
 | `Auth:ConfirmacaoEmailHoras` | `24` | Validade token/codigo |
 | `Auth:ConfirmacaoCodigoDigitos` | `6` | Tamanho do codigo |
 
-Link gerado:
+Link gerado pelo backend:
 
 ```text
 {FrontendBaseUrl}/confirmar-email?token=<token-opaco>
 ```
+
+**Frontend (SPA):** a rota canonica e `/auth/confirmar-email`. O app registra redirect de `/confirmar-email` para `/auth/confirmar-email` (preservando `?token=`), compativel com o padrao acima quando `FrontendBaseUrl` e a raiz do app (`http://localhost:5173`).
+
+Alternativa: configurar `Auth:FrontendBaseUrl` como `http://localhost:5173/auth/confirmar-email` — nesse caso o backend geraria path duplicado; prefira a raiz + alias no frontend.
 
 ---
 
@@ -76,10 +80,10 @@ Link gerado:
 ### Fluxo no frontend
 
 1. Usuario clica **Confirmar e-mail** no e-mail.
-2. Abre `/confirmar-email?token=...`.
+2. Abre `/confirmar-email?token=...` (redirect para `/auth/confirmar-email?token=...`).
 3. Extrai `token` da query string.
 4. Chama API ao montar a pagina (loading).
-5. Sucesso → CTA login; erro → reenvio ou codigo manual.
+5. Sucesso → CTA login; erro → reenvio ou codigo manual (sem exigir e-mail no sessionStorage).
 
 ### Request
 
@@ -141,6 +145,8 @@ Tela pos-cadastro: input 6 digitos + botao **Confirmar**.
 
 - Mascara `000000` ou 6 campos.
 - Validar 6 digitos antes da API.
+- Confirmacao por codigo **nao exige e-mail** no cliente (API aceita so `{ codigo }`).
+- Reenvio exige e-mail (campo visivel quando nao ha e-mail em sessionStorage).
 - Link **Reenviar codigo** e **Ja confirmou? Entrar**.
 
 ---
@@ -215,20 +221,20 @@ Assunto: **Confirme seu cadastro**
 
 ## Telas sugeridas
 
-### `/confirmar-email`
+### `/auth/confirmar-email` (alias: `/confirmar-email?token=`)
 
 | Estado | UI |
 |--------|-----|
 | Loading | Confirmando... |
 | Sucesso | Conta confirmada + login |
 | Erro | Reenvio ou codigo manual |
-| Sem token | Formulario de codigo |
+| Sem token | Redirect para tela de codigo |
 
-### `/aguardando-confirmacao`
+### `/auth/confirmar-email/codigo`
 
-- Texto com e-mail do usuario
-- Input 6 digitos
-- Reenviar e-mail
+- Texto com e-mail do usuario (quando disponivel) ou instrucao generica
+- Input 6 digitos (funciona sem e-mail armazenado)
+- Reenviar e-mail (campo de e-mail se necessario)
 - Link para login
 
 ---

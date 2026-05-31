@@ -69,13 +69,15 @@ export function useConfirmEmail() {
     }
   }
 
-  async function resendConfirmation(): Promise<{ ok: true; message: string } | { ok: false }> {
-    const email = getStoredEmail()
-    if (!email) return { ok: false }
+  async function resendConfirmation(
+    emailOverride?: string,
+  ): Promise<{ ok: true; message: string } | { ok: false; missingEmail?: boolean }> {
+    const email = (emailOverride ?? getStoredEmail())?.trim()
+    if (!email) return { ok: false, missingEmail: true }
 
     try {
       const { data } = await authService.reenviarConfirmacao({
-        email: email.trim().toLowerCase(),
+        email: email.toLowerCase(),
       })
       const message =
         data && typeof data === 'object' && 'message' in data && typeof data.message === 'string'
