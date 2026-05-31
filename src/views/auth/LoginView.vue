@@ -7,6 +7,7 @@ import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
 import { useAuth } from '@/composables/useAuth'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
+import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { GLOW_AUTH_PANEL_CLASS, GLOW_BUTTON_PRIMARY_CLASS, GLOW_INPUT_CLASS } from '@/constants/designTokens'
 
@@ -15,6 +16,7 @@ const REMEMBER_EMAIL_KEY = 'guc_remember_email'
 const route = useRoute()
 const router = useRouter()
 const { login, loading } = useAuth()
+const { setStoredEmail } = useConfirmEmail()
 const { resolveError, resolveErrorCode } = useApiError()
 const notificationsStore = useNotificationsStore()
 
@@ -48,10 +50,8 @@ async function handleSubmit() {
   } catch (err) {
     if (resolveErrorCode(err) === 'EMAIL_NAO_CONFIRMADO') {
       notificationsStore.push('info', 'Confirme seu e-mail antes de entrar.')
-      await router.push({
-        path: ROUTE_PATHS.CONFIRM_EMAIL,
-        query: { email: email.value.trim() },
-      })
+      setStoredEmail(email.value.trim())
+      await router.push(ROUTE_PATHS.CONFIRM_EMAIL_CODE)
       return
     }
     errorMessage.value = resolveError(err, 'Não foi possível entrar.')
