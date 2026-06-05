@@ -53,13 +53,13 @@ function onToggleCollapsed() {
   >
     <div
       class="flex h-full flex-col"
-      :class="[innerPaddingClass, collapsed ? 'items-center gap-[65px]' : 'gap-16']"
+      :class="[innerPaddingClass, collapsed ? 'items-center gap-10' : 'gap-10']"
     >
       <div
-        class="flex w-full shrink-0 items-center"
+        class="flex w-full shrink-0 items-center gap-2"
         :class="collapsed ? 'justify-center' : 'justify-between'"
       >
-        <AppLogo v-if="!collapsed" />
+        <AppLogo v-if="!collapsed" class="min-w-0 flex-1" />
         <SidebarToggleButton :collapsed="collapsed" @toggle="onToggleCollapsed" />
       </div>
 
