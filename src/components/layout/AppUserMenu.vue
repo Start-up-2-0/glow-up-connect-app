@@ -63,16 +63,19 @@ onUnmounted(() => {
       @click.stop="toggleMenu"
     >
       <div
-        class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-glow-canvas ring-1 ring-inset ring-glow-border-soft/50"
+        class="relative size-8 shrink-0 overflow-hidden rounded-full bg-glow-canvas ring-1 ring-inset ring-glow-border-soft/50"
         aria-hidden="true"
       >
         <img
           v-if="avatarSrc"
           :src="avatarSrc"
           alt=""
-          class="block size-full max-h-full max-w-full object-contain object-center"
+          class="absolute inset-0 size-full object-cover object-center"
         />
-        <span v-else class="font-urbanist text-xs font-semibold leading-none text-glow-text">
+        <span
+          v-else
+          class="flex size-full items-center justify-center font-urbanist text-xs font-semibold leading-none text-glow-text"
+        >
           {{ userInitial }}
         </span>
       </div>
