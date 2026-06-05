@@ -41,7 +41,7 @@ onUnmounted(() => {
       <IconBell :size="20" />
       <span
         v-if="unreadCount > 0"
-        class="absolute right-2.5 top-2.5 size-1.5 rounded-full bg-red-500 ring-2 ring-glow-surface"
+        class="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-red-500 ring-2 ring-glow-surface lg:right-2.5 lg:top-2.5"
         aria-hidden="true"
       />
     </NavbarIconButton>

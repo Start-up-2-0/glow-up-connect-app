@@ -21,22 +21,24 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
-    <h1>Olá, {{ profile?.nome ?? 'Usuário' }}!</h1>
+  <div class="space-y-4 lg:space-y-6">
+    <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
+      Olá, {{ profile?.nome ?? 'Usuário' }}!
+    </h1>
 
     <BaseCard title="Perfil">
-      <dl>
-        <div>
-          <dt>E-mail</dt>
-          <dd>{{ profile?.email ?? '—' }}</dd>
+      <dl class="space-y-3 font-urbanist text-sm">
+        <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4">
+          <dt class="shrink-0 font-medium text-glow-text-subtle sm:w-24">E-mail</dt>
+          <dd class="break-all text-glow-text">{{ profile?.email ?? '—' }}</dd>
         </div>
-        <div>
-          <dt>Perfil</dt>
-          <dd>{{ profile?.role ?? '—' }}</dd>
+        <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4">
+          <dt class="shrink-0 font-medium text-glow-text-subtle sm:w-24">Perfil</dt>
+          <dd class="text-glow-text">{{ profile?.role ?? '—' }}</dd>
         </div>
-        <div>
-          <dt>Status</dt>
-          <dd>{{ profile?.ativo ? 'Ativo' : 'Inativo' }}</dd>
+        <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4">
+          <dt class="shrink-0 font-medium text-glow-text-subtle sm:w-24">Status</dt>
+          <dd class="text-glow-text">{{ profile?.ativo ? 'Ativo' : 'Inativo' }}</dd>
         </div>
       </dl>
     </BaseCard>
