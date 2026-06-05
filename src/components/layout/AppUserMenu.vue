@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/user.store'
 import { useAuth } from '@/composables/useAuth'
 import { getUserRoleLabel } from '@/utils/userRoleLabel'
 import IconArrowDown from './icons/IconArrowDown.vue'
+import UserAvatar from './UserAvatar.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -20,17 +21,6 @@ const open = ref(false)
 const rootEl = ref<HTMLElement | null>(null)
 
 const roleLabel = computed(() => getUserRoleLabel(profile.value?.role))
-
-const avatarSrc = computed(() => {
-  const raw = profile.value?.avatarBase64
-  if (!raw) return null
-  if (raw.startsWith('data:')) return raw
-  return `data:image/jpeg;base64,${raw}`
-})
-
-const userInitial = computed(
-  () => profile.value?.nome?.charAt(0)?.toUpperCase() ?? 'U',
-)
 
 function toggleMenu() {
   open.value = !open.value
@@ -75,24 +65,12 @@ onUnmounted(() => {
       aria-haspopup="menu"
       @click.stop="toggleMenu"
     >
-      <div
-        class="relative shrink-0 overflow-hidden rounded-full bg-glow-canvas ring-1 ring-inset ring-glow-border-soft/50"
-        :class="props.compact ? 'size-8' : 'size-8'"
+      <UserAvatar
+        :src="profile?.avatarBase64"
+        :name="profile?.nome"
+        size="sm"
         aria-hidden="true"
-      >
-        <img
-          v-if="avatarSrc"
-          :src="avatarSrc"
-          alt=""
-          class="absolute inset-0 size-full object-cover object-center"
-        />
-        <span
-          v-else
-          class="flex size-full items-center justify-center font-urbanist text-xs font-semibold leading-none text-glow-text"
-        >
-          {{ userInitial }}
-        </span>
-      </div>
+      />
 
       <template v-if="!props.compact">
         <div class="flex min-w-0 items-center gap-1.5">
