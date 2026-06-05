@@ -4,9 +4,10 @@ import logoUrl from '@/assets/logo/logo.png'
 withDefaults(
   defineProps<{
     compact?: boolean
+    mobile?: boolean
     logoClass?: string
   }>(),
-  { compact: false },
+  { compact: false, mobile: false },
 )
 </script>
 
@@ -16,7 +17,7 @@ withDefaults(
     alt="Glow Up Connect"
     :class="[
       'object-contain object-left',
-      compact ? 'h-9 w-9' : 'h-[76px] w-auto max-w-[120px]',
+      compact ? 'h-10 w-10' : mobile ? 'h-[120px] w-[168px]' : 'h-[112px] w-[148px]',
       logoClass,
     ]"
   />

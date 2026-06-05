@@ -39,7 +39,7 @@ const appStore = useAppStore()
 
     <div class="flex min-w-0 flex-1 flex-col overflow-hidden">
       <AppNavbar @toggle-sidebar="appStore.toggleSidebar()" />
-      <main class="flex-1 overflow-y-auto px-6 py-6">
+      <main class="flex-1 overflow-y-auto px-4 py-4 lg:px-6 lg:py-6">
         <slot />
       </main>
     </div>
