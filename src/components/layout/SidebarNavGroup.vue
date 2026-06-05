@@ -48,30 +48,31 @@ function onNavigate() {
   <div class="w-full">
     <button
       type="button"
-      class="group flex h-11 w-full items-center gap-3 rounded-lg py-2 pl-2 pr-3 transition-colors"
+      class="group flex h-10 w-full items-center gap-2.5 rounded-lg py-1.5 pl-2 pr-2 transition-colors"
       :class="[
         collapsed ? 'w-[60px] justify-center px-2' : '',
         expanded && !collapsed
-          ? 'bg-glow-gold-selected pl-4'
+          ? 'bg-glow-gold-selected pl-3'
           : 'hover:bg-black/[0.03]',
       ]"
       :aria-expanded="collapsed ? undefined : expanded"
       @click="toggleExpanded"
     >
       <IconDashboardGrid
-        :size="expanded && !collapsed ? 30 : 28"
+        :size="22"
         class="shrink-0 text-glow-text"
       />
       <span
         v-if="!collapsed"
-        class="flex-1 truncate text-left font-urbanist text-sm text-glow-text transition-colors group-hover:text-glow-text-hover"
-        :class="expanded ? 'text-base' : ''"
+        class="flex-1 truncate text-left font-urbanist text-sm leading-none text-glow-text transition-colors group-hover:text-glow-text-hover"
+        :class="expanded ? 'font-medium' : 'font-normal'"
       >
         {{ label }}
       </span>
       <IconNavCaret
         v-if="!collapsed"
         :expanded="expanded"
+        :size="16"
         class="shrink-0 text-glow-text"
       />
     </button>
@@ -83,18 +84,18 @@ function onNavigate() {
         :key="child.id"
         :to="child.to"
         type="button"
-        class="group flex h-11 items-center rounded-lg py-2 transition-colors hover:bg-black/[0.03]"
-        :class="isChildActive(child) ? 'gap-3 px-7' : 'px-5'"
+        class="group flex h-10 items-center rounded-lg py-1.5 transition-colors hover:bg-black/[0.03]"
+        :class="isChildActive(child) ? 'gap-2.5 px-6' : 'px-5'"
         @click="onNavigate"
       >
         <span
           v-if="isChildActive(child)"
-          class="size-2 shrink-0 rounded-full bg-glow-gold"
+          class="size-1.5 shrink-0 rounded-full bg-glow-gold"
           aria-hidden="true"
         />
         <span
-          class="truncate font-urbanist text-sm text-glow-text transition-colors group-hover:text-glow-text-hover"
-          :class="isChildActive(child) ? 'text-base' : ''"
+          class="truncate font-urbanist text-sm leading-none text-glow-text transition-colors group-hover:text-glow-text-hover"
+          :class="isChildActive(child) ? 'font-medium' : 'font-normal'"
         >
           {{ child.label }}
         </span>

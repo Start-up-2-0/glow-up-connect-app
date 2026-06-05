@@ -31,11 +31,11 @@ function onClick() {
     :is="to ? RouterLink : 'button'"
     :to="to"
     type="button"
-    class="group flex h-11 w-full items-center gap-3 rounded-lg py-2 pl-2 pr-3 transition-colors"
+    class="group flex h-10 w-full items-center gap-2.5 rounded-lg py-1.5 pl-2 pr-2 transition-colors"
     :class="[
       collapsed ? 'w-[60px] justify-center px-2' : '',
       isActive
-        ? 'bg-glow-gold-selected pl-4'
+        ? 'bg-glow-gold-selected pl-3 font-medium'
         : 'hover:bg-black/[0.03]',
       !to && !collapsed ? 'cursor-default' : '',
     ]"
@@ -44,14 +44,13 @@ function onClick() {
     @click="onClick"
   >
     <IconDashboardGrid
-      :size="isActive ? 30 : 28"
+      :size="22"
       class="shrink-0 text-glow-text transition-colors group-hover:text-glow-text-hover"
-      :class="isActive ? 'text-glow-text' : ''"
     />
     <span
       v-if="!collapsed"
-      class="truncate font-urbanist text-sm transition-colors group-hover:text-glow-text-hover"
-      :class="isActive ? 'text-base text-glow-text' : 'text-glow-text'"
+      class="truncate font-urbanist text-sm leading-none text-glow-text transition-colors group-hover:text-glow-text-hover"
+      :class="isActive ? 'font-medium' : 'font-normal'"
     >
       {{ label }}
     </span>

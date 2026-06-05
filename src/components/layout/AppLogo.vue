@@ -15,8 +15,8 @@ withDefaults(
     :src="logoUrl"
     alt="Glow Up Connect"
     :class="[
-      'object-contain',
-      compact ? 'h-8 w-8' : 'h-[52px] w-auto',
+      'object-contain object-left',
+      compact ? 'h-9 w-9' : 'h-[76px] w-auto max-w-[120px]',
       logoClass,
     ]"
   />

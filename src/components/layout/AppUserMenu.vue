@@ -14,6 +14,17 @@ const rootEl = ref<HTMLElement | null>(null)
 
 const roleLabel = computed(() => getUserRoleLabel(profile.value?.role))
 
+const avatarSrc = computed(() => {
+  const raw = profile.value?.avatarBase64
+  if (!raw) return null
+  if (raw.startsWith('data:')) return raw
+  return `data:image/jpeg;base64,${raw}`
+})
+
+const userInitial = computed(
+  () => profile.value?.nome?.charAt(0)?.toUpperCase() ?? 'U',
+)
+
 function toggleMenu() {
   open.value = !open.value
 }
@@ -46,33 +57,42 @@ onUnmounted(() => {
   <div ref="rootEl" class="relative">
     <button
       type="button"
-      class="flex h-[46px] min-w-[199px] items-center gap-2.5 rounded border border-glow-border-soft bg-glow-surface px-2.5 text-left transition-colors hover:bg-white"
+      class="inline-flex h-[46px] max-w-[220px] items-center gap-2 rounded border border-glow-border-soft bg-glow-surface py-1 pl-2 pr-2.5 text-left transition-colors hover:bg-white"
       :aria-expanded="open"
       aria-haspopup="menu"
       @click.stop="toggleMenu"
     >
       <div
-        class="flex size-[29px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-glow-canvas text-xs font-semibold text-glow-text"
+        class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-glow-canvas ring-1 ring-inset ring-glow-border-soft/50"
+        aria-hidden="true"
       >
         <img
-          v-if="profile?.avatarBase64"
-          :src="profile.avatarBase64"
+          v-if="avatarSrc"
+          :src="avatarSrc"
           alt=""
-          class="size-full object-cover"
+          class="block size-full max-h-full max-w-full object-contain object-center"
         />
-        <span v-else>{{ profile?.nome?.charAt(0)?.toUpperCase() ?? 'U' }}</span>
+        <span v-else class="font-urbanist text-xs font-semibold leading-none text-glow-text">
+          {{ userInitial }}
+        </span>
       </div>
 
-      <div class="min-w-0 flex-1">
-        <p class="truncate font-urbanist text-sm font-semibold text-glow-text">
-          {{ profile?.nome ?? 'Usuário' }}
-        </p>
-        <p class="truncate font-urbanist text-[13px] font-medium text-glow-text-subtle">
-          {{ roleLabel }}
-        </p>
-      </div>
+      <div class="flex min-w-0 items-center gap-1.5">
+        <div class="min-w-0 max-w-[148px]">
+          <p class="truncate font-urbanist text-sm font-semibold leading-4 text-glow-text">
+            {{ profile?.nome ?? 'Usuário' }}
+          </p>
+          <p class="truncate font-urbanist text-xs font-medium leading-4 text-glow-text-subtle">
+            {{ roleLabel }}
+          </p>
+        </div>
 
-      <IconArrowDown class="shrink-0 text-glow-text-subtle" />
+        <IconArrowDown
+          :size="14"
+          class="shrink-0 text-glow-text-subtle transition-transform duration-200"
+          :class="open ? 'rotate-180' : ''"
+        />
+      </div>
     </button>
 
     <div
