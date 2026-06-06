@@ -76,7 +76,6 @@ export interface UpdateProfilePayload {
 }
 
 export interface ChangePasswordPayload {
-  senhaAtual: string
   senha: string
   confirmarSenha: string
 }
