@@ -21,12 +21,18 @@ const appStore = useAppStore()
 const collapsed = computed(() => !props.mobile && appStore.sidebarCollapsed)
 
 const sidebarWidthClass = computed(() => {
-  if (props.mobile) return 'w-[272px]'
+  if (props.mobile) return 'w-[min(100vw,320px)]'
   return collapsed.value ? 'w-[99px]' : 'w-[272px]'
 })
 
-const innerPaddingClass = computed(() =>
-  collapsed.value ? 'px-[7px] pt-6' : 'px-[23px] pt-[23px]',
+const innerPaddingClass = computed(() => {
+  if (collapsed.value) return 'px-[7px] pt-6'
+  if (props.mobile) return 'px-5 pt-5'
+  return 'px-[23px] pt-[23px]'
+})
+
+const sectionGapClass = computed(() =>
+  props.mobile || collapsed.value ? 'gap-6' : 'gap-10',
 )
 
 function isItemActive(to?: string) {
@@ -53,14 +59,18 @@ function onToggleCollapsed() {
   >
     <div
       class="flex h-full flex-col"
-      :class="[innerPaddingClass, collapsed ? 'items-center gap-[65px]' : 'gap-16']"
+      :class="[innerPaddingClass, collapsed ? 'items-center' : '', sectionGapClass]"
     >
       <div
-        class="flex w-full shrink-0 items-center"
+        class="flex w-full shrink-0 items-start gap-2"
         :class="collapsed ? 'justify-center' : 'justify-between'"
       >
-        <AppLogo v-if="!collapsed" />
-        <SidebarToggleButton :collapsed="collapsed" @toggle="onToggleCollapsed" />
+        <AppLogo v-if="!collapsed" :mobile="mobile" />
+        <SidebarToggleButton
+          :collapsed="collapsed"
+          :class="collapsed ? '' : 'mt-1 shrink-0'"
+          @toggle="onToggleCollapsed"
+        />
       </div>
 
       <nav class="flex w-full flex-col gap-1.5 overflow-y-auto pb-6">

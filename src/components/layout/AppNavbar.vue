@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { NAV_SEARCH_PLACEHOLDER } from '@/constants/navigation'
 import AppNotifications from './AppNotifications.vue'
 import AppUserMenu from './AppUserMenu.vue'
+import NavbarIconButton from './NavbarIconButton.vue'
+import NavbarSearchModal from './NavbarSearchModal.vue'
 import IconSearch from './icons/IconSearch.vue'
 import IconSettings from './icons/IconSettings.vue'
 
@@ -11,24 +13,25 @@ defineEmits<{
 }>()
 
 const searchQuery = ref('')
+const searchOpen = ref(false)
 </script>
 
 <template>
-  <header class="shrink-0 bg-glow-canvas px-6 pt-6">
-    <div class="flex items-center gap-4 pb-[17px]">
+  <header class="shrink-0 bg-glow-canvas px-4 pt-4 lg:px-6 lg:pt-6">
+    <div class="flex items-center gap-2 pb-3 lg:gap-4 lg:pb-[17px]">
       <button
         type="button"
-        class="flex size-[46px] shrink-0 items-center justify-center rounded border border-glow-border-soft bg-glow-surface text-glow-text lg:hidden"
+        class="flex size-10 shrink-0 items-center justify-center rounded border border-glow-border-soft bg-glow-surface text-glow-text lg:hidden"
         aria-label="Abrir menu"
         @click="$emit('toggleSidebar')"
       >
         <span class="sr-only">Menu</span>
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
           <path d="M4 6H16M4 10H16M4 14H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
         </svg>
       </button>
 
-      <div class="relative min-w-0 flex-1">
+      <div class="relative hidden min-w-0 flex-1 lg:block">
         <label for="dashboard-search" class="sr-only">Pesquisar</label>
         <div
           class="relative flex h-[46px] max-w-[480px] items-center rounded-xl border border-glow-border-soft bg-glow-surface"
@@ -44,18 +47,20 @@ const searchQuery = ref('')
         </div>
       </div>
 
-      <div class="ml-auto flex shrink-0 items-center gap-3">
+      <div class="ml-auto flex shrink-0 items-center gap-1.5 lg:ml-0 lg:gap-2">
+        <NavbarIconButton label="Pesquisar" class="lg:hidden" @click="searchOpen = true">
+          <IconSearch :size="20" />
+        </NavbarIconButton>
         <AppNotifications />
-        <button
-          type="button"
-          class="flex size-[46px] items-center justify-center rounded border border-glow-border-soft bg-glow-surface text-glow-text transition-colors hover:text-glow-text-soft"
-          aria-label="Configurações"
-        >
-          <IconSettings />
-        </button>
-        <AppUserMenu />
+        <NavbarIconButton label="Configurações">
+          <IconSettings :size="20" />
+        </NavbarIconButton>
+        <AppUserMenu compact class="lg:hidden" />
+        <AppUserMenu class="hidden lg:block" />
       </div>
     </div>
+
+    <NavbarSearchModal v-model="searchOpen" />
 
     <div class="h-px w-full bg-glow-border-soft" />
   </header>

@@ -5,6 +5,14 @@ import { useUserStore } from '@/stores/user.store'
 import { useAuth } from '@/composables/useAuth'
 import { getUserRoleLabel } from '@/utils/userRoleLabel'
 import IconArrowDown from './icons/IconArrowDown.vue'
+import UserAvatar from './UserAvatar.vue'
+
+const props = withDefaults(
+  defineProps<{
+    compact?: boolean
+  }>(),
+  { compact: false },
+)
 
 const { profile } = storeToRefs(useUserStore())
 const { logout } = useAuth()
@@ -46,33 +54,42 @@ onUnmounted(() => {
   <div ref="rootEl" class="relative">
     <button
       type="button"
-      class="flex h-[46px] min-w-[199px] items-center gap-2.5 rounded border border-glow-border-soft bg-glow-surface px-2.5 text-left transition-colors hover:bg-white"
+      class="inline-flex items-center rounded border border-glow-border-soft bg-glow-surface text-left transition-colors hover:bg-white"
+      :class="
+        props.compact
+          ? 'size-10 justify-center p-0'
+          : 'h-[46px] max-w-[220px] gap-2 py-1 pl-2 pr-2.5'
+      "
       :aria-expanded="open"
+      :aria-label="props.compact ? `Menu de ${profile?.nome ?? 'usuário'}` : undefined"
       aria-haspopup="menu"
       @click.stop="toggleMenu"
     >
-      <div
-        class="flex size-[29px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-glow-canvas text-xs font-semibold text-glow-text"
-      >
-        <img
-          v-if="profile?.avatarBase64"
-          :src="profile.avatarBase64"
-          alt=""
-          class="size-full object-cover"
-        />
-        <span v-else>{{ profile?.nome?.charAt(0)?.toUpperCase() ?? 'U' }}</span>
-      </div>
+      <UserAvatar
+        :src="profile?.avatarBase64"
+        :name="profile?.nome"
+        size="sm"
+        aria-hidden="true"
+      />
 
-      <div class="min-w-0 flex-1">
-        <p class="truncate font-urbanist text-sm font-semibold text-glow-text">
-          {{ profile?.nome ?? 'Usuário' }}
-        </p>
-        <p class="truncate font-urbanist text-[13px] font-medium text-glow-text-subtle">
-          {{ roleLabel }}
-        </p>
-      </div>
+      <template v-if="!props.compact">
+        <div class="flex min-w-0 items-center gap-1.5">
+          <div class="min-w-0 max-w-[148px]">
+            <p class="truncate font-urbanist text-sm font-semibold leading-4 text-glow-text">
+              {{ profile?.nome ?? 'Usuário' }}
+            </p>
+            <p class="truncate font-urbanist text-xs font-medium leading-4 text-glow-text-subtle">
+              {{ roleLabel }}
+            </p>
+          </div>
 
-      <IconArrowDown class="shrink-0 text-glow-text-subtle" />
+          <IconArrowDown
+            :size="14"
+            class="shrink-0 text-glow-text-subtle transition-transform duration-200"
+            :class="open ? 'rotate-180' : ''"
+          />
+        </div>
+      </template>
     </button>
 
     <div
@@ -80,7 +97,18 @@ onUnmounted(() => {
       class="absolute right-0 top-[calc(100%+8px)] z-50 min-w-[220px] overflow-hidden rounded border border-glow-border-soft bg-glow-surface py-1 shadow-lg"
       role="menu"
     >
-      <p class="border-b border-glow-border-soft px-4 py-2 font-urbanist text-xs text-glow-text-subtle">
+      <template v-if="props.compact">
+        <p class="border-b border-glow-border-soft px-4 py-2 font-urbanist text-sm font-semibold text-glow-text">
+          {{ profile?.nome ?? 'Usuário' }}
+        </p>
+        <p class="border-b border-glow-border-soft px-4 py-2 font-urbanist text-xs text-glow-text-subtle">
+          {{ roleLabel }} · {{ profile?.email }}
+        </p>
+      </template>
+      <p
+        v-else
+        class="border-b border-glow-border-soft px-4 py-2 font-urbanist text-xs text-glow-text-subtle"
+      >
         {{ profile?.email }}
       </p>
       <button
