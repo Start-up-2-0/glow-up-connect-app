@@ -42,7 +42,7 @@ const { searchPlaceholder } = useDashboardNav()
             id="dashboard-search"
             v-model="searchQuery"
             type="search"
-            :placeholder="NAV_SEARCH_PLACEHOLDER"
+            :placeholder="searchPlaceholder"
             class="h-full w-full rounded-xl border-0 bg-transparent pl-11 pr-4 font-urbanist text-sm text-glow-text placeholder:text-glow-placeholder focus:outline-none focus:ring-0"
           />
         </div>

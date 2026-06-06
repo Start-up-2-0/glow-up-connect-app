@@ -4,7 +4,7 @@ import IconSearch from './icons/IconSearch.vue'
 
 const open = defineModel<boolean>({ default: false })
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     placeholder?: string
   }>(),
@@ -70,7 +70,7 @@ function onKeydown(event: KeyboardEvent) {
                 ref="inputRef"
                 v-model="query"
                 type="search"
-                :placeholder="NAV_SEARCH_PLACEHOLDER"
+                :placeholder="props.placeholder"
                 class="min-w-0 flex-1 border-0 bg-transparent font-urbanist text-sm text-glow-text placeholder:text-glow-placeholder focus:outline-none focus:ring-0"
               />
               <button
