@@ -5,6 +5,7 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import { useUserStore } from '@/stores/user.store'
+import { getUserRoleLabel } from '@/utils/userRoleLabel'
 import { useFetchOnce } from '@/composables/useFetchOnce'
 
 const userStore = useUserStore()
@@ -34,7 +35,7 @@ onMounted(async () => {
         </div>
         <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4">
           <dt class="shrink-0 font-medium text-glow-text-subtle sm:w-24">Perfil</dt>
-          <dd class="text-glow-text">{{ profile?.role ?? '—' }}</dd>
+          <dd class="text-glow-text">{{ getUserRoleLabel(profile?.role) }}</dd>
         </div>
         <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4">
           <dt class="shrink-0 font-medium text-glow-text-subtle sm:w-24">Status</dt>

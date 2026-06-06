@@ -7,6 +7,7 @@ import type {
   UpdateProfilePayload,
   User,
 } from '@/types/user.types'
+import type { WhatsAppConfirmacaoInstrucoes, WhatsAppOptInPayload } from '@/types/whatsapp.types'
 
 export const userService = {
   cadastrar(payload: CadastroPayload) {
@@ -24,6 +25,22 @@ export const userService = {
   meEstabelecimentos() {
     return api.get<EstabelecimentoAcesso[]>('/usuario/me/estabelecimentos')
   },
+
+  solicitarConfirmacaoWhatsApp() {
+    return api
+      .post<ApiSuccessResponse<WhatsAppConfirmacaoInstrucoes>>(
+        '/usuario/me/whatsapp/solicitar-confirmacao',
+      )
+      .then((response) => response.data.data)
+  },
+
+  atualizarWhatsAppOptIn(payload: WhatsAppOptInPayload) {
+    return api.post('/usuario/me/whatsapp/opt-in', payload)
+  },
+
+  desativarConta() {
+    return api.delete('/usuario/me')
+  },
 }
 
-export type { ApiSuccessResponse }
+export type { ApiSuccessResponse } from '@/types/api.types'

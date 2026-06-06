@@ -1,9 +1,15 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
-import { NAV_SEARCH_PLACEHOLDER } from '@/constants/navigation'
 import IconSearch from './icons/IconSearch.vue'
 
 const open = defineModel<boolean>({ default: false })
+
+withDefaults(
+  defineProps<{
+    placeholder?: string
+  }>(),
+  { placeholder: 'Pesquisar...' },
+)
 
 const query = ref('')
 const inputRef = ref<HTMLInputElement | null>(null)
@@ -78,7 +84,7 @@ function onKeydown(event: KeyboardEvent) {
 
             <div class="px-4 py-6">
               <p class="text-center font-urbanist text-sm text-glow-text-subtle">
-                Digite para buscar em dashboard, clientes e estabelecimentos.
+                Digite para buscar nas páginas disponíveis no seu menu.
               </p>
             </div>
           </div>

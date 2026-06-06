@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { userService } from '@/services/userService'
-import type { EstabelecimentoAcesso, User, UserSummary } from '@/types/user.types'
+import type { EstabelecimentoAcesso, UpdateProfilePayload, User, UserSummary } from '@/types/user.types'
 
 export const useUserStore = defineStore('user', () => {
   const profile = ref<User | null>(null)
   const estabelecimentos = ref<EstabelecimentoAcesso[]>([])
   const loading = ref(false)
   const estabelecimentosLoading = ref(false)
+  const saving = ref(false)
 
   function setUser(user: User | null) {
     profile.value = user
@@ -41,6 +42,22 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  async function updateProfile(payload: UpdateProfilePayload) {
+    saving.value = true
+    try {
+      await userService.updateMe(payload)
+      if (profile.value) {
+        profile.value = {
+          ...profile.value,
+          ...payload,
+        }
+      }
+      await fetchMe(true)
+    } finally {
+      saving.value = false
+    }
+  }
+
   async function fetchEstabelecimentos(force = false) {
     if (estabelecimentos.value.length > 0 && !force) {
       return estabelecimentos.value
@@ -60,10 +77,12 @@ export const useUserStore = defineStore('user', () => {
     estabelecimentos,
     loading,
     estabelecimentosLoading,
+    saving,
     setUser,
     setUserFromSummary,
     clear,
     fetchMe,
+    updateProfile,
     fetchEstabelecimentos,
   }
 })

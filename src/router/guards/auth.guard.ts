@@ -2,6 +2,7 @@ import type { NavigationGuard } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUserStore } from '@/stores/user.store'
 import { ROUTE_PATHS } from '@/constants/routes'
+import { isClienteRole } from '@/types/user.types'
 
 export const authGuard: NavigationGuard = async (to) => {
   const authStore = useAuthStore()
@@ -9,6 +10,8 @@ export const authGuard: NavigationGuard = async (to) => {
 
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const guestOnly = to.matched.some((record) => record.meta.guestOnly)
+  const clienteOnly = to.matched.some((record) => record.meta.clienteOnly)
+  const businessOnly = to.matched.some((record) => record.meta.businessOnly)
 
   if (requiresAuth && !authStore.isAuthenticated) {
     return {
@@ -30,6 +33,17 @@ export const authGuard: NavigationGuard = async (to) => {
         path: ROUTE_PATHS.LOGIN,
         query: { redirect: to.fullPath },
       }
+    }
+  }
+
+  const role = userStore.profile?.role
+
+  if (requiresAuth && authStore.isAuthenticated && role !== undefined) {
+    if (clienteOnly && !isClienteRole(role)) {
+      return { path: ROUTE_PATHS.DASHBOARD }
+    }
+    if (businessOnly && isClienteRole(role)) {
+      return { path: ROUTE_PATHS.DASHBOARD }
     }
   }
 
