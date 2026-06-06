@@ -65,7 +65,7 @@ function onKeydown(event: KeyboardEvent) {
                 v-model="query"
                 type="search"
                 :placeholder="NAV_SEARCH_PLACEHOLDER"
-                class="min-w-0 flex-1 border-0 bg-transparent font-urbanist text-sm text-glow-text placeholder:text-[rgba(40,40,40,0.3)] focus:outline-none focus:ring-0"
+                class="min-w-0 flex-1 border-0 bg-transparent font-urbanist text-sm text-glow-text placeholder:text-glow-placeholder focus:outline-none focus:ring-0"
               />
               <button
                 type="button"

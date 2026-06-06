@@ -5,8 +5,8 @@ import AppNotifications from './AppNotifications.vue'
 import AppUserMenu from './AppUserMenu.vue'
 import NavbarIconButton from './NavbarIconButton.vue'
 import NavbarSearchModal from './NavbarSearchModal.vue'
+import NavbarThemeToggle from './NavbarThemeToggle.vue'
 import IconSearch from './icons/IconSearch.vue'
-import IconSettings from './icons/IconSettings.vue'
 
 defineEmits<{
   toggleSidebar: []
@@ -42,7 +42,7 @@ const searchOpen = ref(false)
             v-model="searchQuery"
             type="search"
             :placeholder="NAV_SEARCH_PLACEHOLDER"
-            class="h-full w-full rounded-xl border-0 bg-transparent pl-11 pr-4 font-urbanist text-sm text-glow-text placeholder:text-[rgba(40,40,40,0.3)] focus:outline-none focus:ring-0"
+            class="h-full w-full rounded-xl border-0 bg-transparent pl-11 pr-4 font-urbanist text-sm text-glow-text placeholder:text-glow-placeholder focus:outline-none focus:ring-0"
           />
         </div>
       </div>
@@ -52,9 +52,7 @@ const searchOpen = ref(false)
           <IconSearch :size="20" />
         </NavbarIconButton>
         <AppNotifications />
-        <NavbarIconButton label="Configurações">
-          <IconSettings :size="20" />
-        </NavbarIconButton>
+        <NavbarThemeToggle />
         <AppUserMenu compact class="lg:hidden" />
         <AppUserMenu class="hidden lg:block" />
       </div>
