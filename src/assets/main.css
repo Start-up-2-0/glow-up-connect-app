@@ -43,6 +43,6 @@
   }
 
   body {
-    @apply font-satoshi antialiased;
+    @apply bg-glow-canvas font-satoshi antialiased;
   }
 }

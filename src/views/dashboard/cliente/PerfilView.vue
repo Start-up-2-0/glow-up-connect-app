@@ -211,12 +211,12 @@ async function handleSolicitarWhatsApp() {
 
     <div
       v-else-if="profile"
-      class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6 xl:grid-cols-12 xl:items-start"
+      class="flex flex-col gap-5 md:grid md:grid-cols-2 lg:gap-6 xl:grid-cols-12 xl:items-start"
     >
       <!-- Coluna esquerda: resumo + WhatsApp -->
-      <div class="flex flex-col gap-5 max-md:contents md:col-span-1 xl:col-span-4 xl:gap-5">
+      <div class="flex flex-col gap-5 md:col-span-1 xl:col-span-4 xl:gap-5">
         <!-- Resumo -->
-        <section :class="CARD_CLASS" class="max-md:order-1">
+        <section :class="CARD_CLASS">
           <div :class="CARD_BODY_CLASS" class="space-y-4 text-center">
             <UserAvatar
               :src="profile.avatarBase64"
@@ -276,7 +276,7 @@ async function handleSolicitarWhatsApp() {
         </section>
 
         <!-- WhatsApp -->
-        <section :class="CARD_CLASS" class="max-md:order-2">
+        <section :class="CARD_CLASS">
           <div :class="CARD_HEADER_CLASS">
             <div class="flex items-start gap-3">
               <div
@@ -396,9 +396,9 @@ async function handleSolicitarWhatsApp() {
       </div>
 
       <!-- Coluna direita: informações + senha -->
-      <div class="flex flex-col gap-5 max-md:contents md:col-span-1 xl:col-span-8 xl:gap-5">
+      <div class="flex flex-col gap-5 md:col-span-1 xl:col-span-8 xl:gap-5">
         <!-- Informações pessoais -->
-        <section :class="CARD_CLASS" class="max-md:order-3">
+        <section :class="CARD_CLASS">
           <div :class="CARD_HEADER_CLASS">
             <h3 class="font-urbanist text-base font-semibold text-glow-text">Informações pessoais</h3>
             <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
@@ -453,7 +453,7 @@ async function handleSolicitarWhatsApp() {
         </section>
 
         <!-- Senha -->
-        <section :class="CARD_CLASS" class="max-md:order-4">
+        <section :class="CARD_CLASS">
           <div :class="CARD_HEADER_CLASS">
             <h3 class="font-urbanist text-base font-semibold text-glow-text">Senha</h3>
             <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
