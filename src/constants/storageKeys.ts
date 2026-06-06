@@ -3,6 +3,7 @@ export const STORAGE_KEYS = {
   REFRESH_TOKEN: 'guc_refresh_token',
   EXPIRES_AT: 'guc_expires_at',
   REFRESH_EXPIRES_AT: 'guc_refresh_expires_at',
+  THEME: 'guc_theme',
 } as const
 
 export const TOKEN_HEADER =

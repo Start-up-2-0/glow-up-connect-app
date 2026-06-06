@@ -18,7 +18,7 @@ const sizeClasses = {
 </script>
 
 <template>
-  <div role="status" :aria-label="label">
+  <div role="status" class="text-glow-text" :aria-label="label">
     <svg
       class="animate-spin"
       :class="sizeClasses[size]"
