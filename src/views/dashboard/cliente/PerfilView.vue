@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
+import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import UserAvatar from '@/components/layout/UserAvatar.vue'
@@ -20,7 +21,6 @@ import type { UpdateProfilePayload } from '@/types/user.types'
 import {
   formatTelefone,
   telefoneLocalFromApi,
-  telefoneLocalFromInput,
   telefoneToApi,
 } from '@/utils/formatters'
 
@@ -100,10 +100,6 @@ function syncFormFromProfile() {
   form.telefone = telefoneLocalFromApi(profile.value.telefone)
   avatarFile.value = null
   avatarRemoved.value = false
-}
-
-function handleTelefoneInput(event: Event) {
-  form.telefone = telefoneLocalFromInput((event.target as HTMLInputElement).value)
 }
 
 function onAvatarChange(file: File) {
@@ -434,32 +430,11 @@ async function handleSolicitarWhatsApp() {
 
               <div class="grid gap-5 sm:grid-cols-2">
                 <BaseInput v-model="form.nome" label="Nome completo" autocomplete="name" required />
-                <div class="flex flex-col gap-2">
-                  <label for="telefone" class="font-urbanist text-sm font-medium text-glow-text">
-                    Telefone
-                  </label>
-                  <div class="flex">
-                    <span
-                      class="inline-flex h-11 shrink-0 items-center rounded-l-lg border border-r-0 border-glow-border-soft bg-glow-surface px-3.5 font-urbanist text-sm font-medium text-glow-text-subtle"
-                      aria-hidden="true"
-                    >
-                      +55
-                    </span>
-                    <input
-                      id="telefone"
-                      :value="form.telefone"
-                      type="tel"
-                      inputmode="numeric"
-                      autocomplete="tel-national"
-                      placeholder="79991917634"
-                      class="h-11 w-full rounded-r-lg border border-glow-border-soft bg-glow-canvas px-3.5 font-urbanist text-sm text-glow-text outline-none transition placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold"
-                      @input="handleTelefoneInput"
-                    />
-                  </div>
-                  <p class="font-urbanist text-xs text-glow-text-subtle">
-                    DDD + número. O código do país (+55) é adicionado automaticamente.
-                  </p>
-                </div>
+                <TelefoneInput
+                  v-model="form.telefone"
+                  label="Telefone"
+                  hint="DDD + número. O código do país (+55) é adicionado automaticamente."
+                />
               </div>
 
               <BaseInput

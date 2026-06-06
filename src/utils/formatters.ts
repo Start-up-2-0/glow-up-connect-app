@@ -17,6 +17,7 @@ const currencyFormatter = new Intl.NumberFormat('pt-BR', {
 })
 
 export const TELEFONE_BR_DDI = '55'
+export const TELEFONE_LOCAL_MAX_LENGTH = 11
 
 export function normalizeTelefone(telefone: string | null | undefined): string {
   if (!telefone) return ''
@@ -45,7 +46,26 @@ export function telefoneLocalFromInput(value: string): string {
   if (digits.startsWith(TELEFONE_BR_DDI) && digits.length > TELEFONE_BR_DDI.length) {
     digits = digits.slice(TELEFONE_BR_DDI.length)
   }
-  return digits
+  return digits.slice(0, TELEFONE_LOCAL_MAX_LENGTH)
+}
+
+/** Máscara visual para DDD + número (sem DDI). */
+export function maskTelefoneLocal(digits: string): string {
+  const d = digits.slice(0, TELEFONE_LOCAL_MAX_LENGTH)
+  if (!d) return ''
+  if (d.length <= 2) return `(${d}`
+
+  const ddd = d.slice(0, 2)
+  const rest = d.slice(2)
+  const isMobile = rest[0] === '9'
+
+  if (isMobile) {
+    if (rest.length <= 5) return `(${ddd}) ${rest}`
+    return `(${ddd}) ${rest.slice(0, 5)}-${rest.slice(5)}`
+  }
+
+  if (rest.length <= 4) return `(${ddd}) ${rest}`
+  return `(${ddd}) ${rest.slice(0, 4)}-${rest.slice(4)}`
 }
 
 export function formatTelefone(telefone: string | null | undefined): string {
