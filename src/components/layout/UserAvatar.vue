@@ -6,7 +6,7 @@ const props = withDefaults(
   defineProps<{
     src?: string | null
     name?: string | null
-    size?: 'sm' | 'md'
+    size?: 'sm' | 'md' | 'lg' | 'xl'
   }>(),
   { size: 'sm' },
 )
@@ -14,10 +14,14 @@ const props = withDefaults(
 const normalizedSrc = computed(() => normalizeAvatarSrc(props.src))
 const initial = computed(() => getAvatarInitial(props.name))
 
-const sizeClass = computed(() => (props.size === 'md' ? 'size-10' : 'size-8'))
-const initialTextClass = computed(() =>
-  props.size === 'md' ? 'text-sm' : 'text-xs',
-)
+const sizeClass = computed(() => {
+  const map = { sm: 'size-8', md: 'size-10', lg: 'size-16', xl: 'size-24' } as const
+  return map[props.size]
+})
+const initialTextClass = computed(() => {
+  const map = { sm: 'text-xs', md: 'text-sm', lg: 'text-xl', xl: 'text-3xl' } as const
+  return map[props.size]
+})
 </script>
 
 <template>
