@@ -12,6 +12,14 @@ export const API_ERROR_MESSAGES: Record<string, string> = {
   RESET_SENHA_INVALIDO: 'Link ou token de redefinição inválido ou expirado.',
   RESET_CODIGO_INVALIDO: 'Código de verificação inválido ou expirado.',
   NOT_IMPLEMENTED: 'Funcionalidade ainda não disponível.',
+  LOCALIZACAO_CLIENTE_INVALIDA: 'Localização inválida. Verifique as coordenadas ou tente novamente.',
+  AGENDAMENTO_NAO_ENCONTRADO: 'Agendamento não encontrado.',
+  AGENDAMENTO_STATUS_INVALIDO: 'Esta ação não é permitida para o status atual do agendamento.',
+  HORARIO_INDISPONIVEL: 'Horário indisponível. Escolha outro horário.',
+  CONVITE_NEGOCIO_NAO_ENCONTRADO: 'Convite não encontrado ou inválido.',
+  CONVITE_NEGOCIO_INVALIDO: 'Convite expirado ou já respondido.',
+  CONVITE_NEGOCIO_DUPLICADO: 'Já existe um convite pendente para este e-mail.',
+  CLIENTE_SEM_ACESSO_NEGOCIO: 'Você não tem acesso a esta área.',
 }
 
 export const DEFAULT_ERROR_MESSAGE = 'Ocorreu um erro inesperado. Tente novamente.'

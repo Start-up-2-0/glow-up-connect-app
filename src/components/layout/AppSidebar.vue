@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { dashboardNavItems } from '@/constants/navigation'
+import { ROUTE_PATHS } from '@/constants/routes'
+import { useDashboardNav } from '@/composables/useDashboardNav'
 import { useAppStore } from '@/stores/app.store'
 import AppLogo from './AppLogo.vue'
 import SidebarToggleButton from './SidebarToggleButton.vue'
@@ -17,6 +18,7 @@ const props = withDefaults(
 
 const route = useRoute()
 const appStore = useAppStore()
+const { navItems } = useDashboardNav()
 
 const collapsed = computed(() => !props.mobile && appStore.sidebarCollapsed)
 
@@ -36,7 +38,9 @@ const sectionGapClass = computed(() =>
 )
 
 function isItemActive(to?: string) {
-  return to ? route.path === to : false
+  if (!to) return false
+  if (to === ROUTE_PATHS.DASHBOARD) return route.path === to
+  return route.path === to || route.path.startsWith(`${to}/`)
 }
 
 function onNavigate() {
@@ -74,7 +78,7 @@ function onToggleCollapsed() {
       </div>
 
       <nav class="flex w-full flex-col gap-1.5 overflow-y-auto pb-6">
-        <template v-for="item in dashboardNavItems" :key="item.id">
+        <template v-for="item in navItems" :key="item.id">
           <SidebarNavGroup
             v-if="item.children?.length"
             :label="item.label"

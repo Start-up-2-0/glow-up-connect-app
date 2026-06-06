@@ -1,5 +1,13 @@
 export type UserRole = 1 | 2 | 3 | 4 | 5
 
+export const USER_ROLE = {
+  CLIENTE: 1,
+  DONO_ESTABELECIMENTO: 2,
+  PROFISSIONAL_AUTONOMO: 3,
+  PROFISSIONAL_ESTABELECIMENTO: 4,
+  ADMIN: 5,
+} as const satisfies Record<string, UserRole>
+
 export function normalizeUserRole(role: UserRole | string | number): UserRole {
   if (typeof role === 'number' && role >= 1 && role <= 5) return role as UserRole
   const map: Record<string, UserRole> = {
@@ -13,6 +21,11 @@ export function normalizeUserRole(role: UserRole | string | number): UserRole {
   return map[key] ?? 1
 }
 
+export function isClienteRole(role: UserRole | string | number | undefined): boolean {
+  if (role === undefined) return false
+  return normalizeUserRole(role) === USER_ROLE.CLIENTE
+}
+
 export interface User {
   id: number
   nome: string
@@ -21,6 +34,9 @@ export interface User {
   role: UserRole
   ativo: boolean
   avatarBase64?: string | null
+  whatsAppConfirmado?: boolean
+  whatsAppOptIn?: boolean
+  whatsAppPendenteConfirmacao?: boolean
   createdAt?: string
   updatedAt?: string | null
 }

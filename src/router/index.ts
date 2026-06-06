@@ -5,6 +5,7 @@ import { authGuard } from './guards/auth.guard'
 import { hardReloadGuard } from './guards/hardReload.guard'
 import { authRoutes } from './routes/auth.routes'
 import { dashboardRoutes } from './routes/dashboard.routes'
+import { clienteRoutes } from './routes/cliente.routes'
 import { notFoundRoutes } from './routes/notFound.routes'
 
 const router = createRouter({
@@ -16,6 +17,7 @@ const router = createRouter({
     },
     ...authRoutes,
     ...dashboardRoutes,
+    ...clienteRoutes,
     ...notFoundRoutes,
   ],
   scrollBehavior(_to, _from, savedPosition) {

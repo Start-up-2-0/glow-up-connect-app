@@ -1,4 +1,5 @@
 import { ROUTE_PATHS } from '@/constants/routes'
+import { isClienteRole, type UserRole } from '@/types/user.types'
 
 export interface NavChildItem {
   id: string
@@ -16,7 +17,8 @@ export interface NavItem {
 export const SIDEBAR_WIDTH_EXPANDED = 272
 export const SIDEBAR_WIDTH_COLLAPSED = 99
 
-export const dashboardNavItems: NavItem[] = [
+/** Menu operacional — roles de negócio (não Cliente). */
+export const businessNavItems: NavItem[] = [
   {
     id: 'dashboard',
     label: 'Dashboard',
@@ -53,4 +55,48 @@ export const dashboardNavItems: NavItem[] = [
   },
 ]
 
-export const NAV_SEARCH_PLACEHOLDER = 'Dashboard, cliente, estabelecimentos...'
+/** Menu do cliente final — ver docs/acesso/cliente.md */
+export const clienteNavItems: NavItem[] = [
+  {
+    id: 'inicio',
+    label: 'Início',
+    to: ROUTE_PATHS.DASHBOARD,
+  },
+  {
+    id: 'explorar',
+    label: 'Explorar lojas',
+    to: ROUTE_PATHS.EXPLORAR,
+  },
+  {
+    id: 'meus-agendamentos',
+    label: 'Meus agendamentos',
+    to: ROUTE_PATHS.MEUS_AGENDAMENTOS,
+  },
+  {
+    id: 'convites',
+    label: 'Convites',
+    to: ROUTE_PATHS.CONVITES,
+  },
+  {
+    id: 'perfil',
+    label: 'Meu perfil',
+    to: ROUTE_PATHS.PERFIL,
+  },
+]
+
+export const NAV_SEARCH_PLACEHOLDER_BUSINESS =
+  'Dashboard, clientes, estabelecimentos...'
+
+export const NAV_SEARCH_PLACEHOLDER_CLIENTE =
+  'Explorar lojas, agendamentos, perfil...'
+
+/** @deprecated Use getNavSearchPlaceholder(role) */
+export const NAV_SEARCH_PLACEHOLDER = NAV_SEARCH_PLACEHOLDER_BUSINESS
+
+export function getNavItemsForRole(role: UserRole | string | number | undefined): NavItem[] {
+  return isClienteRole(role) ? clienteNavItems : businessNavItems
+}
+
+export function getNavSearchPlaceholder(role: UserRole | string | number | undefined): string {
+  return isClienteRole(role) ? NAV_SEARCH_PLACEHOLDER_CLIENTE : NAV_SEARCH_PLACEHOLDER_BUSINESS
+}

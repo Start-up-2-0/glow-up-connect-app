@@ -9,6 +9,14 @@ export const ROUTE_NAMES = {
   RESET_PASSWORD: 'reset-password',
   RESET_PASSWORD_SUCCESS: 'reset-password-success',
   DASHBOARD_HOME: 'dashboard-home',
+  EXPLORAR: 'explorar',
+  MEUS_AGENDAMENTOS: 'meus-agendamentos',
+  CONVITES: 'convites',
+  CONVITE_RESPONDER: 'convite-responder',
+  PERFIL: 'perfil',
+  LOJA_DETALHE: 'loja-detalhe',
+  LOJA_AGENDAR: 'loja-agendar',
+  AGENDAMENTO_DETALHE: 'agendamento-detalhe',
   NOT_FOUND: 'not-found',
 } as const
 
@@ -26,7 +34,29 @@ export const ROUTE_PATHS = {
   RESET_PASSWORD: '/auth/redefinir-senha',
   RESET_PASSWORD_SUCCESS: '/auth/redefinir-senha/sucesso',
   DASHBOARD: '/dashboard',
+  EXPLORAR: '/explorar',
+  MEUS_AGENDAMENTOS: '/meus-agendamentos',
+  CONVITES: '/convites',
+  PERFIL: '/perfil',
+  LOJA: '/loja',
+  MEUS_AGENDAMENTOS_DETALHE: '/meus-agendamentos',
 } as const
+
+export function lojaDetalhePath(publicGuid: string): string {
+  return `${ROUTE_PATHS.LOJA}/${publicGuid}`
+}
+
+export function lojaAgendarPath(publicGuid: string): string {
+  return `${ROUTE_PATHS.LOJA}/${publicGuid}/agendar`
+}
+
+export function agendamentoDetalhePath(id: number): string {
+  return `${ROUTE_PATHS.MEUS_AGENDAMENTOS_DETALHE}/${id}`
+}
+
+export function conviteResponderPath(token: string): string {
+  return `${ROUTE_PATHS.CONVITES}/${encodeURIComponent(token)}`
+}
 
 export type AppLayout = 'auth' | 'dashboard'
 
@@ -35,6 +65,10 @@ declare module 'vue-router' {
     layout?: AppLayout
     requiresAuth?: boolean
     guestOnly?: boolean
+    /** Apenas usuários com role Cliente */
+    clienteOnly?: boolean
+    /** Rotas operacionais — bloqueadas para Cliente */
+    businessOnly?: boolean
     title?: string
   }
 }

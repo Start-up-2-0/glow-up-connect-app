@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { NAV_SEARCH_PLACEHOLDER } from '@/constants/navigation'
+import { useDashboardNav } from '@/composables/useDashboardNav'
 import AppNotifications from './AppNotifications.vue'
 import AppUserMenu from './AppUserMenu.vue'
 import NavbarIconButton from './NavbarIconButton.vue'
@@ -14,6 +14,7 @@ defineEmits<{
 
 const searchQuery = ref('')
 const searchOpen = ref(false)
+const { searchPlaceholder } = useDashboardNav()
 </script>
 
 <template>
@@ -41,8 +42,8 @@ const searchOpen = ref(false)
             id="dashboard-search"
             v-model="searchQuery"
             type="search"
-            :placeholder="NAV_SEARCH_PLACEHOLDER"
-            class="h-full w-full rounded-xl border-0 bg-transparent pl-11 pr-4 font-urbanist text-sm text-glow-text placeholder:text-[rgba(40,40,40,0.3)] focus:outline-none focus:ring-0"
+            :placeholder="searchPlaceholder"
+            class="h-full w-full rounded-xl border-0 bg-transparent pl-11 pr-4 font-urbanist text-sm text-glow-text placeholder:text-glow-placeholder focus:outline-none focus:ring-0"
           />
         </div>
       </div>
@@ -60,7 +61,7 @@ const searchOpen = ref(false)
       </div>
     </div>
 
-    <NavbarSearchModal v-model="searchOpen" />
+    <NavbarSearchModal v-model="searchOpen" :placeholder="searchPlaceholder" />
 
     <div class="h-px w-full bg-glow-border-soft" />
   </header>
