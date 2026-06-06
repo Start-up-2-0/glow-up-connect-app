@@ -7,6 +7,41 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --glow-gold: #ffbf00;
+    --glow-gold-dark: #c59400;
+    --glow-gold-selected: rgba(255, 191, 0, 0.8);
+    --glow-text: #282828;
+    --glow-text-muted: rgba(40, 40, 40, 0.4);
+    --glow-text-soft: rgba(40, 40, 40, 0.8);
+    --glow-text-subtle: rgba(40, 40, 40, 0.5);
+    --glow-text-hover: rgba(40, 40, 40, 0.6);
+    --glow-border-soft: rgba(40, 40, 40, 0.25);
+    --glow-border-sidebar: rgba(40, 40, 40, 0.3);
+    --glow-surface: #f3f3f3;
+    --glow-canvas: #e5e5e5;
+    --glow-placeholder: rgba(99, 99, 99, 0.6);
+    --glow-primary: #3c5ccf;
+    --glow-secondary: #a38a2d;
+    --glow-avatar-bg: #171717;
+    --glow-hover-surface: #ffffff;
+  }
+
+  .dark {
+    --glow-text: #f3f3f3;
+    --glow-text-muted: rgba(243, 243, 243, 0.45);
+    --glow-text-soft: rgba(243, 243, 243, 0.8);
+    --glow-text-subtle: rgba(243, 243, 243, 0.55);
+    --glow-text-hover: rgba(243, 243, 243, 0.7);
+    --glow-border-soft: rgba(243, 243, 243, 0.15);
+    --glow-border-sidebar: rgba(243, 243, 243, 0.2);
+    --glow-surface: #242424;
+    --glow-canvas: #161616;
+    --glow-placeholder: rgba(243, 243, 243, 0.4);
+    --glow-avatar-bg: #1f1f1f;
+    --glow-hover-surface: #2e2e2e;
+  }
+
   body {
     @apply font-satoshi antialiased;
   }

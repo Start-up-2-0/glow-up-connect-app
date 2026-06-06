@@ -23,7 +23,7 @@ const initialTextClass = computed(() =>
 <template>
   <div
     class="relative isolate shrink-0 overflow-hidden rounded-full ring-1 ring-inset ring-glow-border-soft/50"
-    :class="[sizeClass, normalizedSrc ? 'bg-neutral-900' : 'bg-glow-canvas']"
+    :class="[sizeClass, normalizedSrc ? 'bg-glow-avatar-bg' : 'bg-glow-canvas']"
   >
     <img
       v-if="normalizedSrc"

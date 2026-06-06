@@ -54,7 +54,7 @@ onUnmounted(() => {
   <div ref="rootEl" class="relative">
     <button
       type="button"
-      class="inline-flex items-center rounded border border-glow-border-soft bg-glow-surface text-left transition-colors hover:bg-white"
+      class="inline-flex items-center rounded border border-glow-border-soft bg-glow-surface text-left transition-colors hover:bg-glow-hover-surface"
       :class="
         props.compact
           ? 'size-10 justify-center p-0'
