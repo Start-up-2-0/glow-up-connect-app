@@ -18,6 +18,11 @@ import {
   telefoneToApi,
 } from '@/utils/formatters'
 
+const CARD_CLASS =
+  'flex h-full flex-col overflow-hidden rounded-xl border border-glow-border-soft bg-glow-surface shadow-sm'
+const CARD_HEADER_CLASS = 'shrink-0 border-b border-glow-border-soft px-5 py-4'
+const CARD_BODY_CLASS = 'flex flex-1 flex-col p-5'
+
 const userStore = useUserStore()
 const { profile, saving } = storeToRefs(userStore)
 const { resolveError } = useApiError()
@@ -116,7 +121,7 @@ async function handleSolicitarWhatsApp() {
 </script>
 
 <template>
-  <div class="mx-auto max-w-4xl space-y-6">
+  <div class="w-full space-y-5 lg:space-y-6">
     <header>
       <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
         Meu perfil
@@ -137,21 +142,20 @@ async function handleSolicitarWhatsApp() {
 
     <LoadingSpinner v-if="loading && !profile" class="mx-auto py-12" />
 
-    <template v-else-if="profile">
-      <!-- Cabeçalho do perfil -->
+    <div
+      v-else-if="profile"
+      class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6 xl:grid-cols-12 xl:items-stretch"
+    >
+      <!-- Resumo do perfil -->
       <section
-        class="overflow-hidden rounded-xl border border-glow-border-soft bg-glow-surface shadow-sm"
+        :class="CARD_CLASS"
+        class="order-1 md:col-span-1 xl:col-span-4 xl:row-start-1"
       >
-        <div class="flex flex-col gap-6 p-6 sm:flex-row sm:items-center">
-          <UserAvatar
-            :src="profile.avatarBase64"
-            :name="profile.nome"
-            size="xl"
-            class="mx-auto sm:mx-0"
-          />
-          <div class="min-w-0 flex-1 text-center sm:text-left">
-            <div class="flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-              <h2 class="truncate font-satoshi text-xl font-bold text-glow-text">
+        <div :class="CARD_BODY_CLASS" class="items-center text-center">
+          <UserAvatar :src="profile.avatarBase64" :name="profile.nome" size="xl" />
+          <div class="mt-4 w-full min-w-0">
+            <div class="flex flex-wrap items-center justify-center gap-2">
+              <h2 class="font-satoshi text-lg font-bold text-glow-text">
                 {{ profile.nome }}
               </h2>
               <span
@@ -168,22 +172,46 @@ async function handleSolicitarWhatsApp() {
             <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
               {{ getUserRoleLabel(profile.role) }}
             </p>
-            <p class="mt-2 truncate font-urbanist text-sm text-glow-text">
-              {{ profile.email }}
-            </p>
-            <p
-              v-if="profile.telefone"
-              class="mt-0.5 font-urbanist text-sm text-glow-text-subtle"
-            >
-              {{ formatTelefone(profile.telefone) }}
-            </p>
           </div>
+
+          <dl class="mt-5 w-full space-y-3 border-t border-glow-border-soft pt-5 text-left">
+            <div class="grid grid-cols-[5.5rem_1fr] gap-x-3 gap-y-1">
+              <dt class="font-urbanist text-xs font-medium uppercase tracking-wide text-glow-text-subtle">
+                E-mail
+              </dt>
+              <dd class="break-all font-urbanist text-sm text-glow-text">{{ profile.email }}</dd>
+            </div>
+            <div class="grid grid-cols-[5.5rem_1fr] gap-x-3 gap-y-1">
+              <dt class="font-urbanist text-xs font-medium uppercase tracking-wide text-glow-text-subtle">
+                Telefone
+              </dt>
+              <dd class="font-urbanist text-sm text-glow-text">
+                {{ profile.telefone ? formatTelefone(profile.telefone) : 'Não informado' }}
+              </dd>
+            </div>
+            <div class="grid grid-cols-[5.5rem_1fr] gap-x-3 gap-y-1">
+              <dt class="font-urbanist text-xs font-medium uppercase tracking-wide text-glow-text-subtle">
+                WhatsApp
+              </dt>
+              <dd>
+                <span
+                  class="inline-flex rounded-full px-2.5 py-0.5 font-urbanist text-xs font-medium"
+                  :class="whatsAppBadge.class"
+                >
+                  {{ whatsAppBadge.label }}
+                </span>
+              </dd>
+            </div>
+          </dl>
         </div>
       </section>
 
       <!-- Informações pessoais -->
-      <section class="overflow-hidden rounded-xl border border-glow-border-soft bg-glow-surface shadow-sm">
-        <div class="border-b border-glow-border-soft px-6 py-5">
+      <section
+        :class="CARD_CLASS"
+        class="order-2 md:col-span-1 xl:col-span-8 xl:row-span-2 xl:row-start-1"
+      >
+        <div :class="CARD_HEADER_CLASS">
           <h3 class="font-urbanist text-base font-semibold text-glow-text">
             Informações pessoais
           </h3>
@@ -192,8 +220,8 @@ async function handleSolicitarWhatsApp() {
           </p>
         </div>
 
-        <form class="space-y-6 p-6" @submit.prevent="handleSave">
-          <div class="grid gap-6 md:grid-cols-2">
+        <form :class="CARD_BODY_CLASS" @submit.prevent="handleSave">
+          <div class="grid flex-1 gap-5 sm:grid-cols-2">
             <BaseInput v-model="form.nome" label="Nome completo" autocomplete="name" required />
             <div class="flex flex-col gap-2">
               <label for="telefone" class="font-urbanist text-sm font-medium text-glow-text">
@@ -221,28 +249,31 @@ async function handleSolicitarWhatsApp() {
                 DDD + número. O código do país (+55) é adicionado automaticamente.
               </p>
             </div>
+            <BaseInput
+              class="sm:col-span-2"
+              :model-value="profile.email"
+              label="E-mail"
+              type="email"
+              readonly
+              hint="Entre em contato com o suporte para alterar seu e-mail."
+            />
           </div>
 
-          <BaseInput
-            :model-value="profile.email"
-            label="E-mail"
-            type="email"
-            readonly
-            hint="Entre em contato com o suporte para alterar seu e-mail."
-          />
-
-          <div class="flex justify-end border-t border-glow-border-soft pt-5">
+          <div class="mt-6 flex justify-end border-t border-glow-border-soft pt-5">
             <BaseButton type="submit" :loading="saving">Salvar alterações</BaseButton>
           </div>
         </form>
       </section>
 
       <!-- WhatsApp -->
-      <section class="overflow-hidden rounded-xl border border-glow-border-soft bg-glow-surface shadow-sm">
-        <div class="flex flex-col gap-3 border-b border-glow-border-soft px-6 py-5 sm:flex-row sm:items-start sm:justify-between">
-          <div class="flex gap-4">
+      <section
+        :class="CARD_CLASS"
+        class="order-3 md:col-span-2 xl:col-span-4 xl:row-start-2"
+      >
+        <div :class="CARD_HEADER_CLASS">
+          <div class="flex items-start gap-3">
             <div
-              class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+              class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
               aria-hidden="true"
             >
               <svg class="size-5" viewBox="0 0 24 24" fill="currentColor">
@@ -251,46 +282,35 @@ async function handleSolicitarWhatsApp() {
                 />
               </svg>
             </div>
-            <div>
-              <div class="flex flex-wrap items-center gap-2">
-                <h3 class="font-urbanist text-base font-semibold text-glow-text">WhatsApp</h3>
-                <span
-                  class="inline-flex rounded-full px-2.5 py-0.5 font-urbanist text-xs font-medium"
-                  :class="whatsAppBadge.class"
-                >
-                  {{ whatsAppBadge.label }}
-                </span>
-              </div>
-              <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-                Receba alertas de agendamento diretamente no seu celular.
+            <div class="min-w-0">
+              <h3 class="font-urbanist text-base font-semibold text-glow-text">WhatsApp</h3>
+              <p class="mt-0.5 font-urbanist text-sm text-glow-text-subtle">
+                Alertas de agendamento no celular.
               </p>
             </div>
           </div>
         </div>
 
-        <div class="space-y-5 p-6">
+        <div :class="CARD_BODY_CLASS" class="gap-4">
           <div v-if="whatsAppState === 'sem-telefone'" class="rounded-lg bg-glow-canvas px-4 py-3">
             <p class="font-urbanist text-sm text-glow-text-subtle">
-              Cadastre seu telefone na seção acima para habilitar alertas de agendamento via
-              WhatsApp.
+              Cadastre seu telefone para habilitar alertas via WhatsApp.
             </p>
           </div>
 
-          <div v-else-if="whatsAppState === 'confirmado'" class="space-y-5">
+          <div v-else-if="whatsAppState === 'confirmado'" class="flex flex-1 flex-col gap-4">
             <p class="font-urbanist text-sm text-glow-text">
-              WhatsApp confirmado para
+              Confirmado para
               <span class="font-medium">{{ formatTelefone(profile.telefone) }}</span>.
             </p>
 
             <label
-              class="flex cursor-pointer items-center justify-between gap-4 rounded-lg border border-glow-border-soft bg-glow-canvas px-4 py-3.5"
+              class="mt-auto flex cursor-pointer items-center justify-between gap-4 rounded-lg border border-glow-border-soft bg-glow-canvas px-4 py-3.5"
             >
-              <div>
-                <p class="font-urbanist text-sm font-medium text-glow-text">
-                  Alertas de agendamento
-                </p>
+              <div class="min-w-0">
+                <p class="font-urbanist text-sm font-medium text-glow-text">Alertas</p>
                 <p class="mt-0.5 font-urbanist text-xs text-glow-text-subtle">
-                  Receber lembretes e atualizações no WhatsApp
+                  Lembretes e atualizações
                 </p>
               </div>
               <div class="relative inline-flex shrink-0 cursor-pointer items-center">
@@ -307,7 +327,7 @@ async function handleSolicitarWhatsApp() {
             </label>
           </div>
 
-          <div v-else class="space-y-5">
+          <div v-else class="flex flex-1 flex-col gap-4">
             <div
               class="rounded-lg border border-glow-border-soft bg-glow-canvas px-4 py-3"
               :class="whatsAppState === 'pendente' ? 'border-amber-200 dark:border-amber-800' : ''"
@@ -316,15 +336,14 @@ async function handleSolicitarWhatsApp() {
                 v-if="whatsAppState === 'pendente' || instrucoes"
                 class="font-urbanist text-sm text-glow-text"
               >
-                Verifique seu e-mail para confirmar o WhatsApp. Abra o link no celular e envie a
-                mensagem do número cadastrado.
+                Verifique seu e-mail e confirme pelo link no celular.
               </p>
               <p v-else class="font-urbanist text-sm text-glow-text-subtle">
-                Confirme seu número
+                Confirme
                 <span class="font-medium text-glow-text">{{
                   formatTelefone(profile.telefone)
                 }}</span>
-                para receber alertas de agendamento.
+                para receber alertas.
               </p>
             </div>
 
@@ -350,14 +369,20 @@ async function handleSolicitarWhatsApp() {
                 </svg>
                 Abrir WhatsApp
               </a>
-              <p v-if="polling" class="flex items-center gap-2 font-urbanist text-xs text-glow-text-subtle">
-                <span class="inline-block size-3.5 animate-spin rounded-full border-2 border-glow-text-subtle border-t-transparent" />
+              <p
+                v-if="polling"
+                class="flex items-center gap-2 font-urbanist text-xs text-glow-text-subtle"
+              >
+                <span
+                  class="inline-block size-3.5 animate-spin rounded-full border-2 border-glow-text-subtle border-t-transparent"
+                />
                 Aguardando confirmação…
               </p>
             </div>
 
             <BaseButton
               v-if="whatsAppState !== 'pendente' || !instrucoes"
+              class="mt-auto w-full sm:w-auto"
               variant="secondary"
               :loading="solicitando"
               @click="handleSolicitarWhatsApp"
@@ -367,6 +392,6 @@ async function handleSolicitarWhatsApp() {
           </div>
         </div>
       </section>
-    </template>
+    </div>
   </div>
 </template>
