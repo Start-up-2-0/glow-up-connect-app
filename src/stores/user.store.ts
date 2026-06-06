@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { userService } from '@/services/userService'
-import type { EstabelecimentoAcesso, UpdateProfilePayload, User, UserSummary } from '@/types/user.types'
+import type { EstabelecimentoAcesso, ChangePasswordPayload, UpdateProfilePayload, User, UserSummary } from '@/types/user.types'
 
 export const useUserStore = defineStore('user', () => {
   const profile = ref<User | null>(null)
@@ -9,6 +9,7 @@ export const useUserStore = defineStore('user', () => {
   const loading = ref(false)
   const estabelecimentosLoading = ref(false)
   const saving = ref(false)
+  const changingPassword = ref(false)
 
   function setUser(user: User | null) {
     profile.value = user
@@ -72,17 +73,28 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  async function changePassword(payload: ChangePasswordPayload) {
+    changingPassword.value = true
+    try {
+      await userService.alterarSenha(payload)
+    } finally {
+      changingPassword.value = false
+    }
+  }
+
   return {
     profile,
     estabelecimentos,
     loading,
     estabelecimentosLoading,
     saving,
+    changingPassword,
     setUser,
     setUserFromSummary,
     clear,
     fetchMe,
     updateProfile,
+    changePassword,
     fetchEstabelecimentos,
   }
 })

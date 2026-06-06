@@ -3,6 +3,7 @@ import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
   CadastroPayload,
   CadastroResponse,
+  ChangePasswordPayload,
   EstabelecimentoAcesso,
   UpdateProfilePayload,
   User,
@@ -20,6 +21,10 @@ export const userService = {
 
   updateMe(payload: UpdateProfilePayload) {
     return api.put('/usuario/me', payload)
+  },
+
+  alterarSenha(payload: ChangePasswordPayload) {
+    return api.put<ApiSuccessResponse<void>>('/usuario/me/senha', payload)
   },
 
   meEstabelecimentos() {

@@ -7,7 +7,7 @@ const appStore = useAppStore()
 </script>
 
 <template>
-  <div class="flex h-screen bg-glow-canvas">
+  <div class="flex h-dvh bg-glow-canvas">
     <AppSidebar class="hidden shrink-0 lg:flex" />
 
     <Transition
@@ -39,7 +39,7 @@ const appStore = useAppStore()
 
     <div class="flex min-w-0 flex-1 flex-col overflow-hidden">
       <AppNavbar @toggle-sidebar="appStore.toggleSidebar()" />
-      <main class="flex-1 overflow-y-auto px-4 py-4 lg:px-6 lg:py-6">
+      <main class="flex-1 overflow-y-auto bg-glow-canvas px-4 py-4 lg:px-6 lg:py-6">
         <slot />
       </main>
     </div>

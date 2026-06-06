@@ -16,6 +16,73 @@ const currencyFormatter = new Intl.NumberFormat('pt-BR', {
   currency: 'BRL',
 })
 
+export const TELEFONE_BR_DDI = '55'
+export const TELEFONE_LOCAL_MAX_LENGTH = 11
+
+export function normalizeTelefone(telefone: string | null | undefined): string {
+  if (!telefone) return ''
+  return telefone.replace(/\D/g, '')
+}
+
+/** Remove o DDI 55 para exibição no campo de edição. */
+export function telefoneLocalFromApi(telefone: string | null | undefined): string {
+  const digits = normalizeTelefone(telefone)
+  if (!digits) return ''
+  if (digits.startsWith(TELEFONE_BR_DDI)) return digits.slice(TELEFONE_BR_DDI.length)
+  return digits
+}
+
+/** Monta o telefone completo para a API (sempre com prefixo 55). */
+export function telefoneToApi(local: string | null | undefined): string {
+  const digits = normalizeTelefone(local)
+  if (!digits) return ''
+  if (digits.startsWith(TELEFONE_BR_DDI)) return digits
+  return `${TELEFONE_BR_DDI}${digits}`
+}
+
+/** Normaliza entrada do usuário, removendo DDI se colado junto. */
+export function telefoneLocalFromInput(value: string): string {
+  let digits = normalizeTelefone(value)
+  if (digits.startsWith(TELEFONE_BR_DDI) && digits.length > TELEFONE_BR_DDI.length) {
+    digits = digits.slice(TELEFONE_BR_DDI.length)
+  }
+  return digits.slice(0, TELEFONE_LOCAL_MAX_LENGTH)
+}
+
+/** Máscara visual para DDD + número (sem DDI). */
+export function maskTelefoneLocal(digits: string): string {
+  const d = digits.slice(0, TELEFONE_LOCAL_MAX_LENGTH)
+  if (!d) return ''
+  if (d.length <= 2) return `(${d}`
+
+  const ddd = d.slice(0, 2)
+  const rest = d.slice(2)
+  const isMobile = rest[0] === '9'
+
+  if (isMobile) {
+    if (rest.length <= 5) return `(${ddd}) ${rest}`
+    return `(${ddd}) ${rest.slice(0, 5)}-${rest.slice(5)}`
+  }
+
+  if (rest.length <= 4) return `(${ddd}) ${rest}`
+  return `(${ddd}) ${rest.slice(0, 4)}-${rest.slice(4)}`
+}
+
+export function formatTelefone(telefone: string | null | undefined): string {
+  if (!telefone) return '—'
+  const digits = normalizeTelefone(telefone)
+  if (digits.length === 13 && digits.startsWith('55')) {
+    return `+${digits.slice(0, 2)} (${digits.slice(2, 4)}) ${digits.slice(4, 9)}-${digits.slice(9)}`
+  }
+  if (digits.length === 11) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
+  }
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`
+  }
+  return telefone
+}
+
 export function formatDate(iso: string): string {
   return dateFormatter.format(new Date(iso))
 }

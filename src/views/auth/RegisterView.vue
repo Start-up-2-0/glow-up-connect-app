@@ -5,6 +5,7 @@ import AuthSplashPanel from '@/components/auth/AuthSplashPanel.vue'
 import AuthMobileBrand from '@/components/auth/AuthMobileBrand.vue'
 import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
+import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import { userService } from '@/services/userService'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
@@ -178,21 +179,15 @@ function onAvatarError(message: string) {
             </p>
           </div>
 
-          <div class="flex flex-col gap-2">
-            <label for="telefone" :class="GLOW_LABEL_CLASS">Telefone</label>
-            <input
-              id="telefone"
-              v-model="telefone"
-              type="tel"
-              autocomplete="tel"
-              required
-              placeholder="(00) 0 0000-0000"
-              :class="GLOW_INPUT_CLASS"
-            />
-            <p v-if="getFieldError(...FIELD_KEYS.telefone)" class="text-sm text-red-600">
-              {{ getFieldError(...FIELD_KEYS.telefone) }}
-            </p>
-          </div>
+          <TelefoneInput
+            id="telefone"
+            v-model="telefone"
+            label="Telefone"
+            variant="auth"
+            autocomplete="tel"
+            required
+            :error="getFieldError(...FIELD_KEYS.telefone)"
+          />
 
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-4">
             <div class="flex flex-col gap-2">
