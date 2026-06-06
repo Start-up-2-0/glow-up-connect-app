@@ -217,10 +217,10 @@ async function handleSolicitarWhatsApp() {
       v-else-if="profile"
       class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6 xl:grid-cols-12 xl:items-start"
     >
-      <!-- Coluna esquerda: resumo -->
-      <div class="max-md:contents md:col-span-1 xl:col-span-4">
+      <!-- Coluna esquerda: resumo + WhatsApp -->
+      <div class="flex flex-col gap-5 max-md:contents md:col-span-1 xl:col-span-4 xl:gap-5">
         <!-- Resumo -->
-        <section :class="CARD_CLASS" class="max-md:order-1 xl:sticky xl:top-6">
+        <section :class="CARD_CLASS" class="max-md:order-1">
           <div :class="CARD_BODY_CLASS" class="space-y-4 text-center">
             <UserAvatar
               :src="profile.avatarBase64"
@@ -278,88 +278,9 @@ async function handleSolicitarWhatsApp() {
             </dl>
           </div>
         </section>
-      </div>
-
-      <!-- Coluna direita: informações → WhatsApp → senha -->
-      <div class="flex flex-col gap-5 max-md:contents md:col-span-1 xl:col-span-8 xl:gap-5">
-        <!-- Informações pessoais -->
-        <section :class="CARD_CLASS" class="max-md:order-2">
-          <div :class="CARD_HEADER_CLASS">
-            <h3 class="font-urbanist text-base font-semibold text-glow-text">Informações pessoais</h3>
-            <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-              Atualize sua foto, nome e telefone. O e-mail é usado para login e não pode ser alterado
-              aqui.
-            </p>
-          </div>
-
-          <form @submit.prevent="handleSaveProfile">
-            <div :class="CARD_BODY_CLASS" class="space-y-5">
-              <BaseAlert v-if="profileError" variant="error">{{ profileError }}</BaseAlert>
-              <div
-                v-if="profileSuccess"
-                class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 font-urbanist text-sm text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300"
-                role="status"
-              >
-                Perfil atualizado com sucesso.
-              </div>
-
-              <div class="rounded-lg border border-glow-border-soft bg-glow-canvas/50 p-4">
-                <ProfileAvatarEditor
-                  :current-src="profile.avatarBase64"
-                  :name="form.nome"
-                  @change="onAvatarChange"
-                  @remove="onAvatarRemove"
-                  @error="onAvatarError"
-                />
-              </div>
-
-              <div class="grid gap-5 sm:grid-cols-2">
-                <BaseInput v-model="form.nome" label="Nome completo" autocomplete="name" required />
-                <div class="flex flex-col gap-2">
-                  <label for="telefone" class="font-urbanist text-sm font-medium text-glow-text">
-                    Telefone
-                  </label>
-                  <div class="flex">
-                    <span
-                      class="inline-flex h-11 shrink-0 items-center rounded-l-lg border border-r-0 border-glow-border-soft bg-glow-surface px-3.5 font-urbanist text-sm font-medium text-glow-text-subtle"
-                      aria-hidden="true"
-                    >
-                      +55
-                    </span>
-                    <input
-                      id="telefone"
-                      :value="form.telefone"
-                      type="tel"
-                      inputmode="numeric"
-                      autocomplete="tel-national"
-                      placeholder="79991917634"
-                      class="h-11 w-full rounded-r-lg border border-glow-border-soft bg-glow-canvas px-3.5 font-urbanist text-sm text-glow-text outline-none transition placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold"
-                      @input="handleTelefoneInput"
-                    />
-                  </div>
-                  <p class="font-urbanist text-xs text-glow-text-subtle">
-                    DDD + número. O código do país (+55) é adicionado automaticamente.
-                  </p>
-                </div>
-              </div>
-
-              <BaseInput
-                :model-value="profile.email"
-                label="E-mail"
-                type="email"
-                readonly
-                hint="Entre em contato com o suporte para alterar seu e-mail."
-              />
-            </div>
-
-            <div :class="CARD_FOOTER_CLASS" class="flex justify-end">
-              <BaseButton type="submit" :loading="saving">Salvar alterações</BaseButton>
-            </div>
-          </form>
-        </section>
 
         <!-- WhatsApp -->
-        <section :class="CARD_CLASS" class="max-md:order-3">
+        <section :class="CARD_CLASS" class="max-md:order-2">
           <div :class="CARD_HEADER_CLASS">
             <div class="flex items-start gap-3">
               <div
@@ -384,7 +305,7 @@ async function handleSolicitarWhatsApp() {
           <div :class="CARD_BODY_CLASS" class="space-y-4">
             <div v-if="whatsAppState === 'sem-telefone'" class="rounded-lg bg-glow-canvas px-4 py-3">
               <p class="font-urbanist text-sm text-glow-text-subtle">
-                Cadastre seu telefone acima para habilitar alertas via WhatsApp.
+                Cadastre seu telefone em Informações pessoais para habilitar alertas via WhatsApp.
               </p>
             </div>
 
@@ -475,6 +396,85 @@ async function handleSolicitarWhatsApp() {
               </BaseButton>
             </template>
           </div>
+        </section>
+      </div>
+
+      <!-- Coluna direita: informações + senha -->
+      <div class="flex flex-col gap-5 max-md:contents md:col-span-1 xl:col-span-8 xl:gap-5">
+        <!-- Informações pessoais -->
+        <section :class="CARD_CLASS" class="max-md:order-3">
+          <div :class="CARD_HEADER_CLASS">
+            <h3 class="font-urbanist text-base font-semibold text-glow-text">Informações pessoais</h3>
+            <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
+              Atualize sua foto, nome e telefone. O e-mail é usado para login e não pode ser alterado
+              aqui.
+            </p>
+          </div>
+
+          <form @submit.prevent="handleSaveProfile">
+            <div :class="CARD_BODY_CLASS" class="space-y-5">
+              <BaseAlert v-if="profileError" variant="error">{{ profileError }}</BaseAlert>
+              <div
+                v-if="profileSuccess"
+                class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 font-urbanist text-sm text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300"
+                role="status"
+              >
+                Perfil atualizado com sucesso.
+              </div>
+
+              <div class="rounded-lg border border-glow-border-soft bg-glow-canvas/50 p-4">
+                <ProfileAvatarEditor
+                  :current-src="profile.avatarBase64"
+                  :name="form.nome"
+                  @change="onAvatarChange"
+                  @remove="onAvatarRemove"
+                  @error="onAvatarError"
+                />
+              </div>
+
+              <div class="grid gap-5 sm:grid-cols-2">
+                <BaseInput v-model="form.nome" label="Nome completo" autocomplete="name" required />
+                <div class="flex flex-col gap-2">
+                  <label for="telefone" class="font-urbanist text-sm font-medium text-glow-text">
+                    Telefone
+                  </label>
+                  <div class="flex">
+                    <span
+                      class="inline-flex h-11 shrink-0 items-center rounded-l-lg border border-r-0 border-glow-border-soft bg-glow-surface px-3.5 font-urbanist text-sm font-medium text-glow-text-subtle"
+                      aria-hidden="true"
+                    >
+                      +55
+                    </span>
+                    <input
+                      id="telefone"
+                      :value="form.telefone"
+                      type="tel"
+                      inputmode="numeric"
+                      autocomplete="tel-national"
+                      placeholder="79991917634"
+                      class="h-11 w-full rounded-r-lg border border-glow-border-soft bg-glow-canvas px-3.5 font-urbanist text-sm text-glow-text outline-none transition placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold"
+                      @input="handleTelefoneInput"
+                    />
+                  </div>
+                  <p class="font-urbanist text-xs text-glow-text-subtle">
+                    DDD + número. O código do país (+55) é adicionado automaticamente.
+                  </p>
+                </div>
+              </div>
+
+              <BaseInput
+                :model-value="profile.email"
+                label="E-mail"
+                type="email"
+                readonly
+                hint="Entre em contato com o suporte para alterar seu e-mail."
+              />
+            </div>
+
+            <div :class="CARD_FOOTER_CLASS" class="flex justify-end">
+              <BaseButton type="submit" :loading="saving">Salvar alterações</BaseButton>
+            </div>
+          </form>
         </section>
 
         <!-- Senha -->
