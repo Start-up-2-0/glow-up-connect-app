@@ -71,6 +71,14 @@ export interface CadastroResponse {
 export interface UpdateProfilePayload {
   nome?: string
   telefone?: string
+  avatarBase64?: string | null
+  avatarContentType?: string
+}
+
+export interface ChangePasswordPayload {
+  senhaAtual: string
+  senha: string
+  confirmarSenha: string
 }
 
 export interface EstabelecimentoAcesso {
