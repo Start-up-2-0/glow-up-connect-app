@@ -6,12 +6,19 @@ import type {
   CriarAssinaturaPayload,
   TrocarPlanoPayload,
 } from '@/types/assinatura.types'
+import type { AssinaturaOnboardingContexto } from '@/types/assinaturaOnboarding.types'
 
 function unwrap<T>(response: { data: ApiSuccessResponse<T> }): T {
   return response.data.data
 }
 
 export const assinaturaService = {
+  obterContextoOnboarding() {
+    return api
+      .get<ApiSuccessResponse<AssinaturaOnboardingContexto>>('/assinaturas/onboarding/contexto')
+      .then(unwrap)
+  },
+
   criar(payload: CriarAssinaturaPayload) {
     return api.post<ApiSuccessResponse<Assinatura>>('/assinaturas', payload).then(unwrap)
   },

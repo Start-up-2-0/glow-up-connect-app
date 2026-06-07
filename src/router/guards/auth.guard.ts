@@ -50,12 +50,16 @@ export const authGuard: NavigationGuard = async (to) => {
 
   const role = userStore.profile?.role
 
+  const assinaturaOnboardingLogado = to.matched.some(
+    (record) => record.meta.assinaturaOnboardingLogado === true,
+  )
+
   if (
     requiresAuth
     && authStore.isAuthenticated
     && userStore.profile
     && !userStore.profile.ativo
-    && businessOnly
+    && (businessOnly || assinaturaOnboardingLogado)
     && !to.path.startsWith(ROUTE_PATHS.CONFIRM_EMAIL)
     && !to.matched.some((record) => record.meta.onboardingAssinatura)
   ) {

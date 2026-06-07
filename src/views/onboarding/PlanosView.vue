@@ -1,5 +1,22 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import PlanosOnboardingSection from '@/components/assinatura/PlanosOnboardingSection.vue'
+import { assinaturaService } from '@/services/assinaturaService'
+import { ROUTE_PATHS } from '@/constants/routes'
+
+const router = useRouter()
+
+onMounted(async () => {
+  try {
+    const contexto = await assinaturaService.obterContextoOnboarding()
+    if (contexto.proximaEtapa === 'GerenciarAssinatura') {
+      await router.replace(ROUTE_PATHS.CONFIG_ASSINATURA)
+    }
+  } catch {
+    // Mantém a página de planos se o contexto não puder ser carregado.
+  }
+})
 </script>
 
 <template>
@@ -9,10 +26,10 @@ import PlanosOnboardingSection from '@/components/assinatura/PlanosOnboardingSec
         Escolha o plano ideal
       </h1>
       <p class="mt-2 text-glow-text-subtle">
-        Gerencie sua operação com módulos liberados conforme o plano contratado.
+        Contrate a plataforma para o seu estabelecimento sem sair da sua conta.
       </p>
     </div>
 
-    <PlanosOnboardingSection />
+    <PlanosOnboardingSection modo-logado />
   </div>
 </template>
