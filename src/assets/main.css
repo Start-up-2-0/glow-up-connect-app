@@ -51,3 +51,58 @@
     @apply bg-glow-canvas font-satoshi antialiased;
   }
 }
+
+@layer components {
+  .checkout-shell {
+    @apply rounded-2xl border border-glow-border-soft bg-white shadow-sm;
+  }
+
+  .checkout-panel {
+    @apply p-6 lg:p-8;
+  }
+
+  .checkout-badge {
+    @apply rounded-full bg-glow-surface px-3 py-1 text-xs font-medium text-glow-text-subtle;
+  }
+
+  .checkout-item-card {
+    @apply flex gap-4 rounded-xl border border-glow-border-soft bg-glow-surface p-4;
+  }
+
+  .checkout-promo-row {
+    @apply flex items-center gap-3 rounded-xl border border-dashed border-glow-gold bg-glow-surface px-4 py-3;
+  }
+
+  .checkout-promo-icon {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-lg bg-glow-surface text-sm font-bold text-glow-gold;
+  }
+
+  .checkout-tabs {
+    @apply grid gap-1 rounded-xl border border-glow-border-soft bg-glow-surface p-1;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  }
+
+  .checkout-tab {
+    @apply rounded-lg px-4 py-2.5 text-sm font-medium text-glow-text-subtle transition-colors;
+  }
+
+  .checkout-tab--active {
+    @apply bg-white text-glow-text shadow-sm;
+  }
+
+  .checkout-method-chip {
+    @apply inline-flex items-center gap-2 rounded-xl border border-glow-border-soft bg-white px-4 py-2.5 text-sm font-medium text-glow-text-subtle transition-colors;
+  }
+
+  .checkout-method-chip--active {
+    @apply border-glow-gold bg-glow-surface text-glow-text;
+  }
+
+  .checkout-section-title {
+    @apply mb-3 font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .checkout-pay-button {
+    @apply flex w-full items-center justify-center gap-2 rounded-xl bg-glow-gold px-5 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+}

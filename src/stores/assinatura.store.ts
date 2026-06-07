@@ -21,7 +21,11 @@ export const useAssinaturaStore = defineStore('assinatura', () => {
     try {
       const result = await assinaturaService.criar(payload)
       assinatura.value = result
-      await useNegocioStore().fetchEstabelecimentos(true)
+      try {
+        await useNegocioStore().fetchEstabelecimentos(true)
+      } catch {
+        // A assinatura já foi criada; o contexto de negócio será recarregado na view.
+      }
       usePlanosStore().invalidate()
       return result
     } finally {

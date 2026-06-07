@@ -24,6 +24,8 @@ const {
   loading,
   submitting,
   aguardandoPagamento,
+  pixQrCode,
+  pixCheckoutUrl,
   erro,
   init,
   avancarParaConfirmacao,
@@ -43,15 +45,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-3xl">
-    <div class="mb-8">
+  <div class="mx-auto w-full" :class="step === 'assinatura' ? 'max-w-6xl' : 'max-w-3xl'">
+    <div v-if="step !== 'assinatura'" class="mb-8">
       <h1 class="font-satoshi text-2xl font-bold text-glow-text lg:text-3xl">Contratar plano</h1>
       <p class="mt-2 text-glow-text-subtle">
         Complete as etapas para vincular o plano ao seu estabelecimento.
       </p>
     </div>
 
-    <OnboardingStepper :current="stepperIndex" :steps="wizardSteps" />
+    <OnboardingStepper v-if="step !== 'assinatura'" :current="stepperIndex" :steps="wizardSteps" />
 
     <LoadingSpinner v-if="loading && !plano" />
 
@@ -82,6 +84,8 @@ onMounted(() => {
         :dias-permitidos="diasPermitidos"
         :submitting="submitting"
         :aguardando-pagamento="aguardandoPagamento"
+        :pix-qr-code="pixQrCode"
+        :pix-checkout-url="pixCheckoutUrl"
         :error-message="erro"
         @back="voltarParaConfirmar"
         @submit="finalizarAssinatura"

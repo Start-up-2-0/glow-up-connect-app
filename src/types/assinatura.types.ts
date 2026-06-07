@@ -47,7 +47,7 @@ export interface ProfissionalAutonomoOnboarding {
 
 export interface PagamentoAssinaturaPayload {
   paymentMethodId: string
-  token: string
+  token?: string
   issuerId?: string
   installments?: number
   identificationType?: string
