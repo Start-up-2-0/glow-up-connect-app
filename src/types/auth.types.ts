@@ -15,6 +15,7 @@ export interface AuthTokens {
 
 export interface LoginData extends AuthTokens {
   usuario: UserSummary
+  requerConfirmacaoEmail?: boolean
 }
 
 export interface RefreshPayload {

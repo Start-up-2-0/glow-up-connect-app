@@ -14,7 +14,7 @@ const props = defineProps<{
 }>()
 
 const checkoutLink = computed(() => ({
-  path: ROUTE_PATHS.ONBOARDING_CHECKOUT,
+  path: ROUTE_PATHS.ONBOARDING_ASSINATURA,
   query: { planoId: String(props.plano.id) },
 }))
 </script>

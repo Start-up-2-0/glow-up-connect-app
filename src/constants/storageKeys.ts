@@ -10,6 +10,17 @@ export const STORAGE_KEYS = {
 export const TOKEN_HEADER =
   import.meta.env.VITE_TOKEN_HEADER?.trim() || 'x-glow-token'
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
+function normalizeApiBaseUrl(raw: string | undefined): string {
+  const value = raw?.trim() || '/api'
+  const withoutTrailingSlash = value.replace(/\/+$/, '')
+
+  if (/^https?:\/\//i.test(withoutTrailingSlash) && !withoutTrailingSlash.endsWith('/api')) {
+    return `${withoutTrailingSlash}/api`
+  }
+
+  return withoutTrailingSlash
+}
+
+export const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL)
 
 export const APP_NAME = import.meta.env.VITE_APP_NAME || 'Glow Up Connect'

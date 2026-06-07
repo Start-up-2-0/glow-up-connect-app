@@ -1,16 +1,30 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { useRoute, RouterLink } from 'vue-router'
 import AuthRecoveryLayout from '@/components/auth/recovery/AuthRecoveryLayout.vue'
 import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { ROUTE_PATHS } from '@/constants/routes'
+import {
+  authRouteWithRedirect,
+  isOnboardingCheckoutPath,
+  readRedirectParam,
+} from '@/utils/authRedirect'
 import {
   GLOW_BUTTON_PRIMARY_CLASS,
   GLOW_RECOVERY_SUBTITLE_CLASS,
   GLOW_RECOVERY_TITLE_CLASS,
 } from '@/constants/designTokens'
 
+const route = useRoute()
 const { clearConfirmSession } = useConfirmEmail()
+
+const checkoutRedirect = computed(() => readRedirectParam(route.query.redirect))
+const isAssinaturaFlow = computed(() =>
+  checkoutRedirect.value ? isOnboardingCheckoutPath(checkoutRedirect.value) : false,
+)
+const loginLink = computed(() =>
+  authRouteWithRedirect(ROUTE_PATHS.LOGIN, checkoutRedirect.value),
+)
 
 onMounted(() => {
   clearConfirmSession()
@@ -48,17 +62,23 @@ onMounted(() => {
       <header class="w-full text-center">
         <h1 :class="GLOW_RECOVERY_TITLE_CLASS">E-mail confirmado com sucesso!</h1>
         <p :class="[GLOW_RECOVERY_SUBTITLE_CLASS, 'mt-2']">
-          Sua conta está ativa.<br />
-          Faça login para continuar.
+          <template v-if="isAssinaturaFlow">
+            Sua conta está ativa.<br />
+            Faça login para cadastrar seu estabelecimento e concluir a assinatura.
+          </template>
+          <template v-else>
+            Sua conta está ativa.<br />
+            Faça login para continuar.
+          </template>
         </p>
       </header>
     </div>
 
     <RouterLink
-      :to="ROUTE_PATHS.LOGIN"
+      :to="loginLink"
       :class="[GLOW_BUTTON_PRIMARY_CLASS, 'font-inter text-base font-medium']"
     >
-      Ir para o login
+      {{ isAssinaturaFlow ? 'Entrar e continuar assinatura' : 'Ir para o login' }}
     </RouterLink>
   </AuthRecoveryLayout>
 </template>

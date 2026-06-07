@@ -21,6 +21,7 @@ export const ROUTE_NAMES = {
   LANDING: 'landing',
   ONBOARDING_PLANOS: 'onboarding-planos',
   ONBOARDING_CHECKOUT: 'onboarding-checkout',
+  ONBOARDING_ASSINATURA: 'onboarding-assinatura',
   CONFIG_ASSINATURA: 'config-assinatura',
   CONFIG_ASSINATURA_FATURAS: 'config-assinatura-faturas',
   CONFIG_ASSINATURA_UPGRADE: 'config-assinatura-upgrade',
@@ -54,6 +55,7 @@ export const ROUTE_PATHS = {
   MEUS_AGENDAMENTOS_DETALHE: '/meus-agendamentos',
   ONBOARDING_PLANOS: '/onboarding/planos',
   ONBOARDING_CHECKOUT: '/onboarding/checkout',
+  ONBOARDING_ASSINATURA: '/onboarding/assinatura',
   CONFIG_ASSINATURA: '/configuracoes/assinatura',
   CONFIG_ASSINATURA_FATURAS: '/configuracoes/assinatura/faturas',
   CONFIG_ASSINATURA_UPGRADE: '/configuracoes/assinatura/upgrade',
@@ -100,6 +102,10 @@ declare module 'vue-router' {
     requerPermissoes?: string[]
     requerAssinaturaAtiva?: boolean
     skipNegocioGuard?: boolean
+    /** Checkout de assinatura — usuário Cliente recém-cadastrado pode acessar */
+    allowClienteOnboarding?: boolean
+    /** Fluxo wizard de assinatura (público até concluir etapa da conta) */
+    onboardingAssinatura?: boolean
     title?: string
   }
 }

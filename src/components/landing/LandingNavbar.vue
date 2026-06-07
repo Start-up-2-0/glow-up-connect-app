@@ -9,6 +9,7 @@ import LandingCtaButton from '@/components/landing/LandingCtaButton.vue'
 const { goToSection } = useLandingScroll()
 const menuOpen = ref(false)
 const activeSection = ref<string>(LANDING_SECTIONS.inicio)
+const navbarVisible = ref(true)
 
 const navLinks = [
   { label: 'Início', id: LANDING_SECTIONS.inicio },
@@ -24,6 +25,21 @@ function handleNavClick(id: string) {
   goToSection(id)
 }
 
+function updateNavbarVisibility() {
+  const hero = document.getElementById(LANDING_SECTIONS.inicio)
+  if (!hero) {
+    navbarVisible.value = true
+    return
+  }
+
+  const heroBottom = hero.getBoundingClientRect().bottom
+  navbarVisible.value = heroBottom > 48
+
+  if (!navbarVisible.value) {
+    menuOpen.value = false
+  }
+}
+
 function updateActiveSection() {
   const offset = 120
   const sections = Object.values(LANDING_SECTIONS)
@@ -37,12 +53,27 @@ function updateActiveSection() {
   activeSection.value = LANDING_SECTIONS.inicio
 }
 
-onMounted(() => window.addEventListener('scroll', updateActiveSection, { passive: true }))
-onUnmounted(() => window.removeEventListener('scroll', updateActiveSection))
+function handleScroll() {
+  updateNavbarVisibility()
+  updateActiveSection()
+}
+
+onMounted(() => {
+  handleScroll()
+  window.addEventListener('scroll', handleScroll, { passive: true })
+})
+onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 </script>
 
 <template>
-  <header class="fixed inset-x-0 top-0 z-50 px-4 pt-6 lg:px-8">
+  <header
+    class="fixed inset-x-0 top-0 z-50 px-4 pt-6 transition-[transform,opacity] duration-300 ease-out lg:px-8"
+    :class="
+      navbarVisible
+        ? 'translate-y-0 opacity-100'
+        : 'pointer-events-none -translate-y-full opacity-0'
+    "
+  >
     <div class="mx-auto flex max-w-[1280px] items-center justify-between">
       <RouterLink
         :to="ROUTE_PATHS.HOME"
@@ -54,7 +85,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSection))
       </RouterLink>
 
       <nav
-        class="relative hidden items-center gap-9 rounded-[80px] bg-[#282828]/50 px-10 py-6 lg:flex"
+        class="relative hidden items-center gap-9 rounded-[80px] bg-[#282828] px-10 py-6 lg:flex"
         aria-label="Navegação principal"
       >
         <button
@@ -100,7 +131,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSection))
 
     <div
       v-if="menuOpen"
-      class="mx-auto mt-3 max-w-[1280px] rounded-2xl border border-white/10 bg-[#282828]/95 px-4 py-4 lg:hidden"
+      class="mx-auto mt-3 max-w-[1280px] rounded-2xl border border-white/10 bg-[#282828] px-4 py-4 lg:hidden"
     >
       <nav class="flex flex-col gap-2" aria-label="Menu mobile">
         <button

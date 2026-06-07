@@ -34,7 +34,7 @@ const { goToSection } = useLandingScroll()
           </span>
         </h1>
 
-        <p class="mx-auto mt-8 max-w-2xl font-poppins text-base font-light leading-[1.4] text-[#aeafb4] sm:text-lg">
+        <p class="mx-auto mt-8 max-w-2xl font-poppins text-base font-light leading-[1.4] text-white sm:text-lg">
           Agende serviços de beleza com
           <span class="font-extrabold text-glow-gold-cta">um toque</span>.
           Conecte-se aos melhores profissionais e salões da sua região.

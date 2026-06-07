@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import LandingSectionTitle from '@/components/landing/LandingSectionTitle.vue'
+import LandingBeneficioIcon from '@/components/landing/LandingBeneficioIcon.vue'
 import {
   BENEFICIOS_INTRO,
   BENEFICIOS_POR_TAB,
@@ -54,9 +55,11 @@ const activeTab = ref<BeneficioTab>('usuarios')
           class="relative min-h-[288px] rounded-[20px] border border-[#282828]/40 p-8 pt-[88px]"
         >
           <span
-            class="absolute left-8 top-8 size-[58px] rounded-2xl bg-glow-gold"
+            class="absolute left-8 top-8 flex size-[58px] items-center justify-center rounded-2xl bg-glow-gold"
             aria-hidden="true"
-          />
+          >
+            <LandingBeneficioIcon :name="item.icon" />
+          </span>
           <h3 class="font-montserrat text-2xl font-bold text-glow-gold">
             {{ item.titulo }}
           </h3>
