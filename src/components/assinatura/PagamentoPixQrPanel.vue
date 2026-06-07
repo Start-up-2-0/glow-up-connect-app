@@ -39,13 +39,13 @@ async function copiarCodigo() {
         v-if="exibicao.tipo === 'imagem'"
         :src="exibicao.valor"
         alt="QR Code PIX"
-        class="max-h-56 rounded-lg border border-glow-border-soft bg-white p-2"
+        class="max-h-56 rounded-lg border border-glow-border-soft bg-glow-hover-surface p-2"
       />
       <div v-else class="w-full">
         <p class="mb-2 text-xs font-medium uppercase tracking-wide text-glow-text-subtle">Pix copia e cola</p>
         <textarea
           readonly
-          class="h-28 w-full resize-none rounded-lg border border-glow-border-soft bg-white p-3 font-mono text-xs text-glow-text"
+          class="h-28 w-full resize-none rounded-lg border border-glow-border-soft bg-glow-canvas p-3 font-mono text-xs text-glow-text"
           :value="exibicao.valor"
         />
         <BaseButton type="button" variant="secondary" class="mt-2" block @click="copiarCodigo">

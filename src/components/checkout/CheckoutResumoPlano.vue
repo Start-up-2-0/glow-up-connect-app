@@ -33,7 +33,7 @@ const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
 
     <article class="checkout-item-card">
       <div
-        class="flex size-16 shrink-0 items-center justify-center rounded-xl bg-glow-gold/15 font-satoshi text-2xl font-bold text-glow-gold"
+        class="flex size-16 shrink-0 items-center justify-center rounded-xl bg-glow-gold-soft font-satoshi text-2xl font-bold text-glow-gold"
         aria-hidden="true"
       >
         {{ plano.nome.charAt(0) }}
@@ -92,7 +92,7 @@ const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
       </div>
       <div
         v-if="trialAtivo"
-        class="flex items-center justify-between text-sm text-emerald-700"
+        class="checkout-alert-success flex items-center justify-between text-sm"
       >
         <span>Período de teste</span>
         <span>− {{ formatBRL(plano.preco) }}</span>
