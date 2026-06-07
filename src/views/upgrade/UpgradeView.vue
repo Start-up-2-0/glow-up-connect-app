@@ -7,7 +7,7 @@ import PlanoCard from '@/components/assinatura/PlanoCard.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import { usePlanosStore } from '@/stores/planos.store'
 import { getUpgradeInfo } from '@/constants/upgradeMessages'
-import { ROUTE_PATHS } from '@/constants/routes'
+import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
 
 const route = useRoute()
 const planosStore = usePlanosStore()
@@ -33,7 +33,7 @@ onMounted(() => planosStore.fetchPlanos())
         Disponível no plano <strong>{{ info.planoMinimo }}</strong>
         <span v-if="modulo"> — módulo {{ modulo }}</span>
       </p>
-      <RouterLink :to="ROUTE_PATHS.ONBOARDING_PLANOS" class="mt-4 inline-block">
+      <RouterLink :to="{ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH }" class="mt-4 inline-block">
         <BaseButton variant="primary">Ver todos os planos</BaseButton>
       </RouterLink>
     </BaseCard>

@@ -12,7 +12,7 @@ import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useAssinaturaStore } from '@/stores/assinatura.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
-import { ROUTE_PATHS } from '@/constants/routes'
+import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
 
 const router = useRouter()
 const { assinaturaId, planoNome, estabelecimentoAtivo, ensureContext } = useNegocioContext()
@@ -27,7 +27,7 @@ const cancelando = ref(false)
 onMounted(async () => {
   await ensureContext()
   if (!estabelecimentoAtivo.value) {
-    await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
+    await router.replace({ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH })
   }
 })
 
@@ -38,7 +38,7 @@ async function confirmarCancelamento() {
     await assinaturaStore.cancelar(assinaturaId.value)
     notifications.push('success', 'Assinatura cancelada.')
     dialogAberto.value = false
-    await router.push(ROUTE_PATHS.ONBOARDING_PLANOS)
+    await router.push({ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH })
   } catch (err) {
     notifications.push('error', resolveError(err))
   } finally {

@@ -15,6 +15,8 @@ export default {
         satoshi: ['Satoshi', 'system-ui', 'sans-serif'],
         inter: ['Inter', 'system-ui', 'sans-serif'],
         urbanist: ['Urbanist', 'Inter', 'system-ui', 'sans-serif'],
+        montserrat: ['Montserrat', 'system-ui', 'sans-serif'],
+        poppins: ['Poppins', 'system-ui', 'sans-serif'],
       },
       colors: {
         glow: {
@@ -32,6 +34,9 @@ export default {
           canvas: 'var(--glow-canvas)',
           placeholder: 'var(--glow-placeholder)',
           primary: 'var(--glow-primary)',
+          purple: 'var(--glow-purple)',
+          'purple-soft': 'var(--glow-purple-soft)',
+          'gold-cta': 'var(--glow-gold-cta)',
           secondary: 'var(--glow-secondary)',
           'avatar-bg': 'var(--glow-avatar-bg)',
           'hover-surface': 'var(--glow-hover-surface)',

@@ -18,6 +18,7 @@ export const ROUTE_NAMES = {
   LOJA_AGENDAR: 'loja-agendar',
   AGENDAMENTO_DETALHE: 'agendamento-detalhe',
   NOT_FOUND: 'not-found',
+  LANDING: 'landing',
   ONBOARDING_PLANOS: 'onboarding-planos',
   ONBOARDING_CHECKOUT: 'onboarding-checkout',
   CONFIG_ASSINATURA: 'config-assinatura',
@@ -80,7 +81,9 @@ export function conviteResponderPath(token: string): string {
   return `${ROUTE_PATHS.CONVITES}/${encodeURIComponent(token)}`
 }
 
-export type AppLayout = 'auth' | 'dashboard' | 'public'
+export const LANDING_PLANOS_HASH = '#planos'
+
+export type AppLayout = 'auth' | 'dashboard' | 'public' | 'landing'
 
 declare module 'vue-router' {
   interface RouteMeta {
