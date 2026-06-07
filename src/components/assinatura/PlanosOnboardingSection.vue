@@ -11,9 +11,11 @@ import { useApiError } from '@/composables/useApiError'
 withDefaults(
   defineProps<{
     showComparativa?: boolean
+    modoLogado?: boolean
   }>(),
   {
     showComparativa: true,
+    modoLogado: false,
   },
 )
 
@@ -52,6 +54,7 @@ onMounted(async () => {
         :plano="plano"
         :destacado="plano.id === planoPlus?.id"
         :desabilitado="planos.length === 0"
+        :modo-logado="modoLogado"
       />
     </div>
 

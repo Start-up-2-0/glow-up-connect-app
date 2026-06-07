@@ -8,8 +8,4 @@ export const publicRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/public/LandingView.vue'),
     meta: { layout: 'landing', skipNegocioGuard: true, title: 'Início' },
   },
-  {
-    path: ROUTE_PATHS.ONBOARDING_PLANOS,
-    redirect: { path: ROUTE_PATHS.HOME, hash: '#planos' },
-  },
 ]

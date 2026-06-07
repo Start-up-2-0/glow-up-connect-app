@@ -7,14 +7,20 @@ import { ROUTE_PATHS } from '@/constants/routes'
 import { formatBRL, formatLimite } from '@/utils/formatters'
 import type { Plano } from '@/types/plano.types'
 
-const props = defineProps<{
-  plano: Plano
-  destacado?: boolean
-  desabilitado?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    plano: Plano
+    destacado?: boolean
+    desabilitado?: boolean
+    modoLogado?: boolean
+  }>(),
+  {
+    modoLogado: false,
+  },
+)
 
 const checkoutLink = computed(() => ({
-  path: ROUTE_PATHS.ONBOARDING_ASSINATURA,
+  path: props.modoLogado ? ROUTE_PATHS.ONBOARDING_CONTRATAR : ROUTE_PATHS.ONBOARDING_ASSINATURA,
   query: { planoId: String(props.plano.id) },
 }))
 </script>
