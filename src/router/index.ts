@@ -2,10 +2,13 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { APP_NAME } from '@/constants/storageKeys'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { authGuard } from './guards/auth.guard'
-import { hardReloadGuard } from './guards/hardReload.guard'
+import { negocioGuard } from './guards/negocio.guard'
 import { authRoutes } from './routes/auth.routes'
 import { dashboardRoutes } from './routes/dashboard.routes'
 import { clienteRoutes } from './routes/cliente.routes'
+import { onboardingRoutes } from './routes/onboarding.routes'
+import { configuracoesRoutes } from './routes/configuracoes.routes'
+import { modulosRoutes } from './routes/modulos.routes'
 import { notFoundRoutes } from './routes/notFound.routes'
 
 const router = createRouter({
@@ -17,6 +20,9 @@ const router = createRouter({
     },
     ...authRoutes,
     ...dashboardRoutes,
+    ...onboardingRoutes,
+    ...configuracoesRoutes,
+    ...modulosRoutes,
     ...clienteRoutes,
     ...notFoundRoutes,
   ],
@@ -27,7 +33,7 @@ const router = createRouter({
 })
 
 router.beforeEach(authGuard)
-router.beforeEach(hardReloadGuard)
+router.beforeEach(negocioGuard)
 
 router.afterEach((to) => {
   const title = to.meta.title as string | undefined
