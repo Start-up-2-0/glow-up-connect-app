@@ -17,21 +17,14 @@ const erro = ref<string | null>(null)
 
 const planoPlus = computed(() => planos.value.find((p) => p.nome === 'Plus'))
 
-const planosOrdenados = computed(() =>
-  [...planos.value].sort((a, b) => a.preco - b.preco),
-)
-
-const planoMaisBarato = computed(() => planosOrdenados.value[0])
-
 function isPopular(plano: Plano): boolean {
   return plano.id === planoPlus.value?.id
 }
 
 function isTrialGratis(plano: Plano): boolean {
-  return (
-    promocao.value?.disponivel === true &&
-    plano.id === planoMaisBarato.value?.id
-  )
+  if (!promocao.value?.disponivel) return false
+  const maisBarato = [...planos.value].sort((a, b) => a.preco - b.preco)[0]
+  return plano.id === maisBarato?.id
 }
 
 onMounted(async () => {
@@ -68,7 +61,7 @@ onMounted(async () => {
       <LoadingSpinner v-if="loading" class="mt-16" />
       <p v-else-if="erro" class="mt-16 text-center text-sm text-red-600">{{ erro }}</p>
       <EmptyState
-        v-else-if="planosOrdenados.length === 0"
+        v-else-if="planos.length === 0"
         class="mt-16"
         title="Nenhum plano disponível"
         description="Tente novamente mais tarde."
@@ -80,7 +73,7 @@ onMounted(async () => {
         :class="promocao?.disponivel ? 'mt-10' : ''"
       >
         <LandingPlanoCard
-          v-for="plano in planosOrdenados"
+          v-for="plano in planos"
           :key="plano.id"
           :plano="plano"
           :popular="isPopular(plano)"
