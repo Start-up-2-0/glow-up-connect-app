@@ -17,7 +17,7 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useUserStore } from '@/stores/user.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
-import { ROUTE_PATHS } from '@/constants/routes'
+import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
 import { formatBRL } from '@/utils/formatters'
 import { USER_ROLE } from '@/types/user.types'
 const route = useRoute()
@@ -73,7 +73,7 @@ onMounted(async () => {
   }
 
   if (!plano.value) {
-    await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
+    await router.replace({ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH })
     return
   }
 

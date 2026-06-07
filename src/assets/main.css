@@ -1,6 +1,8 @@
 @import url('https://api.fontshare.com/v2/css?f[]=satoshi@1,2&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;500;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -22,6 +24,9 @@
     --glow-canvas: #e5e5e5;
     --glow-placeholder: rgba(99, 99, 99, 0.6);
     --glow-primary: #3c5ccf;
+    --glow-purple: #6c63ff;
+    --glow-purple-soft: #4f47d2;
+    --glow-gold-cta: #e6ad01;
     --glow-secondary: #a38a2d;
     --glow-avatar-bg: #171717;
     --glow-hover-surface: #ffffff;
