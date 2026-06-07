@@ -20,27 +20,27 @@ const { goToSection } = useLandingScroll()
     />
     <div class="absolute inset-0 bg-[#282828]/40" aria-hidden="true" />
 
-    <div class="relative z-10 mx-auto flex min-h-[929px] max-w-[1280px] flex-col justify-center px-4 pb-24 pt-32 lg:px-8">
-      <div class="max-w-4xl">
+    <div class="relative z-10 mx-auto flex min-h-[929px] max-w-[1280px] flex-col items-center justify-center px-4 pb-24 pt-32 text-center lg:px-8">
+      <div class="max-w-3xl">
         <h1 class="font-montserrat leading-[1.09] text-white/80">
-          <span class="block text-5xl font-extralight sm:text-6xl lg:text-8xl xl:text-[140px]">
+          <span class="block text-3xl font-extralight sm:text-4xl lg:text-5xl xl:text-6xl">
             O início da sua
           </span>
-          <span class="block text-5xl font-black text-glow-gold sm:text-6xl lg:text-8xl xl:text-[140px]">
+          <span class="block text-3xl font-black text-glow-gold sm:text-4xl lg:text-5xl xl:text-6xl">
             transformação
           </span>
-          <span class="block text-5xl font-extralight sm:text-6xl lg:text-8xl xl:text-[140px]">
+          <span class="block text-3xl font-extralight sm:text-4xl lg:text-5xl xl:text-6xl">
             começa aqui.
           </span>
         </h1>
 
-        <p class="mt-11 max-w-3xl font-poppins text-lg font-light leading-[1.09] text-[#aeafb4]">
+        <p class="mx-auto mt-8 max-w-2xl font-poppins text-base font-light leading-[1.4] text-[#aeafb4] sm:text-lg">
           Agende serviços de beleza com
           <span class="font-extrabold text-glow-gold-cta">um toque</span>.
           Conecte-se aos melhores profissionais e salões da sua região.
         </p>
 
-        <div class="mt-12">
+        <div class="mt-10 flex justify-center">
           <button type="button" @click="goToSection(LANDING_SECTIONS.planos)">
             <LandingCtaButton label="Começar agora" />
           </button>
