@@ -6,6 +6,7 @@ import AppUserMenu from './AppUserMenu.vue'
 import NavbarIconButton from './NavbarIconButton.vue'
 import NavbarSearchModal from './NavbarSearchModal.vue'
 import NavbarThemeToggle from './NavbarThemeToggle.vue'
+import EstabelecimentoSelector from './EstabelecimentoSelector.vue'
 import IconSearch from './icons/IconSearch.vue'
 
 defineEmits<{
@@ -31,6 +32,8 @@ const { searchPlaceholder } = useDashboardNav()
           <path d="M4 6H16M4 10H16M4 14H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
         </svg>
       </button>
+
+      <EstabelecimentoSelector />
 
       <div class="relative hidden min-w-0 flex-1 lg:block">
         <label for="dashboard-search" class="sr-only">Pesquisar</label>
