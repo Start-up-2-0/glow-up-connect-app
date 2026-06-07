@@ -33,19 +33,44 @@ const emit = defineEmits<{
 }>()
 
 const cardFormRef = ref<InstanceType<typeof MercadoPagoCardForm> | null>(null)
-const diaVencimento = ref<number | null>(props.diasPermitidos[1] ?? 10)
+const diaVencimento = ref<number | null>(props.diasPermitidos[1] ?? props.diasPermitidos[0] ?? 10)
+const erroLocal = ref<string | null>(null)
+const tokenizando = ref(false)
 
 const ctaLabel = computed(() => {
   if (props.aguardandoPagamento) return 'Processando pagamento...'
+  if (tokenizando.value) return 'Validando cartão...'
   if (props.promocao?.disponivel) return 'Contratar com período de teste'
   return 'Contratar plano'
 })
 
+const erroVisivel = computed(() => props.errorMessage ?? erroLocal.value)
+
+function onCardError(message: string) {
+  erroLocal.value = message
+}
+
 async function handleSubmit() {
-  if (diaVencimento.value === null) return
-  const pagamento = await cardFormRef.value?.tokenizar()
-  if (!pagamento) return
-  emit('submit', diaVencimento.value, pagamento)
+  erroLocal.value = null
+
+  if (diaVencimento.value === null) {
+    erroLocal.value = 'Selecione o dia de vencimento da cobrança.'
+    return
+  }
+
+  tokenizando.value = true
+  try {
+    const pagamento = await cardFormRef.value?.tokenizar()
+    if (!pagamento) {
+      if (!erroLocal.value) {
+        erroLocal.value = 'Não foi possível validar o cartão. Preencha todos os campos.'
+      }
+      return
+    }
+    emit('submit', diaVencimento.value, pagamento)
+  } finally {
+    tokenizando.value = false
+  }
 }
 </script>
 
@@ -66,10 +91,10 @@ async function handleSubmit() {
       </BaseCard>
 
       <BaseCard title="Cartão de crédito">
-        <MercadoPagoCardForm ref="cardFormRef" />
+        <MercadoPagoCardForm ref="cardFormRef" @error="onCardError" />
       </BaseCard>
 
-      <p v-if="errorMessage" class="text-sm text-red-600" role="alert">{{ errorMessage }}</p>
+      <p v-if="erroVisivel" class="text-sm text-red-600" role="alert">{{ erroVisivel }}</p>
 
       <div class="flex flex-col gap-3 sm:flex-row">
         <BaseButton type="button" variant="secondary" class="sm:flex-1" @click="emit('back')">
@@ -79,7 +104,8 @@ async function handleSubmit() {
           type="button"
           variant="primary"
           class="sm:flex-1"
-          :loading="submitting || aguardandoPagamento"
+          :loading="submitting || aguardandoPagamento || tokenizando"
+          :disabled="submitting || aguardandoPagamento || tokenizando"
           @click="handleSubmit"
         >
           {{ ctaLabel }}

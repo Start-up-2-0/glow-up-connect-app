@@ -350,7 +350,11 @@ export function useAssinaturaLogadaWizard(planoId: number) {
 
       assinaturaStore.setAssinatura(result)
       await userStore.fetchMe()
-      await negocioStore.fetchEstabelecimentos(true)
+      try {
+        await negocioStore.fetchEstabelecimentos(true)
+      } catch {
+        // Contexto será recarregado após o redirect.
+      }
 
       if (result.emTrial) {
         notifications.push('success', `Assinatura iniciada! Você tem ${result.diasTrial} dias de teste.`)
