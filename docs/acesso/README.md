@@ -27,6 +27,15 @@ Retorna, por negocio: `Permissoes`, `Modulos`, `AssinaturaAtiva`, `PlanoNome`, `
 
 Usuarios com role global `Cliente` recebem **403** neste endpoint.
 
+## Specs de implementacao (frontend)
+
+| Documento | Descricao |
+|-----------|-----------|
+| [specs/README.md](./specs/README.md) | **Indice** — planos, modulos, onboarding, guardas e cobrancas |
+| [specs/onboarding-assinatura.md](./specs/onboarding-assinatura.md) | Contratacao, trial e checkout MP |
+| [specs/guardas-frontend.md](./specs/guardas-frontend.md) | Sidebar, router meta e `ModuloGate` |
+| [specs/catalogo-planos.md](./specs/catalogo-planos.md) | `GET /api/planos` e vitrine |
+
 ## Documentos por tipo de acesso
 
 | Documento | Descricao |

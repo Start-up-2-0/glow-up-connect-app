@@ -18,6 +18,17 @@ export const ROUTE_NAMES = {
   LOJA_AGENDAR: 'loja-agendar',
   AGENDAMENTO_DETALHE: 'agendamento-detalhe',
   NOT_FOUND: 'not-found',
+  ONBOARDING_PLANOS: 'onboarding-planos',
+  ONBOARDING_CHECKOUT: 'onboarding-checkout',
+  CONFIG_ASSINATURA: 'config-assinatura',
+  CONFIG_ASSINATURA_FATURAS: 'config-assinatura-faturas',
+  CONFIG_ASSINATURA_UPGRADE: 'config-assinatura-upgrade',
+  UPGRADE: 'upgrade',
+  AGENDA: 'agenda',
+  SERVICOS: 'servicos',
+  FINANCEIRO: 'financeiro',
+  CONFIG_EQUIPE: 'config-equipe',
+  CONFIG_WHATSAPP: 'config-whatsapp',
 } as const
 
 export const ROUTE_PATHS = {
@@ -40,6 +51,17 @@ export const ROUTE_PATHS = {
   PERFIL: '/perfil',
   LOJA: '/loja',
   MEUS_AGENDAMENTOS_DETALHE: '/meus-agendamentos',
+  ONBOARDING_PLANOS: '/onboarding/planos',
+  ONBOARDING_CHECKOUT: '/onboarding/checkout',
+  CONFIG_ASSINATURA: '/configuracoes/assinatura',
+  CONFIG_ASSINATURA_FATURAS: '/configuracoes/assinatura/faturas',
+  CONFIG_ASSINATURA_UPGRADE: '/configuracoes/assinatura/upgrade',
+  UPGRADE: '/upgrade',
+  AGENDA: '/agenda',
+  SERVICOS: '/servicos',
+  FINANCEIRO: '/financeiro',
+  CONFIG_EQUIPE: '/configuracoes/equipe',
+  CONFIG_WHATSAPP: '/configuracoes/whatsapp',
 } as const
 
 export function lojaDetalhePath(publicGuid: string): string {
@@ -58,7 +80,7 @@ export function conviteResponderPath(token: string): string {
   return `${ROUTE_PATHS.CONVITES}/${encodeURIComponent(token)}`
 }
 
-export type AppLayout = 'auth' | 'dashboard'
+export type AppLayout = 'auth' | 'dashboard' | 'public'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -69,6 +91,12 @@ declare module 'vue-router' {
     clienteOnly?: boolean
     /** Rotas operacionais — bloqueadas para Cliente */
     businessOnly?: boolean
+    requerModulo?: string
+    requerModulos?: string[]
+    requerPermissao?: string
+    requerPermissoes?: string[]
+    requerAssinaturaAtiva?: boolean
+    skipNegocioGuard?: boolean
     title?: string
   }
 }

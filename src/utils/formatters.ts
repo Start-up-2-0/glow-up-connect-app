@@ -99,6 +99,13 @@ export function formatCurrency(value: number): string {
   return currencyFormatter.format(value)
 }
 
+export const formatBRL = formatCurrency
+
+export function formatLimite(valor: number | null | undefined): string {
+  if (valor === null || valor === undefined) return 'Ilimitado'
+  return String(valor)
+}
+
 export function formatDistanciaKm(km: number): string {
   if (km < 1) return `${Math.round(km * 1000)} m`
   return `${km.toFixed(1).replace('.', ',')} km`

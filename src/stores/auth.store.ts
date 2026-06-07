@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { authService } from '@/services/authService'
 import { useUserStore } from './user.store'
+import { useNegocioStore } from './negocio.store'
+import { useAssinaturaStore } from './assinatura.store'
 import type { LoginPayload, StoredSession } from '@/types/auth.types'
 import {
   clearSessionStorage,
@@ -81,6 +83,8 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       clearSession()
       useUserStore().clear()
+      useNegocioStore().clear()
+      useAssinaturaStore().clear()
       loading.value = false
     }
   }

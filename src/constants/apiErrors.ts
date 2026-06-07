@@ -20,6 +20,8 @@ export const API_ERROR_MESSAGES: Record<string, string> = {
   CONVITE_NEGOCIO_INVALIDO: 'Convite expirado ou já respondido.',
   CONVITE_NEGOCIO_DUPLICADO: 'Já existe um convite pendente para este e-mail.',
   CLIENTE_SEM_ACESSO_NEGOCIO: 'Você não tem acesso a esta área.',
+  SUBSCRIPTION_MODULE_BLOCKED: 'Este recurso não está disponível no seu plano atual.',
+  INVALID_SUBSCRIPTION_SCOPE: 'Selecione um estabelecimento para continuar.',
 }
 
 export const DEFAULT_ERROR_MESSAGE = 'Ocorreu um erro inesperado. Tente novamente.'

@@ -15,6 +15,7 @@ Substitua `{BASE_URL}` pela URL da API (local, staging ou producao).
 | Documento | Conteudo |
 |-----------|----------|
 | [../acesso/README.md](../acesso/README.md) | Controle de acesso: roles, planos e modulos por persona |
+| [../acesso/specs/README.md](../acesso/specs/README.md) | **Assinatura e modulos** — vitrine, onboarding, guardas, faturas |
 | [convencoes.md](./convencoes.md) | Content-Type, header `x-glow-token`, formatos de resposta e erros |
 | [cadastro.md](./cadastro.md) | `POST /api/usuario` — criar conta cliente |
 | [confirmacao-conta.md](./confirmacao-conta.md) | Confirmar e-mail (link, codigo, reenvio) |
@@ -92,6 +93,9 @@ sequenceDiagram
 | Detalhe da loja | `/loja/{publicGuid}` | [area-cliente-agendamento.md](./area-cliente-agendamento.md) |
 | Meus agendamentos | `/meus-agendamentos` | [area-cliente-agendamento.md](./area-cliente-agendamento.md) |
 | Confirmar WhatsApp | `/confirmar-whatsapp` | [confirmacao-whatsapp.md](./confirmacao-whatsapp.md) |
+| Escolher plano | `/onboarding/planos` | [../acesso/specs/catalogo-planos.md](../acesso/specs/catalogo-planos.md) |
+| Checkout assinatura | `/onboarding/checkout` | [../acesso/specs/onboarding-assinatura.md](../acesso/specs/onboarding-assinatura.md) |
+| Gestao assinatura | `/configuracoes/assinatura` | [../acesso/specs/modulos/assinatura.md](../acesso/specs/modulos/assinatura.md) |
 
 ---
 

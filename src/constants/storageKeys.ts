@@ -4,6 +4,7 @@ export const STORAGE_KEYS = {
   EXPIRES_AT: 'guc_expires_at',
   REFRESH_EXPIRES_AT: 'guc_refresh_expires_at',
   THEME: 'guc_theme',
+  ESTABELECIMENTO_ID: 'guc_estabelecimento_id',
 } as const
 
 export const TOKEN_HEADER =
