@@ -14,6 +14,9 @@ import {
   setAccessToken,
 } from '@/utils/storage'
 import { syncSession } from '@/utils/sessionSync'
+import { getUpgradeInfo } from '@/constants/upgradeMessages'
+import { useAppStore } from '@/stores/app.store'
+import { useNotificationsStore } from '@/stores/notifications.store'
 
 type QueueCallback = {
   resolve: (token: string) => void
@@ -83,11 +86,46 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config
 })
 
+function handleSubscriptionError(error: AxiosError<ApiErrorResponse>) {
+  const status = error.response?.status
+  const code = error.response?.data?.code
+
+  if (status !== 403 || !code) return false
+
+  if (code === 'SUBSCRIPTION_MODULE_BLOCKED') {
+    const modulo =
+      typeof error.response?.data?.details === 'object' &&
+      error.response.data.details !== null &&
+      'modulo' in error.response.data.details
+        ? String((error.response.data.details as { modulo: string }).modulo)
+        : undefined
+
+    const info = getUpgradeInfo(modulo ?? '')
+    useAppStore().openUpgradeModal({
+      modulo,
+      mensagem: info.mensagem,
+      planoMinimo: info.planoMinimo,
+    })
+    return true
+  }
+
+  if (code === 'INVALID_SUBSCRIPTION_SCOPE') {
+    useNotificationsStore().push('warning', 'Selecione um estabelecimento para continuar.')
+    return true
+  }
+
+  return false
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ApiErrorResponse>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
     const requestUrl = originalRequest?.url
+
+    if (handleSubscriptionError(error)) {
+      return Promise.reject(error)
+    }
 
     if (!originalRequest || !shouldAttemptRefresh(error, requestUrl)) {
       if (error.response?.status === 401 && !requestUrl?.includes('/auth/login')) {

@@ -17,12 +17,20 @@ function applyThemeToDocument(theme: Theme) {
   document.documentElement.classList.toggle('dark', theme === 'dark')
 }
 
+export interface UpgradeModalState {
+  open: boolean
+  modulo?: string
+  mensagem?: string
+  planoMinimo?: string
+}
+
 export const useAppStore = defineStore('app', () => {
   /** Drawer mobile (overlay) */
   const sidebarOpen = ref(false)
   /** Sidebar desktop recolhida (ícones only) */
   const sidebarCollapsed = ref(false)
   const theme = ref<Theme>('light')
+  const upgradeModal = ref<UpgradeModalState>({ open: false })
 
   const isDark = computed(() => theme.value === 'dark')
 
@@ -59,6 +67,14 @@ export const useAppStore = defineStore('app', () => {
     applyTheme(isTheme(saved) ? saved : getSystemTheme())
   }
 
+  function openUpgradeModal(payload?: Omit<UpgradeModalState, 'open'>) {
+    upgradeModal.value = { open: true, ...payload }
+  }
+
+  function closeUpgradeModal() {
+    upgradeModal.value = { open: false }
+  }
+
   return {
     sidebarOpen,
     sidebarCollapsed,
@@ -71,6 +87,9 @@ export const useAppStore = defineStore('app', () => {
     applyTheme,
     toggleTheme,
     hydrateTheme,
+    upgradeModal,
+    openUpgradeModal,
+    closeUpgradeModal,
   }
 })
 
