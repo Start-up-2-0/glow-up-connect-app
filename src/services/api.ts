@@ -34,10 +34,17 @@ function processQueue(error: unknown, token: string | null = null) {
   failedQueue = []
 }
 
+const PUBLIC_API_PATHS = ['/auth/login', '/auth/refresh', '/planos']
+
+function isPublicApiPath(url?: string): boolean {
+  if (!url) return false
+  return PUBLIC_API_PATHS.some((path) => url.includes(path))
+}
+
 function shouldAttemptRefresh(error: AxiosError<ApiErrorResponse>, url?: string) {
   if (error.response?.status !== 401) return false
   if (!url) return false
-  if (url.includes('/auth/login') || url.includes('/auth/refresh')) return false
+  if (isPublicApiPath(url)) return false
 
   const code = error.response.data?.code
   return !code || code === 'TOKEN_EXPIRED' || code === 'INVALID_TOKEN' || code === 'UNAUTHORIZED'
@@ -128,7 +135,7 @@ api.interceptors.response.use(
     }
 
     if (!originalRequest || !shouldAttemptRefresh(error, requestUrl)) {
-      if (error.response?.status === 401 && !requestUrl?.includes('/auth/login')) {
+      if (error.response?.status === 401 && !isPublicApiPath(requestUrl)) {
         redirectToLogin()
       }
       return Promise.reject(error)

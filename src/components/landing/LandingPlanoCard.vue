@@ -8,26 +8,17 @@ import type { Plano } from '@/types/plano.types'
 const props = defineProps<{
   plano: Plano
   popular?: boolean
-  trialGratis?: boolean
 }>()
 
 const checkoutLink = computed(() => ({
-  path: ROUTE_PATHS.ONBOARDING_CHECKOUT,
+  path: ROUTE_PATHS.ONBOARDING_ASSINATURA,
   query: { planoId: String(props.plano.id) },
 }))
 
-const precoLabel = computed(() =>
-  props.trialGratis ? 'GRÁTIS' : formatBRL(props.plano.preco),
-)
-
 const features = computed(() =>
-  props.plano.modulos.length > 0
-    ? props.plano.modulos
-    : props.plano.funcionalidades,
-)
-
-const ctaLabel = computed(() =>
-  props.trialGratis ? 'Começar grátis' : 'Assinar agora',
+  props.plano.funcionalidades.length > 0
+    ? props.plano.funcionalidades
+    : props.plano.modulos,
 )
 
 const ctaVariant = computed(() => (props.popular ? 'purple' : 'outline'))
@@ -75,10 +66,9 @@ const ctaVariant = computed(() => (props.popular ? 'purple' : 'outline'))
         class="inline font-montserrat text-2xl font-black leading-[1.09]"
         :class="popular ? 'text-glow-purple' : 'text-glow-gold'"
       >
-        {{ precoLabel }}
+        {{ formatBRL(plano.preco) }}
       </p>
       <span
-        v-if="!trialGratis"
         class="ml-1 font-montserrat text-[10px] font-bold"
         :class="popular ? 'text-glow-purple' : 'text-glow-gold'"
       >
@@ -113,7 +103,7 @@ const ctaVariant = computed(() => (props.popular ? 'purple' : 'outline'))
     <LandingCtaButton
       class="mx-auto mt-8 w-full max-w-[259px] justify-center"
       :to="checkoutLink"
-      :label="ctaLabel"
+      label="Assinar agora"
       :variant="ctaVariant"
     />
   </article>

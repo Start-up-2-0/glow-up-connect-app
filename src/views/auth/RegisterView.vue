@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter, RouterLink } from 'vue-router'
+import { computed, ref } from 'vue'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
 import AuthSplashPanel from '@/components/auth/AuthSplashPanel.vue'
 import AuthMobileBrand from '@/components/auth/AuthMobileBrand.vue'
 import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
@@ -12,6 +12,12 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { ROUTE_PATHS } from '@/constants/routes'
 import {
+  authRouteWithRedirect,
+  isOnboardingCheckoutPath,
+  readRedirectParam,
+  redirectQuery,
+} from '@/utils/authRedirect'
+import {
   GLOW_AUTH_PANEL_BORDERED_CLASS,
   GLOW_BODY_TEXT_CLASS,
   GLOW_BUTTON_PRIMARY_CLASS,
@@ -20,7 +26,13 @@ import {
   GLOW_LINK_ACCENT_CLASS,
 } from '@/constants/designTokens'
 
+const route = useRoute()
 const router = useRouter()
+const checkoutRedirect = computed(() => readRedirectParam(route.query.redirect))
+const isAssinaturaFlow = computed(() =>
+  checkoutRedirect.value ? isOnboardingCheckoutPath(checkoutRedirect.value) : false,
+)
+const loginLink = computed(() => authRouteWithRedirect(ROUTE_PATHS.LOGIN, checkoutRedirect.value))
 const { setStoredEmail } = useConfirmEmail()
 const { resolveError, resolveErrorCode, resolveFieldErrors } = useApiError()
 const notificationsStore = useNotificationsStore()
@@ -109,7 +121,10 @@ async function handleSubmit() {
     const { data } = await userService.cadastrar(payload)
     notificationsStore.push('success', data.mensagem)
     setStoredEmail(email.value.trim())
-    await router.push(ROUTE_PATHS.CONFIRM_EMAIL_CODE)
+    await router.push({
+      path: ROUTE_PATHS.CONFIRM_EMAIL_CODE,
+      query: redirectQuery(checkoutRedirect.value),
+    })
   } catch (err) {
     if (resolveErrorCode(err) === 'EMAIL_JA_CADASTRADO') {
       emailJaCadastrado.value = true
@@ -140,10 +155,14 @@ function onAvatarError(message: string) {
 
         <header class="mb-[13px]">
           <h1 class="font-satoshi text-3xl font-bold text-zinc-800">
-            Bem-vindo ao Glow Up Connect
+            {{ isAssinaturaFlow ? 'Crie sua conta para assinar' : 'Bem-vindo ao Glow Up Connect' }}
           </h1>
           <p class="mt-[5px] font-satoshi text-xl font-normal text-zinc-800/40">
-            Insira seus dados corretamente para criar sua conta.
+            {{
+              isAssinaturaFlow
+                ? 'Cadastre-se para configurar seu estabelecimento e contratar o plano escolhido.'
+                : 'Insira seus dados corretamente para criar sua conta.'
+            }}
           </p>
         </header>
 
@@ -155,7 +174,7 @@ function onAvatarError(message: string) {
           {{ errorMessage }}
           <RouterLink
             v-if="emailJaCadastrado"
-            :to="ROUTE_PATHS.LOGIN"
+            :to="loginLink"
             :class="[GLOW_LINK_ACCENT_CLASS, 'ml-1 inline-block']"
           >
             Fazer login
@@ -289,7 +308,7 @@ function onAvatarError(message: string) {
 
             <p :class="GLOW_BODY_TEXT_CLASS">
               Já possui conta?
-              <RouterLink :to="ROUTE_PATHS.LOGIN" :class="GLOW_LINK_ACCENT_CLASS">
+              <RouterLink :to="loginLink" :class="GLOW_LINK_ACCENT_CLASS">
                 Faça o login
               </RouterLink>
             </p>

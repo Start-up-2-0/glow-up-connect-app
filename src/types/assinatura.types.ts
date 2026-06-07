@@ -85,6 +85,7 @@ export interface Assinatura {
   emTrial: boolean
   diasTrial: number
   pagamentoInicial: PagamentoInicial | null
+  requerConfirmacaoEmail?: boolean
 }
 
 export interface TrocarPlanoPayload {

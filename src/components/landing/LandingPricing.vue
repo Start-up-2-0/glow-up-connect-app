@@ -21,12 +21,6 @@ function isPopular(plano: Plano): boolean {
   return plano.id === planoPlus.value?.id
 }
 
-function isTrialGratis(plano: Plano): boolean {
-  if (!promocao.value?.disponivel) return false
-  const maisBarato = [...planos.value].sort((a, b) => a.preco - b.preco)[0]
-  return plano.id === maisBarato?.id
-}
-
 onMounted(async () => {
   try {
     await planosStore.fetchPlanos()
@@ -77,7 +71,6 @@ onMounted(async () => {
           :key="plano.id"
           :plano="plano"
           :popular="isPopular(plano)"
-          :trial-gratis="isTrialGratis(plano)"
         />
       </div>
     </div>

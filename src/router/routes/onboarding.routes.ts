@@ -3,15 +3,21 @@ import { ROUTE_NAMES, ROUTE_PATHS } from '@/constants/routes'
 
 export const onboardingRoutes: RouteRecordRaw[] = [
   {
-    path: ROUTE_PATHS.ONBOARDING_CHECKOUT,
-    name: ROUTE_NAMES.ONBOARDING_CHECKOUT,
-    component: () => import('@/views/onboarding/CheckoutAssinaturaView.vue'),
+    path: ROUTE_PATHS.ONBOARDING_ASSINATURA,
+    name: ROUTE_NAMES.ONBOARDING_ASSINATURA,
+    component: () => import('@/views/onboarding/OnboardingAssinaturaView.vue'),
     meta: {
       layout: 'auth',
-      requiresAuth: true,
-      businessOnly: true,
+      onboardingAssinatura: true,
       skipNegocioGuard: true,
-      title: 'Checkout',
+      title: 'Contratar plano',
     },
+  },
+  {
+    path: ROUTE_PATHS.ONBOARDING_CHECKOUT,
+    redirect: (to) => ({
+      path: ROUTE_PATHS.ONBOARDING_ASSINATURA,
+      query: to.query,
+    }),
   },
 ]
