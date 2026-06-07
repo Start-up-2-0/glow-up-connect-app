@@ -5,6 +5,15 @@ import BaseInput from '@/components/ui/BaseInput.vue'
 import type { PagamentoAssinaturaPayload } from '@/types/assinatura.types'
 import { extrairErroMercadoPago, obterMercadoPagoCtor } from '@/utils/mercadoPagoErrors'
 
+withDefaults(
+  defineProps<{
+    variant?: 'default' | 'checkout'
+  }>(),
+  {
+    variant: 'default',
+  },
+)
+
 const emit = defineEmits<{
   tokenized: [payload: PagamentoAssinaturaPayload]
   error: [message: string]
@@ -151,13 +160,32 @@ defineExpose({ tokenizar, loading, mpReady, mpConfigurado })
       {{ sdkErro }}
     </p>
 
-    <BaseInput v-model="cardNumber" label="Número do cartão" placeholder="0000 0000 0000 0000" autocomplete="cc-number" />
-    <BaseInput v-model="cardholderName" label="Nome no cartão" autocomplete="cc-name" />
-    <div class="grid grid-cols-2 gap-4">
-      <BaseInput v-model="expirationMonth" label="Mês" placeholder="MM" autocomplete="cc-exp-month" />
-      <BaseInput v-model="expirationYear" label="Ano" placeholder="AA" autocomplete="cc-exp-year" />
-    </div>
-    <BaseInput v-model="securityCode" label="CVV" placeholder="123" type="password" autocomplete="cc-csc" />
-    <BaseInput v-model="identificationNumber" label="CPF do titular" placeholder="000.000.000-00" />
+    <template v-if="variant === 'checkout'">
+      <div class="space-y-3">
+        <p class="text-xs font-medium uppercase tracking-wide text-glow-text-subtle">Dados do cartão</p>
+        <BaseInput v-model="cardNumber" label="Número do cartão" placeholder="0000 0000 0000 0000" autocomplete="cc-number" />
+        <div class="grid grid-cols-2 gap-3">
+          <BaseInput v-model="expirationMonth" label="Validade (mês)" placeholder="MM" autocomplete="cc-exp-month" />
+          <BaseInput v-model="expirationYear" label="Validade (ano)" placeholder="AA" autocomplete="cc-exp-year" />
+        </div>
+        <BaseInput v-model="securityCode" label="Código de segurança" placeholder="123" type="password" autocomplete="cc-csc" />
+      </div>
+      <div class="space-y-3 border-t border-glow-border-soft pt-4">
+        <p class="text-xs font-medium uppercase tracking-wide text-glow-text-subtle">Titular</p>
+        <BaseInput v-model="cardholderName" label="Nome no cartão" autocomplete="cc-name" />
+        <BaseInput v-model="identificationNumber" label="CPF do titular" placeholder="000.000.000-00" />
+      </div>
+    </template>
+
+    <template v-else>
+      <BaseInput v-model="cardNumber" label="Número do cartão" placeholder="0000 0000 0000 0000" autocomplete="cc-number" />
+      <BaseInput v-model="cardholderName" label="Nome no cartão" autocomplete="cc-name" />
+      <div class="grid grid-cols-2 gap-4">
+        <BaseInput v-model="expirationMonth" label="Mês" placeholder="MM" autocomplete="cc-exp-month" />
+        <BaseInput v-model="expirationYear" label="Ano" placeholder="AA" autocomplete="cc-exp-year" />
+      </div>
+      <BaseInput v-model="securityCode" label="CVV" placeholder="123" type="password" autocomplete="cc-csc" />
+      <BaseInput v-model="identificationNumber" label="CPF do titular" placeholder="000.000.000-00" />
+    </template>
   </div>
 </template>

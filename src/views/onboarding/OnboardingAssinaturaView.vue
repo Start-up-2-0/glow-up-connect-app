@@ -59,10 +59,13 @@ async function handleConfirmarEmail(codigo: string) {
     <AuthSplashPanel />
 
     <main :class="[GLOW_AUTH_PANEL_BORDERED_CLASS, 'overflow-y-auto']">
-      <div class="my-auto w-full max-w-[560px] py-6">
+      <div
+        class="my-auto w-full py-6"
+        :class="step === 'assinatura' ? 'max-w-6xl px-4 lg:px-8' : 'max-w-[560px]'"
+      >
         <AuthMobileBrand />
 
-        <OnboardingStepper :current="stepperIndex" />
+        <OnboardingStepper v-if="step !== 'assinatura'" :current="stepperIndex" />
 
         <LoadingSpinner v-if="loading && !plano" />
 
