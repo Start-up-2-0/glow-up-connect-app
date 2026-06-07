@@ -10,41 +10,49 @@ const { goToSection } = useLandingScroll()
 <template>
   <section
     :id="LANDING_SECTIONS.inicio"
-    class="relative flex min-h-[min(100dvh,900px)] items-center justify-center overflow-hidden"
+    class="relative min-h-[929px] overflow-hidden"
   >
     <img
       :src="heroBg"
       alt=""
-      class="absolute inset-0 size-full object-cover"
+      class="absolute inset-0 size-full object-cover blur-[2px] scale-105"
       fetchpriority="high"
     />
-    <div class="absolute inset-0 bg-[#282828]/65" aria-hidden="true" />
+    <div class="absolute inset-0 bg-[#282828]/40" aria-hidden="true" />
 
-    <div class="relative z-10 mx-auto max-w-4xl px-4 py-32 text-center lg:px-8">
-      <p class="mb-4 font-montserrat text-sm font-medium uppercase tracking-[0.2em] text-white/80">
-        Beleza conectada
-      </p>
-      <h1 class="font-montserrat text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
-        A plataforma que conecta sua beleza à
-        <span class="text-glow-gold">transformação</span>
-        digital
-      </h1>
-      <p class="mx-auto mt-6 max-w-2xl font-poppins text-base font-light text-white/85 sm:text-lg">
-        Agende, gerencie e cresça com uma solução completa para clientes, profissionais e
-        estabelecimentos de beleza.
-      </p>
-      <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
-        <button type="button" @click="goToSection(LANDING_SECTIONS.planos)">
-          <LandingCtaButton label="Começar agora!" />
-        </button>
-        <button
-          type="button"
-          class="rounded-full border border-white/40 px-6 py-3 font-montserrat text-sm font-semibold text-white transition hover:bg-white/10"
-          @click="goToSection(LANDING_SECTIONS.sobre)"
-        >
-          Saiba mais
-        </button>
+    <div class="relative z-10 mx-auto flex min-h-[929px] max-w-[1280px] flex-col justify-center px-4 pb-24 pt-32 lg:px-8">
+      <div class="max-w-4xl">
+        <h1 class="font-montserrat leading-[1.09] text-white/80">
+          <span class="block text-5xl font-extralight sm:text-6xl lg:text-8xl xl:text-[140px]">
+            O início da sua
+          </span>
+          <span class="block text-5xl font-black text-glow-gold sm:text-6xl lg:text-8xl xl:text-[140px]">
+            transformação
+          </span>
+          <span class="block text-5xl font-extralight sm:text-6xl lg:text-8xl xl:text-[140px]">
+            começa aqui.
+          </span>
+        </h1>
+
+        <p class="mt-11 max-w-3xl font-poppins text-lg font-light leading-[1.09] text-[#aeafb4]">
+          Agende serviços de beleza com
+          <span class="font-extrabold text-glow-gold-cta">um toque</span>.
+          Conecte-se aos melhores profissionais e salões da sua região.
+        </p>
+
+        <div class="mt-12">
+          <button type="button" @click="goToSection(LANDING_SECTIONS.planos)">
+            <LandingCtaButton label="Começar agora" />
+          </button>
+        </div>
       </div>
+    </div>
+
+    <div
+      class="absolute bottom-24 right-8 hidden h-[85px] w-[45px] rounded-[200px] border-4 border-glow-gold lg:block"
+      aria-hidden="true"
+    >
+      <div class="absolute left-1/2 top-4 size-3 -translate-x-1/2 rounded-full bg-glow-gold" />
     </div>
   </section>
 </template>

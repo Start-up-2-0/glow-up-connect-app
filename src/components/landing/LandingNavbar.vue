@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import logo from '@/assets/logo/logo.png'
 import { LANDING_SECTIONS } from '@/constants/landing'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { useLandingScroll } from '@/composables/useLandingScroll'
 import LandingCtaButton from '@/components/landing/LandingCtaButton.vue'
 
 const { goToSection } = useLandingScroll()
-const scrolled = ref(false)
 const menuOpen = ref(false)
+const activeSection = ref<string>(LANDING_SECTIONS.inicio)
 
 const navLinks = [
   { label: 'Início', id: LANDING_SECTIONS.inicio },
@@ -19,45 +18,71 @@ const navLinks = [
   { label: 'Planos', id: LANDING_SECTIONS.planos },
 ] as const
 
-function onScroll() {
-  scrolled.value = window.scrollY > 24
-}
-
 function handleNavClick(id: string) {
   menuOpen.value = false
+  activeSection.value = id
   goToSection(id)
 }
 
-onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))
-onUnmounted(() => window.removeEventListener('scroll', onScroll))
+function updateActiveSection() {
+  const offset = 120
+  const sections = Object.values(LANDING_SECTIONS)
+  for (let i = sections.length - 1; i >= 0; i--) {
+    const el = document.getElementById(sections[i])
+    if (el && el.getBoundingClientRect().top <= offset) {
+      activeSection.value = sections[i]
+      return
+    }
+  }
+  activeSection.value = LANDING_SECTIONS.inicio
+}
+
+onMounted(() => window.addEventListener('scroll', updateActiveSection, { passive: true }))
+onUnmounted(() => window.removeEventListener('scroll', updateActiveSection))
 </script>
 
 <template>
-  <header
-    class="fixed inset-x-0 top-0 z-50 transition-colors duration-300"
-    :class="scrolled ? 'bg-[#282828]/95 shadow-lg backdrop-blur-sm' : 'bg-transparent'"
-  >
-    <div class="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 lg:px-8">
-      <RouterLink :to="ROUTE_PATHS.HOME" class="flex items-center gap-2" @click="handleNavClick(LANDING_SECTIONS.inicio)">
-        <img :src="logo" alt="Glow Up Connect" class="h-9 w-auto brightness-0 invert" />
+  <header class="fixed inset-x-0 top-0 z-50 px-4 pt-6 lg:px-8">
+    <div class="mx-auto flex max-w-[1280px] items-center justify-between">
+      <RouterLink
+        :to="ROUTE_PATHS.HOME"
+        class="font-satoshi text-2xl text-white"
+        @click="handleNavClick(LANDING_SECTIONS.inicio)"
+      >
+        <span class="font-light">GlowUp </span>
+        <span class="font-black">Connect</span>
       </RouterLink>
 
-      <nav class="hidden items-center gap-8 lg:flex" aria-label="Navegação principal">
+      <nav
+        class="relative hidden items-center gap-9 rounded-[80px] bg-[#282828]/50 px-10 py-6 lg:flex"
+        aria-label="Navegação principal"
+      >
         <button
           v-for="link in navLinks"
           :key="link.id"
           type="button"
-          class="font-montserrat text-sm font-medium text-white/90 transition hover:text-white"
+          class="relative font-satoshi text-base text-white transition hover:text-white/90"
+          :class="activeSection === link.id ? 'font-black' : 'font-normal'"
           @click="handleNavClick(link.id)"
         >
           {{ link.label }}
+          <span
+            v-if="activeSection === link.id"
+            class="absolute -bottom-3 left-1/2 h-0.5 w-6 -translate-x-1/2 bg-glow-gold"
+          />
         </button>
       </nav>
 
       <div class="hidden lg:block">
-        <button type="button" @click="handleNavClick(LANDING_SECTIONS.planos)">
-          <LandingCtaButton label="Começar agora!" />
-        </button>
+        <div class="relative">
+          <div
+            class="pointer-events-none absolute -left-4 top-1 h-[18px] w-[260px] rounded-3xl bg-glow-gold/80 blur-[50px]"
+            aria-hidden="true"
+          />
+          <button type="button" @click="handleNavClick(LANDING_SECTIONS.planos)">
+            <LandingCtaButton label="Começar agora!" size="sm" class="!h-11 !rounded-3xl !px-5 !text-base" />
+          </button>
+        </div>
       </div>
 
       <button
@@ -75,14 +100,15 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
     <div
       v-if="menuOpen"
-      class="border-t border-white/10 bg-[#282828]/98 px-4 py-4 lg:hidden"
+      class="mx-auto mt-3 max-w-[1280px] rounded-2xl border border-white/10 bg-[#282828]/95 px-4 py-4 lg:hidden"
     >
-      <nav class="flex flex-col gap-3" aria-label="Menu mobile">
+      <nav class="flex flex-col gap-2" aria-label="Menu mobile">
         <button
           v-for="link in navLinks"
           :key="link.id"
           type="button"
-          class="rounded-lg px-3 py-2 text-left font-montserrat text-sm font-medium text-white"
+          class="rounded-lg px-3 py-2.5 text-left font-satoshi text-base text-white"
+          :class="activeSection === link.id ? 'font-black' : 'font-normal'"
           @click="handleNavClick(link.id)"
         >
           {{ link.label }}

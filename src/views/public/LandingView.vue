@@ -25,7 +25,7 @@ watch(() => route.hash, handleHashScroll)
 </script>
 
 <template>
-  <div class="overflow-x-hidden">
+  <div class="overflow-x-hidden bg-[#f3f3f3]">
     <LandingNavbar />
     <main>
       <LandingHero />
