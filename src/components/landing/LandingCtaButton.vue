@@ -8,20 +8,23 @@ const props = withDefaults(
     variant?: 'gold' | 'purple' | 'outline'
     type?: 'button' | 'submit'
     to?: RouteLocationRaw
+    size?: 'md' | 'sm'
   }>(),
   {
-    label: 'Começar agora!',
+    label: 'Começar agora',
     variant: 'gold',
     type: 'button',
+    size: 'md',
   },
 )
 
 const classes = computed(() => [
-  'inline-flex items-center gap-2 rounded-full px-6 py-3 font-montserrat text-sm font-semibold transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-offset-2',
+  'inline-flex items-center justify-center gap-2.5 rounded-[80px] font-montserrat transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-offset-2',
+  props.size === 'md' ? 'h-[60px] px-6 text-lg font-medium' : 'h-11 px-5 text-base font-medium',
   props.variant === 'gold' && 'bg-glow-gold-cta text-white focus:ring-glow-gold-cta/50',
   props.variant === 'purple' && 'bg-glow-purple text-white focus:ring-glow-purple/50',
   props.variant === 'outline' &&
-    'border-2 border-glow-purple bg-transparent text-glow-purple focus:ring-glow-purple/30',
+    'border border-[#282828]/50 bg-transparent text-[#282828] focus:ring-[#282828]/20',
 ])
 </script>
 
@@ -29,27 +32,27 @@ const classes = computed(() => [
   <RouterLink v-if="to" :to="to" :class="classes">
     <span>{{ label }}</span>
     <svg
-      class="size-4 shrink-0"
+      class="size-5 shrink-0 rotate-90"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       stroke-width="2"
       aria-hidden="true"
     >
-      <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M12 19V5M5 12l7-7 7 7" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   </RouterLink>
   <button v-else :type="type" :class="classes">
     <span>{{ label }}</span>
     <svg
-      class="size-4 shrink-0"
+      class="size-5 shrink-0 rotate-90"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       stroke-width="2"
       aria-hidden="true"
     >
-      <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M12 19V5M5 12l7-7 7 7" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   </button>
 </template>

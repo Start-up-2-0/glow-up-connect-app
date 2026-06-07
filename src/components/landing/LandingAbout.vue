@@ -1,58 +1,50 @@
 <script setup lang="ts">
 import aboutImg from '@/assets/landing/about-salon.jpg'
-import { LANDING_SECTIONS, SOBRE_FEATURES } from '@/constants/landing'
+import LandingSectionTitle from '@/components/landing/LandingSectionTitle.vue'
+import { LANDING_SECTIONS, SOBRE_BODY, SOBRE_FEATURES } from '@/constants/landing'
 </script>
 
 <template>
-  <section :id="LANDING_SECTIONS.sobre" class="bg-[#f3f3f3] py-20 lg:py-28">
-    <div class="mx-auto grid max-w-7xl items-center gap-12 px-4 lg:grid-cols-2 lg:gap-16 lg:px-8">
-      <div class="relative mx-auto w-full max-w-md lg:max-w-none">
+  <section :id="LANDING_SECTIONS.sobre" class="bg-[#f3f3f3] px-4 pb-24 pt-20 lg:px-8 lg:pt-28">
+    <div class="mx-auto grid max-w-[1280px] items-center gap-16 lg:grid-cols-2 lg:gap-20">
+      <div class="relative mx-auto aspect-[587/497] w-full max-w-[588px] justify-self-start">
         <div
-          class="absolute -left-3 -top-3 h-[calc(100%-24px)] w-[calc(100%-24px)] rounded-2xl border-4 border-glow-gold"
+          class="absolute bottom-[6%] left-0 top-[15%] w-[95%] rounded-3xl bg-glow-purple"
           aria-hidden="true"
         />
         <div
-          class="absolute -bottom-3 -right-3 h-[calc(100%-24px)] w-[calc(100%-24px)] rounded-2xl border-4 border-glow-purple"
+          class="absolute bottom-[3%] left-[5%] top-[8%] w-[95%] rounded-3xl bg-glow-gold"
           aria-hidden="true"
         />
         <img
           :src="aboutImg"
           alt="Profissional de beleza atendendo cliente"
-          class="relative z-10 aspect-[4/5] w-full rounded-2xl object-cover shadow-xl"
+          class="relative z-10 size-full rounded-3xl object-cover"
         />
       </div>
 
       <div>
-        <p class="font-montserrat text-sm font-semibold uppercase tracking-wider text-glow-purple">
-          Sobre nós
-        </p>
-        <h2 class="mt-3 font-montserrat text-3xl font-bold text-[#282828] lg:text-4xl">
-          Harmonia entre tecnologia e
-          <span class="text-glow-gold">cuidado</span>
-        </h2>
-        <p class="mt-5 font-poppins text-base leading-relaxed text-[#282828]/75">
-          O Glow Up Connect nasceu para simplificar a rotina de quem busca bem-estar e de quem
-          trabalha com beleza. Unimos agendamento, gestão e relacionamento em uma experiência
-          moderna e humana.
-        </p>
+        <LandingSectionTitle before="Beleza e tecnologia em " highlight="harmonia" size="xl" />
 
-        <ul class="mt-10 space-y-6">
+        <div class="mt-11 space-y-0 font-poppins text-lg font-light leading-[1.09] text-[#282828]/50">
+          <p v-for="(line, index) in SOBRE_BODY" :key="index">{{ line }}</p>
+        </div>
+
+        <ul class="mt-14 space-y-8">
           <li
-            v-for="(feature, index) in SOBRE_FEATURES"
+            v-for="feature in SOBRE_FEATURES"
             :key="feature.titulo"
-            class="flex gap-4"
+            class="flex gap-5"
           >
             <span
-              class="flex size-10 shrink-0 items-center justify-center rounded-full font-montserrat text-sm font-bold text-white"
-              :class="index % 2 === 0 ? 'bg-glow-gold' : 'bg-glow-purple'"
-            >
-              {{ index + 1 }}
-            </span>
+              class="mt-1 size-[50px] shrink-0 rounded-2xl bg-glow-gold"
+              aria-hidden="true"
+            />
             <div>
-              <h3 class="font-montserrat text-lg font-semibold text-[#282828]">
+              <h3 class="font-montserrat text-lg font-bold text-glow-gold">
                 {{ feature.titulo }}
               </h3>
-              <p class="mt-1 font-poppins text-sm text-[#282828]/70">
+              <p class="mt-2 font-poppins text-base font-light leading-[1.09] text-[#282828]">
                 {{ feature.descricao }}
               </p>
             </div>
