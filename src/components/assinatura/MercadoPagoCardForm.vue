@@ -148,13 +148,17 @@ defineExpose({ tokenizar, loading, mpReady, mpConfigurado })
 
 <template>
   <div class="space-y-4">
-    <p v-if="!mpConfigurado" class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800" role="alert">
+    <p
+      v-if="!mpConfigurado"
+      class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-700/50 dark:bg-amber-950/30 dark:text-amber-300"
+      role="alert"
+    >
       Pagamento indisponível: a variável <strong>VITE_MP_PUBLIC_KEY</strong> não foi incluída no build
       de homologação. Configure no Railway e faça um novo deploy.
     </p>
     <p
       v-else-if="sdkErro"
-      class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+      class="checkout-alert-error"
       role="alert"
     >
       {{ sdkErro }}

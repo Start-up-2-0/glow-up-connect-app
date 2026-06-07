@@ -175,7 +175,7 @@ async function handleSubmit() {
               />
             </div>
 
-            <p v-if="erroVisivel" class="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+            <p v-if="erroVisivel" class="checkout-alert-error mt-4" role="alert">
               {{ erroVisivel }}
             </p>
 
