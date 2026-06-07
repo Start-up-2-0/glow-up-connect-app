@@ -9,6 +9,8 @@ import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import DiaVencimentoSelect from '@/components/assinatura/DiaVencimentoSelect.vue'
 import MercadoPagoCardForm from '@/components/assinatura/MercadoPagoCardForm.vue'
 import PromocaoLancamentoBanner from '@/components/assinatura/PromocaoLancamentoBanner.vue'
+import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
+import { readFileAsDataUrl } from '@/utils/avatarFile'
 import { usePlanosStore } from '@/stores/planos.store'
 import { useAssinaturaStore } from '@/stores/assinatura.store'
 import { useNegocioStore } from '@/stores/negocio.store'
@@ -47,6 +49,8 @@ const numero = ref('')
 const bairro = ref('')
 const cidade = ref('')
 const estado = ref('')
+const complemento = ref('')
+const logoFile = ref<File | null>(null)
 
 const diasPermitidos = computed(
   () => promocao.value?.diasVencimentoPermitidos ?? [5, 10, 15, 20],
@@ -111,6 +115,23 @@ async function finalizarCheckout() {
     return
   }
 
+  if (!logoFile.value) {
+    erro.value = 'Envie a logo do negócio.'
+    return
+  }
+
+  const logo = await readFileAsDataUrl(logoFile.value)
+
+  const endereco = {
+    cep: cep.value,
+    logradouro: logradouro.value,
+    numero: numero.value,
+    bairro: bairro.value,
+    cidade: cidade.value,
+    estado: estado.value,
+    complemento: complemento.value || undefined,
+  }
+
   const pagamento = await cardFormRef.value?.tokenizar()
   if (!pagamento) return
 
@@ -119,9 +140,11 @@ async function finalizarCheckout() {
         planoId: plano.value.id,
         tipoAssinatura: 'ProfissionalAutonomo' as const,
         profissionalAutonomo: {
-          nome: nome.value,
+          nomePublico: nome.value,
+          logo,
           telefone: telefone.value,
           email: email.value,
+          endereco,
         },
         gateway: 'MercadoPago' as const,
         diaVencimento: diaVencimento.value,
@@ -132,16 +155,10 @@ async function finalizarCheckout() {
         tipoAssinatura: 'Estabelecimento' as const,
         estabelecimento: {
           nome: nome.value,
+          logo,
           telefone: telefone.value,
           email: email.value,
-          endereco: {
-            cep: cep.value,
-            logradouro: logradouro.value,
-            numero: numero.value,
-            bairro: bairro.value,
-            cidade: cidade.value,
-            estado: estado.value,
-          },
+          endereco,
         },
         gateway: 'MercadoPago' as const,
         diaVencimento: diaVencimento.value,
@@ -178,6 +195,14 @@ async function finalizarCheckout() {
     erro.value = resolveError(err)
   }
 }
+
+function onLogoChange(file: File | null) {
+  logoFile.value = file
+}
+
+function onLogoError(message: string) {
+  erro.value = message
+}
 </script>
 
 <template>
@@ -196,21 +221,21 @@ async function finalizarCheckout() {
     <template v-else-if="plano">
       <BaseCard title="Dados do negócio">
         <div class="space-y-4">
-          <BaseInput v-model="nome" label="Nome" />
+          <BaseInput v-model="nome" :label="isAutonomo ? 'Nome público' : 'Nome'" />
+          <AuthAvatarUpload label="Logo" @change="onLogoChange" @error="onLogoError" />
           <BaseInput v-model="telefone" label="Telefone" />
           <BaseInput v-model="email" label="E-mail" type="email" />
-          <template v-if="!isAutonomo">
-            <BaseInput v-model="cep" label="CEP" />
-            <BaseInput v-model="logradouro" label="Logradouro" />
-            <div class="grid grid-cols-2 gap-4">
-              <BaseInput v-model="numero" label="Número" />
-              <BaseInput v-model="bairro" label="Bairro" />
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <BaseInput v-model="cidade" label="Cidade" />
-              <BaseInput v-model="estado" label="Estado" maxlength="2" />
-            </div>
-          </template>
+          <BaseInput v-model="cep" label="CEP" />
+          <BaseInput v-model="logradouro" label="Logradouro" />
+          <div class="grid grid-cols-2 gap-4">
+            <BaseInput v-model="numero" label="Número" />
+            <BaseInput v-model="bairro" label="Bairro" />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <BaseInput v-model="cidade" label="Cidade" />
+            <BaseInput v-model="estado" label="Estado" maxlength="2" />
+          </div>
+          <BaseInput v-model="complemento" label="Complemento" hint="Opcional" />
         </div>
       </BaseCard>
 

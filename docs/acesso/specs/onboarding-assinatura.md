@@ -91,7 +91,7 @@ Resumo dos blocos:
 - Regras: JPEG/PNG/WebP, max 5 MB — reutilizar `validateAvatarFile` e `readFileAsDataUrl` de `src/utils/avatarFile.ts`.
 - Componente sugerido: `LogoUploader` (mesmo UX do `ProfileAvatarEditor`).
 
-> **Backend:** coluna `Logo` hoje limita 500 caracteres. Base64 real exige migracao para `text` (como `Usuario.AvatarBase64`). Validar com API antes de habilitar upload no checkout.
+A API normaliza `logo` como data URI (mesma validacao do avatar). Reutilizar `validateAvatarFile` + `readFileAsDataUrl`.
 
 ### Exemplo minimo — estabelecimento novo
 

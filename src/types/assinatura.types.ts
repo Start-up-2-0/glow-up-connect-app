@@ -30,17 +30,19 @@ export interface EnderecoOnboarding {
 export interface EstabelecimentoOnboarding {
   nome: string
   descricao?: string
-  logo?: string
+  logo: string
   telefone?: string
   email?: string
   endereco: EnderecoOnboarding
 }
 
 export interface ProfissionalAutonomoOnboarding {
-  nome?: string
-  descricao?: string
+  nomePublico: string
+  biografia?: string
+  logo: string
   telefone?: string
   email?: string
+  endereco: EnderecoOnboarding
 }
 
 export interface PagamentoAssinaturaPayload {

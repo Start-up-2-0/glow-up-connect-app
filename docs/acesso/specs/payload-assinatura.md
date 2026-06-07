@@ -112,7 +112,7 @@ async function logoFromFile(file: File): Promise<string> {
 "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
 ```
 
-> **Atencao (API hoje):** a coluna `Logo` no banco esta limitada a **500 caracteres**. Imagem base64 real **nao cabe** ate migracao para `text` (como `AvatarBase64`). Alinhar com backend antes do upload de logo no onboarding — ver nota em [onboarding-assinatura.md](./onboarding-assinatura.md).
+A API valida e persiste `logo` com as **mesmas regras do avatar** (`IAvatarBase64Decoder`): tipos JPEG/PNG/WebP, max 5 MB, data URI normalizado no banco (coluna `text`).
 
 ---
 
