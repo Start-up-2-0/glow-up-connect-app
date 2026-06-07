@@ -10,6 +10,8 @@ interface ImportMetaEnv {
   readonly VITE_API_PROXY_TARGET?: string
   readonly VITE_APP_NAME: string
   readonly VITE_TOKEN_HEADER: string
+  readonly VITE_MP_PUBLIC_KEY?: string
+  readonly VITE_WHATSAPP_NUMBER?: string
 }
 
 interface ImportMeta {
