@@ -5,6 +5,7 @@ import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import PromocaoLancamentoBanner from '@/components/assinatura/PromocaoLancamentoBanner.vue'
 import LandingPlanoCard from '@/components/landing/LandingPlanoCard.vue'
+import LandingPlanoDetalhesModal from '@/components/landing/LandingPlanoDetalhesModal.vue'
 import { LANDING_SECTIONS } from '@/constants/landing'
 import { usePlanosStore } from '@/stores/planos.store'
 import { useApiError } from '@/composables/useApiError'
@@ -14,11 +15,20 @@ const planosStore = usePlanosStore()
 const { planos, promocao, loading } = storeToRefs(planosStore)
 const { resolveError } = useApiError()
 const erro = ref<string | null>(null)
+const planoDetalhesAberto = ref<Plano | null>(null)
 
 const planoPlus = computed(() => planos.value.find((p) => p.nome === 'Plus'))
 
 function isPopular(plano: Plano): boolean {
   return plano.id === planoPlus.value?.id
+}
+
+function abrirDetalhesPlano(plano: Plano) {
+  planoDetalhesAberto.value = plano
+}
+
+function fecharDetalhesPlano() {
+  planoDetalhesAberto.value = null
 }
 
 onMounted(async () => {
@@ -48,6 +58,7 @@ onMounted(async () => {
 
       <PromocaoLancamentoBanner
         v-if="promocao?.disponivel"
+        variant="landing"
         class="mx-auto mt-10 max-w-3xl"
         :promocao="promocao"
       />
@@ -63,7 +74,7 @@ onMounted(async () => {
 
       <div
         v-else
-        class="mt-16 grid gap-6 lg:grid-cols-3"
+        class="mt-16 grid items-stretch gap-6 lg:grid-cols-3"
         :class="promocao?.disponivel ? 'mt-10' : ''"
       >
         <LandingPlanoCard
@@ -71,8 +82,16 @@ onMounted(async () => {
           :key="plano.id"
           :plano="plano"
           :popular="isPopular(plano)"
+          @ver-detalhes="abrirDetalhesPlano"
         />
       </div>
+
+      <LandingPlanoDetalhesModal
+        :open="planoDetalhesAberto !== null"
+        :plano="planoDetalhesAberto"
+        :popular="planoDetalhesAberto ? isPopular(planoDetalhesAberto) : false"
+        @close="fecharDetalhesPlano"
+      />
     </div>
   </section>
 </template>
