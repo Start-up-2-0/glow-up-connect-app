@@ -8,6 +8,8 @@ import { useAssinaturaStore } from '@/stores/assinatura.store'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
+import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
+import type { PagamentoAssinaturaPayload } from '@/types/assinatura.types'
 import { ROUTE_PATHS } from '@/constants/routes'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 import type {
@@ -94,6 +96,12 @@ export function useAssinaturaLogadaWizard(planoId: number) {
   const negocioStore = useNegocioStore()
   const notifications = useNotificationsStore()
   const { resolveError, resolveErrorCode } = useApiError()
+  const {
+    pixQrCode,
+    pixCheckoutUrl,
+    aguardandoPagamento,
+    processarResposta,
+  } = useAssinaturaPagamentoResposta()
 
   const storedDraft = loadDraft()
   const draft = ref<AssinaturaLogadaDraft>(
@@ -103,8 +111,6 @@ export function useAssinaturaLogadaWizard(planoId: number) {
   const loading = ref(false)
   const submitting = ref(false)
   const erro = ref<string | null>(null)
-  const aguardandoPagamento = ref(false)
-
   const step = computed({
     get: () => draft.value.step,
     set: (value: AssinaturaLogadaWizardStep) => {
@@ -272,7 +278,6 @@ export function useAssinaturaLogadaWizard(planoId: number) {
   }
 
   async function aguardarAtivacao() {
-    aguardandoPagamento.value = true
     const maxTentativas = 30
     for (let i = 0; i < maxTentativas; i++) {
       await new Promise((r) => setTimeout(r, 2000))
@@ -293,17 +298,7 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     )
   }
 
-  async function finalizarAssinatura(
-    diaVencimento: number,
-    pagamento: {
-      token: string
-      paymentMethodId: string
-      issuerId?: string
-      installments?: number
-      identificationType?: string
-      identificationNumber?: string
-    },
-  ) {
+  async function finalizarAssinatura(diaVencimento: number, pagamento: PagamentoAssinaturaPayload) {
     erro.value = null
 
     if (!plano.value) {
@@ -356,26 +351,19 @@ export function useAssinaturaLogadaWizard(planoId: number) {
         // Contexto será recarregado após o redirect.
       }
 
-      if (result.emTrial) {
-        notifications.push('success', `Assinatura iniciada! Você tem ${result.diasTrial} dias de teste.`)
-        clearDraft()
-        await router.push(ROUTE_PATHS.DASHBOARD)
-        return
-      }
-
-      if (result.status === 'PendentePagamento') {
-        if (result.pagamentoInicial?.checkoutUrl) {
-          persist()
-          window.location.href = result.pagamentoInicial.checkoutUrl
-          return
-        }
-        await aguardarAtivacao()
-        return
-      }
-
-      notifications.push('success', 'Assinatura iniciada com sucesso!')
-      clearDraft()
-      await router.push(ROUTE_PATHS.DASHBOARD)
+      await processarResposta(result, {
+        onTrial: async (diasTrial) => {
+          notifications.push('success', `Assinatura iniciada! Você tem ${diasTrial} dias de teste.`)
+          clearDraft()
+          await router.push(ROUTE_PATHS.DASHBOARD)
+        },
+        onDashboard: async () => {
+          notifications.push('success', 'Assinatura iniciada com sucesso!')
+          clearDraft()
+          await router.push(ROUTE_PATHS.DASHBOARD)
+        },
+        aguardarAtivacao,
+      })
     } catch (err) {
       const code = resolveErrorCode(err)
       if (code === 'ESTABELECIMENTO_ONBOARDING_DUPLICADO') {
@@ -404,6 +392,8 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     loading,
     submitting,
     aguardandoPagamento,
+    pixQrCode,
+    pixCheckoutUrl,
     erro,
     init,
     avancarParaConfirmacao,

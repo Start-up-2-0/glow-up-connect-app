@@ -24,6 +24,8 @@ const {
   loading,
   submitting,
   aguardandoPagamento,
+  pixQrCode,
+  pixCheckoutUrl,
   erro,
   init,
   avancarParaConfirmacao,
@@ -82,6 +84,8 @@ onMounted(() => {
         :dias-permitidos="diasPermitidos"
         :submitting="submitting"
         :aguardando-pagamento="aguardandoPagamento"
+        :pix-qr-code="pixQrCode"
+        :pix-checkout-url="pixCheckoutUrl"
         :error-message="erro"
         @back="voltarParaConfirmar"
         @submit="finalizarAssinatura"

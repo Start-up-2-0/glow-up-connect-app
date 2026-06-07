@@ -26,6 +26,8 @@ const {
   loading,
   submitting,
   aguardandoPagamento,
+  pixQrCode,
+  pixCheckoutUrl,
   erro,
   fieldErrors,
   init,
@@ -89,6 +91,8 @@ async function handleConfirmarEmail(codigo: string) {
             :dias-permitidos="diasPermitidos"
             :submitting="submitting"
             :aguardando-pagamento="aguardandoPagamento"
+            :pix-qr-code="pixQrCode"
+            :pix-checkout-url="pixCheckoutUrl"
             :error-message="erro"
             @back="voltarParaEstabelecimento"
             @submit="contratarPlano"
