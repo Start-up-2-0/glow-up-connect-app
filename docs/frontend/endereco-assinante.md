@@ -56,8 +56,10 @@ async function buscarCep(cep) {
 |-------|--------|------|
 | Atualizar perfil estabelecimento | PUT | `/api/estabelecimentos/{id}/perfil` |
 | Atualizar perfil autonomo | PUT | `/api/profissionais-autonomos/{id}/perfil` |
-| Criar assinatura + estabelecimento | POST | `/api/assinaturas/iniciar` (body `estabelecimento.endereco`) |
-| Criar assinatura + autonomo | POST | `/api/assinaturas/iniciar` (body `profissionalAutonomo.endereco`) |
+| Criar assinatura + estabelecimento | POST | `/api/assinaturas` (body `estabelecimento.endereco`) |
+| Criar assinatura + autonomo | POST | `/api/assinaturas` (body `profissionalAutonomo.endereco`) |
+
+Payload completo: [../acesso/specs/payload-assinatura.md](../acesso/specs/payload-assinatura.md).
 
 ### Exemplo de payload (`endereco`)
 

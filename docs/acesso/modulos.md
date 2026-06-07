@@ -103,3 +103,7 @@ Consultar ambos em `GET /api/usuario/me/estabelecimentos`.
 - [plano-basic.md](./planos/plano-basic.md)
 - [plano-plus.md](./planos/plano-plus.md)
 - [plano-premium.md](./planos/plano-premium.md)
+
+## Specs frontend (menu, rotas, onboarding)
+
+Ver [specs/modulos/README.md](./specs/modulos/README.md) e [specs/README.md](./specs/README.md).
