@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import aboutImg from '@/assets/landing/about-salon.jpg'
-import sobreIcon1 from '@/assets/landing/sobre-icon-1.png'
-import sobreIcon2 from '@/assets/landing/sobre-icon-2.png'
-import sobreIcon3 from '@/assets/landing/sobre-icon-3.png'
+import sobreIcon1 from '@/assets/landing/group_3.svg'
+import sobreIcon2 from '@/assets/landing/group_3.svg'
+import sobreIcon3 from '@/assets/landing/group_3.svg'
 import { LANDING_SECTIONS, SOBRE_BODY, SOBRE_FEATURES } from '@/constants/landing'
 
 const featureIcons = [sobreIcon1, sobreIcon2, sobreIcon3]
