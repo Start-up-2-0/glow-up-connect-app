@@ -1,0 +1,411 @@
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { assinaturaService } from '@/services/assinaturaService'
+import { useAuthStore } from '@/stores/auth.store'
+import { useUserStore } from '@/stores/user.store'
+import { usePlanosStore } from '@/stores/planos.store'
+import { useAssinaturaStore } from '@/stores/assinatura.store'
+import { useNegocioStore } from '@/stores/negocio.store'
+import { useNotificationsStore } from '@/stores/notifications.store'
+import { useApiError } from '@/composables/useApiError'
+import { ROUTE_PATHS } from '@/constants/routes'
+import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
+import type {
+  AssinaturaLogadaWizardStep,
+  AssinaturaOnboardingContexto,
+  EstabelecimentoOnboardingContexto,
+} from '@/types/assinaturaOnboarding.types'
+import { ASSINATURA_LOGADA_WIZARD_STEPS } from '@/types/assinaturaOnboarding.types'
+
+const STORAGE_KEY = 'guc_assinatura_logada'
+
+interface AssinaturaLogadaDraft {
+  planoId: number
+  step: AssinaturaLogadaWizardStep
+  estabelecimento: OnboardingEstabelecimentoDraft
+  estabelecimentoId: number | null
+}
+
+function emptyEstabelecimento(): OnboardingEstabelecimentoDraft {
+  return {
+    nome: '',
+    descricao: '',
+    telefone: '',
+    email: '',
+    cep: '',
+    logradouro: '',
+    numero: '',
+    bairro: '',
+    cidade: '',
+    estado: '',
+    complemento: '',
+    logoDataUrl: null,
+  }
+}
+
+function createDraft(planoId: number): AssinaturaLogadaDraft {
+  return {
+    planoId,
+    step: 'estabelecimento',
+    estabelecimento: emptyEstabelecimento(),
+    estabelecimentoId: null,
+  }
+}
+
+function loadDraft(): AssinaturaLogadaDraft | null {
+  const raw = sessionStorage.getItem(STORAGE_KEY)
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as AssinaturaLogadaDraft
+  } catch {
+    return null
+  }
+}
+
+function saveDraft(draft: AssinaturaLogadaDraft) {
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
+}
+
+function mapEstabelecimentoExistente(
+  estabelecimento: EstabelecimentoOnboardingContexto,
+): OnboardingEstabelecimentoDraft {
+  return {
+    nome: estabelecimento.nome,
+    descricao: '',
+    telefone: '',
+    email: '',
+    cep: '',
+    logradouro: '',
+    numero: '',
+    bairro: '',
+    cidade: '',
+    estado: '',
+    complemento: '',
+    logoDataUrl: estabelecimento.logo,
+  }
+}
+
+export function useAssinaturaLogadaWizard(planoId: number) {
+  const router = useRouter()
+  const authStore = useAuthStore()
+  const userStore = useUserStore()
+  const planosStore = usePlanosStore()
+  const assinaturaStore = useAssinaturaStore()
+  const negocioStore = useNegocioStore()
+  const notifications = useNotificationsStore()
+  const { resolveError, resolveErrorCode } = useApiError()
+
+  const storedDraft = loadDraft()
+  const draft = ref<AssinaturaLogadaDraft>(
+    storedDraft?.planoId === planoId ? storedDraft : createDraft(planoId),
+  )
+  const contexto = ref<AssinaturaOnboardingContexto | null>(null)
+  const loading = ref(false)
+  const submitting = ref(false)
+  const erro = ref<string | null>(null)
+  const aguardandoPagamento = ref(false)
+
+  const step = computed({
+    get: () => draft.value.step,
+    set: (value: AssinaturaLogadaWizardStep) => {
+      draft.value.step = value
+      saveDraft(draft.value)
+    },
+  })
+
+  const plano = computed(() => planosStore.getPlanoById(planoId))
+  const promocao = computed(() => planosStore.promocao)
+
+  const usaEstabelecimentoExistente = computed(
+    () => contexto.value?.temEstabelecimentoProprio === true,
+  )
+
+  const wizardSteps = computed(() => {
+    if (usaEstabelecimentoExistente.value) {
+      return ASSINATURA_LOGADA_WIZARD_STEPS.filter((item) => item.id !== 'estabelecimento')
+    }
+    return ASSINATURA_LOGADA_WIZARD_STEPS
+  })
+
+  const stepperIndex = computed(() => {
+    const index = wizardSteps.value.findIndex((item) => item.id === step.value)
+    return index >= 0 ? index : 0
+  })
+
+  function persist() {
+    saveDraft(draft.value)
+  }
+
+  function clearDraft() {
+    sessionStorage.removeItem(STORAGE_KEY)
+  }
+
+  function preencherDadosUsuario() {
+    const profile = userStore.profile
+    if (!profile) return
+
+    if (!draft.value.estabelecimento.email) {
+      draft.value.estabelecimento.email = profile.email
+    }
+    if (!draft.value.estabelecimento.telefone) {
+      draft.value.estabelecimento.telefone = profile.telefone ?? ''
+    }
+  }
+
+  function aplicarContexto(data: AssinaturaOnboardingContexto) {
+    contexto.value = data
+
+    if (data.proximaEtapa === 'GerenciarAssinatura') {
+      void router.replace(ROUTE_PATHS.CONFIG_ASSINATURA)
+      return false
+    }
+
+    if (data.proximaEtapa === 'EscolherPlano') {
+      void router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
+      return false
+    }
+
+    if (data.temEstabelecimentoProprio && data.estabelecimentoIdSugerido) {
+      draft.value.estabelecimentoId = data.estabelecimentoIdSugerido
+      const existente = data.estabelecimentos.find(
+        (item) => item.estabelecimentoId === data.estabelecimentoIdSugerido,
+      )
+      if (existente) {
+        draft.value.estabelecimento = mapEstabelecimentoExistente(existente)
+      }
+      step.value = 'confirmar'
+    } else if (step.value === 'confirmar' && !data.temEstabelecimentoProprio) {
+      step.value = 'estabelecimento'
+    }
+
+    persist()
+    return true
+  }
+
+  async function init() {
+    erro.value = null
+    loading.value = true
+    try {
+      if (!authStore.isAuthenticated) {
+        await router.replace({
+          path: ROUTE_PATHS.LOGIN,
+          query: { redirect: `${ROUTE_PATHS.ONBOARDING_CONTRATAR}?planoId=${planoId}` },
+        })
+        return
+      }
+
+      if (!planoId || Number.isNaN(planoId)) {
+        await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
+        return
+      }
+
+      if (!userStore.profile) {
+        await userStore.fetchMe()
+      }
+
+      if (!userStore.profile?.ativo) {
+        await router.replace({
+          path: ROUTE_PATHS.CONFIRM_EMAIL_CODE,
+          query: { email: userStore.profile?.email },
+        })
+        return
+      }
+
+      await planosStore.fetchPlanos()
+      if (!plano.value) {
+        await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
+        return
+      }
+
+      preencherDadosUsuario()
+
+      const data = await assinaturaService.obterContextoOnboarding()
+      if (!aplicarContexto(data)) {
+        return
+      }
+    } catch (err) {
+      erro.value = resolveError(err)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  function avancarParaConfirmacao(estabelecimento: OnboardingEstabelecimentoDraft) {
+    erro.value = null
+
+    if (!estabelecimento.nome.trim()) {
+      erro.value = 'Informe o nome do estabelecimento.'
+      return
+    }
+    if (!estabelecimento.logoDataUrl) {
+      erro.value = 'Envie a logo do estabelecimento.'
+      return
+    }
+    if (!estabelecimento.cep.trim() || !estabelecimento.logradouro.trim()) {
+      erro.value = 'Preencha o endereço do estabelecimento.'
+      return
+    }
+
+    draft.value.estabelecimento = { ...estabelecimento }
+    draft.value.estabelecimentoId = null
+    step.value = 'confirmar'
+    persist()
+  }
+
+  function voltarDoConfirmar() {
+    if (usaEstabelecimentoExistente.value) {
+      void router.push(ROUTE_PATHS.ONBOARDING_PLANOS)
+      return
+    }
+    step.value = 'estabelecimento'
+    persist()
+  }
+
+  function avancarParaPagamento() {
+    step.value = 'assinatura'
+    persist()
+  }
+
+  function voltarParaConfirmar() {
+    step.value = 'confirmar'
+    persist()
+  }
+
+  async function aguardarAtivacao() {
+    aguardandoPagamento.value = true
+    const maxTentativas = 30
+    for (let i = 0; i < maxTentativas; i++) {
+      await new Promise((r) => setTimeout(r, 2000))
+      await userStore.fetchMe()
+      await negocioStore.fetchEstabelecimentos(true)
+      if (negocioStore.assinaturaAtiva) {
+        aguardandoPagamento.value = false
+        clearDraft()
+        notifications.push('success', 'Pagamento confirmado! Bem-vindo ao seu estabelecimento.')
+        await router.push(ROUTE_PATHS.DASHBOARD)
+        return
+      }
+    }
+    aguardandoPagamento.value = false
+    notifications.push(
+      'info',
+      'Pagamento em processamento. Atualize a página em alguns instantes.',
+    )
+  }
+
+  async function finalizarAssinatura(
+    diaVencimento: number,
+    pagamento: {
+      token: string
+      paymentMethodId: string
+      issuerId?: string
+      installments?: number
+      identificationType?: string
+      identificationNumber?: string
+    },
+  ) {
+    erro.value = null
+
+    if (!plano.value) {
+      erro.value = 'Plano não encontrado.'
+      return
+    }
+
+    submitting.value = true
+    try {
+      const payloadBase = {
+        planoId: plano.value.id,
+        tipoAssinatura: 'Estabelecimento' as const,
+        gateway: 'MercadoPago' as const,
+        diaVencimento,
+        pagamento,
+      }
+
+      const result = await assinaturaStore.criarAssinatura(
+        draft.value.estabelecimentoId
+          ? {
+              ...payloadBase,
+              estabelecimentoId: draft.value.estabelecimentoId,
+            }
+          : {
+              ...payloadBase,
+              estabelecimento: {
+                nome: draft.value.estabelecimento.nome.trim(),
+                descricao: draft.value.estabelecimento.descricao.trim(),
+                logo: draft.value.estabelecimento.logoDataUrl!,
+                telefone: draft.value.estabelecimento.telefone.trim(),
+                email: draft.value.estabelecimento.email.trim(),
+                endereco: {
+                  cep: draft.value.estabelecimento.cep,
+                  logradouro: draft.value.estabelecimento.logradouro,
+                  numero: draft.value.estabelecimento.numero,
+                  bairro: draft.value.estabelecimento.bairro,
+                  cidade: draft.value.estabelecimento.cidade,
+                  estado: draft.value.estabelecimento.estado,
+                  complemento: draft.value.estabelecimento.complemento || undefined,
+                },
+              },
+            },
+      )
+
+      assinaturaStore.setAssinatura(result)
+      await userStore.fetchMe()
+      await negocioStore.fetchEstabelecimentos(true)
+
+      if (result.emTrial) {
+        notifications.push('success', `Assinatura iniciada! Você tem ${result.diasTrial} dias de teste.`)
+        clearDraft()
+        await router.push(ROUTE_PATHS.DASHBOARD)
+        return
+      }
+
+      if (result.status === 'PendentePagamento') {
+        if (result.pagamentoInicial?.checkoutUrl) {
+          persist()
+          window.location.href = result.pagamentoInicial.checkoutUrl
+          return
+        }
+        await aguardarAtivacao()
+        return
+      }
+
+      notifications.push('success', 'Assinatura iniciada com sucesso!')
+      clearDraft()
+      await router.push(ROUTE_PATHS.DASHBOARD)
+    } catch (err) {
+      const code = resolveErrorCode(err)
+      if (code === 'ESTABELECIMENTO_ONBOARDING_DUPLICADO') {
+        const data = await assinaturaService.obterContextoOnboarding()
+        aplicarContexto(data)
+        erro.value = 'Você já possui um estabelecimento. Confirme os dados para assinar o plano.'
+        step.value = 'confirmar'
+        persist()
+        return
+      }
+      erro.value = resolveError(err)
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  return {
+    draft,
+    step,
+    stepperIndex,
+    wizardSteps,
+    plano,
+    promocao,
+    contexto,
+    usaEstabelecimentoExistente,
+    loading,
+    submitting,
+    aguardandoPagamento,
+    erro,
+    init,
+    avancarParaConfirmacao,
+    voltarDoConfirmar,
+    avancarParaPagamento,
+    voltarParaConfirmar,
+    finalizarAssinatura,
+  }
+}

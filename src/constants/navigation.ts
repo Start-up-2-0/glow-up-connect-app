@@ -109,6 +109,11 @@ export const clienteNavItems: NavItem[] = [
     label: 'Meu perfil',
     to: ROUTE_PATHS.PERFIL,
   },
+  {
+    id: 'abrir-loja',
+    label: 'Abrir minha loja',
+    to: ROUTE_PATHS.ONBOARDING_PLANOS,
+  },
 ]
 
 export const NAV_SEARCH_PLACEHOLDER_BUSINESS =

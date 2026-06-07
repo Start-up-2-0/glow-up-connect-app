@@ -20,6 +20,7 @@ export const ROUTE_NAMES = {
   NOT_FOUND: 'not-found',
   LANDING: 'landing',
   ONBOARDING_PLANOS: 'onboarding-planos',
+  ONBOARDING_CONTRATAR: 'onboarding-contratar',
   ONBOARDING_CHECKOUT: 'onboarding-checkout',
   ONBOARDING_ASSINATURA: 'onboarding-assinatura',
   CONFIG_ASSINATURA: 'config-assinatura',
@@ -54,6 +55,7 @@ export const ROUTE_PATHS = {
   LOJA: '/loja',
   MEUS_AGENDAMENTOS_DETALHE: '/meus-agendamentos',
   ONBOARDING_PLANOS: '/onboarding/planos',
+  ONBOARDING_CONTRATAR: '/onboarding/contratar',
   ONBOARDING_CHECKOUT: '/onboarding/checkout',
   ONBOARDING_ASSINATURA: '/onboarding/assinatura',
   CONFIG_ASSINATURA: '/configuracoes/assinatura',
@@ -106,6 +108,8 @@ declare module 'vue-router' {
     allowClienteOnboarding?: boolean
     /** Fluxo wizard de assinatura (público até concluir etapa da conta) */
     onboardingAssinatura?: boolean
+    /** Assinatura para usuário já autenticado (conta ativa) */
+    assinaturaOnboardingLogado?: boolean
     title?: string
   }
 }
