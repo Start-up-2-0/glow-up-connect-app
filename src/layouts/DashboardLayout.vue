@@ -2,6 +2,7 @@
 import { useAppStore } from '@/stores/app.store'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import AppNavbar from '@/components/layout/AppNavbar.vue'
+import UpgradeModal from '@/components/access/UpgradeModal.vue'
 
 const appStore = useAppStore()
 </script>
@@ -43,5 +44,6 @@ const appStore = useAppStore()
         <slot />
       </main>
     </div>
+    <UpgradeModal />
   </div>
 </template>

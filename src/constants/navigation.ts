@@ -1,13 +1,22 @@
 import { ROUTE_PATHS } from '@/constants/routes'
 import { isClienteRole, type UserRole } from '@/types/user.types'
 
-export interface NavChildItem {
+export interface NavGateMeta {
+  requerModulo?: string
+  requerModulos?: string[]
+  requerPermissao?: string
+  requerPermissoes?: string[]
+  /** Default true para itens com gate de módulo */
+  requerAssinatura?: boolean
+}
+
+export interface NavChildItem extends NavGateMeta {
   id: string
   label: string
   to?: string
 }
 
-export interface NavItem {
+export interface NavItem extends NavGateMeta {
   id: string
   label: string
   to?: string
@@ -23,34 +32,52 @@ export const businessNavItems: NavItem[] = [
     id: 'dashboard',
     label: 'Dashboard',
     to: ROUTE_PATHS.DASHBOARD,
-  },
-  {
-    id: 'clientes',
-    label: 'Clientes',
-  },
-  {
-    id: 'estabelecimentos',
-    label: 'Estabelecimentos',
+    requerAssinatura: false,
   },
   {
     id: 'agenda',
     label: 'Agenda',
-    children: [
-      { id: 'agenda-hoje', label: 'Hoje' },
-      { id: 'agenda-semana', label: 'Semana' },
-      { id: 'agenda-mes', label: 'Mês' },
-    ],
+    to: ROUTE_PATHS.AGENDA,
+    requerModulo: 'Agenda',
+    requerPermissoes: ['AgendaVisualizarGeral', 'AgendaVisualizarPropria'],
+  },
+  {
+    id: 'servicos',
+    label: 'Serviços',
+    to: ROUTE_PATHS.SERVICOS,
+    requerModulo: 'Servicos',
   },
   {
     id: 'financeiro',
     label: 'Financeiro',
+    to: ROUTE_PATHS.FINANCEIRO,
+    requerModulos: ['Caixa', 'Financeiro'],
+    requerPermissao: 'CaixaVisualizar',
   },
   {
     id: 'configuracoes',
     label: 'Configurações',
     children: [
-      { id: 'config-perfil', label: 'Perfil' },
-      { id: 'config-equipe', label: 'Equipe' },
+      {
+        id: 'config-assinatura',
+        label: 'Assinatura',
+        to: ROUTE_PATHS.CONFIG_ASSINATURA,
+        requerModulo: 'Assinatura',
+        requerAssinatura: false,
+      },
+      {
+        id: 'config-equipe',
+        label: 'Equipe',
+        to: ROUTE_PATHS.CONFIG_EQUIPE,
+        requerModulo: 'Profissionais',
+        requerPermissao: 'EquipeGerenciar',
+      },
+      {
+        id: 'config-whatsapp',
+        label: 'WhatsApp',
+        to: ROUTE_PATHS.CONFIG_WHATSAPP,
+        requerModulo: 'WhatsApp',
+      },
     ],
   },
 ]
@@ -85,7 +112,7 @@ export const clienteNavItems: NavItem[] = [
 ]
 
 export const NAV_SEARCH_PLACEHOLDER_BUSINESS =
-  'Dashboard, clientes, estabelecimentos...'
+  'Dashboard, agenda, serviços, assinatura...'
 
 export const NAV_SEARCH_PLACEHOLDER_CLIENTE =
   'Explorar lojas, agendamentos, perfil...'

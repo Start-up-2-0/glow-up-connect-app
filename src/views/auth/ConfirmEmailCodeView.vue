@@ -8,6 +8,7 @@ import AuthOtpInput from '@/components/auth/recovery/AuthOtpInput.vue'
 import { maskEmail, useConfirmEmail } from '@/composables/useConfirmEmail'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { ROUTE_PATHS } from '@/constants/routes'
+import { readRedirectParam, redirectQuery } from '@/utils/authRedirect'
 import {
   GLOW_RECOVERY_BTN_SECONDARY_CLASS,
   GLOW_RECOVERY_INPUT_CLASS,
@@ -88,7 +89,10 @@ async function handleCodeComplete(value: string) {
     const result = await confirmByCode(value)
 
     if (result.ok) {
-      await router.push(ROUTE_PATHS.CONFIRM_EMAIL_SUCCESS)
+      await router.push({
+        path: ROUTE_PATHS.CONFIRM_EMAIL_SUCCESS,
+        query: redirectQuery(readRedirectParam(route.query.redirect)),
+      })
       return
     }
 

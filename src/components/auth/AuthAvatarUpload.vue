@@ -5,6 +5,15 @@ import { GLOW_AVATAR_DROPZONE_CLASS, GLOW_LABEL_CLASS, GLOW_PLACEHOLDER_TEXT_CLA
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_SIZE_BYTES = 5 * 1024 * 1024
 
+withDefaults(
+  defineProps<{
+    label?: string
+  }>(),
+  {
+    label: 'Avatar',
+  },
+)
+
 const emit = defineEmits<{
   change: [file: File | null]
   error: [message: string]
@@ -53,7 +62,7 @@ function openPicker() {
 
 <template>
   <div class="flex flex-col gap-2">
-    <label :class="GLOW_LABEL_CLASS">Avatar</label>
+    <label :class="GLOW_LABEL_CLASS">{{ label }}</label>
     <div
       role="button"
       tabindex="0"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import AuthSplashPanel from '@/components/auth/AuthSplashPanel.vue'
 import AuthMobileBrand from '@/components/auth/AuthMobileBrand.vue'
@@ -9,6 +9,12 @@ import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { ROUTE_PATHS } from '@/constants/routes'
+import {
+  authRouteWithRedirect,
+  isOnboardingCheckoutPath,
+  readRedirectParam,
+  redirectQuery,
+} from '@/utils/authRedirect'
 import { GLOW_AUTH_PANEL_CLASS, GLOW_BUTTON_PRIMARY_CLASS, GLOW_INPUT_CLASS } from '@/constants/designTokens'
 
 const REMEMBER_EMAIL_KEY = 'guc_remember_email'
@@ -25,6 +31,13 @@ const senha = ref('')
 const lembrarConta = ref(false)
 const mostrarSenha = ref(false)
 const errorMessage = ref('')
+const checkoutRedirect = computed(() => readRedirectParam(route.query.redirect))
+const isAssinaturaFlow = computed(() =>
+  checkoutRedirect.value ? isOnboardingCheckoutPath(checkoutRedirect.value) : false,
+)
+const registerLink = computed(() =>
+  authRouteWithRedirect(ROUTE_PATHS.REGISTER, checkoutRedirect.value),
+)
 
 onMounted(() => {
   const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY)
@@ -44,14 +57,16 @@ async function handleSubmit() {
   }
 
   try {
-    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : undefined
-    await login({ email: email.value, senha: senha.value }, redirect)
+    await login({ email: email.value, senha: senha.value }, checkoutRedirect.value)
     notificationsStore.push('success', 'Login realizado com sucesso!')
   } catch (err) {
     if (resolveErrorCode(err) === 'EMAIL_NAO_CONFIRMADO') {
       notificationsStore.push('info', 'Confirme seu e-mail antes de entrar.')
       setStoredEmail(email.value.trim())
-      await router.push(ROUTE_PATHS.CONFIRM_EMAIL_CODE)
+      await router.push({
+        path: ROUTE_PATHS.CONFIRM_EMAIL_CODE,
+        query: redirectQuery(checkoutRedirect.value),
+      })
       return
     }
     errorMessage.value = resolveError(err, 'Não foi possível entrar.')
@@ -72,7 +87,11 @@ async function handleSubmit() {
             Bem-vindo ao Glow Up Connect
           </h1>
           <p class="mt-[5px] font-satoshi text-xl font-normal text-zinc-800/40">
-            Acesse sua conta para gerenciar seus agendamentos.
+            {{
+              isAssinaturaFlow
+                ? 'Entre na sua conta para cadastrar o estabelecimento e concluir a assinatura.'
+                : 'Acesse sua conta para gerenciar seus agendamentos.'
+            }}
           </p>
         </header>
 
@@ -162,7 +181,7 @@ async function handleSubmit() {
 
         <p class="mt-[25px] font-satoshi text-sm font-bold text-yellow-600">
           Não possui conta?
-          <RouterLink :to="ROUTE_PATHS.REGISTER" class="hover:underline">Clique aqui.</RouterLink>
+          <RouterLink :to="registerLink" class="hover:underline">Clique aqui.</RouterLink>
         </p>
       </div>
     </main>
