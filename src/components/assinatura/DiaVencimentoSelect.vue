@@ -30,8 +30,8 @@ const opcoes = computed(() => props.diasPermitidos)
         class="rounded-lg border px-4 py-2 text-sm font-medium transition-colors"
         :class="
           modelValue === dia
-            ? 'border-glow-gold bg-glow-gold/10 text-glow-text'
-            : 'border-glow-border-soft bg-glow-surface text-glow-text-subtle hover:border-glow-gold/50'
+            ? 'border-glow-gold bg-glow-gold-soft text-glow-text'
+            : 'border-glow-border-soft bg-glow-canvas text-glow-text-subtle hover:border-glow-gold-dark'
         "
         @click="emit('update:modelValue', dia)"
       >

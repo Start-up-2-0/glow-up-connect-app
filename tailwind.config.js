@@ -22,6 +22,7 @@ export default {
         glow: {
           gold: 'var(--glow-gold)',
           'gold-dark': 'var(--glow-gold-dark)',
+          'gold-soft': 'var(--glow-gold-soft)',
           'gold-selected': 'var(--glow-gold-selected)',
           text: 'var(--glow-text)',
           'text-muted': 'var(--glow-text-muted)',

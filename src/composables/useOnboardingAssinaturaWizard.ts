@@ -9,6 +9,8 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { useApiError } from '@/composables/useApiError'
+import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
+import type { PagamentoAssinaturaPayload } from '@/types/assinatura.types'
 import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
 import type {
   OnboardingAssinaturaDraft,
@@ -79,6 +81,12 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
   const notifications = useNotificationsStore()
   const { setStoredEmail, confirmByCode } = useConfirmEmail()
   const { resolveError, resolveErrorCode, resolveFieldErrors } = useApiError()
+  const {
+    pixQrCode,
+    pixCheckoutUrl,
+    aguardandoPagamento,
+    processarResposta,
+  } = useAssinaturaPagamentoResposta()
 
   const storedDraft = loadDraft()
   const draft = ref<OnboardingAssinaturaDraft>(
@@ -88,8 +96,6 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
   const submitting = ref(false)
   const erro = ref<string | null>(null)
   const fieldErrors = ref<Record<string, string[]>>({})
-  const aguardandoPagamento = ref(false)
-
   const step = computed({
     get: () => draft.value.step,
     set: (value: OnboardingWizardStep) => {
@@ -308,17 +314,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     )
   }
 
-  async function contratarPlano(
-    diaVencimento: number,
-    pagamento: {
-      token: string
-      paymentMethodId: string
-      issuerId?: string
-      installments?: number
-      identificationType?: string
-      identificationNumber?: string
-    },
-  ) {
+  async function contratarPlano(diaVencimento: number, pagamento?: PagamentoAssinaturaPayload) {
     erro.value = null
 
     if (!plano.value) {
@@ -359,7 +355,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
         },
         gateway: 'MercadoPago',
         diaVencimento,
-        pagamento,
+        ...(pagamento ? { pagamento } : {}),
       })
 
       assinaturaStore.setAssinatura(result)
@@ -368,34 +364,27 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
       const precisaConfirmar =
         result.requerConfirmacaoEmail ?? !userStore.profile?.ativo
 
-      if (result.emTrial) {
-        notifications.push('success', `Assinatura iniciada! Você tem ${result.diasTrial} dias de teste.`)
-        if (precisaConfirmar) {
-          irParaConfirmacaoEmail()
-          return
-        }
-        clearDraft()
-        await router.push(ROUTE_PATHS.DASHBOARD)
-        return
-      }
-
-      if (result.status === 'PendentePagamento') {
-        if (result.pagamentoInicial?.checkoutUrl) {
-          persist()
-          window.location.href = result.pagamentoInicial.checkoutUrl
-          return
-        }
-        await aguardarAtivacao()
-        return
-      }
-
-      notifications.push('success', 'Assinatura iniciada com sucesso!')
-      if (precisaConfirmar) {
-        irParaConfirmacaoEmail()
-        return
-      }
-      clearDraft()
-      await router.push(ROUTE_PATHS.DASHBOARD)
+      await processarResposta(result, {
+        onTrial: async (diasTrial) => {
+          notifications.push('success', `Assinatura iniciada! Você tem ${diasTrial} dias de teste.`)
+          if (precisaConfirmar) {
+            irParaConfirmacaoEmail()
+            return
+          }
+          clearDraft()
+          await router.push(ROUTE_PATHS.DASHBOARD)
+        },
+        onDashboard: async () => {
+          notifications.push('success', 'Assinatura iniciada com sucesso!')
+          if (precisaConfirmar) {
+            irParaConfirmacaoEmail()
+            return
+          }
+          clearDraft()
+          await router.push(ROUTE_PATHS.DASHBOARD)
+        },
+        aguardarAtivacao,
+      })
     } catch (err) {
       const code = resolveErrorCode(err)
       if (code === 'EMAIL_NAO_CONFIRMADO') {
@@ -419,6 +408,8 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     loading,
     submitting,
     aguardandoPagamento,
+    pixQrCode,
+    pixCheckoutUrl,
     erro,
     fieldErrors,
     init,

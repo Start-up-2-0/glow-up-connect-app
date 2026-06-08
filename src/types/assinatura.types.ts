@@ -47,7 +47,7 @@ export interface ProfissionalAutonomoOnboarding {
 
 export interface PagamentoAssinaturaPayload {
   paymentMethodId: string
-  token: string
+  token?: string
   issuerId?: string
   installments?: number
   identificationType?: string
@@ -62,7 +62,7 @@ export interface CriarAssinaturaPayload {
   profissionalAutonomo?: ProfissionalAutonomoOnboarding
   gateway: 'MercadoPago'
   diaVencimento: number
-  pagamento: PagamentoAssinaturaPayload
+  pagamento?: PagamentoAssinaturaPayload
 }
 
 export interface PagamentoInicial {

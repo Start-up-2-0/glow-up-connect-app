@@ -12,6 +12,7 @@
   :root {
     --glow-gold: #ffbf00;
     --glow-gold-dark: #c59400;
+    --glow-gold-soft: rgba(255, 191, 0, 0.14);
     --glow-gold-selected: rgba(255, 191, 0, 0.8);
     --glow-text: #282828;
     --glow-text-muted: rgba(40, 40, 40, 0.4);
@@ -33,6 +34,7 @@
   }
 
   .dark {
+    --glow-gold-soft: rgba(255, 191, 0, 0.22);
     --glow-text: #f3f3f3;
     --glow-text-muted: rgba(243, 243, 243, 0.45);
     --glow-text-soft: rgba(243, 243, 243, 0.8);
@@ -49,5 +51,68 @@
 
   body {
     @apply bg-glow-canvas font-satoshi antialiased;
+  }
+}
+
+@layer components {
+  .checkout-shell {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface shadow-sm;
+  }
+
+  .checkout-panel {
+    @apply p-6 lg:p-8;
+  }
+
+  .checkout-badge {
+    @apply rounded-full bg-glow-canvas px-3 py-1 text-xs font-medium text-glow-text-subtle;
+  }
+
+  .checkout-item-card {
+    @apply flex gap-4 rounded-xl border border-glow-border-soft bg-glow-canvas p-4;
+  }
+
+  .checkout-promo-row {
+    @apply flex items-center gap-3 rounded-xl border border-dashed border-glow-gold bg-glow-canvas px-4 py-3;
+  }
+
+  .checkout-promo-icon {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-lg bg-glow-gold-soft text-sm font-bold text-glow-gold;
+  }
+
+  .checkout-tabs {
+    @apply grid gap-1 rounded-xl border border-glow-border-soft bg-glow-canvas p-1;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  }
+
+  .checkout-tab {
+    @apply rounded-lg px-4 py-2.5 text-sm font-medium text-glow-text-subtle transition-colors hover:text-glow-text;
+  }
+
+  .checkout-tab--active {
+    @apply bg-glow-hover-surface text-glow-text shadow-sm;
+  }
+
+  .checkout-method-chip {
+    @apply inline-flex items-center gap-2 rounded-xl border border-glow-border-soft bg-glow-canvas px-4 py-2.5 text-sm font-medium text-glow-text-subtle transition-colors hover:border-glow-gold-dark hover:text-glow-text;
+  }
+
+  .checkout-method-chip--active {
+    @apply border-glow-gold bg-glow-gold-soft text-glow-text;
+  }
+
+  .checkout-section-title {
+    @apply mb-3 font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .checkout-alert-error {
+    @apply rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800/50 dark:bg-red-950/30 dark:text-red-300;
+  }
+
+  .checkout-alert-success {
+    @apply text-emerald-700 dark:text-emerald-400;
+  }
+
+  .checkout-pay-button {
+    @apply flex w-full items-center justify-center gap-2 rounded-xl bg-glow-gold px-5 py-3.5 text-sm font-semibold text-glow-text shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
   }
 }
