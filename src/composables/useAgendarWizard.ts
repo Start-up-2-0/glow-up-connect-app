@@ -407,10 +407,15 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
       throw new Error(error.value ?? 'Seleção de horário inválida.')
     }
 
+    const slot = selectedSlot.value
+    if (!slot) {
+      throw new Error('Seleção de horário inválida.')
+    }
+
     submitting.value = true
     error.value = null
     try {
-      const inicio = new Date(selectedSlot.value.inicio)
+      const inicio = new Date(slot.inicio)
       const horarioInicio = toTimeOnlyString(inicio)
       const observacaoTrim = observacao.value.trim() || undefined
       const payloadBase = {
