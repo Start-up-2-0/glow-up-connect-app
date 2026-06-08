@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import EquipeAdicionarForm from '@/components/equipe/EquipeAdicionarForm.vue'
+import { equipeAdicionarAcao } from '@/constants/equipeAdicionarAcoes'
 import type { ModoCadastro } from '@/composables/useEquipeAdicionarForm'
 import type { EstablishmentUserRole } from '@/types/negocio/equipe.types'
 
@@ -16,12 +17,6 @@ const emit = defineEmits<{
 }>()
 
 const formRef = ref<InstanceType<typeof EquipeAdicionarForm> | null>(null)
-
-const titulos: Record<ModoCadastro, string> = {
-  convite: 'Enviar convite',
-  vincular: 'Vincular à equipe',
-  criar: 'Criar conta manual',
-}
 
 function close() {
   open.value = false
@@ -58,12 +53,17 @@ watch(open, (isOpen) => {
           aria-modal="true"
           :aria-labelledby="`equipe-modal-${modo}`"
         >
-          <h2
-            :id="`equipe-modal-${modo}`"
-            class="mb-4 font-satoshi text-lg font-bold text-glow-text"
-          >
-            {{ titulos[modo] }}
-          </h2>
+          <div class="mb-4 space-y-1">
+            <h2
+              :id="`equipe-modal-${modo}`"
+              class="font-satoshi text-lg font-bold text-glow-text"
+            >
+              {{ equipeAdicionarAcao(modo).tituloModal }}
+            </h2>
+            <p class="font-urbanist text-sm leading-relaxed text-glow-text-subtle">
+              {{ equipeAdicionarAcao(modo).descricao }}
+            </p>
+          </div>
           <EquipeAdicionarForm
             ref="formRef"
             :modo="modo"

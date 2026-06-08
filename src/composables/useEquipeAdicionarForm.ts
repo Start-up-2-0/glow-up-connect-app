@@ -7,6 +7,7 @@ import { equipeService } from '@/services/equipeService'
 import { conviteService } from '@/services/conviteService'
 import { userService } from '@/services/userService'
 import { ROUTE_PATHS } from '@/constants/routes'
+import { equipeAdicionarBotaoConfirmar } from '@/constants/equipeAdicionarAcoes'
 import { getUnmetPasswordRules } from '@/utils/passwordRules'
 import type { EstablishmentUserRole } from '@/types/negocio/equipe.types'
 
@@ -46,13 +47,9 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
 
   const ehProfissional = computed(() => role.value === 'Profissional')
 
-  const submitLabel = computed(() => {
-    if (options.modo.value === 'convite') return 'Gerar convite'
-    if (options.modo.value === 'criar') {
-      return ehProfissional.value ? 'Criar conta e convidar' : 'Criar conta'
-    }
-    return ehProfissional.value ? 'Vincular profissional' : 'Vincular usuário'
-  })
+  const submitLabel = computed(() =>
+    equipeAdicionarBotaoConfirmar(options.modo.value, ehProfissional.value),
+  )
 
   function clearFormFeedback() {
     formError.value = null

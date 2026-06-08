@@ -4,6 +4,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import EquipeAdicionarModal from '@/components/equipe/EquipeAdicionarModal.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
+import { EQUIPE_ADICIONAR_ACOES } from '@/constants/equipeAdicionarAcoes'
 import { ROUTE_PATHS } from '@/constants/routes'
 import type { ModoCadastro } from '@/composables/useEquipeAdicionarForm'
 import type { EstablishmentUserRole } from '@/types/negocio/equipe.types'
@@ -18,31 +19,6 @@ const modalModo = ref<ModoCadastro>('convite')
 const initialRole = ref<EstablishmentUserRole | undefined>(
   route.query.role === 'Profissional' ? 'Profissional' : undefined,
 )
-
-const acoes: {
-  modo: ModoCadastro
-  titulo: string
-  descricao: string
-  badge?: string
-}[] = [
-  {
-    modo: 'convite',
-    titulo: 'Enviar convite',
-    descricao: 'Gere um link ou vincule na hora se a conta já estiver ativa.',
-    badge: 'Recomendado',
-  },
-  {
-    modo: 'vincular',
-    titulo: 'Já tem conta',
-    descricao: 'Vincule alguém que já se cadastrou e confirmou o e-mail.',
-  },
-  {
-    modo: 'criar',
-    titulo: 'Criar manual',
-    descricao: 'Defina a senha inicial. Use apenas quando necessário.',
-    badge: 'Avançado',
-  },
-]
 
 function parseModoQuery(): ModoCadastro | null {
   const q = route.query.acao ?? route.query.modo
@@ -79,10 +55,10 @@ onMounted(() => {
         Voltar à equipe
       </RouterLink>
       <h1 class="font-satoshi text-2xl font-bold leading-tight text-glow-text lg:text-3xl">
-        Adicionar à equipe
+        Adicionar pessoa à equipe
       </h1>
       <p class="max-w-2xl font-urbanist text-sm leading-relaxed text-glow-text-subtle">
-        Escolha como incluir a pessoa. Cada opção abre um formulário focado só no que é necessário.
+        Toque na opção que combina com a situação da pessoa. Cada uma abre um passo a passo simples.
       </p>
     </div>
 
@@ -95,7 +71,7 @@ onMounted(() => {
       class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:max-w-5xl"
     >
       <button
-        v-for="acao in acoes"
+        v-for="acao in EQUIPE_ADICIONAR_ACOES"
         :key="acao.modo"
         type="button"
         class="equipe-acao-card text-left"

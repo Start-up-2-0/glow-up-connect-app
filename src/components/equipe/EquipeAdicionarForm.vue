@@ -7,6 +7,7 @@ import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import AuthPasswordRules from '@/components/auth/recovery/AuthPasswordRules.vue'
+import { equipeAdicionarAcao } from '@/constants/equipeAdicionarAcoes'
 import { ROLES_CADASTRO_EQUIPE } from '@/constants/establishmentRoles'
 import {
   useEquipeAdicionarForm,
@@ -71,21 +72,10 @@ const roleHint = computed(
 )
 
 const modoHint = computed(() => {
-  if (props.modo === 'convite') {
-    return {
-      title: 'Convite inteligente',
-      text: 'Informe o e-mail e a função. Conta ativa é vinculada na hora; caso contrário, gere um link.',
-    }
-  }
-  if (props.modo === 'vincular') {
-    return {
-      title: 'Conta já existente',
-      text: 'Use quando a pessoa já se cadastrou e confirmou o e-mail na plataforma.',
-    }
-  }
+  const acao = equipeAdicionarAcao(props.modo)
   return {
-    title: 'Criação manual',
-    text: 'Você define a senha inicial. Para o dia a dia, prefira enviar convite.',
+    title: acao.titulo,
+    text: acao.instrucao,
   }
 })
 
@@ -97,7 +87,7 @@ defineExpose({ resetForm })
     <BaseAlert
       v-if="linkConvite && sucessoDetalhe"
       variant="success"
-      title="Convite pronto"
+      title="Link pronto!"
     >
       {{ sucessoDetalhe }}
     </BaseAlert>
@@ -120,7 +110,7 @@ defineExpose({ resetForm })
       class="form-section space-y-3"
     >
       <p class="font-urbanist text-sm text-glow-text-subtle">
-        Copie e envie por WhatsApp, e-mail ou outro canal.
+        Copie o link e mande para a pessoa por WhatsApp ou e-mail.
       </p>
       <div
         class="flex flex-col gap-2 rounded-lg border border-glow-border-soft bg-glow-surface p-3 sm:flex-row sm:items-center"
@@ -149,7 +139,7 @@ defineExpose({ resetForm })
       </ContentAlert>
 
       <section class="form-section">
-        <h3 class="form-section__title">Identificação</h3>
+        <h3 class="form-section__title">Dados da pessoa</h3>
         <div
           class="form-section__grid"
           :class="modo === 'convite' ? 'form-section__grid--single' : ''"
@@ -172,7 +162,7 @@ defineExpose({ resetForm })
             :error="emailError"
             :hint="
               modo === 'vincular' && !emailError
-                ? 'Informe e-mail ou telefone (pelo menos um).'
+                ? 'Preencha o e-mail ou o telefone. Um dos dois já basta.'
                 : undefined
             "
           />
@@ -196,7 +186,7 @@ defineExpose({ resetForm })
       </section>
 
       <section v-if="modo === 'criar'" class="form-section">
-        <h3 class="form-section__title">Acesso</h3>
+        <h3 class="form-section__title">Senha de entrada</h3>
         <div class="form-section__grid">
           <BaseInput
             v-model="senha"
@@ -219,11 +209,11 @@ defineExpose({ resetForm })
       </section>
 
       <section class="form-section">
-        <h3 class="form-section__title">Função e permissões</h3>
+        <h3 class="form-section__title">O que essa pessoa faz aqui?</h3>
         <div class="form-section__grid form-section__grid--single">
           <BaseSelect
             v-model="role"
-            label="Função na equipe"
+            label="Cargo da pessoa"
             :options="roleOptions"
             required
             :hint="roleHint"
@@ -251,7 +241,7 @@ defineExpose({ resetForm })
               type="checkbox"
               class="size-4 shrink-0 rounded border-glow-border-soft bg-glow-canvas text-glow-gold focus:ring-glow-gold/40"
             />
-            Recebe agendamentos na vitrine
+            Pode receber horários de clientes
           </label>
         </div>
       </section>

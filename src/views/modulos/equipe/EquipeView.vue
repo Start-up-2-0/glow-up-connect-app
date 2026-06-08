@@ -12,6 +12,7 @@ import { useApiError } from '@/composables/useApiError'
 import { equipeService } from '@/services/equipeService'
 import type { ProfissionalEquipe, UsuarioEquipe } from '@/types/negocio/equipe.types'
 import type { ModoCadastro } from '@/composables/useEquipeAdicionarForm'
+import { EQUIPE_ADICIONAR_ACOES } from '@/constants/equipeAdicionarAcoes'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { establishmentRoleLabel } from '@/constants/establishmentRoles'
 import { formatTelefone } from '@/utils/formatters'
@@ -96,7 +97,7 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
           Equipe
         </h1>
         <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-          Usuários e profissionais vinculados ao estabelecimento.
+          Pessoas que trabalham com você no negócio.
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
@@ -106,37 +107,30 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
             size="sm"
             @click="menuAberto = !menuAberto"
           >
-            Adicionar à equipe
+            Adicionar pessoa
           </BaseButton>
           <div
             v-if="menuAberto"
-            class="absolute right-0 z-20 mt-1 min-w-[12rem] rounded-lg border border-glow-border-soft bg-glow-surface py-1 shadow-lg"
+            class="absolute right-0 z-20 mt-1 w-[min(100vw-2rem,18rem)] rounded-lg border border-glow-border-soft bg-glow-surface py-1 shadow-lg"
           >
             <button
+              v-for="acao in EQUIPE_ADICIONAR_ACOES"
+              :key="acao.modo"
               type="button"
-              class="block w-full px-4 py-2 text-left font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface"
-              @click="abrirModal('convite')"
+              class="block w-full px-4 py-3 text-left transition hover:bg-glow-hover-surface"
+              @click="abrirModal(acao.modo)"
             >
-              Enviar convite
-            </button>
-            <button
-              type="button"
-              class="block w-full px-4 py-2 text-left font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface"
-              @click="abrirModal('vincular')"
-            >
-              Vincular conta
-            </button>
-            <button
-              type="button"
-              class="block w-full px-4 py-2 text-left font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface"
-              @click="abrirModal('criar')"
-            >
-              Criar manual
+              <span class="block font-urbanist text-sm font-semibold text-glow-text">
+                {{ acao.titulo }}
+              </span>
+              <span class="mt-0.5 block font-urbanist text-xs leading-snug text-glow-text-subtle">
+                {{ acao.descricao }}
+              </span>
             </button>
           </div>
         </div>
         <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE_CONVITES">
-          <BaseButton variant="secondary" size="sm">Convites</BaseButton>
+          <BaseButton variant="secondary" size="sm">Links enviados</BaseButton>
         </RouterLink>
       </div>
     </div>
@@ -185,10 +179,10 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
 
     <template v-else-if="aba === 'usuarios'">
       <BaseCard v-if="usuarios.length === 0">
-        <EmptyState title="Nenhum usuário" description="Cadastre usuários da equipe.">
+        <EmptyState title="Ninguém na equipe ainda" description="Adicione quem vai ajudar no dia a dia do negócio.">
           <template #action>
             <BaseButton variant="primary" size="sm" class="mt-3" @click="abrirModal('convite')">
-              Adicionar usuário
+              Adicionar pessoa
             </BaseButton>
           </template>
         </EmptyState>
@@ -215,10 +209,10 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
 
     <template v-else>
       <BaseCard v-if="profissionais.length === 0">
-        <EmptyState title="Nenhum profissional" description="Convide profissionais para a equipe.">
+        <EmptyState title="Nenhum profissional ainda" description="Adicione quem atende os clientes no salão ou barbearia.">
           <template #action>
             <BaseButton variant="primary" size="sm" class="mt-3" @click="abrirModal('convite')">
-              Enviar convite
+              Chamar profissional
             </BaseButton>
           </template>
         </EmptyState>

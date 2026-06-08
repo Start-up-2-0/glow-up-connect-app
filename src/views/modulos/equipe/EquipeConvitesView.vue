@@ -69,15 +69,15 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
         <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-          Convites da equipe
+          Links enviados
         </h1>
         <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-          Convites pendentes enviados por e-mail ou link copiável.
+          Pessoas que ainda não entraram na equipe. Aguardando aceitar o link.
         </p>
       </div>
       <div class="flex flex-wrap gap-2">
         <RouterLink :to="{ path: ROUTE_PATHS.CONFIG_EQUIPE, query: { acao: 'convite' } }">
-          <BaseButton variant="primary" size="sm">Enviar convite</BaseButton>
+          <BaseButton variant="primary" size="sm">Chamar pessoa</BaseButton>
         </RouterLink>
         <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE">
           <BaseButton variant="secondary" size="sm">Voltar à equipe</BaseButton>
@@ -140,4 +140,4 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
     </BaseCard>
   </div>
 </template>
-
+
