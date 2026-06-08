@@ -5,6 +5,8 @@ import {
   clienteNavItems,
   NAV_SEARCH_PLACEHOLDER_BUSINESS,
   NAV_SEARCH_PLACEHOLDER_CLIENTE,
+  NAV_SEARCH_PLACEHOLDER_PROFISSIONAL,
+  profissionalNavItems,
   type NavItem,
 } from '@/constants/navigation'
 import { filterNavItems } from '@/utils/filterNavItems'
@@ -27,7 +29,7 @@ export function useDashboardNav() {
   const negocioStore = useNegocioStore()
   const { profile } = storeToRefs(userStore)
   const { assinaturaAtiva } = storeToRefs(negocioStore)
-  const { temVinculoNegocio } = useAcessoUsuario()
+  const { temVinculoNegocio, ehProfissionalOperacional } = useAcessoUsuario()
 
   const navItems = computed(() => {
     const filterCtx = {
@@ -36,6 +38,12 @@ export function useDashboardNav() {
       possuiPermissao: negocioStore.possuiPermissao,
       possuiAlgumModulo: negocioStore.possuiAlgumModulo,
       possuiAlgumaPermissao: negocioStore.possuiAlgumaPermissao,
+    }
+
+    if (ehProfissionalOperacional.value) {
+      const cliente = clienteNavItems.filter((item) => item.id !== 'abrir-loja')
+      const operacao = filterNavItems(profissionalNavItems, filterCtx)
+      return dedupeNavById([...cliente, ...operacao])
     }
 
     if (temVinculoNegocio.value) {
@@ -54,6 +62,9 @@ export function useDashboardNav() {
   })
 
   const searchPlaceholder = computed(() => {
+    if (ehProfissionalOperacional.value) {
+      return NAV_SEARCH_PLACEHOLDER_PROFISSIONAL
+    }
     if (temVinculoNegocio.value) {
       return NAV_SEARCH_PLACEHOLDER_BUSINESS
     }

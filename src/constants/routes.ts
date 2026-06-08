@@ -148,6 +148,8 @@ declare module 'vue-router' {
     onboardingAssinatura?: boolean
     /** Assinatura para usuário já autenticado (conta ativa) */
     assinaturaOnboardingLogado?: boolean
+    /** Rota acessível quando a role na loja é Profissional */
+    permitidoRoleProfissional?: boolean
     title?: string
   }
 }

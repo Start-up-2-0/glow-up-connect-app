@@ -10,8 +10,7 @@ export function useAcessoUsuario() {
   const userStore = useUserStore()
   const negocioStore = useNegocioStore()
   const { profile } = storeToRefs(userStore)
-  const { estabelecimentos, estabelecimentoAtivo, role: roleLoja, permissoes } =
-    storeToRefs(negocioStore)
+  const { estabelecimentos, estabelecimentoAtivo, role: roleLoja } = storeToRefs(negocioStore)
 
   const temVinculoNegocio = computed(() => estabelecimentos.value.length > 0)
 
@@ -32,15 +31,9 @@ export function useAcessoUsuario() {
     () => profile.value?.role !== undefined && !isClienteRole(profile.value.role),
   )
 
-  const ehProfissionalOperacional = computed(() => {
-    if (!temContextoOperacional.value) return false
-    const perms = permissoes.value
-    return (
-      perms.includes('AgendaVisualizarPropria') &&
-      !perms.includes('AgendaVisualizarGeral') &&
-      !perms.includes('EquipeGerenciar')
-    )
-  })
+  const ehProfissionalOperacional = computed(
+    () => temContextoOperacional.value && roleLoja.value === 'Profissional',
+  )
 
   const linkAgendamentoPublico = computed(() => {
     const ativo = estabelecimentoAtivo.value

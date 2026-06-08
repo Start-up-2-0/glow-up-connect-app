@@ -47,6 +47,15 @@ export const negocioGuard: NavigationGuard = async (to) => {
     return true
   }
 
+  const roleLoja = negocioStore.role
+  if (roleLoja === 'Profissional') {
+    const permitido = to.matched.some((record) => record.meta.permitidoRoleProfissional === true)
+    if (!permitido) {
+      useNotificationsStore().push('warning', 'Você não tem permissão para acessar esta área.')
+      return { path: ROUTE_PATHS.DASHBOARD }
+    }
+  }
+
   const requerAssinatura =
     to.matched.some((record) => record.meta.requerAssinaturaAtiva !== false) &&
     to.matched.some(
@@ -78,6 +87,13 @@ export const negocioGuard: NavigationGuard = async (to) => {
     !ignoraAssinaturaAtiva &&
     negocioStore.estabelecimentos.length > 0
   ) {
+    if (roleLoja === 'Profissional') {
+      useNotificationsStore().push(
+        'warning',
+        'A assinatura desta loja está inativa. Fale com o administrador.',
+      )
+      return { path: ROUTE_PATHS.DASHBOARD }
+    }
     return { path: ROUTE_PATHS.CONFIG_ASSINATURA }
   }
 

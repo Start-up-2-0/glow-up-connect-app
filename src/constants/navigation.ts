@@ -114,13 +114,6 @@ export const businessNavItems: NavItem[] = [
         requerPermissao: 'CaixaVisualizar',
       },
       {
-        id: 'financeiro-minhas-comissoes',
-        label: 'Minhas comissões',
-        to: ROUTE_PATHS.FINANCEIRO_COMISSOES,
-        requerModulo: 'ComissaoProfissionais',
-        requerPermissao: 'ComissaoVisualizarPropria',
-      },
-      {
         id: 'financeiro-relatorios',
         label: 'Relatórios',
         to: ROUTE_PATHS.FINANCEIRO_RELATORIOS,
@@ -146,6 +139,26 @@ export const businessNavItems: NavItem[] = [
     requerAssinatura: false,
   },
 ]
+
+/** Menu operacional exclusivo da role Profissional na loja (sem gestão/financeiro). */
+export const profissionalNavItems: NavItem[] = [
+  {
+    id: 'agenda',
+    label: 'Minha agenda',
+    to: ROUTE_PATHS.AGENDA,
+    requerModulo: 'Agenda',
+    requerPermissao: 'AgendaVisualizarPropria',
+  },
+  {
+    id: 'meus-horarios',
+    label: 'Meus horários',
+    to: ROUTE_PATHS.CONFIG_HORARIOS,
+    requerModulo: 'HorariosAtendimento',
+    requerPermissao: 'HorarioGerenciarProprio',
+  },
+]
+
+export const NAV_SEARCH_PLACEHOLDER_PROFISSIONAL = 'Minha agenda, meus horários...'
 
 /** Menu do cliente final — ver docs/acesso/cliente.md */
 export const clienteNavItems: NavItem[] = [
