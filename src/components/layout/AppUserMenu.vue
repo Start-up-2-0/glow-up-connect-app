@@ -3,7 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/user.store'
 import { useAuth } from '@/composables/useAuth'
-import { getUserRoleLabel } from '@/utils/userRoleLabel'
+import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
 import IconArrowDown from './icons/IconArrowDown.vue'
 import UserAvatar from './UserAvatar.vue'
 
@@ -16,11 +16,12 @@ const props = withDefaults(
 
 const { profile } = storeToRefs(useUserStore())
 const { logout } = useAuth()
+const { roleExibicao } = useAcessoUsuario()
 
 const open = ref(false)
 const rootEl = ref<HTMLElement | null>(null)
 
-const roleLabel = computed(() => getUserRoleLabel(profile.value?.role))
+const roleLabel = computed(() => roleExibicao.value)
 
 function toggleMenu() {
   open.value = !open.value

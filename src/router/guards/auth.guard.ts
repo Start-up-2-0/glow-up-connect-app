@@ -3,7 +3,6 @@ import { useAuthStore } from '@/stores/auth.store'
 import { useUserStore } from '@/stores/user.store'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { ROUTE_PATHS } from '@/constants/routes'
-import { isClienteRole } from '@/types/user.types'
 import { isOnboardingCheckoutPath } from '@/utils/authRedirect'
 
 export const authGuard: NavigationGuard = async (to) => {
@@ -12,7 +11,6 @@ export const authGuard: NavigationGuard = async (to) => {
 
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const guestOnly = to.matched.some((record) => record.meta.guestOnly)
-  const clienteOnly = to.matched.some((record) => record.meta.clienteOnly)
   const businessOnly = to.matched.some((record) => record.meta.businessOnly)
 
   if (requiresAuth && !authStore.isAuthenticated) {
@@ -70,19 +68,15 @@ export const authGuard: NavigationGuard = async (to) => {
   }
 
   if (requiresAuth && authStore.isAuthenticated && role !== undefined) {
-    if (clienteOnly && !isClienteRole(role)) {
-      return { path: ROUTE_PATHS.DASHBOARD }
-    }
+    const negocioStore = useNegocioStore()
+    await negocioStore.fetchEstabelecimentos()
+
     const allowClienteOnboarding = to.matched.some(
       (record) => record.meta.allowClienteOnboarding === true,
     )
 
-    if (businessOnly && isClienteRole(role) && !allowClienteOnboarding) {
+    if (businessOnly && !allowClienteOnboarding && negocioStore.estabelecimentos.length === 0) {
       return { path: ROUTE_PATHS.DASHBOARD }
-    }
-
-    if (!isClienteRole(role)) {
-      await useNegocioStore().fetchEstabelecimentos()
     }
   }
 

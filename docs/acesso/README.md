@@ -80,13 +80,15 @@ A role global **nao substitui** permissoes de negocio. Um `DonoEstabelecimento` 
 ## Regra pratica para o frontend
 
 ```text
-Pode exibir funcionalidade X?
+Pode exibir funcionalidade X (negocio)?
   = usuario autenticado
-  AND role global != Cliente (para contexto de negocio)
-  AND (se rota de negocio) vinculo ativo no estabelecimento
-  AND permissao X em Permissoes[]
-  AND modulo necessario em Modulos[]
-  AND AssinaturaAtiva == true
+  AND vinculo ativo em EstabelecimentoUsuario (loja selecionada)
+  AND permissao X em Permissoes[] da loja
+  AND modulo necessario em Modulos[] do plano da loja
+  AND AssinaturaAtiva == true da loja
+
+Pode exibir funcionalidade cliente?
+  = usuario autenticado (role global Cliente ou hibrido)
 ```
 
 ## Codigo-fonte de referencia

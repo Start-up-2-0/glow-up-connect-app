@@ -2,17 +2,14 @@
 import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useNegocioStore } from '@/stores/negocio.store'
-import { isClienteRole } from '@/types/user.types'
-import { useUserStore } from '@/stores/user.store'
+import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
 
 const negocioStore = useNegocioStore()
-const userStore = useUserStore()
+const { temVinculoNegocio } = useAcessoUsuario()
 const { estabelecimentos, estabelecimentoIdSelecionado, loading } = storeToRefs(negocioStore)
 
 onMounted(async () => {
-  if (userStore.profile && !isClienteRole(userStore.profile.role)) {
-    await negocioStore.fetchEstabelecimentos()
-  }
+  await negocioStore.fetchEstabelecimentos()
 })
 
 function onChange(event: Event) {
@@ -25,7 +22,7 @@ function onChange(event: Event) {
 
 <template>
   <div
-    v-if="estabelecimentos.length > 0 && userStore.profile && !isClienteRole(userStore.profile.role)"
+    v-if="temVinculoNegocio"
     class="hidden min-w-0 lg:block"
   >
     <label for="estabelecimento-select" class="sr-only">Estabelecimento</label>

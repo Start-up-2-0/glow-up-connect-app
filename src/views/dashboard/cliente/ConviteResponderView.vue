@@ -14,7 +14,6 @@ import { useApiError } from '@/composables/useApiError'
 import { ROUTE_PATHS, conviteResponderPath } from '@/constants/routes'
 import { establishmentRoleLabel } from '@/constants/establishmentRoles'
 import { authRouteWithRedirect } from '@/utils/authRedirect'
-import { isClienteRole } from '@/types/user.types'
 import type { ConvitePreview } from '@/types/convite.types'
 
 const route = useRoute()
@@ -72,12 +71,10 @@ async function responder(acao: 'aceitar' | 'rejeitar') {
       notifications.push('success', 'Convite aceito!')
 
       await userStore.fetchMe(true)
-      if (!isClienteRole(userStore.profile?.role)) {
-        const negocioStore = useNegocioStore()
-        await negocioStore.fetchEstabelecimentos(true)
-        if (preview.value?.estabelecimentoId) {
-          negocioStore.selecionarEstabelecimento(preview.value.estabelecimentoId)
-        }
+      const negocioStore = useNegocioStore()
+      await negocioStore.fetchEstabelecimentos(true)
+      if (preview.value?.estabelecimentoId) {
+        negocioStore.selecionarEstabelecimento(preview.value.estabelecimentoId)
       }
     } else {
       await conviteService.rejeitar(token.value)

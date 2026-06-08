@@ -1,5 +1,13 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+
+const props = withDefaults(
+  defineProps<{
+    /** Oculta o cabeçalho de boas-vindas quando a home unificada já exibe bloco operacional. */
+    compact?: boolean
+  }>(),
+  { compact: false },
+)
 import { RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import BaseCard from '@/components/ui/BaseCard.vue'
@@ -36,12 +44,20 @@ onMounted(async () => {
 
 <template>
   <div class="space-y-4 lg:space-y-6">
-    <div>
+    <div v-if="!props.compact">
       <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
         Olá, {{ profile?.nome ?? 'Cliente' }}!
       </h1>
       <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
         Agende serviços, acompanhe seus horários e gerencie seu perfil.
+      </p>
+    </div>
+    <div v-else>
+      <h2 class="font-satoshi text-lg font-bold text-glow-text lg:text-xl">
+        Sua área de cliente
+      </h2>
+      <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
+        Agende serviços, acompanhe horários e gerencie seu perfil.
       </p>
     </div>
 

@@ -27,18 +27,25 @@ export const negocioGuard: NavigationGuard = async (to) => {
     return true
   }
 
-  const userStore = useUserStore()
-  const role = userStore.profile?.role
-  if (role === undefined || isClienteRole(role)) {
+  if (!rotaRequerNegocio(to)) {
     return true
   }
 
-  if (!rotaRequerNegocio(to)) {
+  const userStore = useUserStore()
+  const role = userStore.profile?.role
+  if (role === undefined) {
     return true
   }
 
   const negocioStore = useNegocioStore()
   await negocioStore.ensureContext()
+
+  const temVinculoNegocio = negocioStore.estabelecimentos.length > 0
+  const isCliente = isClienteRole(role)
+
+  if (isCliente && !temVinculoNegocio) {
+    return true
+  }
 
   const requerAssinatura =
     to.matched.some((record) => record.meta.requerAssinaturaAtiva !== false) &&

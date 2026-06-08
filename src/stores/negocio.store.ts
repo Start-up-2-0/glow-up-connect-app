@@ -118,6 +118,11 @@ export const useNegocioStore = defineStore('negocio', () => {
       estabelecimentos.value = data
       resolverEstabelecimentoPadrao()
       return estabelecimentos.value
+    } catch {
+      estabelecimentos.value = []
+      estabelecimentoIdSelecionado.value = null
+      persistEstabelecimentoId(null)
+      return estabelecimentos.value
     } finally {
       loading.value = false
     }
