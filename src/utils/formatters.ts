@@ -101,6 +101,41 @@ export function formatCurrency(value: number): string {
 
 export const formatBRL = formatCurrency
 
+/** Limite de centavos no input monetário (R$ 9.999.999,99). */
+export const CURRENCY_CENTS_MAX = 999_999_999
+
+/** Extrai dígitos da entrada e interpreta como centavos (máscara left-shift). */
+export function currencyCentsFromInput(raw: string): number {
+  const digits = raw.replace(/\D/g, '')
+  if (!digits) return 0
+  const cents = Number.parseInt(digits, 10)
+  if (!Number.isFinite(cents)) return 0
+  return Math.min(cents, CURRENCY_CENTS_MAX)
+}
+
+/** Exibe valor monetário para o campo de edição (sem símbolo R$ — prefixo no componente). */
+export function maskCurrencyBRL(cents: number): string {
+  const safeCents = Math.max(0, Math.min(cents, CURRENCY_CENTS_MAX))
+  const reais = safeCents / 100
+  return reais.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+/** Converte centavos inteiros para decimal da API. */
+export function currencyCentsToDecimal(cents: number): number {
+  return Math.round(cents) / 100
+}
+
+/** Converte decimal da API para centavos inteiros. */
+export function decimalToCurrencyCents(value: number): number {
+  if (!Number.isFinite(value) || value < 0) return 0
+  return Math.min(Math.round(value * 100), CURRENCY_CENTS_MAX)
+}
+
+/** Valida preço monetário antes de enviar à API. */
+export function isValidCurrencyValue(value: number): boolean {
+  return Number.isFinite(value) && value >= 0 && value <= currencyCentsToDecimal(CURRENCY_CENTS_MAX)
+}
+
 export function formatLimite(valor: number | null | undefined): string {
   if (valor === null || valor === undefined) return 'Ilimitado'
   return String(valor)
@@ -123,7 +158,17 @@ export function formatPrecoRange(min: number, max: number): string {
 }
 
 export function toDateOnlyString(date: Date): string {
-  return date.toISOString().slice(0, 10)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+export function addDaysToDateOnly(isoDate: string, days: number): string {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  date.setDate(date.getDate() + days)
+  return toDateOnlyString(date)
 }
 
 export function toTimeOnlyString(date: Date): string {
