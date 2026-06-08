@@ -62,7 +62,7 @@ export interface CriarAssinaturaPayload {
   profissionalAutonomo?: ProfissionalAutonomoOnboarding
   gateway: 'MercadoPago'
   diaVencimento: number
-  pagamento: PagamentoAssinaturaPayload
+  pagamento?: PagamentoAssinaturaPayload
 }
 
 export interface PagamentoInicial {
