@@ -57,6 +57,17 @@ export const useAssinaturaStore = defineStore('assinatura', () => {
     }
   }
 
+  async function fetchAtual(estabelecimentoId: number) {
+    loading.value = true
+    try {
+      const data = await assinaturaService.obterAtual(estabelecimentoId)
+      assinatura.value = data
+      return data
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function fetchCobrancas(assinaturaId: number) {
     cobrancasLoading.value = true
     try {
@@ -85,6 +96,7 @@ export const useAssinaturaStore = defineStore('assinatura', () => {
     criarAssinatura,
     trocarPlano,
     cancelar,
+    fetchAtual,
     fetchCobrancas,
     setAssinatura,
     clear,

@@ -50,14 +50,56 @@ export const businessNavItems: NavItem[] = [
   {
     id: 'financeiro',
     label: 'Financeiro',
-    to: ROUTE_PATHS.FINANCEIRO,
     requerModulos: ['Caixa', 'Financeiro'],
     requerPermissao: 'CaixaVisualizar',
+    children: [
+      {
+        id: 'financeiro-resumo',
+        label: 'Visão geral',
+        to: ROUTE_PATHS.FINANCEIRO,
+        requerModulo: 'Financeiro',
+        requerPermissao: 'CaixaVisualizar',
+      },
+      {
+        id: 'financeiro-caixa',
+        label: 'Caixa',
+        to: ROUTE_PATHS.FINANCEIRO_CAIXA,
+        requerModulo: 'Caixa',
+        requerPermissao: 'CaixaVisualizar',
+      },
+      {
+        id: 'financeiro-comissoes',
+        label: 'Comissões',
+        to: ROUTE_PATHS.FINANCEIRO_COMISSOES,
+        requerModulo: 'ComissaoProfissionais',
+        requerPermissao: 'CaixaVisualizar',
+      },
+      {
+        id: 'financeiro-relatorios',
+        label: 'Relatórios',
+        to: ROUTE_PATHS.FINANCEIRO_RELATORIOS,
+        requerModulo: 'Financeiro',
+        requerPermissao: 'CaixaVisualizar',
+      },
+    ],
   },
   {
     id: 'configuracoes',
     label: 'Configurações',
     children: [
+      {
+        id: 'config-perfil',
+        label: 'Perfil',
+        to: ROUTE_PATHS.CONFIG_PERFIL,
+        requerModulo: 'Estabelecimento',
+        requerAssinatura: false,
+      },
+      {
+        id: 'config-horarios',
+        label: 'Horários',
+        to: ROUTE_PATHS.CONFIG_HORARIOS,
+        requerModulo: 'HorariosAtendimento',
+      },
       {
         id: 'config-assinatura',
         label: 'Assinatura',
