@@ -30,6 +30,11 @@ export const GLOW_LINK_ACCENT_CLASS = 'font-satoshi text-sm font-bold text-yello
 
 export const GLOW_BODY_TEXT_CLASS = 'font-satoshi text-sm font-normal text-zinc-800'
 
+export const GLOW_LOGIN_PAGE_CLASS =
+  'flex min-h-screen items-center justify-center bg-glow-hover-surface px-6 py-10'
+
+export const GLOW_LOGIN_CONTENT_CLASS = 'flex w-full max-w-[494px] flex-col items-center'
+
 export const GLOW_AUTH_PANEL_CLASS =
   'relative z-10 flex min-h-screen w-full flex-1 items-center justify-center bg-white px-6 py-10 lg:-ml-[54px] lg:rounded-l-panel lg:px-16'
 

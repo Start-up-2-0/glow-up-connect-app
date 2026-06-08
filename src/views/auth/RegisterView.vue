@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import AuthSplashPanel from '@/components/auth/AuthSplashPanel.vue'
-import AuthMobileBrand from '@/components/auth/AuthMobileBrand.vue'
+import registerCrest from '@/assets/logo/logo.png'
 import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
@@ -22,12 +21,13 @@ import {
 import { conviteService } from '@/services/conviteService'
 import { establishmentRoleLabel } from '@/constants/establishmentRoles'
 import {
-  GLOW_AUTH_PANEL_BORDERED_CLASS,
   GLOW_BODY_TEXT_CLASS,
   GLOW_BUTTON_PRIMARY_CLASS,
   GLOW_INPUT_CLASS,
   GLOW_LABEL_CLASS,
   GLOW_LINK_ACCENT_CLASS,
+  GLOW_LOGIN_CONTENT_CLASS,
+  GLOW_LOGIN_PAGE_CLASS,
 } from '@/constants/designTokens'
 
 const route = useRoute()
@@ -168,39 +168,42 @@ function onAvatarError(message: string) {
 </script>
 
 <template>
-  <div class="relative flex min-h-screen bg-white">
-    <AuthSplashPanel />
+  <div :class="[GLOW_LOGIN_PAGE_CLASS, 'overflow-y-auto']">
+    <div :class="[GLOW_LOGIN_CONTENT_CLASS, 'my-auto py-4']">
+      <img
+        :src="registerCrest"
+        alt="Glow Up Connect"
+        class="mb-[22px] h-[145px] w-[145px] shrink-0 object-contain"
+        width="145"
+        height="145"
+      />
 
-    <main :class="[GLOW_AUTH_PANEL_BORDERED_CLASS, 'overflow-y-auto']">
-      <div class="my-auto w-full max-w-[494px] py-4">
-        <AuthMobileBrand />
-
-        <header class="mb-[13px]">
-          <h1 class="font-satoshi text-3xl font-bold text-zinc-800">
-            {{ isAssinaturaFlow ? 'Crie sua conta para assinar' : 'Bem-vindo ao Glow Up Connect' }}
-          </h1>
-          <p class="mt-[5px] font-satoshi text-xl font-normal text-zinc-800/40">
-            {{
-              isAssinaturaFlow
-                ? 'Cadastre-se para configurar seu estabelecimento e contratar o plano escolhido.'
-                : 'Insira seus dados corretamente para criar sua conta.'
-            }}
-          </p>
-        </header>
-
-        <p
-          v-if="conviteResumo"
-          class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
-          role="status"
-        >
-          {{ conviteResumo }}
+      <header class="mb-10 w-full">
+        <h1 class="font-satoshi text-[32px] font-bold leading-normal text-glow-text">
+          {{ isAssinaturaFlow ? 'Crie sua conta para assinar' : 'Bem-vindo ao Glow Up Connect' }}
+        </h1>
+        <p class="mt-[5px] font-satoshi text-xl font-normal leading-normal text-glow-text-muted">
+          {{
+            isAssinaturaFlow
+              ? 'Cadastre-se para configurar seu estabelecimento e contratar o plano escolhido.'
+              : 'Insira seus dados corretamente para criar sua conta.'
+          }}
         </p>
+      </header>
 
-        <p
-          v-if="errorMessage"
-          class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-          role="alert"
-        >
+      <p
+        v-if="conviteResumo"
+        class="mb-4 w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/35 dark:text-amber-200"
+        role="status"
+      >
+        {{ conviteResumo }}
+      </p>
+
+      <p
+        v-if="errorMessage"
+        class="mb-4 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800/50 dark:bg-red-950/35 dark:text-red-300"
+        role="alert"
+      >
           {{ errorMessage }}
           <RouterLink
             v-if="emailJaCadastrado"
@@ -211,7 +214,7 @@ function onAvatarError(message: string) {
           </RouterLink>
         </p>
 
-        <form class="flex flex-col gap-6" @submit.prevent="handleSubmit">
+        <form class="flex w-full flex-col gap-6" @submit.prevent="handleSubmit">
           <div class="flex flex-col gap-2">
             <label for="nome" :class="GLOW_LABEL_CLASS">Nome completo</label>
             <input
@@ -223,7 +226,10 @@ function onAvatarError(message: string) {
               placeholder="Informe seu nome completo"
               :class="GLOW_INPUT_CLASS"
             />
-            <p v-if="getFieldError(...FIELD_KEYS.nome)" class="text-sm text-red-600">
+            <p
+              v-if="getFieldError(...FIELD_KEYS.nome)"
+              class="text-sm text-red-600 dark:text-red-400"
+            >
               {{ getFieldError(...FIELD_KEYS.nome) }}
             </p>
           </div>
@@ -250,7 +256,10 @@ function onAvatarError(message: string) {
                 placeholder="ex: usuario01@exemplo.com"
                 :class="GLOW_INPUT_CLASS"
               />
-              <p v-if="getFieldError(...FIELD_KEYS.email)" class="text-sm text-red-600">
+              <p
+                v-if="getFieldError(...FIELD_KEYS.email)"
+                class="text-sm text-red-600 dark:text-red-400"
+              >
                 {{ getFieldError(...FIELD_KEYS.email) }}
               </p>
             </div>
@@ -286,7 +295,10 @@ function onAvatarError(message: string) {
                 :pressed="mostrarSenha"
                 @click="mostrarSenha = !mostrarSenha"
               />
-              <p v-if="getFieldError(...FIELD_KEYS.senha)" class="text-sm text-red-600">
+              <p
+                v-if="getFieldError(...FIELD_KEYS.senha)"
+                class="text-sm text-red-600 dark:text-red-400"
+              >
                 {{ getFieldError(...FIELD_KEYS.senha) }}
               </p>
             </div>
@@ -344,7 +356,6 @@ function onAvatarError(message: string) {
             </p>
           </div>
         </form>
-      </div>
-    </main>
+    </div>
   </div>
 </template>
