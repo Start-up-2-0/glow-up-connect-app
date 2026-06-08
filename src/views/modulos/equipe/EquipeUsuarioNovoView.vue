@@ -410,6 +410,13 @@ async function handleSubmit() {
         >
           {{ sucessoDetalhe }}
         </BaseAlert>
+        <BaseAlert
+          v-else-if="!linkConvite"
+          variant="info"
+          :title="modoHint.title"
+        >
+          {{ modoHint.text }}
+        </BaseAlert>
       </div>
 
       <div v-if="linkConvite" class="panel-shell__body space-y-4">
@@ -440,162 +447,149 @@ async function handleSubmit() {
       </div>
 
       <div v-else class="panel-shell__body">
-        <div class="grid gap-6 xl:grid-cols-12 xl:gap-8">
-          <aside class="panel-shell__aside xl:col-span-4 xl:self-start">
-            <p class="font-urbanist text-sm font-semibold text-glow-text">{{ modoHint.title }}</p>
-            <p class="mt-2 font-urbanist text-sm leading-relaxed text-glow-text-subtle">
-              {{ modoHint.text }}
-            </p>
-          </aside>
+        <form class="space-y-5" @submit.prevent="handleSubmit">
+          <ContentAlert v-if="formError" variant="error" compact>
+            {{ formError }}
+          </ContentAlert>
 
-          <form class="space-y-5 xl:col-span-8" @submit.prevent="handleSubmit">
-            <ContentAlert v-if="formError" variant="error" compact>
-              {{ formError }}
-            </ContentAlert>
-
-            <div>
-              <h2 class="mb-3 font-urbanist text-sm font-semibold text-glow-text">
-                Dados da pessoa
-              </h2>
-              <div
-                class="grid gap-4"
-                :class="
-                  modo === 'convite'
-                    ? 'max-w-xl'
-                    : 'sm:grid-cols-2'
-                "
-              >
-                <BaseInput
-                  v-if="modo === 'criar'"
-                  v-model="nome"
-                  label="Nome completo"
-                  required
-                  placeholder="Maria Silva"
-                  :error="nomeError"
-                />
-
-                <BaseInput
-                  v-model="email"
-                  label="E-mail"
-                  type="email"
-                  placeholder="usuario@exemplo.com"
-                  required
-                  :error="emailError"
-                  :hint="
-                    modo === 'vincular' && !emailError
-                      ? 'Informe e-mail ou telefone (pelo menos um).'
-                      : undefined
-                  "
-                />
-
-                <TelefoneInput
-                  v-if="modo === 'criar'"
-                  v-model="telefone"
-                  label="Telefone"
-                  required
-                  :error="telefoneError"
-                />
-                <BaseInput
-                  v-else-if="modo === 'vincular'"
-                  v-model="telefone"
-                  label="Telefone"
-                  type="tel"
-                  placeholder="(11) 99999-9999"
-                  :error="telefoneError"
-                />
-
-                <template v-if="modo === 'criar'">
-                  <div class="space-y-1">
-                    <BaseInput
-                      v-model="senha"
-                      label="Senha inicial"
-                      type="password"
-                      required
-                      autocomplete="new-password"
-                      :error="senhaError"
-                    />
-                    <AuthPasswordRules :password="senha" />
-                  </div>
-                  <BaseInput
-                    v-model="confirmarSenha"
-                    label="Confirmar senha"
-                    type="password"
-                    required
-                    autocomplete="new-password"
-                    :error="confirmarSenhaError"
-                  />
-                </template>
-              </div>
-            </div>
-
-            <fieldset>
-              <legend class="mb-3 block font-urbanist text-sm font-semibold text-glow-text">
-                Função na equipe
-              </legend>
-              <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <label
-                  v-for="r in ROLES_CADASTRO_EQUIPE"
-                  :key="r.value"
-                  class="cursor-pointer rounded-lg border px-3 py-3 transition"
-                  :class="
-                    role === r.value
-                      ? 'border-glow-gold bg-glow-gold-soft shadow-sm'
-                      : 'border-glow-border-soft bg-glow-canvas hover:border-glow-text-subtle hover:bg-glow-hover-surface'
-                  "
-                >
-                  <input
-                    v-model="role"
-                    type="radio"
-                    :value="r.value"
-                    class="sr-only"
-                  />
-                  <span class="block font-urbanist text-sm font-semibold text-glow-text">
-                    {{ r.label }}
-                  </span>
-                  <span class="mt-0.5 block font-urbanist text-xs leading-snug text-glow-text-subtle">
-                    {{ r.description }}
-                  </span>
-                </label>
-              </div>
-            </fieldset>
-
+          <div>
+            <h2 class="mb-3 font-urbanist text-sm font-semibold text-glow-text">
+              Dados da pessoa
+            </h2>
             <div
-              v-if="ehProfissional"
-              class="grid gap-4 rounded-lg border border-glow-border-soft bg-glow-canvas p-4 sm:grid-cols-2"
+              class="grid gap-4"
+              :class="modo === 'convite' ? 'max-w-md' : 'sm:grid-cols-2 lg:max-w-3xl'"
             >
               <BaseInput
-                v-model="nomePublico"
-                label="Nome público"
-                :placeholder="
-                  modo === 'convite' || modo === 'criar'
-                    ? 'Opcional — usa o nome no cadastro'
-                    : 'Como aparecerá para os clientes'
+                v-if="modo === 'criar'"
+                v-model="nome"
+                label="Nome completo"
+                required
+                placeholder="Maria Silva"
+                :error="nomeError"
+              />
+
+              <BaseInput
+                v-model="email"
+                label="E-mail"
+                type="email"
+                placeholder="usuario@exemplo.com"
+                required
+                :error="emailError"
+                :hint="
+                  modo === 'vincular' && !emailError
+                    ? 'Informe e-mail ou telefone (pelo menos um).'
+                    : undefined
                 "
               />
+
+              <TelefoneInput
+                v-if="modo === 'criar'"
+                v-model="telefone"
+                label="Telefone"
+                required
+                :error="telefoneError"
+              />
+              <BaseInput
+                v-else-if="modo === 'vincular'"
+                v-model="telefone"
+                label="Telefone"
+                type="tel"
+                placeholder="(11) 99999-9999"
+                :error="telefoneError"
+              />
+
+              <template v-if="modo === 'criar'">
+                <BaseInput
+                  v-model="senha"
+                  label="Senha inicial"
+                  type="password"
+                  required
+                  autocomplete="new-password"
+                  :error="senhaError"
+                />
+                <BaseInput
+                  v-model="confirmarSenha"
+                  label="Confirmar senha"
+                  type="password"
+                  required
+                  autocomplete="new-password"
+                  :error="confirmarSenhaError"
+                />
+                <div class="sm:col-span-2">
+                  <AuthPasswordRules :password="senha" />
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <fieldset>
+            <legend class="mb-3 block font-urbanist text-sm font-semibold text-glow-text">
+              Função na equipe
+            </legend>
+            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <label
-                class="flex cursor-pointer items-center gap-3 self-end rounded-lg border border-glow-border-soft bg-glow-surface px-3 py-3 font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface sm:min-h-[2.75rem]"
+                v-for="r in ROLES_CADASTRO_EQUIPE"
+                :key="r.value"
+                class="cursor-pointer rounded-lg border px-3 py-3 transition"
+                :class="
+                  role === r.value
+                    ? 'border-glow-gold bg-glow-gold-soft shadow-sm'
+                    : 'border-glow-border-soft bg-glow-canvas hover:border-glow-text-subtle hover:bg-glow-hover-surface'
+                "
               >
                 <input
-                  v-model="podeReceberAgendamento"
-                  type="checkbox"
-                  class="size-4 shrink-0 rounded border-glow-border-soft bg-glow-canvas text-glow-gold focus:ring-glow-gold/40"
+                  v-model="role"
+                  type="radio"
+                  :value="r.value"
+                  class="sr-only"
                 />
-                Pode receber agendamentos na vitrine
+                <span class="block font-urbanist text-sm font-semibold text-glow-text">
+                  {{ r.label }}
+                </span>
+                <span class="mt-0.5 block font-urbanist text-xs leading-snug text-glow-text-subtle">
+                  {{ r.description }}
+                </span>
               </label>
             </div>
+          </fieldset>
 
-            <div
-              class="flex flex-col-reverse gap-3 border-t border-glow-border-soft pt-5 sm:flex-row sm:justify-end"
+          <div
+            v-if="ehProfissional"
+            class="grid gap-4 rounded-lg border border-glow-border-soft bg-glow-canvas p-4 sm:grid-cols-2 lg:max-w-3xl"
+          >
+            <BaseInput
+              v-model="nomePublico"
+              label="Nome público"
+              :placeholder="
+                modo === 'convite' || modo === 'criar'
+                  ? 'Opcional — usa o nome no cadastro'
+                  : 'Como aparecerá para os clientes'
+              "
+            />
+            <label
+              class="flex cursor-pointer items-center gap-3 self-end rounded-lg border border-glow-border-soft bg-glow-surface px-3 py-3 font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface sm:min-h-[2.75rem]"
             >
-              <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE" class="sm:order-first">
-                <BaseButton variant="secondary" block class="sm:w-auto">Cancelar</BaseButton>
-              </RouterLink>
-              <BaseButton type="submit" :loading="saving" block class="sm:w-auto">
-                {{ submitLabel }}
-              </BaseButton>
-            </div>
-          </form>
-        </div>
+              <input
+                v-model="podeReceberAgendamento"
+                type="checkbox"
+                class="size-4 shrink-0 rounded border-glow-border-soft bg-glow-canvas text-glow-gold focus:ring-glow-gold/40"
+              />
+              Pode receber agendamentos na vitrine
+            </label>
+          </div>
+
+          <div
+            class="flex flex-col-reverse gap-3 border-t border-glow-border-soft pt-5 sm:flex-row sm:justify-end"
+          >
+            <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE" class="sm:order-first">
+              <BaseButton variant="secondary" block class="sm:w-auto">Cancelar</BaseButton>
+            </RouterLink>
+            <BaseButton type="submit" :loading="saving" block class="sm:w-auto">
+              {{ submitLabel }}
+            </BaseButton>
+          </div>
+        </form>
       </div>
     </section>
   </div>
