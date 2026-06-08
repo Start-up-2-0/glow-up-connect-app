@@ -41,6 +41,25 @@ export const useNegocioStore = defineStore('negocio', () => {
   const planoId = computed(() => estabelecimentoAtivo.value?.planoId ?? null)
   const planoNome = computed(() => estabelecimentoAtivo.value?.planoNome ?? null)
   const role = computed(() => estabelecimentoAtivo.value?.role ?? null)
+  const limites = computed(
+    () =>
+      estabelecimentoAtivo.value?.limites ?? {
+        profissionais: null,
+        servicos: null,
+        agendamentos: null,
+        usuarios: null,
+        agendamentosPorDia: null,
+        prioridadeListagemPublica: false,
+      },
+  )
+  const emTrial = computed(() => estabelecimentoAtivo.value?.emTrial ?? false)
+  const diasTrial = computed(() => estabelecimentoAtivo.value?.diasTrial ?? null)
+  const proximaDataVencimento = computed(
+    () => estabelecimentoAtivo.value?.proximaDataVencimento ?? null,
+  )
+  const prioridadeMarketplace = computed(
+    () => estabelecimentoAtivo.value?.limites?.prioridadeListagemPublica ?? false,
+  )
 
   function possuiModulo(modulo: string): boolean {
     return modulos.value.includes(modulo)
@@ -131,6 +150,11 @@ export const useNegocioStore = defineStore('negocio', () => {
     planoId,
     planoNome,
     role,
+    limites,
+    emTrial,
+    diasTrial,
+    proximaDataVencimento,
+    prioridadeMarketplace,
     possuiModulo,
     possuiPermissao,
     possuiAlgumaPermissao,

@@ -40,4 +40,12 @@ export const assinaturaService = {
       .get<ApiSuccessResponse<CobrancaAssinatura[]>>(`/assinaturas/${assinaturaId}/cobrancas`)
       .then(unwrap)
   },
+
+  obterAtual(estabelecimentoId: number) {
+    return api
+      .get<ApiSuccessResponse<Assinatura>>('/assinaturas/atual', {
+        params: { estabelecimentoId },
+      })
+      .then(unwrap)
+  },
 }

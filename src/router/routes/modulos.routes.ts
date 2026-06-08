@@ -1,13 +1,11 @@
 import type { RouteRecordRaw } from 'vue-router'
 import { ROUTE_NAMES, ROUTE_PATHS } from '@/constants/routes'
 
-const placeholder = () => import('@/views/dashboard/placeholders/ModuloPlaceholderView.vue')
-
 export const modulosRoutes: RouteRecordRaw[] = [
   {
     path: ROUTE_PATHS.AGENDA,
     name: ROUTE_NAMES.AGENDA,
-    component: placeholder,
+    component: () => import('@/views/modulos/agenda/AgendaView.vue'),
     meta: {
       layout: 'dashboard',
       requiresAuth: true,
@@ -18,9 +16,48 @@ export const modulosRoutes: RouteRecordRaw[] = [
     },
   },
   {
+    path: ROUTE_PATHS.AGENDA_SEMANA,
+    name: ROUTE_NAMES.AGENDA_SEMANA,
+    component: () => import('@/views/modulos/agenda/AgendaSemanaView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'Agenda',
+      requerPermissoes: ['AgendaVisualizarGeral', 'AgendaVisualizarPropria'],
+      title: 'Agenda — Semana',
+    },
+  },
+  {
+    path: ROUTE_PATHS.AGENDA_MES,
+    name: ROUTE_NAMES.AGENDA_MES,
+    component: () => import('@/views/modulos/agenda/AgendaMesView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'Agenda',
+      requerPermissoes: ['AgendaVisualizarGeral', 'AgendaVisualizarPropria'],
+      title: 'Agenda — Mês',
+    },
+  },
+  {
+    path: `${ROUTE_PATHS.AGENDA_DETALHE}/:id`,
+    name: ROUTE_NAMES.AGENDA_DETALHE,
+    component: () => import('@/views/modulos/agenda/AgendaDetalheView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'Agenda',
+      requerPermissoes: ['AgendaVisualizarGeral', 'AgendaVisualizarPropria'],
+      title: 'Agendamento',
+    },
+  },
+  {
     path: ROUTE_PATHS.SERVICOS,
     name: ROUTE_NAMES.SERVICOS,
-    component: placeholder,
+    component: () => import('@/views/modulos/servicos/ServicosListView.vue'),
     meta: {
       layout: 'dashboard',
       requiresAuth: true,
@@ -32,7 +69,7 @@ export const modulosRoutes: RouteRecordRaw[] = [
   {
     path: ROUTE_PATHS.FINANCEIRO,
     name: ROUTE_NAMES.FINANCEIRO,
-    component: placeholder,
+    component: () => import('@/views/modulos/financeiro/FinanceiroView.vue'),
     meta: {
       layout: 'dashboard',
       requiresAuth: true,
@@ -43,9 +80,48 @@ export const modulosRoutes: RouteRecordRaw[] = [
     },
   },
   {
+    path: ROUTE_PATHS.FINANCEIRO_CAIXA,
+    name: ROUTE_NAMES.FINANCEIRO_CAIXA,
+    component: () => import('@/views/modulos/financeiro/CaixaView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'Caixa',
+      requerPermissao: 'CaixaVisualizar',
+      title: 'Caixa',
+    },
+  },
+  {
+    path: ROUTE_PATHS.FINANCEIRO_COMISSOES,
+    name: ROUTE_NAMES.FINANCEIRO_COMISSOES,
+    component: () => import('@/views/modulos/financeiro/ComissoesView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'ComissaoProfissionais',
+      requerPermissao: 'CaixaVisualizar',
+      title: 'Comissões',
+    },
+  },
+  {
+    path: ROUTE_PATHS.FINANCEIRO_RELATORIOS,
+    name: ROUTE_NAMES.FINANCEIRO_RELATORIOS,
+    component: () => import('@/views/modulos/financeiro/RelatoriosView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'Financeiro',
+      requerPermissao: 'CaixaVisualizar',
+      title: 'Relatórios',
+    },
+  },
+  {
     path: ROUTE_PATHS.CONFIG_EQUIPE,
     name: ROUTE_NAMES.CONFIG_EQUIPE,
-    component: placeholder,
+    component: () => import('@/views/modulos/equipe/EquipeView.vue'),
     meta: {
       layout: 'dashboard',
       requiresAuth: true,
@@ -56,15 +132,79 @@ export const modulosRoutes: RouteRecordRaw[] = [
     },
   },
   {
+    path: ROUTE_PATHS.CONFIG_EQUIPE_CONVITES,
+    name: ROUTE_NAMES.CONFIG_EQUIPE_CONVITES,
+    component: () => import('@/views/modulos/equipe/EquipeConvitesView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'Profissionais',
+      requerPermissao: 'EquipeGerenciar',
+      title: 'Convites da equipe',
+    },
+  },
+  {
+    path: ROUTE_PATHS.CONFIG_EQUIPE_NOVO,
+    name: ROUTE_NAMES.CONFIG_EQUIPE_NOVO,
+    component: () => import('@/views/modulos/equipe/EquipeNovoView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'Profissionais',
+      requerPermissao: 'EquipeGerenciar',
+      title: 'Convidar profissional',
+    },
+  },
+  {
     path: ROUTE_PATHS.CONFIG_WHATSAPP,
     name: ROUTE_NAMES.CONFIG_WHATSAPP,
-    component: placeholder,
+    component: () => import('@/views/modulos/whatsapp/WhatsAppEstabelecimentoView.vue'),
     meta: {
       layout: 'dashboard',
       requiresAuth: true,
       businessOnly: true,
       requerModulo: 'WhatsApp',
       title: 'WhatsApp',
+    },
+  },
+  {
+    path: ROUTE_PATHS.CONFIG_HORARIOS,
+    name: ROUTE_NAMES.CONFIG_HORARIOS,
+    component: () => import('@/views/modulos/horarios/HorariosView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'HorariosAtendimento',
+      title: 'Horários',
+    },
+  },
+  {
+    path: ROUTE_PATHS.CONFIG_PERFIL,
+    name: ROUTE_NAMES.CONFIG_PERFIL,
+    component: () => import('@/views/modulos/perfil/PerfilEstabelecimentoView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'Estabelecimento',
+      requerAssinaturaAtiva: false,
+      title: 'Perfil do estabelecimento',
+    },
+  },
+  {
+    path: ROUTE_PATHS.CONFIG_CLIENTES,
+    name: ROUTE_NAMES.CONFIG_CLIENTES,
+    component: () => import('@/views/modulos/clientes/ClientesView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'Agenda',
+      requerPermissoes: ['AgendaVisualizarGeral', 'AgendaVisualizarPropria'],
+      title: 'Clientes',
     },
   },
 ]

@@ -12,7 +12,7 @@ import { useApiError } from '@/composables/useApiError'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { formatBRL, formatDate } from '@/utils/formatters'
 
-const { assinaturaId } = useNegocioContext()
+const { assinaturaId, estabelecimentoId } = useNegocioContext()
 const assinaturaStore = useAssinaturaStore()
 const { cobrancas, cobrancasLoading, assinatura } = storeToRefs(assinaturaStore)
 const { resolveError } = useApiError()
@@ -23,6 +23,9 @@ const proximaData = computed(() => assinatura.value?.proximaDataVencimento)
 onMounted(async () => {
   if (!assinaturaId.value) return
   try {
+    if (estabelecimentoId.value) {
+      await assinaturaStore.fetchAtual(estabelecimentoId.value)
+    }
     await assinaturaStore.fetchCobrancas(assinaturaId.value)
   } catch (err) {
     erro.value = resolveError(err)

@@ -35,6 +35,17 @@ export const ROUTE_NAMES = {
   FINANCEIRO: 'financeiro',
   CONFIG_EQUIPE: 'config-equipe',
   CONFIG_WHATSAPP: 'config-whatsapp',
+  CONFIG_HORARIOS: 'config-horarios',
+  CONFIG_PERFIL: 'config-perfil',
+  CONFIG_CLIENTES: 'config-clientes',
+  AGENDA_SEMANA: 'agenda-semana',
+  AGENDA_MES: 'agenda-mes',
+  AGENDA_DETALHE: 'agenda-detalhe',
+  CONFIG_EQUIPE_CONVITES: 'config-equipe-convites',
+  CONFIG_EQUIPE_NOVO: 'config-equipe-novo',
+  FINANCEIRO_CAIXA: 'financeiro-caixa',
+  FINANCEIRO_COMISSOES: 'financeiro-comissoes',
+  FINANCEIRO_RELATORIOS: 'financeiro-relatorios',
 } as const
 
 export const ROUTE_PATHS = {
@@ -73,7 +84,22 @@ export const ROUTE_PATHS = {
   FINANCEIRO: '/financeiro',
   CONFIG_EQUIPE: '/configuracoes/equipe',
   CONFIG_WHATSAPP: '/configuracoes/whatsapp',
+  CONFIG_HORARIOS: '/configuracoes/horarios',
+  CONFIG_PERFIL: '/configuracoes/perfil',
+  CONFIG_CLIENTES: '/configuracoes/clientes',
+  AGENDA_SEMANA: '/agenda/semana',
+  AGENDA_MES: '/agenda/mes',
+  AGENDA_DETALHE: '/agenda',
+  CONFIG_EQUIPE_CONVITES: '/configuracoes/equipe/convites',
+  CONFIG_EQUIPE_NOVO: '/configuracoes/equipe/novo',
+  FINANCEIRO_CAIXA: '/financeiro/caixa',
+  FINANCEIRO_COMISSOES: '/financeiro/comissoes',
+  FINANCEIRO_RELATORIOS: '/financeiro/relatorios',
 } as const
+
+export function agendaDetalhePath(id: number): string {
+  return `${ROUTE_PATHS.AGENDA_DETALHE}/${id}`
+}
 
 export function lojaDetalhePath(publicGuid: string): string {
   return `${ROUTE_PATHS.LOJA}/${publicGuid}`

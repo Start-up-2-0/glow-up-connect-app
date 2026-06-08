@@ -28,6 +28,10 @@ onMounted(async () => {
   await ensureContext()
   if (!estabelecimentoAtivo.value) {
     await router.replace({ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH })
+    return
+  }
+  if (assinaturaId.value) {
+    await assinaturaStore.fetchAtual(estabelecimentoAtivo.value.estabelecimentoId)
   }
 })
 

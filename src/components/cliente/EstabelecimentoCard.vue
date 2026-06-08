@@ -30,9 +30,17 @@ defineProps<{
 
     <div class="min-w-0 flex-1">
       <div class="flex items-start justify-between gap-2">
-        <h2 class="truncate font-urbanist text-base font-semibold text-glow-text group-hover:text-glow-text-hover">
-          {{ item.nome }}
-        </h2>
+        <div class="flex min-w-0 flex-wrap items-center gap-2">
+          <h2 class="truncate font-urbanist text-base font-semibold text-glow-text group-hover:text-glow-text-hover">
+            {{ item.nome }}
+          </h2>
+          <span
+            v-if="item.destaqueMarketplace"
+            class="inline-flex shrink-0 rounded-full bg-glow-gold/15 px-2 py-0.5 font-urbanist text-xs font-medium text-glow-gold-dark"
+          >
+            Destaque
+          </span>
+        </div>
         <span class="shrink-0 font-urbanist text-xs font-medium text-glow-text-subtle">
           {{ formatDistanciaKm(item.distanciaKm) }}
         </span>

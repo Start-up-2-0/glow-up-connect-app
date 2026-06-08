@@ -12,6 +12,7 @@ export interface EstabelecimentoProximo {
   descricao: string
   distanciaKm: number
   endereco: EnderecoResumo
+  destaqueMarketplace?: boolean
 }
 
 export interface EstabelecimentosProximosResponse {

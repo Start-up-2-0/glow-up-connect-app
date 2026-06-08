@@ -1,3 +1,5 @@
+import type { LimitesAssinatura } from '@/types/negocio/limites.types'
+
 export type UserRole = 1 | 2 | 3 | 4 | 5
 
 export const USER_ROLE = {
@@ -92,5 +94,10 @@ export interface EstabelecimentoAcesso {
   assinaturaId?: number | null
   planoId?: number | null
   planoNome?: string | null
+  assinaturaStatus?: string | null
+  emTrial?: boolean
+  diasTrial?: number | null
+  proximaDataVencimento?: string | null
   modulos: string[]
+  limites?: LimitesAssinatura
 }
