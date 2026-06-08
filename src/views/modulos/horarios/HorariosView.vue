@@ -47,6 +47,7 @@ const saving = ref(false)
 const togglingId = ref<number | null>(null)
 const editingLojaId = ref<number | null>(null)
 const editingProfissionalId = ref<number | null>(null)
+const profissionaisFormIds = ref<number[]>([])
 
 const formLoja = ref(emptyForm())
 const formProfissional = ref(emptyForm())
@@ -90,7 +91,38 @@ function resetFormLoja() {
 function resetFormProfissional() {
   formProfissional.value = emptyForm()
   editingProfissionalId.value = null
+  profissionaisFormIds.value = []
   showFormProfissional.value = false
+}
+
+function abrirFormProfissional() {
+  if (showFormProfissional.value) {
+    resetFormProfissional()
+    return
+  }
+  editingProfissionalId.value = null
+  formProfissional.value = emptyForm()
+  if (apenasHorarioProprio.value && profissionalProprioId.value) {
+    profissionaisFormIds.value = [profissionalProprioId.value]
+  } else if (profissionalSelecionadoId.value) {
+    profissionaisFormIds.value = [profissionalSelecionadoId.value]
+  } else {
+    profissionaisFormIds.value = []
+  }
+  showFormProfissional.value = true
+}
+
+function toggleProfissionalForm(id: number) {
+  const idx = profissionaisFormIds.value.indexOf(id)
+  if (idx >= 0) {
+    profissionaisFormIds.value = profissionaisFormIds.value.filter((pid) => pid !== id)
+  } else {
+    profissionaisFormIds.value = [...profissionaisFormIds.value, id]
+  }
+}
+
+function profissionalMarcadoNoForm(id: number): boolean {
+  return profissionaisFormIds.value.includes(id)
 }
 
 async function load() {
@@ -217,16 +249,17 @@ async function handleToggleLoja(h: HorarioFuncionamento) {
 }
 
 async function handleCriarProfissional() {
-  if (!estabelecimentoId.value || !profissionalSelecionadoId.value || !podeGerenciarProfissional.value)
-    return
-  saving.value = true
-  try {
-    const payload = {
-      diaSemana: formProfissional.value.diaSemana,
-      horaInicio: horaParaApi(formProfissional.value.horaInicio),
-      horaFim: horaParaApi(formProfissional.value.horaFim),
-    }
-    if (editingProfissionalId.value) {
+  if (!estabelecimentoId.value || !podeGerenciarProfissional.value) return
+
+  const payload = {
+    diaSemana: formProfissional.value.diaSemana,
+    horaInicio: horaParaApi(formProfissional.value.horaInicio),
+    horaFim: horaParaApi(formProfissional.value.horaFim),
+  }
+
+  if (editingProfissionalId.value) {
+    saving.value = true
+    try {
       const atualizado = await horarioService.atualizarProfissional(
         estabelecimentoId.value,
         editingProfissionalId.value,
@@ -236,16 +269,63 @@ async function handleCriarProfissional() {
         h.id === editingProfissionalId.value ? atualizado : h,
       )
       notifications.push('success', 'Horário do profissional atualizado.')
-    } else {
-      const criado = await horarioService.criarProfissional(
-        estabelecimentoId.value,
-        profissionalSelecionadoId.value,
-        payload,
+      resetFormProfissional()
+    } catch (err) {
+      notifications.push(
+        'error',
+        resolveError(err, 'Não foi possível salvar o horário do profissional.'),
       )
-      horariosProfissionais.value = [...horariosProfissionais.value, criado]
-      notifications.push('success', 'Horário do profissional criado.')
+    } finally {
+      saving.value = false
     }
-    resetFormProfissional()
+    return
+  }
+
+  const idsAlvo = apenasHorarioProprio.value
+    ? profissionalProprioId.value
+      ? [profissionalProprioId.value]
+      : []
+    : profissionaisFormIds.value
+
+  if (idsAlvo.length === 0) {
+    notifications.push('warning', 'Selecione ao menos um profissional.')
+    return
+  }
+
+  saving.value = true
+  try {
+    const estId = estabelecimentoId.value
+    const results = await Promise.allSettled(
+      idsAlvo.map((profId) => horarioService.criarProfissional(estId, profId, payload)),
+    )
+    const criados = results
+      .filter((r): r is PromiseFulfilledResult<HorarioProfissional> => r.status === 'fulfilled')
+      .map((r) => r.value)
+    const falhas = results.filter((r) => r.status === 'rejected')
+
+    if (criados.length > 0) {
+      horariosProfissionais.value = [...horariosProfissionais.value, ...criados]
+      const msg =
+        criados.length === 1
+          ? 'Horário do profissional criado.'
+          : `Horário criado para ${criados.length} profissionais.`
+      notifications.push('success', msg)
+      if (!profissionalSelecionadoId.value && criados[0]) {
+        profissionalSelecionadoId.value = criados[0].profissionalId
+      }
+    }
+
+    if (falhas.length > 0) {
+      const motivo =
+        falhas[0].status === 'rejected'
+          ? resolveError(falhas[0].reason, 'Não foi possível salvar para alguns profissionais.')
+          : 'Não foi possível salvar para alguns profissionais.'
+      notifications.push(criados.length > 0 ? 'warning' : 'error', motivo)
+    }
+
+    if (criados.length > 0) {
+      resetFormProfissional()
+    }
   } catch (err) {
     notifications.push(
       'error',
@@ -258,6 +338,8 @@ async function handleCriarProfissional() {
 
 function iniciarEdicaoProfissional(h: HorarioProfissional) {
   editingProfissionalId.value = h.id
+  profissionaisFormIds.value = [h.profissionalId]
+  profissionalSelecionadoId.value = h.profissionalId
   formProfissional.value = {
     diaSemana: h.diaSemana as DiaSemanaValue,
     horaInicio: horaParaExibicao(h.horaInicio),
@@ -313,6 +395,13 @@ watch(
               : 'Horários de funcionamento da loja e dos profissionais.'
           }}
         </p>
+        <p
+          v-if="!apenasHorarioProprio && podeGerenciarLoja"
+          class="mt-1 font-urbanist text-xs text-glow-text-subtle"
+        >
+          Horários da loja são independentes; cada profissional pode ter horários iguais ou
+          diferentes.
+        </p>
       </div>
       <BaseButton
         v-if="aba === 'loja' && podeGerenciarLoja"
@@ -323,10 +412,10 @@ watch(
         {{ showFormLoja ? 'Cancelar' : 'Adicionar horário' }}
       </BaseButton>
       <BaseButton
-        v-else-if="aba === 'profissional' && podeGerenciarProfissional && profissionalSelecionadoId"
+        v-else-if="aba === 'profissional' && podeGerenciarProfissional && listaProfissionaisHorario.length > 0"
         variant="primary"
         size="sm"
-        @click="showFormProfissional ? resetFormProfissional() : (showFormProfissional = true)"
+        @click="abrirFormProfissional"
       >
         {{ showFormProfissional ? 'Cancelar' : 'Adicionar horário' }}
       </BaseButton>
@@ -394,6 +483,30 @@ watch(
       :title="editingProfissionalId ? 'Editar horário' : 'Novo horário do profissional'"
     >
       <form class="space-y-4" @submit.prevent="handleCriarProfissional">
+        <div
+          v-if="!editingProfissionalId && podeGerenciarLoja && !apenasHorarioProprio"
+          class="space-y-2"
+        >
+          <p class="font-urbanist text-sm font-medium text-glow-text">Profissionais</p>
+          <p class="font-urbanist text-xs text-glow-text-subtle">
+            Selecione um ou mais profissionais para o mesmo dia e horário.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <label
+              v-for="p in listaProfissionaisHorario"
+              :key="p.profissionalId"
+              class="flex cursor-pointer items-center gap-2 rounded-lg border border-glow-border-soft px-3 py-2"
+            >
+              <input
+                type="checkbox"
+                class="h-4 w-4 rounded border-glow-border-soft text-glow-gold focus:ring-glow-gold"
+                :checked="profissionalMarcadoNoForm(p.profissionalId)"
+                @change="toggleProfissionalForm(p.profissionalId)"
+              />
+              <span class="font-urbanist text-sm text-glow-text">{{ p.nomePublico }}</span>
+            </label>
+          </div>
+        </div>
         <div class="grid gap-4 sm:grid-cols-3">
           <div>
             <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">
