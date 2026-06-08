@@ -49,3 +49,9 @@ export interface CriarConviteProfissionalPayload {
   nomePublico?: string
   podeReceberAgendamento?: boolean
 }
+
+/** Convite nominativo para Admin, Gerente ou Recepcionista. */
+export interface CriarConviteUsuarioEquipePayload {
+  email: string
+  role: 'Admin' | 'Manager' | 'Receptionist'
+}

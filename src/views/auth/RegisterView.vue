@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import AuthSplashPanel from '@/components/auth/AuthSplashPanel.vue'
 import AuthMobileBrand from '@/components/auth/AuthMobileBrand.vue'
@@ -13,10 +13,14 @@ import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { ROUTE_PATHS } from '@/constants/routes'
 import {
   authRouteWithRedirect,
+  extractConviteTokenFromPath,
+  isConviteResponderPath,
   isOnboardingCheckoutPath,
   readRedirectParam,
   redirectQuery,
 } from '@/utils/authRedirect'
+import { conviteService } from '@/services/conviteService'
+import { establishmentRoleLabel } from '@/constants/establishmentRoles'
 import {
   GLOW_AUTH_PANEL_BORDERED_CLASS,
   GLOW_BODY_TEXT_CLASS,
@@ -50,6 +54,24 @@ const loading = ref(false)
 const errorMessage = ref('')
 const fieldErrors = ref<Record<string, string[]>>({})
 const emailJaCadastrado = ref(false)
+const conviteResumo = ref<string | null>(null)
+
+onMounted(async () => {
+  const redirect = checkoutRedirect.value
+  if (!redirect || !isConviteResponderPath(redirect)) return
+
+  const token = extractConviteTokenFromPath(redirect)
+  if (!token) return
+
+  try {
+    const preview = await conviteService.obterPreview(token)
+    email.value = preview.email
+    confirmarEmail.value = preview.email
+    conviteResumo.value = `Convite para ${establishmentRoleLabel(preview.roleSugerida)} em ${preview.nomeEstabelecimento}. Use este e-mail no cadastro.`
+  } catch {
+    /* cadastro segue sem pré-preenchimento */
+  }
+})
 
 const FIELD_KEYS = {
   nome: ['Nome', 'nome'],
@@ -165,6 +187,14 @@ function onAvatarError(message: string) {
             }}
           </p>
         </header>
+
+        <p
+          v-if="conviteResumo"
+          class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+          role="status"
+        >
+          {{ conviteResumo }}
+        </p>
 
         <p
           v-if="errorMessage"

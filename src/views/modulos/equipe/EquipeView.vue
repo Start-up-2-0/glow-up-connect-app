@@ -11,6 +11,7 @@ import { useApiError } from '@/composables/useApiError'
 import { equipeService } from '@/services/equipeService'
 import type { ProfissionalEquipe, UsuarioEquipe } from '@/types/negocio/equipe.types'
 import { ROUTE_PATHS } from '@/constants/routes'
+import { establishmentRoleLabel } from '@/constants/establishmentRoles'
 import { formatTelefone } from '@/utils/formatters'
 
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
@@ -56,13 +57,16 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
       </div>
       <div class="flex flex-wrap gap-2">
         <RouterLink v-if="aba === 'usuarios'" :to="ROUTE_PATHS.CONFIG_EQUIPE_USUARIO_NOVO">
-          <BaseButton variant="primary" size="sm">Adicionar usuário</BaseButton>
+          <BaseButton variant="primary" size="sm">Enviar convite</BaseButton>
         </RouterLink>
         <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE_CONVITES">
           <BaseButton variant="secondary" size="sm">Convites</BaseButton>
         </RouterLink>
-        <RouterLink v-if="aba === 'profissionais'" :to="ROUTE_PATHS.CONFIG_EQUIPE_NOVO">
-          <BaseButton variant="primary" size="sm">Convidar profissional</BaseButton>
+        <RouterLink
+          v-if="aba === 'profissionais'"
+          :to="{ path: ROUTE_PATHS.CONFIG_EQUIPE_USUARIO_NOVO, query: { role: 'Profissional' } }"
+        >
+          <BaseButton variant="primary" size="sm">Enviar convite</BaseButton>
         </RouterLink>
       </div>
     </div>
@@ -116,7 +120,9 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
         >
           <div class="flex flex-wrap items-center justify-between gap-2">
             <p class="font-urbanist text-sm font-semibold text-glow-text">{{ u.nome }}</p>
-            <span class="font-urbanist text-xs text-glow-text-subtle">{{ u.role }}</span>
+            <span class="font-urbanist text-xs text-glow-text-subtle">
+              {{ establishmentRoleLabel(u.role) }}
+            </span>
           </div>
           <p class="mt-1 font-urbanist text-xs text-glow-text-subtle">{{ u.email }}</p>
           <p class="font-urbanist text-xs text-glow-text-subtle">

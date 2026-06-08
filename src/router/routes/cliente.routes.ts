@@ -73,8 +73,7 @@ export const clienteRoutes: RouteRecordRaw[] = [
     name: ROUTE_NAMES.CONVITE_RESPONDER,
     component: () => import('@/views/dashboard/cliente/ConviteResponderView.vue'),
     meta: {
-      layout: 'dashboard',
-      requiresAuth: true,
+      layout: 'public',
       title: 'Responder convite',
     },
   },
