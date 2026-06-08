@@ -38,15 +38,19 @@ const permitePix = computed(() => true)
 const exibindoPixGerado = computed(() => Boolean(props.pixQrCode?.trim()))
 
 const trialAtivo = computed(
-  () => !usarCheckoutPro && props.promocao?.disponivel && metodoPagamento.value === 'cartao',
+  () => props.promocao?.disponivel && (!usarCheckoutPro ? metodoPagamento.value === 'cartao' : true),
 )
+
+const diasTrialPromocao = computed(() => props.promocao?.diasTrial ?? 30)
 
 const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
 
 const ctaLabel = computed(() => {
   if (props.aguardandoPagamento) return 'Aguardando confirmação...'
   if (tokenizando.value) return 'Validando cartão...'
-  if (usarCheckoutPro) return `Continuar para pagamento — ${formatBRL(totalHoje.value)}`
+  if (usarCheckoutPro && !trialAtivo.value) {
+    return `Continuar para pagamento — ${formatBRL(totalHoje.value)}`
+  }
   if (metodoPagamento.value === 'pix') return `Pagar ${formatBRL(totalHoje.value)} com PIX`
   if (trialAtivo.value) return 'Iniciar período de teste'
   return `Pagar ${formatBRL(totalHoje.value)}`
@@ -152,7 +156,14 @@ async function handleSubmit() {
 
           <template v-else>
             <div
-              v-if="usarCheckoutPro"
+              v-if="usarCheckoutPro && trialAtivo"
+              class="rounded-xl border border-glow-border-soft bg-glow-surface/60 p-4 text-sm text-glow-text-subtle"
+            >
+              Você ganha {{ diasTrialPromocao }} dias grátis para testar todos os módulos.
+              Não há cobrança hoje — a primeira fatura será gerada ao fim do período de teste, com link de pagamento por e-mail e WhatsApp.
+            </div>
+            <div
+              v-else-if="usarCheckoutPro"
               class="rounded-xl border border-glow-border-soft bg-glow-surface/60 p-4 text-sm text-glow-text-subtle"
             >
               Você será redirecionado ao Mercado Pago para escolher o meio de pagamento (cartão, PIX, boleto e outros).
