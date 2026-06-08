@@ -65,6 +65,22 @@
 }
 
 @layer components {
+  /* Auth (login, cadastro, recuperação): sempre light conforme Figma, independente do tema global */
+  .auth-light-shell {
+    --glow-text: #282828;
+    --glow-text-muted: rgba(40, 40, 40, 0.4);
+    --glow-text-soft: rgba(40, 40, 40, 0.8);
+    --glow-text-subtle: rgba(40, 40, 40, 0.5);
+    --glow-text-hover: rgba(40, 40, 40, 0.6);
+    --glow-border-soft: rgba(40, 40, 40, 0.25);
+    --glow-surface: #f3f3f3;
+    --glow-canvas: #ffffff;
+    --glow-placeholder: rgba(99, 99, 99, 0.6);
+    --glow-hover-surface: #ffffff;
+    color-scheme: light;
+    @apply min-h-screen bg-white text-glow-text;
+  }
+
   .checkout-shell {
     @apply rounded-2xl border border-glow-border-soft bg-glow-surface shadow-sm;
   }

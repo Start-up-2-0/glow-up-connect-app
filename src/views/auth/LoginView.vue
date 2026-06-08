@@ -17,9 +17,10 @@ import {
 import {
   GLOW_BUTTON_PRIMARY_CLASS,
   GLOW_INPUT_CLASS,
+  GLOW_LABEL_CLASS,
+  GLOW_LINK_CLASS,
   GLOW_LOGIN_CONTENT_CLASS,
   GLOW_LOGIN_PAGE_CLASS,
-  GLOW_LINK_ACCENT_CLASS,
 } from '@/constants/designTokens'
 
 const REMEMBER_EMAIL_KEY = 'guc_remember_email'
@@ -90,7 +91,7 @@ async function handleSubmit() {
         height="145"
       />
 
-      <header class="mb-10 w-full">
+      <header class="mb-10 w-full text-left">
         <h1 class="font-satoshi text-[32px] font-bold leading-normal text-glow-text">
           Bem-vindo ao Glow Up Connect
         </h1>
@@ -105,7 +106,7 @@ async function handleSubmit() {
 
       <p
         v-if="errorMessage"
-        class="mb-4 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800/50 dark:bg-red-950/35 dark:text-red-300"
+        class="mb-4 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
         role="alert"
       >
         {{ errorMessage }}
@@ -113,9 +114,7 @@ async function handleSubmit() {
 
       <form class="flex w-full flex-col gap-6" @submit.prevent="handleSubmit">
         <div class="flex flex-col gap-2">
-          <label for="email" class="font-satoshi text-sm font-normal text-glow-text">
-            E-mail
-          </label>
+          <label for="email" :class="GLOW_LABEL_CLASS">E-mail</label>
           <input
             id="email"
             v-model="email"
@@ -127,9 +126,7 @@ async function handleSubmit() {
         </div>
 
         <div class="relative flex flex-col gap-2">
-          <label for="senha" class="font-satoshi text-sm font-normal text-glow-text">
-            Senha
-          </label>
+          <label for="senha" :class="GLOW_LABEL_CLASS">Senha</label>
           <input
             id="senha"
             v-model="senha"
@@ -146,7 +143,7 @@ async function handleSubmit() {
             <label class="group flex cursor-pointer select-none items-center gap-2">
               <input v-model="lembrarConta" type="checkbox" class="sr-only" />
               <span
-                class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[2px] border border-glow-text/20 bg-glow-hover-surface transition group-has-[:checked]:border-glow-gold group-has-[:checked]:bg-glow-gold"
+                class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[2px] border border-glow-text/20 bg-white transition group-has-[:checked]:border-glow-gold group-has-[:checked]:bg-glow-gold"
                 aria-hidden="true"
               >
                 <svg
@@ -165,7 +162,7 @@ async function handleSubmit() {
               </span>
             </label>
 
-            <RouterLink :to="ROUTE_PATHS.FORGOT_PASSWORD" :class="GLOW_LINK_ACCENT_CLASS">
+            <RouterLink :to="ROUTE_PATHS.FORGOT_PASSWORD" :class="GLOW_LINK_CLASS">
               Esqueceu a senha?
             </RouterLink>
           </div>
@@ -184,7 +181,7 @@ async function handleSubmit() {
         </div>
       </form>
 
-      <p class="mt-[25px] w-full font-satoshi text-sm font-bold" :class="GLOW_LINK_ACCENT_CLASS">
+      <p class="mt-[25px] w-full font-satoshi text-sm font-bold text-glow-gold-dark">
         Não possui conta?
         <RouterLink :to="registerLink" class="hover:underline">Clique aqui.</RouterLink>
       </p>

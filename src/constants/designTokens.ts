@@ -20,20 +20,25 @@ export const GLOW_SPLASH_PANEL_CLASS =
   'relative hidden min-h-screen shrink-0 overflow-hidden lg:block lg:w-[955px] lg:max-w-[50%]'
 
 export const GLOW_INPUT_CLASS =
-  'h-[49px] w-full rounded-lg border-[0.3px] border-glow-text/40 px-4 font-satoshi text-zinc-800 placeholder:font-inter placeholder:text-sm placeholder:font-normal placeholder:text-zinc-600/60 outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold'
+  'h-[49px] w-full rounded-lg border-[0.3px] border-glow-text/40 bg-white px-4 font-satoshi text-zinc-800 placeholder:font-inter placeholder:text-sm placeholder:font-normal placeholder:text-zinc-600/60 outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold'
 
 export const GLOW_LABEL_CLASS = 'font-satoshi text-sm font-normal text-zinc-800'
 
 export const GLOW_PLACEHOLDER_TEXT_CLASS = 'font-inter text-sm font-normal text-zinc-600/60'
 
-export const GLOW_LINK_ACCENT_CLASS = 'font-satoshi text-sm font-bold text-yellow-600 hover:underline'
+export const GLOW_LINK_ACCENT_CLASS =
+  'font-satoshi text-sm font-bold text-glow-gold-dark hover:underline'
 
 export const GLOW_BODY_TEXT_CLASS = 'font-satoshi text-sm font-normal text-zinc-800'
 
+/** Fundo branco fixo — telas de auth não seguem o tema dark do app (Figma) */
 export const GLOW_LOGIN_PAGE_CLASS =
-  'flex min-h-screen items-center justify-center bg-glow-hover-surface px-6 py-10'
+  'flex min-h-screen items-center justify-center bg-white px-6 py-10'
 
 export const GLOW_LOGIN_CONTENT_CLASS = 'flex w-full max-w-[494px] flex-col items-center'
+
+/** Grid 2 colunas do formulário de cadastro (Figma telaCadastro) */
+export const GLOW_AUTH_FORM_GRID_CLASS = 'grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-x-2'
 
 export const GLOW_AUTH_PANEL_CLASS =
   'relative z-10 flex min-h-screen w-full flex-1 items-center justify-center bg-white px-6 py-10 lg:-ml-[54px] lg:rounded-l-panel lg:px-16'

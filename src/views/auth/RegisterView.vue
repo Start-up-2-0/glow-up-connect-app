@@ -21,11 +21,12 @@ import {
 import { conviteService } from '@/services/conviteService'
 import { establishmentRoleLabel } from '@/constants/establishmentRoles'
 import {
+  GLOW_AUTH_FORM_GRID_CLASS,
   GLOW_BODY_TEXT_CLASS,
   GLOW_BUTTON_PRIMARY_CLASS,
   GLOW_INPUT_CLASS,
   GLOW_LABEL_CLASS,
-  GLOW_LINK_ACCENT_CLASS,
+  GLOW_LINK_CLASS,
   GLOW_LOGIN_CONTENT_CLASS,
   GLOW_LOGIN_PAGE_CLASS,
 } from '@/constants/designTokens'
@@ -178,9 +179,9 @@ function onAvatarError(message: string) {
         height="145"
       />
 
-      <header class="mb-10 w-full">
+      <header class="mb-10 w-full text-center">
         <h1 class="font-satoshi text-[32px] font-bold leading-normal text-glow-text">
-          {{ isAssinaturaFlow ? 'Crie sua conta para assinar' : 'Bem-vindo ao Glow Up Connect' }}
+          {{ isAssinaturaFlow ? 'Crie sua conta para assinar' : 'Crie agora a sua conta!' }}
         </h1>
         <p class="mt-[5px] font-satoshi text-xl font-normal leading-normal text-glow-text-muted">
           {{
@@ -193,7 +194,7 @@ function onAvatarError(message: string) {
 
       <p
         v-if="conviteResumo"
-        class="mb-4 w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/35 dark:text-amber-200"
+        class="mb-4 w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
         role="status"
       >
         {{ conviteResumo }}
@@ -201,20 +202,17 @@ function onAvatarError(message: string) {
 
       <p
         v-if="errorMessage"
-        class="mb-4 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800/50 dark:bg-red-950/35 dark:text-red-300"
+        class="mb-4 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
         role="alert"
       >
-          {{ errorMessage }}
-          <RouterLink
-            v-if="emailJaCadastrado"
-            :to="loginLink"
-            :class="[GLOW_LINK_ACCENT_CLASS, 'ml-1 inline-block']"
-          >
-            Fazer login
-          </RouterLink>
-        </p>
+        {{ errorMessage }}
+        <RouterLink v-if="emailJaCadastrado" :to="loginLink" :class="[GLOW_LINK_CLASS, 'ml-1 inline-block']">
+          Fazer login
+        </RouterLink>
+      </p>
 
-        <form class="flex w-full flex-col gap-6" @submit.prevent="handleSubmit">
+      <form class="flex w-full flex-col gap-6" @submit.prevent="handleSubmit">
+        <div :class="GLOW_AUTH_FORM_GRID_CLASS">
           <div class="flex flex-col gap-2">
             <label for="nome" :class="GLOW_LABEL_CLASS">Nome completo</label>
             <input
@@ -226,10 +224,7 @@ function onAvatarError(message: string) {
               placeholder="Informe seu nome completo"
               :class="GLOW_INPUT_CLASS"
             />
-            <p
-              v-if="getFieldError(...FIELD_KEYS.nome)"
-              class="text-sm text-red-600 dark:text-red-400"
-            >
+            <p v-if="getFieldError(...FIELD_KEYS.nome)" class="text-sm text-red-600">
               {{ getFieldError(...FIELD_KEYS.nome) }}
             </p>
           </div>
@@ -241,121 +236,106 @@ function onAvatarError(message: string) {
             variant="auth"
             autocomplete="tel"
             required
+            placeholder="(00) 0 0000-0000"
             :error="getFieldError(...FIELD_KEYS.telefone)"
           />
 
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-4">
-            <div class="flex flex-col gap-2">
-              <label for="email" :class="GLOW_LABEL_CLASS">E-mail</label>
-              <input
-                id="email"
-                v-model="email"
-                type="email"
-                autocomplete="email"
-                required
-                placeholder="ex: usuario01@exemplo.com"
-                :class="GLOW_INPUT_CLASS"
-              />
-              <p
-                v-if="getFieldError(...FIELD_KEYS.email)"
-                class="text-sm text-red-600 dark:text-red-400"
-              >
-                {{ getFieldError(...FIELD_KEYS.email) }}
-              </p>
-            </div>
-            <div class="flex flex-col gap-2">
-              <label for="confirmar-email" :class="GLOW_LABEL_CLASS">
-                Confirmar E-mail
-              </label>
-              <input
-                id="confirmar-email"
-                v-model="confirmarEmail"
-                type="email"
-                autocomplete="email"
-                required
-                placeholder="ex: usuario01@exemplo.com"
-                :class="GLOW_INPUT_CLASS"
-              />
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-4">
-            <div class="relative flex flex-col gap-2">
-              <label for="senha" :class="GLOW_LABEL_CLASS">Senha</label>
-              <input
-                id="senha"
-                v-model="senha"
-                :type="mostrarSenha ? 'text' : 'password'"
-                autocomplete="new-password"
-                required
-                placeholder="Informe a sua senha"
-                :class="[GLOW_INPUT_CLASS, 'pr-12']"
-              />
-              <AuthPasswordToggle
-                :pressed="mostrarSenha"
-                @click="mostrarSenha = !mostrarSenha"
-              />
-              <p
-                v-if="getFieldError(...FIELD_KEYS.senha)"
-                class="text-sm text-red-600 dark:text-red-400"
-              >
-                {{ getFieldError(...FIELD_KEYS.senha) }}
-              </p>
-            </div>
-            <div class="relative flex flex-col gap-2">
-              <label for="confirmar-senha" :class="GLOW_LABEL_CLASS">
-                Confirmar Senha
-              </label>
-              <input
-                id="confirmar-senha"
-                v-model="confirmarSenha"
-                :type="mostrarConfirmarSenha ? 'text' : 'password'"
-                autocomplete="new-password"
-                required
-                placeholder="Confirme a sua senha"
-                :class="[GLOW_INPUT_CLASS, 'pr-12']"
-              />
-              <AuthPasswordToggle
-                :pressed="mostrarConfirmarSenha"
-                @click="mostrarConfirmarSenha = !mostrarConfirmarSenha"
-              />
-            </div>
-          </div>
-
-          <AuthAvatarUpload @change="onAvatarChange" @error="onAvatarError" />
-
-          <div class="flex flex-col gap-4">
-            <button
-              type="submit"
-              :disabled="loading"
-              :class="[GLOW_BUTTON_PRIMARY_CLASS, 'font-satoshi text-xl font-medium text-white']"
-            >
-              <span
-                v-if="loading"
-                class="mr-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
-              />
-              Criar conta
-            </button>
-
-            <p :class="GLOW_BODY_TEXT_CLASS">
-              Ao clicar em “Criar conta” você concorda com os nossos
-              <button
-                type="button"
-                :class="GLOW_LINK_ACCENT_CLASS"
-                @click="notificationsStore.push('info', 'Termos de uso em breve.')"
-              >
-                termos de uso
-              </button>
-            </p>
-
-            <p :class="GLOW_BODY_TEXT_CLASS">
-              Já possui conta?
-              <RouterLink :to="loginLink" :class="GLOW_LINK_ACCENT_CLASS">
-                Faça o login
-              </RouterLink>
+          <div class="flex flex-col gap-2">
+            <label for="email" :class="GLOW_LABEL_CLASS">E-mail</label>
+            <input
+              id="email"
+              v-model="email"
+              type="email"
+              autocomplete="email"
+              required
+              placeholder="ex: usuario01@exemplo.com"
+              :class="GLOW_INPUT_CLASS"
+            />
+            <p v-if="getFieldError(...FIELD_KEYS.email)" class="text-sm text-red-600">
+              {{ getFieldError(...FIELD_KEYS.email) }}
             </p>
           </div>
-        </form>
+
+          <div class="flex flex-col gap-2">
+            <label for="confirmar-email" :class="GLOW_LABEL_CLASS">Confirmar E-mail</label>
+            <input
+              id="confirmar-email"
+              v-model="confirmarEmail"
+              type="email"
+              autocomplete="email"
+              required
+              placeholder="ex: usuario01@exemplo.com"
+              :class="GLOW_INPUT_CLASS"
+            />
+          </div>
+
+          <div class="relative flex flex-col gap-2">
+            <label for="senha" :class="GLOW_LABEL_CLASS">Senha</label>
+            <input
+              id="senha"
+              v-model="senha"
+              :type="mostrarSenha ? 'text' : 'password'"
+              autocomplete="new-password"
+              required
+              placeholder="Informe a sua senha"
+              :class="[GLOW_INPUT_CLASS, 'pr-12']"
+            />
+            <AuthPasswordToggle :pressed="mostrarSenha" @click="mostrarSenha = !mostrarSenha" />
+            <p v-if="getFieldError(...FIELD_KEYS.senha)" class="text-sm text-red-600">
+              {{ getFieldError(...FIELD_KEYS.senha) }}
+            </p>
+          </div>
+
+          <div class="relative flex flex-col gap-2">
+            <label for="confirmar-senha" :class="GLOW_LABEL_CLASS">Confirmar Senha</label>
+            <input
+              id="confirmar-senha"
+              v-model="confirmarSenha"
+              :type="mostrarConfirmarSenha ? 'text' : 'password'"
+              autocomplete="new-password"
+              required
+              placeholder="Confirme a sua senha"
+              :class="[GLOW_INPUT_CLASS, 'pr-12']"
+            />
+            <AuthPasswordToggle
+              :pressed="mostrarConfirmarSenha"
+              @click="mostrarConfirmarSenha = !mostrarConfirmarSenha"
+            />
+          </div>
+
+          <div class="sm:col-span-2">
+            <AuthAvatarUpload @change="onAvatarChange" @error="onAvatarError" />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          :disabled="loading"
+          :class="[GLOW_BUTTON_PRIMARY_CLASS, 'font-satoshi text-xl font-medium text-white']"
+        >
+          <span
+            v-if="loading"
+            class="mr-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
+          />
+          Criar conta
+        </button>
+
+        <p :class="[GLOW_BODY_TEXT_CLASS, 'text-center']">
+          Ao clicar em “Criar conta” você concorda com os nossos
+          <button
+            type="button"
+            :class="GLOW_LINK_CLASS"
+            @click="notificationsStore.push('info', 'Termos de uso em breve.')"
+          >
+            termos de uso
+          </button>
+        </p>
+
+        <p :class="[GLOW_BODY_TEXT_CLASS, 'text-center']">
+          Já possui conta?
+          <RouterLink :to="loginLink" :class="GLOW_LINK_CLASS">Faça o login</RouterLink>
+        </p>
+      </form>
     </div>
   </div>
 </template>
