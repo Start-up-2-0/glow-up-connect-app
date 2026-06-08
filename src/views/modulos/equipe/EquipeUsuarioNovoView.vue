@@ -5,6 +5,7 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
+import SegmentedControl from '@/components/ui/SegmentedControl.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import AuthPasswordRules from '@/components/auth/recovery/AuthPasswordRules.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
@@ -48,10 +49,40 @@ const saving = ref(false)
 const sucessoDetalhe = ref<string | null>(null)
 const linkConvite = ref<string | null>(null)
 
+const modoOptions = [
+  { value: 'convite', label: 'Enviar convite', description: 'Recomendado' },
+  { value: 'vincular', label: 'Já tem conta', description: 'Vínculo direto' },
+  { value: 'criar', label: 'Criar manual', description: 'Avançado' },
+] as const
+
 const ehProfissional = computed(() => role.value === 'Profissional')
-const roleSelecionada = computed(() =>
-  ROLES_CADASTRO_EQUIPE.find((r) => r.value === role.value),
-)
+
+const modoHint = computed(() => {
+  if (modo.value === 'convite') {
+    return {
+      title: 'Convite inteligente',
+      text: 'Informe o e-mail e a função. Conta ativa e confirmada é vinculada na hora; caso contrário, você recebe um link para copiar.',
+    }
+  }
+  if (modo.value === 'vincular') {
+    return {
+      title: 'Conta já existente',
+      text: 'Use quando a pessoa já se cadastrou e confirmou o e-mail na plataforma.',
+    }
+  }
+  return {
+    title: 'Criação manual',
+    text: 'Você define a senha inicial. Para o dia a dia, prefira Enviar convite.',
+  }
+})
+
+const submitLabel = computed(() => {
+  if (modo.value === 'convite') return 'Gerar convite'
+  if (modo.value === 'criar') {
+    return ehProfissional.value ? 'Criar conta e convidar' : 'Criar conta'
+  }
+  return ehProfissional.value ? 'Vincular profissional' : 'Vincular usuário'
+})
 
 watch(modo, () => {
   sucessoDetalhe.value = null
@@ -117,7 +148,7 @@ async function enviarConvite() {
 
     linkConvite.value = resultado.linkConvite ?? resultado.convite?.linkConvite ?? null
     sucessoDetalhe.value =
-      'A pessoa deve se cadastrar com este e-mail, confirmar o e-mail e abrir o link abaixo para aceitar o convite.'
+      'Envie o link abaixo. A pessoa deve se cadastrar com este e-mail, confirmar e aceitar o convite.'
     notifications.push('success', 'Convite criado com sucesso.')
   } catch (err) {
     notifications.push('error', resolveError(err, 'Não foi possível criar o convite.'))
@@ -262,10 +293,10 @@ async function criarNovaConta() {
       linkConvite.value = resultado.linkConvite ?? resultado.convite?.linkConvite ?? null
       if (contaRecémCriada) {
         sucessoDetalhe.value =
-          'Conta criada e convite gerado. A pessoa deve confirmar o e-mail e aceitar o convite pelo link.'
+          'Conta criada. Peça para confirmar o e-mail e aceitar o convite pelo link abaixo.'
       } else {
         sucessoDetalhe.value =
-          'Convite gerado. Peça para a pessoa confirmar o e-mail e aceitar pelo link.'
+          'Convite gerado. Peça para confirmar o e-mail e aceitar pelo link abaixo.'
       }
       notifications.push('success', 'Convite de profissional criado.')
       return
@@ -280,14 +311,14 @@ async function criarNovaConta() {
 
     if (contaRecémCriada) {
       sucessoDetalhe.value =
-        'Conta criada com sucesso. A pessoa receberá um e-mail de confirmação. Depois de confirmar, use "Já tem conta" para vincular.'
+        'Conta criada. A pessoa receberá um e-mail de confirmação. Depois, use "Já tem conta" para vincular.'
       notifications.push('success', 'Conta criada. Aguardando confirmação de e-mail.')
       return
     }
 
     notifications.push(
       'info',
-      'O e-mail já existe na plataforma, mas ainda não foi possível vincular. Peça para a pessoa confirmar o e-mail ou use "Já tem conta".',
+      'O e-mail já existe, mas ainda não foi possível vincular. Peça para confirmar o e-mail ou use "Já tem conta".',
     )
   } catch (err) {
     notifications.push('error', resolveError(err, 'Não foi possível criar a conta.'))
@@ -308,81 +339,75 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="mx-auto max-w-lg space-y-4 lg:space-y-6">
-    <div>
-      <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
+  <div class="mx-auto max-w-xl space-y-5 lg:space-y-6">
+    <RouterLink
+      :to="ROUTE_PATHS.CONFIG_EQUIPE"
+      class="inline-flex items-center gap-1.5 font-urbanist text-sm text-glow-text-subtle transition hover:text-glow-text"
+    >
+      <span aria-hidden="true">←</span>
+      Voltar à equipe
+    </RouterLink>
+
+    <header class="space-y-2">
+      <h1 class="font-satoshi text-2xl font-bold leading-tight text-glow-text lg:text-3xl">
         Adicionar à equipe
       </h1>
-      <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-        O fluxo padrão é enviar um <strong class="text-glow-text">convite por link</strong>.
-        A pessoa define a própria senha no cadastro.
+      <p class="font-urbanist text-sm leading-relaxed text-glow-text-subtle">
+        Convide pessoas para operar seu negócio. O fluxo recomendado é por
+        <strong class="font-medium text-glow-text">convite por link</strong> — cada um define a própria senha.
       </p>
-    </div>
+    </header>
 
-    <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
+    <p v-if="contextError" class="font-urbanist text-sm text-red-600 dark:text-red-400">
+      {{ contextError }}
+    </p>
 
-    <div v-if="ready" class="flex gap-1 rounded-lg border border-glow-border-soft bg-glow-canvas p-1">
-      <button
-        type="button"
-        class="flex-1 rounded-md px-2 py-2 font-urbanist text-xs font-medium transition-colors sm:text-sm"
-        :class="
-          modo === 'convite'
-            ? 'bg-glow-surface text-glow-text shadow-sm'
-            : 'text-glow-text-subtle hover:text-glow-text'
-        "
-        @click="modo = 'convite'"
-      >
-        Enviar convite
-      </button>
-      <button
-        type="button"
-        class="flex-1 rounded-md px-2 py-2 font-urbanist text-xs font-medium transition-colors sm:text-sm"
-        :class="
-          modo === 'vincular'
-            ? 'bg-glow-surface text-glow-text shadow-sm'
-            : 'text-glow-text-subtle hover:text-glow-text'
-        "
-        @click="modo = 'vincular'"
-      >
-        Já tem conta
-      </button>
-      <button
-        type="button"
-        class="flex-1 rounded-md px-2 py-2 font-urbanist text-xs font-medium transition-colors sm:text-sm"
-        :class="
-          modo === 'criar'
-            ? 'bg-glow-surface text-glow-text shadow-sm'
-            : 'text-glow-text-subtle hover:text-glow-text'
-        "
-        @click="modo = 'criar'"
-      >
-        Criar manual
-      </button>
-    </div>
+    <SegmentedControl
+      v-if="ready"
+      v-model="modo"
+      :options="[...modoOptions]"
+      aria-label="Modo de adição à equipe"
+    />
 
-    <BaseAlert v-if="modo === 'convite'" variant="info">
-      Informe o <strong>e-mail</strong> e a função. Se a pessoa já tem conta ativa e confirmada,
-      ela é vinculada na hora. Caso contrário, você recebe um link para copiar e enviar.
+    <BaseAlert v-if="sucessoDetalhe" variant="success" :title="linkConvite ? 'Convite pronto' : undefined">
+      {{ sucessoDetalhe }}
     </BaseAlert>
-
-    <BaseAlert v-else-if="modo === 'vincular'" variant="info">
-      Use quando a pessoa <strong>já se cadastrou</strong> e confirmou o e-mail na plataforma.
-    </BaseAlert>
-
-    <BaseAlert v-else variant="info">
-      Opção avançada: você cria a conta com senha inicial. Para o dia a dia, prefira
-      <strong>Enviar convite</strong>.
-    </BaseAlert>
-
-    <BaseAlert v-if="sucessoDetalhe" variant="success">{{ sucessoDetalhe }}</BaseAlert>
 
     <BaseCard v-if="linkConvite" title="Link do convite">
-      <p class="mb-3 break-all font-urbanist text-sm text-glow-text-subtle">{{ linkConvite }}</p>
-      <BaseButton variant="secondary" size="sm" @click="copiarLink">Copiar link</BaseButton>
+      <p class="mb-3 font-urbanist text-xs text-glow-text-subtle">
+        Copie e envie por WhatsApp, e-mail ou outro canal. Só a conta com o e-mail informado pode aceitar.
+      </p>
+      <div
+        class="flex flex-col gap-2 rounded-lg border border-glow-border-soft bg-glow-canvas p-3 sm:flex-row sm:items-center"
+      >
+        <p class="min-w-0 flex-1 break-all font-mono text-xs text-glow-text sm:text-sm">
+          {{ linkConvite }}
+        </p>
+        <BaseButton variant="primary" size="sm" class="shrink-0" @click="copiarLink">
+          Copiar link
+        </BaseButton>
+      </div>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE_CONVITES">
+          <BaseButton variant="secondary" size="sm">Ver convites pendentes</BaseButton>
+        </RouterLink>
+        <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE">
+          <BaseButton variant="ghost" size="sm">Voltar à equipe</BaseButton>
+        </RouterLink>
+      </div>
     </BaseCard>
 
     <BaseCard v-if="ready && !linkConvite">
-      <form class="space-y-4" @submit.prevent="handleSubmit">
+      <div
+        class="mb-5 rounded-lg border border-glow-gold/30 bg-glow-gold-soft px-4 py-3"
+      >
+        <p class="font-urbanist text-sm font-semibold text-glow-text">{{ modoHint.title }}</p>
+        <p class="mt-1 font-urbanist text-sm leading-relaxed text-glow-text-subtle">
+          {{ modoHint.text }}
+        </p>
+      </div>
+
+      <form class="space-y-5" @submit.prevent="handleSubmit">
         <template v-if="modo === 'criar'">
           <BaseInput v-model="nome" label="Nome completo" required placeholder="Maria Silva" />
         </template>
@@ -428,21 +453,36 @@ async function handleSubmit() {
           />
         </template>
 
-        <div>
-          <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">Função</label>
-          <select
-            v-model="role"
-            class="w-full rounded-lg border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm text-glow-text"
-            required
-          >
-            <option v-for="r in ROLES_CADASTRO_EQUIPE" :key="r.value" :value="r.value">
-              {{ r.label }}
-            </option>
-          </select>
-          <p v-if="roleSelecionada" class="mt-1 font-urbanist text-xs text-glow-text-subtle">
-            {{ roleSelecionada.description }}
-          </p>
-        </div>
+        <fieldset>
+          <legend class="mb-2 block font-urbanist text-sm font-medium text-glow-text">
+            Função na equipe
+          </legend>
+          <div class="grid gap-2 sm:grid-cols-2">
+            <label
+              v-for="r in ROLES_CADASTRO_EQUIPE"
+              :key="r.value"
+              class="cursor-pointer rounded-lg border px-3 py-3 transition"
+              :class="
+                role === r.value
+                  ? 'border-glow-gold bg-glow-gold-soft shadow-sm'
+                  : 'border-glow-border-soft bg-glow-canvas hover:border-glow-text-subtle hover:bg-glow-hover-surface'
+              "
+            >
+              <input
+                v-model="role"
+                type="radio"
+                :value="r.value"
+                class="sr-only"
+              />
+              <span class="block font-urbanist text-sm font-semibold text-glow-text">
+                {{ r.label }}
+              </span>
+              <span class="mt-0.5 block font-urbanist text-xs leading-snug text-glow-text-subtle">
+                {{ r.description }}
+              </span>
+            </label>
+          </div>
+        </fieldset>
 
         <template v-if="ehProfissional">
           <BaseInput
@@ -454,45 +494,27 @@ async function handleSubmit() {
                 : 'Como aparecerá para os clientes'
             "
           />
-          <label class="flex cursor-pointer items-center gap-3 font-urbanist text-sm text-glow-text">
+          <label
+            class="flex cursor-pointer items-center gap-3 rounded-lg border border-glow-border-soft bg-glow-canvas px-3 py-3 font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface"
+          >
             <input
               v-model="podeReceberAgendamento"
               type="checkbox"
-              class="rounded border-glow-border-soft"
+              class="size-4 rounded border-glow-border-soft bg-glow-surface text-glow-gold focus:ring-glow-gold/40"
             />
-            Pode receber agendamentos
+            Pode receber agendamentos na vitrine
           </label>
         </template>
 
-        <div class="flex flex-wrap gap-3">
-          <BaseButton type="submit" :loading="saving">
-            {{
-              modo === 'convite'
-                ? 'Gerar convite'
-                : modo === 'criar'
-                  ? ehProfissional
-                    ? 'Criar conta e convidar'
-                    : 'Criar conta'
-                  : ehProfissional
-                    ? 'Vincular profissional'
-                    : 'Vincular usuário'
-            }}
-          </BaseButton>
-          <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE">
-            <BaseButton variant="secondary">Cancelar</BaseButton>
+        <div class="flex flex-col-reverse gap-3 border-t border-glow-border-soft pt-5 sm:flex-row sm:justify-end">
+          <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE" class="sm:order-first">
+            <BaseButton variant="secondary" block class="sm:w-auto">Cancelar</BaseButton>
           </RouterLink>
+          <BaseButton type="submit" :loading="saving" block class="sm:w-auto">
+            {{ submitLabel }}
+          </BaseButton>
         </div>
       </form>
     </BaseCard>
-
-    <div v-if="linkConvite" class="flex flex-wrap gap-3">
-      <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE_CONVITES">
-        <BaseButton variant="secondary">Ver convites pendentes</BaseButton>
-      </RouterLink>
-      <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE">
-        <BaseButton variant="secondary">Voltar à equipe</BaseButton>
-      </RouterLink>
-    </div>
   </div>
 </template>
-

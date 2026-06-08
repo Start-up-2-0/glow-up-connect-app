@@ -22,6 +22,13 @@ Skill para bootstrap e evolução do frontend administrativo do **glow-up-connec
 - Criar services, stores, composables ou componentes UI base
 - Padronizar consumo de API e prevenção de overfetching
 
+## Theming (light + dark)
+
+Todo componente ou view **deve** funcionar nos dois temas. Antes de estilizar, carregar a skill
+`glow-up-connect-theming` (`.cursor/skills/glow-up-connect-theming/SKILL.md`).
+
+Resumo: usar tokens `bg-glow-*`, `text-glow-*`, `border-glow-*`; evitar `bg-white`/`text-gray-*` soltos.
+
 ## Princípios obrigatórios
 
 1. **Separação de responsabilidades**: Views só orquestram UI; lógica em composables/stores/services.
