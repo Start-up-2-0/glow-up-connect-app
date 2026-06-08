@@ -7,7 +7,7 @@ import BaseInput from '@/components/ui/BaseInput.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
-import { equipeService } from '@/services/equipeService'
+import { conviteService } from '@/services/conviteService'
 import { ROUTE_PATHS } from '@/constants/routes'
 
 const router = useRouter()
@@ -15,25 +15,24 @@ const { estabelecimentoId, ready, error: contextError } = useEstabelecimentoView
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 
-const profissionalId = ref('')
+const email = ref('')
+const telefone = ref('')
+const nomePublico = ref('')
 const podeReceberAgendamento = ref(true)
 const saving = ref(false)
 
 async function handleSubmit() {
-  if (!estabelecimentoId.value || !profissionalId.value.trim()) return
-  const id = Number.parseInt(profissionalId.value, 10)
-  if (!Number.isFinite(id)) {
-    notifications.push('error', 'Informe um ID de profissional válido.')
-    return
-  }
+  if (!estabelecimentoId.value || !email.value.trim()) return
   saving.value = true
   try {
-    await equipeService.convidarProfissional(estabelecimentoId.value, {
-      profissionalId: id,
+    await conviteService.criarConviteProfissional(estabelecimentoId.value, {
+      email: email.value.trim(),
+      telefone: telefone.value.trim() || undefined,
+      nomePublico: nomePublico.value.trim() || undefined,
       podeReceberAgendamento: podeReceberAgendamento.value,
     })
-    notifications.push('success', 'Convite enviado ao profissional.')
-    await router.push(ROUTE_PATHS.CONFIG_EQUIPE)
+    notifications.push('success', 'Convite enviado por e-mail ao profissional.')
+    await router.push(ROUTE_PATHS.CONFIG_EQUIPE_CONVITES)
   } catch (err) {
     notifications.push('error', resolveError(err, 'Não foi possível enviar o convite.'))
   } finally {
@@ -49,7 +48,7 @@ async function handleSubmit() {
         Convidar profissional
       </h1>
       <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-        Informe o ID do usuário profissional para enviar o convite.
+        O profissional receberá um e-mail com link para aceitar o convite e integrar a equipe.
       </p>
     </div>
 
@@ -58,15 +57,29 @@ async function handleSubmit() {
     <BaseCard v-if="ready">
       <form class="space-y-4" @submit.prevent="handleSubmit">
         <BaseInput
-          v-model="profissionalId"
-          label="ID do profissional"
-          type="number"
-          placeholder="Ex.: 42"
+          v-model="email"
+          label="E-mail"
+          type="email"
+          placeholder="profissional@exemplo.com"
           required
-          hint="ID do usuário profissional já cadastrado na plataforma."
+        />
+        <BaseInput
+          v-model="telefone"
+          label="Telefone"
+          type="tel"
+          placeholder="Opcional"
+        />
+        <BaseInput
+          v-model="nomePublico"
+          label="Nome público"
+          placeholder="Como aparecerá para os clientes"
         />
         <label class="flex cursor-pointer items-center gap-3 font-urbanist text-sm text-glow-text">
-          <input v-model="podeReceberAgendamento" type="checkbox" class="rounded border-glow-border-soft" />
+          <input
+            v-model="podeReceberAgendamento"
+            type="checkbox"
+            class="rounded border-glow-border-soft"
+          />
           Pode receber agendamentos
         </label>
         <div class="flex flex-wrap gap-3">

@@ -13,7 +13,7 @@ import { ROUTE_PATHS } from '@/constants/routes'
           Convites da equipe
         </h1>
         <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-          Profissionais recebem convites por e-mail com link exclusivo.
+          Profissionais recebem convites por e-mail com link exclusivo para aceitar.
         </p>
       </div>
       <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE">
@@ -23,16 +23,20 @@ import { ROUTE_PATHS } from '@/constants/routes'
 
     <BaseCard title="Como funciona">
       <ol class="list-decimal space-y-2 pl-5 font-urbanist text-sm text-glow-text-subtle">
-        <li>Convide um profissional informando o ID do usuário profissional.</li>
+        <li>Convide um profissional informando o e-mail dele.</li>
         <li>O convidado recebe um e-mail com link no formato <code class="text-glow-text">/convites/...</code>.</li>
         <li>Ao aceitar, o profissional passa a integrar a equipe do estabelecimento.</li>
       </ol>
+      <p class="mt-3 font-urbanist text-sm text-glow-text-subtle">
+        Se o profissional já possui conta na plataforma, ele também pode ser vinculado diretamente
+        pela equipe após aceitar o convite.
+      </p>
       <div class="mt-4 flex flex-wrap gap-3">
         <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE_NOVO">
           <BaseButton variant="primary">Convidar profissional</BaseButton>
         </RouterLink>
         <RouterLink :to="ROUTE_PATHS.CONVITES">
-          <BaseButton variant="secondary">Ver página de convites (cliente)</BaseButton>
+          <BaseButton variant="secondary">Página de resposta ao convite</BaseButton>
         </RouterLink>
       </div>
     </BaseCard>

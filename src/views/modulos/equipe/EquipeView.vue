@@ -55,10 +55,13 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
         </p>
       </div>
       <div class="flex flex-wrap gap-2">
+        <RouterLink v-if="aba === 'usuarios'" :to="ROUTE_PATHS.CONFIG_EQUIPE_USUARIO_NOVO">
+          <BaseButton variant="primary" size="sm">Adicionar usuário</BaseButton>
+        </RouterLink>
         <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE_CONVITES">
           <BaseButton variant="secondary" size="sm">Convites</BaseButton>
         </RouterLink>
-        <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE_NOVO">
+        <RouterLink v-if="aba === 'profissionais'" :to="ROUTE_PATHS.CONFIG_EQUIPE_NOVO">
           <BaseButton variant="primary" size="sm">Convidar profissional</BaseButton>
         </RouterLink>
       </div>
@@ -97,7 +100,13 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
 
     <template v-else-if="aba === 'usuarios'">
       <BaseCard v-if="usuarios.length === 0">
-        <EmptyState title="Nenhum usuário" description="Cadastre usuários da equipe." />
+        <EmptyState title="Nenhum usuário" description="Cadastre usuários da equipe.">
+          <template #action>
+            <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE_USUARIO_NOVO" class="mt-3 inline-block">
+              <BaseButton variant="primary" size="sm">Adicionar usuário</BaseButton>
+            </RouterLink>
+          </template>
+        </EmptyState>
       </BaseCard>
       <div v-else class="space-y-2">
         <div

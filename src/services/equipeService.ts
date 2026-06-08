@@ -4,7 +4,7 @@ import { negocioPath } from '@/utils/negocioApi'
 import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
   CadastrarUsuarioEquipePayload,
-  ConvidarProfissionalPayload,
+  ConvidarProfissionalEquipePayload,
   ProfissionalEquipe,
   UsuarioEquipe,
 } from '@/types/negocio/equipe.types'
@@ -33,7 +33,8 @@ export const equipeService = {
       .then(unwrapApi)
   },
 
-  convidarProfissional(estabelecimentoId: number, payload: ConvidarProfissionalPayload) {
+  /** Vínculo direto — profissional já cadastrado na plataforma. */
+  vincularProfissional(estabelecimentoId: number, payload: ConvidarProfissionalEquipePayload) {
     return api
       .post<ApiSuccessResponse<ProfissionalEquipe>>(
         negocioPath(estabelecimentoId, '/equipe/profissionais'),
