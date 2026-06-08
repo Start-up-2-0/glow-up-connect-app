@@ -68,6 +68,7 @@ export const modulosRoutes: RouteRecordRaw[] = [
       businessOnly: true,
       requerModulo: 'Servicos',
       requerPermissoes: ['ServicoVisualizar', 'ServicoGerenciar'],
+      permitidoRoleProfissional: true,
       title: 'Serviços',
     },
   },

@@ -156,9 +156,16 @@ export const profissionalNavItems: NavItem[] = [
     requerModulo: 'HorariosAtendimento',
     requerPermissao: 'HorarioGerenciarProprio',
   },
+  {
+    id: 'meus-servicos',
+    label: 'Meus serviços',
+    to: ROUTE_PATHS.SERVICOS,
+    requerModulo: 'Servicos',
+    requerPermissao: 'ServicoVisualizar',
+  },
 ]
 
-export const NAV_SEARCH_PLACEHOLDER_PROFISSIONAL = 'Minha agenda, meus horários...'
+export const NAV_SEARCH_PLACEHOLDER_PROFISSIONAL = 'Minha agenda, meus horários, meus serviços...'
 
 /** Menu do cliente final — ver docs/acesso/cliente.md */
 export const clienteNavItems: NavItem[] = [

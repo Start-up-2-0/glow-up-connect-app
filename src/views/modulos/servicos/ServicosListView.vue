@@ -6,6 +6,7 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
+import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useNegocioStore } from '@/stores/negocio.store'
@@ -24,8 +25,9 @@ const router = useRouter()
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
 const { possuiPermissao, possuiModulo } = useNegocioContext()
+const { ehProfissionalOperacional } = useAcessoUsuario()
 const negocioStore = useNegocioStore()
-const { limites } = storeToRefs(negocioStore)
+const { limites, estabelecimentoAtivo } = storeToRefs(negocioStore)
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 
@@ -34,6 +36,8 @@ const loading = ref(false)
 const togglingId = ref<number | null>(null)
 
 const podeGerenciar = computed(() => possuiPermissao('ServicoGerenciar'))
+const ehVisaoProfissional = computed(() => ehProfissionalOperacional.value && !podeGerenciar.value)
+const profissionalProprioId = computed(() => estabelecimentoAtivo.value?.profissionalId ?? null)
 const temModuloProfissionais = computed(() => possuiModulo('Profissionais'))
 const limiteServicos = computed(() => limites.value?.servicos ?? null)
 const usoServicos = computed(() => servicos.value.length)
@@ -43,6 +47,23 @@ const limiteAtingido = computed(
 
 function profissionaisAtivos(servico: Servico): number {
   return servico.profissionais.filter((p) => p.ativo).length
+}
+
+function vinculoProprio(servico: Servico) {
+  if (profissionalProprioId.value === null) return null
+  return (
+    servico.profissionais.find(
+      (p) => p.profissionalId === profissionalProprioId.value && p.ativo,
+    ) ?? null
+  )
+}
+
+function precoExibicao(servico: Servico): number {
+  return vinculoProprio(servico)?.preco ?? servico.precoBase
+}
+
+function duracaoExibicao(servico: Servico): number {
+  return vinculoProprio(servico)?.duracaoMinutos ?? servico.duracaoMinutos
 }
 
 async function load() {
@@ -101,16 +122,21 @@ watch(
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
         <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-          Serviços
+          {{ ehVisaoProfissional ? 'Meus serviços' : 'Serviços' }}
         </h1>
         <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
           {{
             podeGerenciar
               ? 'Cadastre e gerencie os serviços oferecidos pelo estabelecimento.'
-              : 'Visualize os serviços oferecidos pelo estabelecimento.'
+              : ehVisaoProfissional
+                ? 'Serviços vinculados a você neste estabelecimento.'
+                : 'Visualize os serviços oferecidos pelo estabelecimento.'
           }}
         </p>
-        <p v-if="limiteServicos !== null" class="mt-1 font-urbanist text-xs text-glow-text-subtle">
+        <p
+          v-if="!ehVisaoProfissional && limiteServicos !== null"
+          class="mt-1 font-urbanist text-xs text-glow-text-subtle"
+        >
           Uso: {{ usoServicos }} / {{ formatLimite(limiteServicos) }}
         </p>
       </div>
@@ -134,7 +160,9 @@ watch(
         :description="
           podeGerenciar
             ? 'Cadastre o primeiro serviço para começar a receber agendamentos.'
-            : 'Nenhum serviço cadastrado neste estabelecimento.'
+            : ehVisaoProfissional
+              ? 'Nenhum serviço foi vinculado a você ainda.'
+              : 'Nenhum serviço cadastrado neste estabelecimento.'
         "
       />
       <div v-if="podeGerenciar" class="mt-4 flex justify-center">
@@ -168,10 +196,10 @@ watch(
             {{ servico.descricao }}
           </p>
           <p class="mt-1 font-urbanist text-sm text-glow-text">
-            {{ formatCurrency(servico.precoBase) }} · {{ servico.duracaoMinutos }} min
+            {{ formatCurrency(precoExibicao(servico)) }} · {{ duracaoExibicao(servico) }} min
           </p>
           <p
-            v-if="temModuloProfissionais && profissionaisAtivos(servico) > 0"
+            v-if="!ehVisaoProfissional && temModuloProfissionais && profissionaisAtivos(servico) > 0"
             class="mt-1 font-urbanist text-xs text-glow-text-subtle"
           >
             {{ profissionaisAtivos(servico) }}
