@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { RouterLink } from 'vue-router'
+import { onMounted, ref, watch } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
@@ -16,6 +16,8 @@ import { ROUTE_PATHS } from '@/constants/routes'
 import { establishmentRoleLabel } from '@/constants/establishmentRoles'
 import { formatTelefone } from '@/utils/formatters'
 
+const route = useRoute()
+const router = useRouter()
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
 const { resolveError } = useApiError()
@@ -38,6 +40,32 @@ function abrirModal(modo: ModoCadastro) {
 async function aoVincular() {
   await load()
 }
+
+function parseAcaoQuery(): ModoCadastro | null {
+  const q = route.query.acao ?? route.query.modo
+  if (q === 'convite' || q === 'vincular' || q === 'criar') return q
+  return null
+}
+
+function abrirModalPorQuery() {
+  const acao = parseAcaoQuery()
+  if (!acao || !ready.value) return
+
+  if (route.query.role === 'Profissional') {
+    aba.value = 'profissionais'
+  }
+
+  abrirModal(acao)
+  void router.replace({ path: ROUTE_PATHS.CONFIG_EQUIPE, query: {} })
+}
+
+onMounted(() => {
+  abrirModalPorQuery()
+})
+
+watch(ready, (isReady) => {
+  if (isReady) abrirModalPorQuery()
+})
 
 async function load() {
   if (!estabelecimentoId.value) return

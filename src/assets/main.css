@@ -219,4 +219,8 @@
   .form-section__grid--single {
     @apply sm:grid-cols-1;
   }
+
+  .equipe-acao-card {
+    @apply rounded-xl border border-glow-border-soft bg-glow-surface p-5 shadow-sm transition hover:border-glow-gold-dark hover:bg-glow-hover-surface;
+  }
 }

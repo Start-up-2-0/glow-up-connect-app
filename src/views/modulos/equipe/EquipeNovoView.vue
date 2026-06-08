@@ -8,8 +8,8 @@ const router = useRouter()
 
 onMounted(async () => {
   await router.replace({
-    path: ROUTE_PATHS.CONFIG_EQUIPE_USUARIO_NOVO,
-    query: { role: 'Profissional' },
+    path: ROUTE_PATHS.CONFIG_EQUIPE,
+    query: { acao: 'convite', role: 'Profissional' },
   })
 })
 </script>
