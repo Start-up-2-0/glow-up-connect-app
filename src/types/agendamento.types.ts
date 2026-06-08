@@ -1,4 +1,4 @@
-import type { EnderecoResumo } from '@/types/estabelecimento.types'
+import type { EnderecoResumo, EstabelecimentoPublico } from '@/types/estabelecimento.types'
 
 export type AgendamentoStatus =
   | 'PendentePagamento'
@@ -70,6 +70,60 @@ export interface CriarAgendamentoPayload {
   observacao?: string
 }
 
+export interface CriarAgendamentoPublicoPayload {
+  profissionalPublicGuid?: string
+  servicoIds: number[]
+  data: string
+  horarioInicio: string
+  clienteNome: string
+  clienteEmail: string
+  clienteTelefone: string
+  observacao?: string
+}
+
+export interface AgendamentoCriado {
+  id: number
+  status: string
+  valorTotal: number
+  duracaoTotalMinutos: number
+  inicio: string
+  fim: string
+}
+
+export interface AgendamentoContextoPublico {
+  estabelecimento: EstabelecimentoPublico
+  profissional: ProfissionalPublico
+  podeReceberAgendamento: boolean
+}
+
+export interface CriarAgendamentoComCadastroPayload {
+  profissionalPublicGuid: string
+  servicoIds: number[]
+  data: string
+  horarioInicio: string
+  observacao?: string
+  cadastro: {
+    nome: string
+    email: string
+    telefone: string
+    senha: string
+  }
+}
+
+export interface PropostaRemarcacao {
+  id: number
+  agendamentoId: number
+  status: string
+  dataSugerida: string
+  horarioInicioSugerido: string
+  motivo: string
+  inicioAtual: string | null
+  estabelecimentoNome: string | null
+  profissionalNome: string | null
+  tokenPublico: string
+  expiraEm: string
+}
+
 export interface CancelarAgendamentoPayload {
   motivo: string
 }
@@ -106,6 +160,7 @@ export interface DisponibilidadeAgenda {
   servicoIds: number[]
   duracaoMinutos: number
   mensagemIndisponibilidade: string | null
+  datasAtendimento: string[]
   slots: SlotDisponivel[]
 }
 
@@ -114,6 +169,7 @@ export interface ConsultarDisponibilidadeParams {
   dataFim: string
   servicoIds: number[]
   profissionalId?: number
+  profissionalPublicGuid?: string
 }
 
 export const AGENDAMENTO_STATUS_CANCELAVEL: readonly string[] = [

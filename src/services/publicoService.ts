@@ -1,9 +1,14 @@
 import api from './api'
 import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
+  AgendamentoContextoPublico,
+  AgendamentoCriado,
   ConsultarDisponibilidadeParams,
+  CriarAgendamentoComCadastroPayload,
+  CriarAgendamentoPublicoPayload,
   DisponibilidadeAgenda,
   ProfissionalPublico,
+  PropostaRemarcacao,
   ServicoPublico,
 } from '@/types/agendamento.types'
 import type {
@@ -33,6 +38,14 @@ export const publicoService = {
       .get<ApiSuccessResponse<EstabelecimentoPublico>>(
         `/publico/estabelecimentos/${publicGuid}`,
         { params },
+      )
+      .then(unwrap)
+  },
+
+  obterContextoLojaProfissional(publicGuid: string, profissionalPublicGuid: string) {
+    return api
+      .get<ApiSuccessResponse<AgendamentoContextoPublico>>(
+        `/publico/agendar/loja/${publicGuid}/profissional/${profissionalPublicGuid}`,
       )
       .then(unwrap)
   },
@@ -72,9 +85,43 @@ export const publicoService = {
             dataFim: params.dataFim,
             servicoIds: params.servicoIds,
             profissionalId: params.profissionalId,
+            profissionalPublicGuid: params.profissionalPublicGuid,
           },
         },
       )
+      .then(unwrap)
+  },
+
+  criarAgendamentoLoja(publicGuid: string, payload: CriarAgendamentoPublicoPayload) {
+    return api
+      .post<ApiSuccessResponse<AgendamentoCriado>>(`/publico/agendar/loja/${publicGuid}`, payload)
+      .then(unwrap)
+  },
+
+  criarAgendamentoComCadastro(publicGuid: string, payload: CriarAgendamentoComCadastroPayload) {
+    return api
+      .post<ApiSuccessResponse<AgendamentoCriado>>(
+        `/publico/agendar/loja/${publicGuid}/com-cadastro`,
+        payload,
+      )
+      .then(unwrap)
+  },
+
+  obterPropostaRemarcacao(token: string) {
+    return api
+      .get<ApiSuccessResponse<PropostaRemarcacao>>(`/publico/agendar/remarcacao/${token}`)
+      .then(unwrap)
+  },
+
+  aceitarPropostaRemarcacao(token: string) {
+    return api
+      .post<ApiSuccessResponse<AgendamentoCriado>>(`/publico/agendar/remarcacao/${token}/aceitar`)
+      .then(unwrap)
+  },
+
+  recusarPropostaRemarcacao(token: string) {
+    return api
+      .post<ApiSuccessResponse<unknown>>(`/publico/agendar/remarcacao/${token}/recusar`)
       .then(unwrap)
   },
 }

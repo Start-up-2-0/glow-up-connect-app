@@ -29,10 +29,19 @@ export const clienteRoutes: RouteRecordRaw[] = [
     name: ROUTE_NAMES.LOJA_AGENDAR,
     component: () => import('@/views/dashboard/cliente/AgendarWizardView.vue'),
     meta: {
-      layout: 'dashboard',
-      requiresAuth: true,
-      clienteOnly: true,
+      layout: 'public',
+      skipNegocioGuard: true,
       title: 'Agendar',
+    },
+  },
+  {
+    path: `${ROUTE_PATHS.AGENDAMENTO_REMARCACAO}/:token`,
+    name: ROUTE_NAMES.AGENDAMENTO_REMARCACAO,
+    component: () => import('@/views/dashboard/cliente/RemarcacaoResponderView.vue'),
+    meta: {
+      layout: 'public',
+      skipNegocioGuard: true,
+      title: 'Responder reagendamento',
     },
   },
   {

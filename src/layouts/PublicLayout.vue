@@ -1,7 +1,13 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { computed } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { APP_NAME } from '@/constants/storageKeys'
+import { authRouteWithRedirect } from '@/utils/authRedirect'
+
+const route = useRoute()
+const loginLink = computed(() => authRouteWithRedirect(ROUTE_PATHS.LOGIN, route.fullPath))
+const registerLink = computed(() => authRouteWithRedirect(ROUTE_PATHS.REGISTER, route.fullPath))
 </script>
 
 <template>
@@ -13,13 +19,13 @@ import { APP_NAME } from '@/constants/storageKeys'
         </RouterLink>
         <div class="flex items-center gap-3">
           <RouterLink
-            :to="ROUTE_PATHS.LOGIN"
+            :to="loginLink"
             class="text-sm font-medium text-glow-text-subtle hover:text-glow-text"
           >
             Entrar
           </RouterLink>
           <RouterLink
-            :to="ROUTE_PATHS.REGISTER"
+            :to="registerLink"
             class="rounded-lg bg-glow-gold px-4 py-2 text-sm font-medium text-white hover:brightness-95"
           >
             Criar conta

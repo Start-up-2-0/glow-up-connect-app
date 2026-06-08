@@ -1,31 +1,59 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { publicoService } from '@/services/publicoService'
 import { agendamentoService } from '@/services/agendamentoService'
+import { useAuthStore } from '@/stores/auth.store'
 import type {
   AgendamentoCliente,
-  ProfissionalPublico,
+  AgendamentoContextoPublico,
+  AgendamentoCriado,
   ServicoPublico,
   SlotDisponivel,
 } from '@/types/agendamento.types'
-import { toDateOnlyString, toTimeOnlyString } from '@/utils/formatters'
+import { addDaysToDateOnly, toDateOnlyString, toTimeOnlyString } from '@/utils/formatters'
 
-export type WizardStep = 'servicos' | 'profissional' | 'horario' | 'confirmar'
+const DISPONIBILIDADE_JANELA_DIAS = 31
+import {
+  clearAgendarWizardDraft,
+  readAgendarWizardDraft,
+  writeAgendarWizardDraft,
+  type ModoIdentidadeAgendamento,
+} from '@/utils/agendarWizardStorage'
 
-export function useAgendarWizard(publicGuid: string) {
+export type WizardStep =
+  | 'identidade'
+  | 'servicos'
+  | 'horario'
+  | 'confirmar'
+  | 'sucesso'
+  | 'sucesso_cadastro'
+
+export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: string) {
+  const authStore = useAuthStore()
+  const isVisitante = computed(() => !authStore.isAuthenticated)
+  const profissionalVinculado = computed(() => profissionalPublicGuid.length > 0)
+
+  const contexto = ref<AgendamentoContextoPublico | null>(null)
+  const contextoInvalido = ref(false)
   const step = ref<WizardStep>('servicos')
+  const modoIdentidade = ref<ModoIdentidadeAgendamento | null>(null)
   const loading = ref(false)
   const submitting = ref(false)
   const error = ref<string | null>(null)
+  const agendamentoCriado = ref<AgendamentoCliente | AgendamentoCriado | null>(null)
+  const sucessoCadastroPendente = ref(false)
 
   const servicos = ref<ServicoPublico[]>([])
-  const profissionais = ref<ProfissionalPublico[]>([])
   const slots = ref<SlotDisponivel[]>([])
+  const datasAtendimento = ref<string[]>([])
 
   const selectedServicoIds = ref<number[]>([])
-  const selectedProfissionalGuid = ref<string>('')
   const selectedDate = ref(toDateOnlyString(new Date()))
   const selectedSlot = ref<SlotDisponivel | null>(null)
   const observacao = ref('')
+  const clienteNome = ref('')
+  const clienteEmail = ref('')
+  const clienteTelefone = ref('')
+  const cadastroSenha = ref('')
 
   const selectedServicos = computed(() =>
     servicos.value.filter((s) => selectedServicoIds.value.includes(s.id)),
@@ -37,14 +65,128 @@ export function useAgendarWizard(publicGuid: string) {
     return selected.reduce((sum, s) => sum + s.precoMinimo, 0)
   })
 
+  const minSelectableDate = computed(() => toDateOnlyString(new Date()))
+
+  const maxSelectableDate = computed(() =>
+    addDaysToDateOnly(minSelectableDate.value, DISPONIBILIDADE_JANELA_DIAS - 1),
+  )
+
+  const datasAtendimentoSet = computed(() => new Set(datasAtendimento.value))
+
+  function isDataAtendimentoPermitida(isoDate: string): boolean {
+    return datasAtendimentoSet.value.has(isoDate)
+  }
+
+  function primeiraDataAtendimentoDisponivel(): string | null {
+    const hoje = minSelectableDate.value
+    return datasAtendimento.value.find((data) => data >= hoje) ?? null
+  }
+
+  function garantirDataAtendimentoValida(): boolean {
+    if (datasAtendimento.value.length === 0) {
+      error.value =
+        'Não há dias de atendimento disponíveis para este profissional com os serviços selecionados.'
+      return false
+    }
+
+    if (!isDataAtendimentoPermitida(selectedDate.value)) {
+      const proxima = primeiraDataAtendimentoDisponivel()
+      if (!proxima) {
+        error.value =
+          'Não há dias de atendimento disponíveis para este profissional com os serviços selecionados.'
+        return false
+      }
+      selectedDate.value = proxima
+    }
+
+    return true
+  }
+
+  function persistDraft() {
+    if (!profissionalVinculado.value) return
+    writeAgendarWizardDraft(publicGuid, profissionalPublicGuid, {
+      step: step.value,
+      modoIdentidade: modoIdentidade.value,
+      selectedServicoIds: selectedServicoIds.value,
+      selectedProfissionalGuid: profissionalPublicGuid,
+      selectedDate: selectedDate.value,
+      selectedSlotInicio: selectedSlot.value?.inicio ?? null,
+      observacao: observacao.value,
+      clienteNome: clienteNome.value,
+      clienteEmail: clienteEmail.value,
+      clienteTelefone: clienteTelefone.value,
+      cadastroSenha: cadastroSenha.value,
+    })
+  }
+
+  function restoreDraft() {
+    const draft = readAgendarWizardDraft(publicGuid, profissionalPublicGuid)
+    if (!draft) return
+
+    modoIdentidade.value = draft.modoIdentidade
+    selectedServicoIds.value = draft.selectedServicoIds
+    selectedDate.value = draft.selectedDate
+    observacao.value = draft.observacao
+    clienteNome.value = draft.clienteNome
+    clienteEmail.value = draft.clienteEmail
+    clienteTelefone.value = draft.clienteTelefone
+    cadastroSenha.value = draft.cadastroSenha
+
+    if (draft.selectedSlotInicio) {
+      selectedSlot.value = { inicio: draft.selectedSlotInicio, fim: '', profissionalId: 0 }
+    }
+
+    if (!isVisitante.value && draft.step !== 'identidade') {
+      step.value = draft.step === 'sucesso_cadastro' ? 'servicos' : draft.step
+    }
+  }
+
+  watch(
+    [
+      step,
+      modoIdentidade,
+      selectedServicoIds,
+      selectedDate,
+      selectedSlot,
+      observacao,
+      clienteNome,
+      clienteEmail,
+      clienteTelefone,
+      cadastroSenha,
+    ],
+    persistDraft,
+    { deep: true },
+  )
+
+  async function loadContexto() {
+    if (!profissionalVinculado.value) {
+      contextoInvalido.value = true
+      return
+    }
+
+    loading.value = true
+    error.value = null
+    try {
+      contexto.value = await publicoService.obterContextoLojaProfissional(
+        publicGuid,
+        profissionalPublicGuid,
+      )
+      if (!contexto.value.podeReceberAgendamento) {
+        error.value = 'Este profissional não está recebendo agendamentos no momento.'
+      }
+    } catch {
+      contextoInvalido.value = true
+      error.value = 'Link de agendamento inválido ou profissional não vinculado a esta loja.'
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function loadServicos() {
     loading.value = true
     error.value = null
     try {
-      servicos.value = await publicoService.listarServicosLoja(
-        publicGuid,
-        selectedProfissionalGuid.value || undefined,
-      )
+      servicos.value = await publicoService.listarServicosLoja(publicGuid, profissionalPublicGuid)
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erro ao carregar serviços.'
       throw err
@@ -53,21 +195,27 @@ export function useAgendarWizard(publicGuid: string) {
     }
   }
 
-  async function loadProfissionais() {
-    loading.value = true
-    error.value = null
-    try {
-      profissionais.value = await publicoService.listarProfissionaisLoja(publicGuid)
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Erro ao carregar profissionais.'
-      throw err
-    } finally {
-      loading.value = false
+  async function loadDatasAtendimento() {
+    if (selectedServicoIds.value.length === 0) return
+    const data = await publicoService.consultarDisponibilidadeLoja(publicGuid, {
+      dataInicio: minSelectableDate.value,
+      dataFim: maxSelectableDate.value,
+      servicoIds: selectedServicoIds.value,
+      profissionalPublicGuid,
+    })
+    datasAtendimento.value = data.datasAtendimento ?? []
+    if (data.mensagemIndisponibilidade && datasAtendimento.value.length === 0) {
+      error.value = data.mensagemIndisponibilidade
     }
   }
 
   async function loadDisponibilidade() {
     if (selectedServicoIds.value.length === 0) return
+    if (!garantirDataAtendimentoValida()) {
+      slots.value = []
+      return
+    }
+
     loading.value = true
     error.value = null
     selectedSlot.value = null
@@ -76,9 +224,19 @@ export function useAgendarWizard(publicGuid: string) {
         dataInicio: selectedDate.value,
         dataFim: selectedDate.value,
         servicoIds: selectedServicoIds.value,
+        profissionalPublicGuid,
       })
       slots.value = data.slots
-      if (data.mensagemIndisponibilidade) {
+      if (data.datasAtendimento?.length) {
+        const merged = new Set([...datasAtendimento.value, ...data.datasAtendimento])
+        datasAtendimento.value = [...merged].sort()
+      }
+      const draft = readAgendarWizardDraft(publicGuid, profissionalPublicGuid)
+      if (draft?.selectedSlotInicio) {
+        const match = data.slots.find((slot) => slot.inicio === draft.selectedSlotInicio)
+        if (match) selectedSlot.value = match
+      }
+      if (data.mensagemIndisponibilidade && slots.value.length === 0) {
         error.value = data.mensagemIndisponibilidade
       }
     } catch (err) {
@@ -87,6 +245,24 @@ export function useAgendarWizard(publicGuid: string) {
     } finally {
       loading.value = false
     }
+  }
+
+  async function handleDateChange() {
+    if (!isDataAtendimentoPermitida(selectedDate.value)) {
+      const proxima = primeiraDataAtendimentoDisponivel()
+      if (proxima) {
+        selectedDate.value = proxima
+        error.value = 'Esta data não está na agenda do profissional. Selecionamos o próximo dia disponível.'
+      } else {
+        error.value = 'Esta data não está na agenda do profissional.'
+        slots.value = []
+        selectedSlot.value = null
+        return
+      }
+    } else {
+      error.value = null
+    }
+    await loadDisponibilidade()
   }
 
   function toggleServico(id: number) {
@@ -98,18 +274,32 @@ export function useAgendarWizard(publicGuid: string) {
     }
   }
 
-  async function goToProfissional() {
+  function escolherIdentidade(modo: ModoIdentidadeAgendamento) {
+    modoIdentidade.value = modo
+    error.value = null
+    if (modo === 'guest') {
+      step.value = 'servicos'
+    }
+  }
+
+  async function goToHorario() {
     if (selectedServicoIds.value.length === 0) {
       error.value = 'Selecione ao menos um serviço.'
       return
     }
-    await loadProfissionais()
-    step.value = 'profissional'
-  }
-
-  async function goToHorario() {
     step.value = 'horario'
-    await loadDisponibilidade()
+    loading.value = true
+    error.value = null
+    try {
+      await loadDatasAtendimento()
+      if (!garantirDataAtendimentoValida()) {
+        slots.value = []
+        return
+      }
+      await loadDisponibilidade()
+    } finally {
+      loading.value = false
+    }
   }
 
   function goToConfirmar() {
@@ -121,52 +311,164 @@ export function useAgendarWizard(publicGuid: string) {
     step.value = 'confirmar'
   }
 
-  async function confirmar(): Promise<AgendamentoCliente> {
+  function validarDadosContato(): boolean {
+    if (!isVisitante.value || modoIdentidade.value !== 'guest') return true
+
+    const nome = clienteNome.value.trim()
+    const email = clienteEmail.value.trim()
+    const telefone = clienteTelefone.value.trim()
+
+    if (!nome || !email || !telefone) {
+      error.value = 'Informe nome, e-mail e telefone para concluir o agendamento.'
+      return false
+    }
+
+    return true
+  }
+
+  function validarCadastro(): boolean {
+    const nome = clienteNome.value.trim()
+    const email = clienteEmail.value.trim()
+    const telefone = clienteTelefone.value.trim()
+    const senha = cadastroSenha.value
+
+    if (!nome || !email || !telefone || !senha) {
+      error.value = 'Preencha todos os dados de cadastro.'
+      return false
+    }
+
+    if (senha.length < 6) {
+      error.value = 'A senha deve ter pelo menos 6 caracteres.'
+      return false
+    }
+
+    return true
+  }
+
+  async function confirmar(): Promise<AgendamentoCliente | AgendamentoCriado> {
     if (!selectedSlot.value) {
       throw new Error('Horário não selecionado.')
     }
+    if (!profissionalPublicGuid) {
+      throw new Error('Profissional não informado.')
+    }
+
     submitting.value = true
     error.value = null
     try {
       const inicio = new Date(selectedSlot.value.inicio)
-      return await agendamentoService.criar({
-        estabelecimentoPublicGuid: publicGuid,
-        profissionalPublicGuid: selectedProfissionalGuid.value || undefined,
+      const horarioInicio = toTimeOnlyString(inicio)
+      const observacaoTrim = observacao.value.trim() || undefined
+      const payloadBase = {
+        profissionalPublicGuid,
         servicoIds: selectedServicoIds.value,
         data: selectedDate.value,
-        horarioInicio: toTimeOnlyString(inicio),
-        observacao: observacao.value.trim() || undefined,
+        horarioInicio,
+        observacao: observacaoTrim,
+      }
+
+      if (isVisitante.value && modoIdentidade.value === 'register') {
+        if (!validarCadastro()) {
+          throw new Error(error.value ?? 'Dados de cadastro inválidos.')
+        }
+
+        const criado = await publicoService.criarAgendamentoComCadastro(publicGuid, {
+          ...payloadBase,
+          cadastro: {
+            nome: clienteNome.value.trim(),
+            email: clienteEmail.value.trim(),
+            telefone: clienteTelefone.value.trim(),
+            senha: cadastroSenha.value,
+          },
+        })
+        agendamentoCriado.value = criado
+        sucessoCadastroPendente.value = true
+        step.value = 'sucesso_cadastro'
+        clearAgendarWizardDraft(publicGuid, profissionalPublicGuid)
+        return criado
+      }
+
+      if (isVisitante.value) {
+        if (!validarDadosContato()) {
+          throw new Error(error.value ?? 'Dados do cliente inválidos.')
+        }
+
+        const criado = await publicoService.criarAgendamentoLoja(publicGuid, {
+          ...payloadBase,
+          clienteNome: clienteNome.value.trim(),
+          clienteEmail: clienteEmail.value.trim(),
+          clienteTelefone: clienteTelefone.value.trim(),
+        })
+        agendamentoCriado.value = criado
+        step.value = 'sucesso'
+        clearAgendarWizardDraft(publicGuid, profissionalPublicGuid)
+        return criado
+      }
+
+      const criado = await agendamentoService.criar({
+        estabelecimentoPublicGuid: publicGuid,
+        ...payloadBase,
       })
+      agendamentoCriado.value = criado
+      clearAgendarWizardDraft(publicGuid, profissionalPublicGuid)
+      return criado
     } finally {
       submitting.value = false
     }
   }
 
   async function init() {
+    restoreDraft()
+    await loadContexto()
+    if (contextoInvalido.value) return
+
+    if (isVisitante.value && !modoIdentidade.value) {
+      step.value = 'identidade'
+      return
+    }
+
     await loadServicos()
+    if (step.value === 'horario') {
+      await loadDisponibilidade()
+    }
   }
 
   return {
     step,
+    modoIdentidade,
     loading,
     submitting,
     error,
+    contexto,
+    contextoInvalido,
+    agendamentoCriado,
+    sucessoCadastroPendente,
+    isVisitante,
+    profissionalVinculado,
     servicos,
-    profissionais,
     slots,
+    datasAtendimento,
+    minSelectableDate,
+    maxSelectableDate,
+    isDataAtendimentoPermitida,
     selectedServicoIds,
-    selectedProfissionalGuid,
     selectedDate,
     selectedSlot,
     observacao,
+    clienteNome,
+    clienteEmail,
+    clienteTelefone,
+    cadastroSenha,
     selectedServicos,
     valorEstimado,
     toggleServico,
+    escolherIdentidade,
     loadDisponibilidade,
-    goToProfissional,
+    handleDateChange,
     goToHorario,
     goToConfirmar,
     confirmar,
     init,
+    persistDraft,
   }
 }

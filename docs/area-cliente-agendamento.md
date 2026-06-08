@@ -26,7 +26,8 @@ sequenceDiagram
 |------|---------------|-----------|
 | Explorar lojas | `/explorar` | [descoberta-estabelecimentos.md](./descoberta-estabelecimentos.md) |
 | Detalhe da loja | `/loja/{publicGuid}` | Este documento |
-| Wizard de agendamento | `/loja/{publicGuid}/agendar` | Rotas publicas abaixo |
+| Wizard de agendamento | `/loja/{publicGuid}/agendar?profissional={guid}` | [agendamento-publico-profissional.md](./acesso/agendamento-publico-profissional.md) |
+| Responder reagendamento | `/agendamento/remarcacao/{token}` | Mesmo documento |
 | Meus agendamentos | `/meus-agendamentos` | Este documento |
 
 ---
