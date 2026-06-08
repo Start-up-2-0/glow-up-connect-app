@@ -9,8 +9,20 @@ export interface ConviteNegocio {
   criadoEm: string
 }
 
+import type { ProfissionalEquipe, UsuarioEquipe } from '@/types/negocio/equipe.types'
+
 export interface ConviteCriado extends ConviteNegocio {
   linkConvite: string
+}
+
+export type TipoResultadoConvite = 'Convite' | 'Vinculado'
+
+export interface ConviteOuVinculo {
+  tipoResultado: TipoResultadoConvite
+  linkConvite?: string | null
+  convite?: ConviteCriado | null
+  vinculoUsuario?: UsuarioEquipe | null
+  vinculoProfissional?: ProfissionalEquipe | null
 }
 
 export interface ConvitePreview {

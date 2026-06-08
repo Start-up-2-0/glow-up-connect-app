@@ -44,6 +44,7 @@ export const ROUTE_NAMES = {
   CONFIG_EQUIPE_CONVITES: 'config-equipe-convites',
   CONFIG_EQUIPE_NOVO: 'config-equipe-novo',
   CONFIG_EQUIPE_USUARIO_NOVO: 'config-equipe-usuario-novo',
+  CONFIG_PROFISSIONAIS_VITRINE: 'config-profissionais-vitrine',
   FINANCEIRO_CAIXA: 'financeiro-caixa',
   FINANCEIRO_COMISSOES: 'financeiro-comissoes',
   FINANCEIRO_RELATORIOS: 'financeiro-relatorios',
@@ -94,6 +95,7 @@ export const ROUTE_PATHS = {
   CONFIG_EQUIPE_CONVITES: '/configuracoes/equipe/convites',
   CONFIG_EQUIPE_NOVO: '/configuracoes/equipe/novo',
   CONFIG_EQUIPE_USUARIO_NOVO: '/configuracoes/equipe/usuarios/novo',
+  CONFIG_PROFISSIONAIS_VITRINE: '/configuracoes/profissionais-vitrine',
   FINANCEIRO_CAIXA: '/financeiro/caixa',
   FINANCEIRO_COMISSOES: '/financeiro/comissoes',
   FINANCEIRO_RELATORIOS: '/financeiro/relatorios',
@@ -137,6 +139,8 @@ declare module 'vue-router' {
     requerPermissao?: string
     requerPermissoes?: string[]
     requerAssinaturaAtiva?: boolean
+    /** Rota exclusiva de planos sem o módulo indicado (ex.: vitrine Basic) */
+    requerSemModulo?: string
     skipNegocioGuard?: boolean
     /** Checkout de assinatura — usuário Cliente recém-cadastrado pode acessar */
     allowClienteOnboarding?: boolean

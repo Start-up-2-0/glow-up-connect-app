@@ -2,7 +2,7 @@ import api from './api'
 import { negocioPath } from '@/utils/negocioApi'
 import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
-  ConviteCriado,
+  ConviteOuVinculo,
   ConviteNegocio,
   ConvitePreview,
   StatusConviteFiltro,
@@ -19,7 +19,7 @@ function unwrap<T>(response: { data: ApiSuccessResponse<T> }): T {
 export const conviteService = {
   criarConviteProfissional(estabelecimentoId: number, payload: CriarConviteProfissionalPayload) {
     return api
-      .post<ApiSuccessResponse<ConviteCriado>>(
+      .post<ApiSuccessResponse<ConviteOuVinculo>>(
         negocioPath(estabelecimentoId, '/convites/profissionais'),
         payload,
       )
@@ -28,7 +28,7 @@ export const conviteService = {
 
   criarConviteUsuario(estabelecimentoId: number, payload: CriarConviteUsuarioEquipePayload) {
     return api
-      .post<ApiSuccessResponse<ConviteCriado>>(
+      .post<ApiSuccessResponse<ConviteOuVinculo>>(
         negocioPath(estabelecimentoId, '/convites/usuarios'),
         payload,
       )

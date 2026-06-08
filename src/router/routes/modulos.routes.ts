@@ -195,6 +195,20 @@ export const modulosRoutes: RouteRecordRaw[] = [
     },
   },
   {
+    path: ROUTE_PATHS.CONFIG_PROFISSIONAIS_VITRINE,
+    name: ROUTE_NAMES.CONFIG_PROFISSIONAIS_VITRINE,
+    component: () => import('@/views/modulos/profissionais/ProfissionaisVitrineView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'HorariosAtendimento',
+      requerSemModulo: 'Profissionais',
+      requerPermissao: 'ProfissionalGerenciar',
+      title: 'Profissionais',
+    },
+  },
+  {
     path: ROUTE_PATHS.CONFIG_PERFIL,
     name: ROUTE_NAMES.CONFIG_PERFIL,
     component: () => import('@/views/modulos/perfil/PerfilEstabelecimentoView.vue'),

@@ -12,6 +12,7 @@ import type {
   ListarProximosParams,
   ObterEstabelecimentoParams,
 } from '@/types/estabelecimento.types'
+import type { ProfissionalVitrinePublico } from '@/types/negocio/profissionalVitrine.types'
 
 function unwrap<T>(response: { data: ApiSuccessResponse<T> }): T {
   return response.data.data
@@ -49,6 +50,14 @@ export const publicoService = {
     return api
       .get<ApiSuccessResponse<ProfissionalPublico[]>>(
         `/publico/agendar/loja/${publicGuid}/profissionais`,
+      )
+      .then(unwrap)
+  },
+
+  listarProfissionaisVitrine(publicGuid: string) {
+    return api
+      .get<ApiSuccessResponse<ProfissionalVitrinePublico[]>>(
+        `/publico/estabelecimentos/${publicGuid}/profissionais-vitrine`,
       )
       .then(unwrap)
   },

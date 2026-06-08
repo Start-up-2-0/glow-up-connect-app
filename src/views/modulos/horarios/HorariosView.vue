@@ -11,6 +11,7 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { horarioService } from '@/services/horarioService'
 import { equipeService } from '@/services/equipeService'
+import { profissionalVitrineService } from '@/services/profissionalVitrineService'
 import {
   DIAS_SEMANA,
   diaSemanaLabel,
@@ -37,6 +38,7 @@ const aba = ref<'loja' | 'profissional'>('loja')
 const horariosLoja = ref<HorarioFuncionamento[]>([])
 const horariosProfissionais = ref<HorarioProfissional[]>([])
 const profissionais = ref<ProfissionalEquipe[]>([])
+const profissionaisVitrine = ref<{ profissionalId: number; nomePublico: string }[]>([])
 const profissionalSelecionadoId = ref<number | null>(null)
 const loading = ref(false)
 const showFormLoja = ref(false)
@@ -50,6 +52,15 @@ const formLoja = ref(emptyForm())
 const formProfissional = ref(emptyForm())
 
 const temModuloProfissionais = computed(() => possuiModulo('Profissionais'))
+const usaProfissionaisVitrine = computed(() => !temModuloProfissionais.value)
+const listaProfissionaisHorario = computed(() =>
+  temModuloProfissionais.value
+    ? profissionais.value.map((p) => ({
+        profissionalId: p.profissionalId,
+        nomePublico: p.nomePublico,
+      }))
+    : profissionaisVitrine.value,
+)
 const podeGerenciarLoja = computed(() => possuiPermissao('HorarioGerenciar'))
 const podeGerenciarProfissional = computed(
   () => possuiPermissao('HorarioGerenciar') || possuiPermissao('HorarioGerenciarProprio'),
@@ -63,7 +74,7 @@ const horariosDoProfissional = computed(() => {
 })
 
 const profissionalSelecionado = computed(() =>
-  profissionais.value.find((p) => p.profissionalId === profissionalSelecionadoId.value),
+  listaProfissionaisHorario.value.find((p) => p.profissionalId === profissionalSelecionadoId.value),
 )
 
 function resetFormLoja() {
@@ -91,12 +102,16 @@ async function load() {
 
     if (temModuloProfissionais.value) {
       profissionais.value = await equipeService.listarProfissionais(estabelecimentoId.value)
-      if (
-        profissionalSelecionadoId.value === null &&
-        profissionais.value.length > 0
-      ) {
-        profissionalSelecionadoId.value = profissionais.value[0]?.profissionalId ?? null
-      }
+    } else {
+      const vitrine = await profissionalVitrineService.listar(estabelecimentoId.value)
+      profissionaisVitrine.value = vitrine
+        .filter((p) => p.ativo)
+        .map((p) => ({ profissionalId: p.profissionalId, nomePublico: p.nomePublico }))
+    }
+
+    const lista = listaProfissionaisHorario.value
+    if (profissionalSelecionadoId.value === null && lista.length > 0) {
+      profissionalSelecionadoId.value = lista[0]?.profissionalId ?? null
     }
   } catch (err) {
     notifications.push('error', resolveError(err, 'Não foi possível carregar os horários.'))
@@ -289,7 +304,7 @@ watch(
         Loja
       </button>
       <button
-        v-if="temModuloProfissionais"
+        v-if="temModuloProfissionais || usaProfissionaisVitrine"
         type="button"
         class="border-b-2 px-4 py-2 font-urbanist text-sm font-medium transition-colors"
         :class="
@@ -406,8 +421,8 @@ watch(
       </div>
     </template>
 
-    <template v-else-if="temModuloProfissionais">
-      <div v-if="profissionais.length > 0" class="max-w-md">
+    <template v-else-if="temModuloProfissionais || usaProfissionaisVitrine">
+      <div v-if="listaProfissionaisHorario.length > 0" class="max-w-md">
         <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">
           Profissional
         </label>
@@ -415,16 +430,24 @@ watch(
           v-model="profissionalSelecionadoId"
           class="w-full rounded-lg border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm text-glow-text"
         >
-          <option v-for="p in profissionais" :key="p.id" :value="p.profissionalId">
+          <option
+            v-for="p in listaProfissionaisHorario"
+            :key="p.profissionalId"
+            :value="p.profissionalId"
+          >
             {{ p.nomePublico }}
           </option>
         </select>
       </div>
 
-      <BaseCard v-if="profissionais.length === 0">
+      <BaseCard v-if="listaProfissionaisHorario.length === 0">
         <EmptyState
-          title="Nenhum profissional na equipe"
-          description="Convide profissionais em Equipe antes de definir horários."
+          :title="usaProfissionaisVitrine ? 'Nenhum profissional na vitrine' : 'Nenhum profissional na equipe'"
+          :description="
+            usaProfissionaisVitrine
+              ? 'Cadastre profissionais em Profissionais antes de definir horários.'
+              : 'Convide profissionais em Equipe antes de definir horários.'
+          "
         />
       </BaseCard>
 

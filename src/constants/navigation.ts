@@ -4,6 +4,8 @@ import { isClienteRole, type UserRole } from '@/types/user.types'
 export interface NavGateMeta {
   requerModulo?: string
   requerModulos?: string[]
+  /** Exibir apenas quando o estabelecimento não possui este módulo */
+  requerSemModulo?: string
   requerPermissao?: string
   requerPermissoes?: string[]
   /** Default true para itens com gate de módulo */
@@ -52,6 +54,14 @@ export const businessNavItems: NavItem[] = [
     label: 'Horários',
     to: ROUTE_PATHS.CONFIG_HORARIOS,
     requerModulo: 'HorariosAtendimento',
+  },
+  {
+    id: 'profissionais-vitrine',
+    label: 'Profissionais',
+    to: ROUTE_PATHS.CONFIG_PROFISSIONAIS_VITRINE,
+    requerModulo: 'HorariosAtendimento',
+    requerSemModulo: 'Profissionais',
+    requerPermissao: 'ProfissionalGerenciar',
   },
   {
     id: 'equipe',
@@ -153,7 +163,7 @@ export const clienteNavItems: NavItem[] = [
 ]
 
 export const NAV_SEARCH_PLACEHOLDER_BUSINESS =
-  'Dashboard, agenda, serviços, horários, equipe...'
+  'Dashboard, agenda, serviços, horários, profissionais, equipe...'
 
 export const NAV_SEARCH_PLACEHOLDER_CLIENTE =
   'Explorar lojas, agendamentos, perfil...'

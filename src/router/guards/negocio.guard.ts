@@ -94,6 +94,14 @@ export const negocioGuard: NavigationGuard = async (to) => {
     }
   }
 
+  const requerSemModulo = to.matched
+    .map((record) => record.meta.requerSemModulo)
+    .find((m): m is string => Boolean(m))
+
+  if (requerSemModulo && negocioStore.possuiModulo(requerSemModulo)) {
+    return { path: ROUTE_PATHS.DASHBOARD }
+  }
+
   const requerPermissao = to.matched
     .map((record) => record.meta.requerPermissao)
     .find((p): p is string => Boolean(p))

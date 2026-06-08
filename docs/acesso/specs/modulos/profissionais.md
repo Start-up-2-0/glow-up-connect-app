@@ -1,12 +1,26 @@
 # Spec UI — Modulo Profissionais
 
-## Gate
+## Dois modos
+
+| Modo | Plano | Menu | Comportamento |
+|------|-------|------|---------------|
+| **Vitrine** | Basic | Profissionais | Somente exibicao na loja publica; sem usuario/login |
+| **Equipe** | Plus+ | Equipe | Convites, vinculos, perfis com acesso ao app |
+
+## Gate Plus (equipe completa)
 
 - Modulo: `Profissionais`
 - Plano minimo: **Plus**
 - Permissoes: `EquipeGerenciar`, `ProfissionalConvidar`, `ProfissionalGerenciar`
 
-## Menu
+## Gate Basic (vitrine)
+
+- Modulo: `HorariosAtendimento` (sem `Profissionais`)
+- Permissao: `ProfissionalGerenciar`
+- Rota: `/configuracoes/profissionais-vitrine`
+- APIs: `POST/GET/PATCH .../profissionais/vitrine`
+
+## Menu Plus
 
 **Equipe** (item raiz do menu operacional)
 
@@ -16,10 +30,14 @@
 | `/configuracoes/equipe/convites` | Convites pendentes |
 | `/configuracoes/equipe/usuario/novo` | Enviar convite (padrao), vincular ou criar manual |
 
-## Fluxo padrao — convite nominativo por link
+## Fluxo padrao — convite inteligente (Plus)
 
 1. Dono informa **e-mail + funcao** em **Enviar convite**.
-2. API retorna `linkConvite` (`/convites/{token}`) — copiavel na UI; e-mail opcional via fila.
+2. API resolve o e-mail:
+   - Conta **ativa e confirmada** → `tipoResultado: Vinculado` (sem convite pendente).
+   - Conta **nao confirmada** → erro `CONVITE_USUARIO_NAO_CONFIRMADO`.
+   - **Sem conta** → `tipoResultado: Convite` com `linkConvite` (`/convites/{token}`).
+3. UI: vinculado redireciona para equipe; convite exibe link copiavel.
 3. Convidado abre o link (sem login): ve preview do estabelecimento e funcao.
 4. Sem conta: **Criar conta** com o e-mail do convite e senha propria → confirma e-mail → volta ao link.
 5. Com conta: **Login** com redirect ao convite → aceita ou rejeita.
@@ -39,11 +57,15 @@
 | Cancelar convite | EquipeGerenciar | DELETE `.../convites/{id}` |
 | Vinculo direto (conta existente) | EquipeGerenciar | POST `/equipe/usuarios`, POST `/equipe/profissionais` |
 
-## Bloqueio Basic
+## Basic — vitrine (sem modulo Profissionais)
 
-Sem modulo: item **Equipe** oculto. Se usuario acessa rota direta:
+- Menu **Profissionais** visivel (nao **Equipe**).
+- Cadastro local sem e-mail/senha/convite.
+- Cliente publico **nao** agenda com profissional vitrine; dono **sim** na agenda interna (`OrigemAgendamento.Logado`).
 
-- Modal upgrade: "Gerencie sua equipe com o plano **Plus**".
+## Bloqueio Plus em rotas de equipe
+
+Sem modulo: item **Equipe** oculto. Rota direta `/configuracoes/equipe` → upgrade Plus.
 
 ## Limite Basic (se downgrade futuro)
 
@@ -51,7 +73,12 @@ Sem modulo: item **Equipe** oculto. Se usuario acessa rota direta:
 
 ## Criterios de aceite
 
-- [ ] Dono convida por e-mail e recebe link copiavel.
+- [ ] E-mail com conta ativa vincula na hora (convite inteligente).
+- [ ] E-mail novo recebe link copiavel.
+- [ ] E-mail nao confirmado exibe erro claro.
+- [ ] Basic cadastra profissional vitrine (limite 1).
+- [ ] Profissional vitrine aparece na pagina publica da loja.
+- [ ] Dono convida por e-mail e recebe link copiavel quando necessario.
 - [ ] Convidado cadastra com senha propria, confirma e-mail e aceita convite.
 - [ ] E-mail divergente no aceite exibe erro claro.
 - [ ] Lista de convites pendentes com cancelamento.
