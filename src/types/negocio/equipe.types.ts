@@ -29,11 +29,23 @@ export interface ProfissionalEquipe {
 }
 
 export interface CadastrarUsuarioEquipePayload {
-  usuarioId: number
+  email?: string
+  telefone?: string
   role: EstablishmentUserRole
 }
 
-export interface ConvidarProfissionalPayload {
-  profissionalId: number
+/** Vínculo direto quando o profissional já existe na plataforma. */
+export interface ConvidarProfissionalEquipePayload {
+  email?: string
+  telefone?: string
+  nomePublico?: string
+  podeReceberAgendamento?: boolean
+}
+
+/** Convite por e-mail (fluxo com token e aceite). */
+export interface CriarConviteProfissionalPayload {
+  email: string
+  telefone?: string
+  nomePublico?: string
   podeReceberAgendamento?: boolean
 }

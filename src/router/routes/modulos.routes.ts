@@ -145,6 +145,19 @@ export const modulosRoutes: RouteRecordRaw[] = [
     },
   },
   {
+    path: ROUTE_PATHS.CONFIG_EQUIPE_USUARIO_NOVO,
+    name: ROUTE_NAMES.CONFIG_EQUIPE_USUARIO_NOVO,
+    component: () => import('@/views/modulos/equipe/EquipeUsuarioNovoView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'Profissionais',
+      requerPermissao: 'EquipeGerenciar',
+      title: 'Adicionar usuário',
+    },
+  },
+  {
     path: ROUTE_PATHS.CONFIG_EQUIPE_NOVO,
     name: ROUTE_NAMES.CONFIG_EQUIPE_NOVO,
     component: () => import('@/views/modulos/equipe/EquipeNovoView.vue'),
@@ -153,7 +166,7 @@ export const modulosRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       businessOnly: true,
       requerModulo: 'Profissionais',
-      requerPermissao: 'EquipeGerenciar',
+      requerPermissao: 'ProfissionalConvidar',
       title: 'Convidar profissional',
     },
   },

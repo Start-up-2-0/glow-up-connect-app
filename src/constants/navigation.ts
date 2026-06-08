@@ -48,6 +48,25 @@ export const businessNavItems: NavItem[] = [
     requerModulo: 'Servicos',
   },
   {
+    id: 'horarios',
+    label: 'Horários',
+    to: ROUTE_PATHS.CONFIG_HORARIOS,
+    requerModulo: 'HorariosAtendimento',
+  },
+  {
+    id: 'equipe',
+    label: 'Equipe',
+    to: ROUTE_PATHS.CONFIG_EQUIPE,
+    requerModulo: 'Profissionais',
+    requerPermissao: 'EquipeGerenciar',
+  },
+  {
+    id: 'whatsapp',
+    label: 'WhatsApp',
+    to: ROUTE_PATHS.CONFIG_WHATSAPP,
+    requerModulo: 'WhatsApp',
+  },
+  {
     id: 'financeiro',
     label: 'Financeiro',
     requerModulos: ['Caixa', 'Financeiro'],
@@ -84,43 +103,18 @@ export const businessNavItems: NavItem[] = [
     ],
   },
   {
-    id: 'configuracoes',
-    label: 'Configurações',
-    children: [
-      {
-        id: 'config-perfil',
-        label: 'Perfil',
-        to: ROUTE_PATHS.CONFIG_PERFIL,
-        requerModulo: 'Estabelecimento',
-        requerAssinatura: false,
-      },
-      {
-        id: 'config-horarios',
-        label: 'Horários',
-        to: ROUTE_PATHS.CONFIG_HORARIOS,
-        requerModulo: 'HorariosAtendimento',
-      },
-      {
-        id: 'config-assinatura',
-        label: 'Assinatura',
-        to: ROUTE_PATHS.CONFIG_ASSINATURA,
-        requerModulo: 'Assinatura',
-        requerAssinatura: false,
-      },
-      {
-        id: 'config-equipe',
-        label: 'Equipe',
-        to: ROUTE_PATHS.CONFIG_EQUIPE,
-        requerModulo: 'Profissionais',
-        requerPermissao: 'EquipeGerenciar',
-      },
-      {
-        id: 'config-whatsapp',
-        label: 'WhatsApp',
-        to: ROUTE_PATHS.CONFIG_WHATSAPP,
-        requerModulo: 'WhatsApp',
-      },
-    ],
+    id: 'perfil-estabelecimento',
+    label: 'Perfil',
+    to: ROUTE_PATHS.CONFIG_PERFIL,
+    requerModulo: 'Estabelecimento',
+    requerAssinatura: false,
+  },
+  {
+    id: 'assinatura',
+    label: 'Assinatura',
+    to: ROUTE_PATHS.CONFIG_ASSINATURA,
+    requerModulo: 'Assinatura',
+    requerAssinatura: false,
   },
 ]
 
@@ -159,7 +153,7 @@ export const clienteNavItems: NavItem[] = [
 ]
 
 export const NAV_SEARCH_PLACEHOLDER_BUSINESS =
-  'Dashboard, agenda, serviços, assinatura...'
+  'Dashboard, agenda, serviços, horários, equipe...'
 
 export const NAV_SEARCH_PLACEHOLDER_CLIENTE =
   'Explorar lojas, agendamentos, perfil...'

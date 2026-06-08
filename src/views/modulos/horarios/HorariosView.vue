@@ -1,52 +1,237 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
+import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { horarioService } from '@/services/horarioService'
+import { equipeService } from '@/services/equipeService'
+import {
+  DIAS_SEMANA,
+  diaSemanaLabel,
+  horaParaApi,
+  horaParaExibicao,
+  type DiaSemanaValue,
+} from '@/constants/diasSemana'
 import type { HorarioFuncionamento, HorarioProfissional } from '@/types/negocio/horario.types'
+import type { ProfissionalEquipe } from '@/types/negocio/equipe.types'
 
-const DIA_LABELS: Record<string, string> = {
-  Domingo: 'Domingo',
-  Segunda: 'Segunda-feira',
-  Terca: 'Terça-feira',
-  Quarta: 'Quarta-feira',
-  Quinta: 'Quinta-feira',
-  Sexta: 'Sexta-feira',
-  Sabado: 'Sábado',
-}
-
-function diaLabel(dia: string): string {
-  return DIA_LABELS[dia] ?? dia
-}
+const emptyForm = () => ({
+  diaSemana: 'Monday' as DiaSemanaValue,
+  horaInicio: '09:00',
+  horaFim: '18:00',
+})
 
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
+const { possuiModulo, possuiPermissao } = useNegocioContext()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 
 const aba = ref<'loja' | 'profissional'>('loja')
 const horariosLoja = ref<HorarioFuncionamento[]>([])
 const horariosProfissionais = ref<HorarioProfissional[]>([])
+const profissionais = ref<ProfissionalEquipe[]>([])
+const profissionalSelecionadoId = ref<number | null>(null)
 const loading = ref(false)
+const showFormLoja = ref(false)
+const showFormProfissional = ref(false)
+const saving = ref(false)
+const togglingId = ref<number | null>(null)
+const editingLojaId = ref<number | null>(null)
+const editingProfissionalId = ref<number | null>(null)
+
+const formLoja = ref(emptyForm())
+const formProfissional = ref(emptyForm())
+
+const temModuloProfissionais = computed(() => possuiModulo('Profissionais'))
+const podeGerenciarLoja = computed(() => possuiPermissao('HorarioGerenciar'))
+const podeGerenciarProfissional = computed(
+  () => possuiPermissao('HorarioGerenciar') || possuiPermissao('HorarioGerenciarProprio'),
+)
+
+const horariosDoProfissional = computed(() => {
+  if (!profissionalSelecionadoId.value) return []
+  return horariosProfissionais.value.filter(
+    (h) => h.profissionalId === profissionalSelecionadoId.value,
+  )
+})
+
+const profissionalSelecionado = computed(() =>
+  profissionais.value.find((p) => p.profissionalId === profissionalSelecionadoId.value),
+)
+
+function resetFormLoja() {
+  formLoja.value = emptyForm()
+  editingLojaId.value = null
+  showFormLoja.value = false
+}
+
+function resetFormProfissional() {
+  formProfissional.value = emptyForm()
+  editingProfissionalId.value = null
+  showFormProfissional.value = false
+}
 
 async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
   try {
-    const [loja, profissionais] = await Promise.all([
+    const [loja, horariosProf] = await Promise.all([
       horarioService.listarLoja(estabelecimentoId.value),
       horarioService.listarProfissionais(estabelecimentoId.value),
     ])
     horariosLoja.value = loja
-    horariosProfissionais.value = profissionais
+    horariosProfissionais.value = horariosProf
+
+    if (temModuloProfissionais.value) {
+      profissionais.value = await equipeService.listarProfissionais(estabelecimentoId.value)
+      if (
+        profissionalSelecionadoId.value === null &&
+        profissionais.value.length > 0
+      ) {
+        profissionalSelecionadoId.value = profissionais.value[0]?.profissionalId ?? null
+      }
+    }
   } catch (err) {
     notifications.push('error', resolveError(err, 'Não foi possível carregar os horários.'))
   } finally {
     loading.value = false
+  }
+}
+
+async function handleCriarLoja() {
+  if (!estabelecimentoId.value || !podeGerenciarLoja.value) return
+  saving.value = true
+  try {
+    const payload = {
+      diaSemana: formLoja.value.diaSemana,
+      horaInicio: horaParaApi(formLoja.value.horaInicio),
+      horaFim: horaParaApi(formLoja.value.horaFim),
+    }
+    if (editingLojaId.value) {
+      const atualizado = await horarioService.atualizarLoja(
+        estabelecimentoId.value,
+        editingLojaId.value,
+        payload,
+      )
+      horariosLoja.value = horariosLoja.value.map((h) =>
+        h.id === editingLojaId.value ? atualizado : h,
+      )
+      notifications.push('success', 'Horário atualizado.')
+    } else {
+      const criado = await horarioService.criarLoja(estabelecimentoId.value, payload)
+      horariosLoja.value = [...horariosLoja.value, criado]
+      notifications.push('success', 'Horário criado.')
+    }
+    resetFormLoja()
+  } catch (err) {
+    notifications.push('error', resolveError(err, 'Não foi possível salvar o horário da loja.'))
+  } finally {
+    saving.value = false
+  }
+}
+
+function iniciarEdicaoLoja(h: HorarioFuncionamento) {
+  editingLojaId.value = h.id
+  formLoja.value = {
+    diaSemana: h.diaSemana as DiaSemanaValue,
+    horaInicio: horaParaExibicao(h.horaInicio),
+    horaFim: horaParaExibicao(h.horaFim),
+  }
+  showFormLoja.value = true
+}
+
+async function handleToggleLoja(h: HorarioFuncionamento) {
+  if (!estabelecimentoId.value || !podeGerenciarLoja.value) return
+  togglingId.value = h.id
+  try {
+    const atualizado = await horarioService.alterarStatusLoja(
+      estabelecimentoId.value,
+      h.id,
+      !h.ativo,
+    )
+    horariosLoja.value = horariosLoja.value.map((item) => (item.id === h.id ? atualizado : item))
+    notifications.push('success', atualizado.ativo ? 'Horário ativado.' : 'Horário desativado.')
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    togglingId.value = null
+  }
+}
+
+async function handleCriarProfissional() {
+  if (!estabelecimentoId.value || !profissionalSelecionadoId.value || !podeGerenciarProfissional.value)
+    return
+  saving.value = true
+  try {
+    const payload = {
+      diaSemana: formProfissional.value.diaSemana,
+      horaInicio: horaParaApi(formProfissional.value.horaInicio),
+      horaFim: horaParaApi(formProfissional.value.horaFim),
+    }
+    if (editingProfissionalId.value) {
+      const atualizado = await horarioService.atualizarProfissional(
+        estabelecimentoId.value,
+        editingProfissionalId.value,
+        payload,
+      )
+      horariosProfissionais.value = horariosProfissionais.value.map((h) =>
+        h.id === editingProfissionalId.value ? atualizado : h,
+      )
+      notifications.push('success', 'Horário do profissional atualizado.')
+    } else {
+      const criado = await horarioService.criarProfissional(
+        estabelecimentoId.value,
+        profissionalSelecionadoId.value,
+        payload,
+      )
+      horariosProfissionais.value = [...horariosProfissionais.value, criado]
+      notifications.push('success', 'Horário do profissional criado.')
+    }
+    resetFormProfissional()
+  } catch (err) {
+    notifications.push(
+      'error',
+      resolveError(err, 'Não foi possível salvar o horário do profissional.'),
+    )
+  } finally {
+    saving.value = false
+  }
+}
+
+function iniciarEdicaoProfissional(h: HorarioProfissional) {
+  editingProfissionalId.value = h.id
+  formProfissional.value = {
+    diaSemana: h.diaSemana as DiaSemanaValue,
+    horaInicio: horaParaExibicao(h.horaInicio),
+    horaFim: horaParaExibicao(h.horaFim),
+  }
+  showFormProfissional.value = true
+}
+
+async function handleToggleProfissional(h: HorarioProfissional) {
+  if (!estabelecimentoId.value || !podeGerenciarProfissional.value) return
+  togglingId.value = h.id
+  try {
+    const atualizado = await horarioService.alterarStatusProfissional(
+      estabelecimentoId.value,
+      h.id,
+      !h.ativo,
+    )
+    horariosProfissionais.value = horariosProfissionais.value.map((item) =>
+      item.id === h.id ? atualizado : item,
+    )
+    notifications.push('success', atualizado.ativo ? 'Horário ativado.' : 'Horário desativado.')
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    togglingId.value = null
   }
 }
 
@@ -61,13 +246,31 @@ watch(
 
 <template>
   <div class="space-y-4 lg:space-y-6">
-    <div>
-      <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-        Horários
-      </h1>
-      <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-        Horários de funcionamento da loja e dos profissionais.
-      </p>
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
+          Horários
+        </h1>
+        <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
+          Horários de funcionamento da loja e dos profissionais.
+        </p>
+      </div>
+      <BaseButton
+        v-if="aba === 'loja' && podeGerenciarLoja"
+        variant="primary"
+        size="sm"
+        @click="showFormLoja ? resetFormLoja() : (showFormLoja = true)"
+      >
+        {{ showFormLoja ? 'Cancelar' : 'Adicionar horário' }}
+      </BaseButton>
+      <BaseButton
+        v-else-if="aba === 'profissional' && podeGerenciarProfissional && profissionalSelecionadoId"
+        variant="primary"
+        size="sm"
+        @click="showFormProfissional ? resetFormProfissional() : (showFormProfissional = true)"
+      >
+        {{ showFormProfissional ? 'Cancelar' : 'Adicionar horário' }}
+      </BaseButton>
     </div>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
@@ -86,6 +289,7 @@ watch(
         Loja
       </button>
       <button
+        v-if="temModuloProfissionais"
         type="button"
         class="border-b-2 px-4 py-2 font-urbanist text-sm font-medium transition-colors"
         :class="
@@ -98,6 +302,65 @@ watch(
         Profissional
       </button>
     </div>
+
+    <BaseCard v-if="aba === 'loja' && showFormLoja && podeGerenciarLoja" :title="editingLojaId ? 'Editar horário' : 'Novo horário da loja'">
+      <form class="space-y-4" @submit.prevent="handleCriarLoja">
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div>
+            <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">
+              Dia da semana
+            </label>
+            <select
+              v-model="formLoja.diaSemana"
+              class="w-full rounded-lg border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm text-glow-text"
+              required
+            >
+              <option v-for="dia in DIAS_SEMANA" :key="dia.value" :value="dia.value">
+                {{ dia.label }}
+              </option>
+            </select>
+          </div>
+          <BaseInput v-model="formLoja.horaInicio" label="Início" type="time" required />
+          <BaseInput v-model="formLoja.horaFim" label="Fim" type="time" required />
+        </div>
+        <div class="flex justify-end gap-2">
+          <BaseButton type="button" variant="secondary" @click="resetFormLoja">Cancelar</BaseButton>
+          <BaseButton type="submit" :loading="saving">Salvar</BaseButton>
+        </div>
+      </form>
+    </BaseCard>
+
+    <BaseCard
+      v-if="aba === 'profissional' && showFormProfissional && podeGerenciarProfissional"
+      :title="editingProfissionalId ? 'Editar horário' : 'Novo horário do profissional'"
+    >
+      <form class="space-y-4" @submit.prevent="handleCriarProfissional">
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div>
+            <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">
+              Dia da semana
+            </label>
+            <select
+              v-model="formProfissional.diaSemana"
+              class="w-full rounded-lg border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm text-glow-text"
+              required
+            >
+              <option v-for="dia in DIAS_SEMANA" :key="dia.value" :value="dia.value">
+                {{ dia.label }}
+              </option>
+            </select>
+          </div>
+          <BaseInput v-model="formProfissional.horaInicio" label="Início" type="time" required />
+          <BaseInput v-model="formProfissional.horaFim" label="Fim" type="time" required />
+        </div>
+        <div class="flex justify-end gap-2">
+          <BaseButton type="button" variant="secondary" @click="resetFormProfissional">
+            Cancelar
+          </BaseButton>
+          <BaseButton type="submit" :loading="saving">Salvar</BaseButton>
+        </div>
+      </form>
+    </BaseCard>
 
     <LoadingSpinner v-if="contextLoading || loading" />
 
@@ -115,10 +378,10 @@ watch(
           class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-glow-border-soft bg-glow-surface px-4 py-3"
         >
           <span class="font-urbanist text-sm font-medium text-glow-text">
-            {{ diaLabel(h.diaSemana) }}
+            {{ diaSemanaLabel(h.diaSemana) }}
           </span>
           <span class="font-urbanist text-sm text-glow-text-subtle">
-            {{ h.horaInicio.slice(0, 5) }} – {{ h.horaFim.slice(0, 5) }}
+            {{ horaParaExibicao(h.horaInicio) }} – {{ horaParaExibicao(h.horaFim) }}
           </span>
           <span
             class="inline-flex rounded-full px-2 py-0.5 font-urbanist text-xs"
@@ -126,28 +389,63 @@ watch(
           >
             {{ h.ativo ? 'Ativo' : 'Inativo' }}
           </span>
+          <div v-if="podeGerenciarLoja" class="flex gap-2">
+            <BaseButton variant="secondary" size="sm" @click="iniciarEdicaoLoja(h)">
+              Editar
+            </BaseButton>
+            <BaseButton
+              variant="secondary"
+              size="sm"
+              :loading="togglingId === h.id"
+              @click="handleToggleLoja(h)"
+            >
+              {{ h.ativo ? 'Desativar' : 'Ativar' }}
+            </BaseButton>
+          </div>
         </div>
       </div>
     </template>
 
-    <template v-else>
-      <BaseCard v-if="horariosProfissionais.length === 0">
+    <template v-else-if="temModuloProfissionais">
+      <div v-if="profissionais.length > 0" class="max-w-md">
+        <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">
+          Profissional
+        </label>
+        <select
+          v-model="profissionalSelecionadoId"
+          class="w-full rounded-lg border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm text-glow-text"
+        >
+          <option v-for="p in profissionais" :key="p.id" :value="p.profissionalId">
+            {{ p.nomePublico }}
+          </option>
+        </select>
+      </div>
+
+      <BaseCard v-if="profissionais.length === 0">
         <EmptyState
-          title="Nenhum horário de profissional"
-          description="Os horários dos profissionais aparecerão aqui quando configurados."
+          title="Nenhum profissional na equipe"
+          description="Convide profissionais em Equipe antes de definir horários."
         />
       </BaseCard>
+
+      <BaseCard v-else-if="horariosDoProfissional.length === 0">
+        <EmptyState
+          :title="`Nenhum horário para ${profissionalSelecionado?.nomePublico ?? 'o profissional'}`"
+          description="Adicione os horários de atendimento deste profissional."
+        />
+      </BaseCard>
+
       <div v-else class="space-y-2">
         <div
-          v-for="h in horariosProfissionais"
+          v-for="h in horariosDoProfissional"
           :key="h.id"
           class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-glow-border-soft bg-glow-surface px-4 py-3"
         >
           <span class="font-urbanist text-sm font-medium text-glow-text">
-            Profissional #{{ h.profissionalId }} · {{ diaLabel(h.diaSemana) }}
+            {{ diaSemanaLabel(h.diaSemana) }}
           </span>
           <span class="font-urbanist text-sm text-glow-text-subtle">
-            {{ h.horaInicio.slice(0, 5) }} – {{ h.horaFim.slice(0, 5) }}
+            {{ horaParaExibicao(h.horaInicio) }} – {{ horaParaExibicao(h.horaFim) }}
           </span>
           <span
             class="inline-flex rounded-full px-2 py-0.5 font-urbanist text-xs"
@@ -155,6 +453,19 @@ watch(
           >
             {{ h.ativo ? 'Ativo' : 'Inativo' }}
           </span>
+          <div v-if="podeGerenciarProfissional" class="flex gap-2">
+            <BaseButton variant="secondary" size="sm" @click="iniciarEdicaoProfissional(h)">
+              Editar
+            </BaseButton>
+            <BaseButton
+              variant="secondary"
+              size="sm"
+              :loading="togglingId === h.id"
+              @click="handleToggleProfissional(h)"
+            >
+              {{ h.ativo ? 'Desativar' : 'Ativar' }}
+            </BaseButton>
+          </div>
         </div>
       </div>
     </template>
