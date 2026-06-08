@@ -6,10 +6,12 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
+import EquipeAdicionarModal from '@/components/equipe/EquipeAdicionarModal.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useApiError } from '@/composables/useApiError'
 import { equipeService } from '@/services/equipeService'
 import type { ProfissionalEquipe, UsuarioEquipe } from '@/types/negocio/equipe.types'
+import type { ModoCadastro } from '@/composables/useEquipeAdicionarForm'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { establishmentRoleLabel } from '@/constants/establishmentRoles'
 import { formatTelefone } from '@/utils/formatters'
@@ -23,6 +25,19 @@ const usuarios = ref<UsuarioEquipe[]>([])
 const profissionais = ref<ProfissionalEquipe[]>([])
 const loading = ref(false)
 const loadError = ref<string | null>(null)
+const menuAberto = ref(false)
+const modalAberto = ref(false)
+const modalModo = ref<ModoCadastro>('convite')
+
+function abrirModal(modo: ModoCadastro) {
+  modalModo.value = modo
+  modalAberto.value = true
+  menuAberto.value = false
+}
+
+async function aoVincular() {
+  await load()
+}
 
 async function load() {
   if (!estabelecimentoId.value) return
@@ -56,18 +71,44 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
           Usuários e profissionais vinculados ao estabelecimento.
         </p>
       </div>
-      <div class="flex flex-wrap gap-2">
-        <RouterLink v-if="aba === 'usuarios'" :to="ROUTE_PATHS.CONFIG_EQUIPE_USUARIO_NOVO">
-          <BaseButton variant="primary" size="sm">Enviar convite</BaseButton>
-        </RouterLink>
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="relative">
+          <BaseButton
+            variant="primary"
+            size="sm"
+            @click="menuAberto = !menuAberto"
+          >
+            Adicionar à equipe
+          </BaseButton>
+          <div
+            v-if="menuAberto"
+            class="absolute right-0 z-20 mt-1 min-w-[12rem] rounded-lg border border-glow-border-soft bg-glow-surface py-1 shadow-lg"
+          >
+            <button
+              type="button"
+              class="block w-full px-4 py-2 text-left font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface"
+              @click="abrirModal('convite')"
+            >
+              Enviar convite
+            </button>
+            <button
+              type="button"
+              class="block w-full px-4 py-2 text-left font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface"
+              @click="abrirModal('vincular')"
+            >
+              Vincular conta
+            </button>
+            <button
+              type="button"
+              class="block w-full px-4 py-2 text-left font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface"
+              @click="abrirModal('criar')"
+            >
+              Criar manual
+            </button>
+          </div>
+        </div>
         <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE_CONVITES">
           <BaseButton variant="secondary" size="sm">Convites</BaseButton>
-        </RouterLink>
-        <RouterLink
-          v-if="aba === 'profissionais'"
-          :to="{ path: ROUTE_PATHS.CONFIG_EQUIPE_USUARIO_NOVO, query: { role: 'Profissional' } }"
-        >
-          <BaseButton variant="primary" size="sm">Enviar convite</BaseButton>
         </RouterLink>
       </div>
     </div>
@@ -118,9 +159,9 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
       <BaseCard v-if="usuarios.length === 0">
         <EmptyState title="Nenhum usuário" description="Cadastre usuários da equipe.">
           <template #action>
-            <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE_USUARIO_NOVO" class="mt-3 inline-block">
-              <BaseButton variant="primary" size="sm">Adicionar usuário</BaseButton>
-            </RouterLink>
+            <BaseButton variant="primary" size="sm" class="mt-3" @click="abrirModal('convite')">
+              Adicionar usuário
+            </BaseButton>
           </template>
         </EmptyState>
       </BaseCard>
@@ -146,7 +187,13 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
 
     <template v-else>
       <BaseCard v-if="profissionais.length === 0">
-        <EmptyState title="Nenhum profissional" description="Convide profissionais para a equipe." />
+        <EmptyState title="Nenhum profissional" description="Convide profissionais para a equipe.">
+          <template #action>
+            <BaseButton variant="primary" size="sm" class="mt-3" @click="abrirModal('convite')">
+              Enviar convite
+            </BaseButton>
+          </template>
+        </EmptyState>
       </BaseCard>
       <div v-else class="space-y-2">
         <div
@@ -170,5 +217,12 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
         </div>
       </div>
     </template>
+
+    <EquipeAdicionarModal
+      v-model="modalAberto"
+      :modo="modalModo"
+      :initial-role="aba === 'profissionais' ? 'Profissional' : undefined"
+      @vinculado="aoVincular"
+    />
   </div>
 </template>

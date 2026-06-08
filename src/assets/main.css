@@ -203,4 +203,20 @@
   .panel-shell__body {
     @apply p-4 lg:p-6;
   }
+
+  .form-section {
+    @apply rounded-lg border border-glow-border-soft bg-glow-canvas p-4;
+  }
+
+  .form-section__title {
+    @apply mb-3 font-urbanist text-xs font-semibold uppercase tracking-wide text-glow-text-subtle;
+  }
+
+  .form-section__grid {
+    @apply grid gap-3 sm:grid-cols-2;
+  }
+
+  .form-section__grid--single {
+    @apply sm:grid-cols-1;
+  }
 }
