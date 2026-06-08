@@ -8,12 +8,13 @@ import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import { conviteService } from '@/services/conviteService'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUserStore } from '@/stores/user.store'
+import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { ROUTE_PATHS, conviteResponderPath } from '@/constants/routes'
 import { establishmentRoleLabel } from '@/constants/establishmentRoles'
 import { authRouteWithRedirect } from '@/utils/authRedirect'
-import { normalizeUserRole, USER_ROLE } from '@/types/user.types'
+import { isClienteRole } from '@/types/user.types'
 import type { ConvitePreview } from '@/types/convite.types'
 
 const route = useRoute()
@@ -65,25 +66,26 @@ async function responder(acao: 'aceitar' | 'rejeitar') {
   actionLoading.value = true
   actionError.value = null
   try {
-    const roleAntes = userStore.profile?.role
     if (acao === 'aceitar') {
       await conviteService.aceitar(token.value)
       success.value = 'Convite aceito com sucesso!'
       notifications.push('success', 'Convite aceito!')
+
+      await userStore.fetchMe(true)
+      if (!isClienteRole(userStore.profile?.role)) {
+        const negocioStore = useNegocioStore()
+        await negocioStore.fetchEstabelecimentos(true)
+        if (preview.value?.estabelecimentoId) {
+          negocioStore.selecionarEstabelecimento(preview.value.estabelecimentoId)
+        }
+      }
     } else {
       await conviteService.rejeitar(token.value)
       success.value = 'Convite rejeitado.'
       notifications.push('info', 'Convite rejeitado.')
     }
 
-    await userStore.fetchMe(true)
-    const roleDepois = normalizeUserRole(userStore.profile?.role ?? USER_ROLE.CLIENTE)
-
-    if (acao === 'aceitar' && roleAntes !== roleDepois) {
-      await router.push(ROUTE_PATHS.DASHBOARD)
-    } else {
-      await router.push(ROUTE_PATHS.DASHBOARD)
-    }
+    await router.push(ROUTE_PATHS.DASHBOARD)
   } catch (err) {
     actionError.value = resolveError(err, 'Não foi possível responder ao convite.')
   } finally {

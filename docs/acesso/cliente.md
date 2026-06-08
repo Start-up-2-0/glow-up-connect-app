@@ -51,7 +51,7 @@ Validacao: agendamento deve pertencer ao `UsuarioClienteId` do usuario logado.
 | POST | `/api/convites/{token}/aceitar` | Aceitar convite para equipe/profissional |
 | POST | `/api/convites/{token}/rejeitar` | Rejeitar convite |
 
-> Ao aceitar convite, o usuario pode passar a ter vinculo de negocio e outra role global pode ser necessaria conforme fluxo de onboarding.
+> Ao aceitar convite, a API promove a role global de `Cliente` para `ProfissionalEstabelecimento` (convite profissional) ou `DonoEstabelecimento` (convite de equipe), liberando `GET /api/usuario/me/estabelecimentos`.
 
 ## Modulos de assinatura
 

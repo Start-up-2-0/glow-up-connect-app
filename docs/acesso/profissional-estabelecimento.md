@@ -20,9 +20,10 @@ Permissoes operacionais seguem a **role no estabelecimento**, nao a role global 
 Convite aceito:
 
 1. `POST /api/convites/{token}/aceitar`
-2. Cria/atualiza `ProfissionalEstabelecimento`
-3. Role no estabelecimento: `Profissional`
-4. Permissoes: ver [estabelecimento/profissional.md](./estabelecimento/profissional.md)
+2. Cria/atualiza `EstabelecimentoUsuario` e `ProfissionalEstabelecimento`
+3. Promove role global de `Cliente` para `ProfissionalEstabelecimento`
+4. Role no estabelecimento: `Profissional`
+5. Permissoes: ver [estabelecimento/profissional.md](./estabelecimento/profissional.md)
 
 ## Modulos
 
