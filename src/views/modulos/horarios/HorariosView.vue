@@ -30,7 +30,7 @@ const emptyForm = () => ({
 
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
-const { possuiModulo, possuiPermissao } = useNegocioContext()
+const { possuiModulo, possuiPermissao, estabelecimentoAtivo } = useNegocioContext()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 
@@ -65,6 +65,10 @@ const podeGerenciarLoja = computed(() => possuiPermissao('HorarioGerenciar'))
 const podeGerenciarProfissional = computed(
   () => possuiPermissao('HorarioGerenciar') || possuiPermissao('HorarioGerenciarProprio'),
 )
+const profissionalProprioId = computed(() => estabelecimentoAtivo.value?.profissionalId ?? null)
+const apenasHorarioProprio = computed(
+  () => podeGerenciarProfissional.value && !podeGerenciarLoja.value,
+)
 
 const horariosDoProfissional = computed(() => {
   if (!profissionalSelecionadoId.value) return []
@@ -93,16 +97,48 @@ async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
   try {
-    const [loja, horariosProf] = await Promise.all([
-      horarioService.listarLoja(estabelecimentoId.value),
-      horarioService.listarProfissionais(estabelecimentoId.value),
-    ])
-    horariosLoja.value = loja
-    horariosProfissionais.value = horariosProf
+    if (apenasHorarioProprio.value) {
+      aba.value = 'profissional'
+    }
 
-    if (temModuloProfissionais.value) {
-      profissionais.value = await equipeService.listarProfissionais(estabelecimentoId.value)
+    const tarefas: Promise<void>[] = []
+
+    if (podeGerenciarLoja.value) {
+      tarefas.push(
+        horarioService.listarLoja(estabelecimentoId.value).then((loja) => {
+          horariosLoja.value = loja
+        }),
+      )
     } else {
+      horariosLoja.value = []
+    }
+
+    tarefas.push(
+      horarioService.listarProfissionais(estabelecimentoId.value).then((horariosProf) => {
+        horariosProfissionais.value = horariosProf
+      }),
+    )
+
+    await Promise.all(tarefas)
+
+    if (apenasHorarioProprio.value && profissionalProprioId.value) {
+      profissionalSelecionadoId.value = profissionalProprioId.value
+      profissionais.value = [
+        {
+          id: 0,
+          estabelecimentoId: estabelecimentoId.value,
+          profissionalId: profissionalProprioId.value,
+          usuarioId: 0,
+          nomePublico: 'Você',
+          email: '',
+          telefone: '',
+          ativo: true,
+          podeReceberAgendamento: true,
+        },
+      ]
+    } else if (temModuloProfissionais.value && possuiPermissao('ProfissionalGerenciar')) {
+      profissionais.value = await equipeService.listarProfissionais(estabelecimentoId.value)
+    } else if (!temModuloProfissionais.value && possuiPermissao('ProfissionalGerenciar')) {
       const vitrine = await profissionalVitrineService.listar(estabelecimentoId.value)
       profissionaisVitrine.value = vitrine
         .filter((p) => p.ativo)
@@ -253,7 +289,11 @@ async function handleToggleProfissional(h: HorarioProfissional) {
 watch(
   ready,
   (isReady) => {
-    if (isReady) void load()
+    if (!isReady) return
+    if (apenasHorarioProprio.value) {
+      aba.value = 'profissional'
+    }
+    void load()
   },
   { immediate: true },
 )
@@ -264,10 +304,14 @@ watch(
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
         <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-          Horários
+          {{ apenasHorarioProprio ? 'Meus horários' : 'Horários' }}
         </h1>
         <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-          Horários de funcionamento da loja e dos profissionais.
+          {{
+            apenasHorarioProprio
+              ? 'Configure os horários em que você atende nesta loja.'
+              : 'Horários de funcionamento da loja e dos profissionais.'
+          }}
         </p>
       </div>
       <BaseButton
@@ -290,7 +334,7 @@ watch(
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
 
-    <div class="flex gap-2 border-b border-glow-border-soft">
+    <div v-if="podeGerenciarLoja" class="flex gap-2 border-b border-glow-border-soft">
       <button
         type="button"
         class="border-b-2 px-4 py-2 font-urbanist text-sm font-medium transition-colors"
@@ -421,8 +465,13 @@ watch(
       </div>
     </template>
 
-    <template v-else-if="temModuloProfissionais || usaProfissionaisVitrine">
-      <div v-if="listaProfissionaisHorario.length > 0" class="max-w-md">
+    <template
+      v-else-if="
+        aba === 'profissional' &&
+        (temModuloProfissionais || usaProfissionaisVitrine || apenasHorarioProprio)
+      "
+    >
+      <div v-if="listaProfissionaisHorario.length > 0 && !apenasHorarioProprio" class="max-w-md">
         <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">
           Profissional
         </label>

@@ -89,6 +89,8 @@ export interface EstabelecimentoAcesso {
   logo: string
   role: string
   possuiVinculoProfissional: boolean
+  profissionalId?: number | null
+  profissionalPublicGuid?: string | null
   permissoes: string[]
   assinaturaAtiva: boolean
   assinaturaId?: number | null

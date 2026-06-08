@@ -48,12 +48,21 @@ export const businessNavItems: NavItem[] = [
     label: 'Serviços',
     to: ROUTE_PATHS.SERVICOS,
     requerModulo: 'Servicos',
+    requerPermissao: 'ServicoGerenciar',
   },
   {
     id: 'horarios',
     label: 'Horários',
     to: ROUTE_PATHS.CONFIG_HORARIOS,
     requerModulo: 'HorariosAtendimento',
+    requerPermissao: 'HorarioGerenciar',
+  },
+  {
+    id: 'meus-horarios',
+    label: 'Meus horários',
+    to: ROUTE_PATHS.CONFIG_HORARIOS,
+    requerModulo: 'HorariosAtendimento',
+    requerPermissao: 'HorarioGerenciarProprio',
   },
   {
     id: 'profissionais-vitrine',
@@ -75,6 +84,7 @@ export const businessNavItems: NavItem[] = [
     label: 'WhatsApp',
     to: ROUTE_PATHS.CONFIG_WHATSAPP,
     requerModulo: 'WhatsApp',
+    requerPermissao: 'NegocioEditar',
   },
   {
     id: 'financeiro',
@@ -104,6 +114,13 @@ export const businessNavItems: NavItem[] = [
         requerPermissao: 'CaixaVisualizar',
       },
       {
+        id: 'financeiro-minhas-comissoes',
+        label: 'Minhas comissões',
+        to: ROUTE_PATHS.FINANCEIRO_COMISSOES,
+        requerModulo: 'ComissaoProfissionais',
+        requerPermissao: 'ComissaoVisualizarPropria',
+      },
+      {
         id: 'financeiro-relatorios',
         label: 'Relatórios',
         to: ROUTE_PATHS.FINANCEIRO_RELATORIOS,
@@ -117,6 +134,7 @@ export const businessNavItems: NavItem[] = [
     label: 'Perfil',
     to: ROUTE_PATHS.CONFIG_PERFIL,
     requerModulo: 'Estabelecimento',
+    requerPermissao: 'NegocioEditar',
     requerAssinatura: false,
   },
   {
@@ -124,6 +142,7 @@ export const businessNavItems: NavItem[] = [
     label: 'Assinatura',
     to: ROUTE_PATHS.CONFIG_ASSINATURA,
     requerModulo: 'Assinatura',
+    requerPermissao: 'NegocioEditar',
     requerAssinatura: false,
   },
 ]

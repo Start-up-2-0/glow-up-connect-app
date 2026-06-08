@@ -12,6 +12,7 @@ import { useAssinaturaStore } from '@/stores/assinatura.store'
 import { labelModulos } from '@/utils/moduloLabels'
 import { useFetchOnce } from '@/composables/useFetchOnce'
 import { ROUTE_PATHS } from '@/constants/routes'
+import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
 
 const negocioStore = useNegocioStore()
 const assinaturaStore = useAssinaturaStore()
@@ -30,6 +31,8 @@ const {
 const { assinatura } = storeToRefs(assinaturaStore)
 
 const { execute: loadNegocio, loading: negocioLoading } = useFetchOnce('negocio-estabelecimentos-resumo')
+
+const { ehProfissionalOperacional } = useAcessoUsuario()
 
 const modulosAmigaveis = computed(() => labelModulos(modulos.value))
 
@@ -72,7 +75,7 @@ onMounted(async () => {
     />
 
     <BaseCard
-      v-if="estabelecimentoAtivo && !assinaturaAtiva"
+      v-if="estabelecimentoAtivo && !assinaturaAtiva && !ehProfissionalOperacional"
       title="Assinatura pendente"
     >
       <p class="mb-4 text-sm text-glow-text-subtle">
@@ -84,7 +87,7 @@ onMounted(async () => {
     </BaseCard>
 
     <div
-      v-if="estabelecimentoAtivo && assinaturaAtiva"
+      v-if="estabelecimentoAtivo && assinaturaAtiva && !ehProfissionalOperacional"
       class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
     >
       <BaseCard title="Agendamentos hoje">
@@ -129,21 +132,26 @@ onMounted(async () => {
         >
           Destaque no marketplace
         </p>
-        <div v-if="modulosAmigaveis.length > 0">
-          <p class="mb-2 text-xs font-medium uppercase tracking-wide text-glow-text-subtle">
-            Módulos do plano
-          </p>
-          <div class="flex flex-wrap gap-2">
-            <span
-              v-for="mod in modulosAmigaveis"
-              :key="mod"
-              class="inline-flex rounded-full bg-glow-canvas px-2.5 py-0.5 text-xs font-medium text-glow-text"
-            >
-              {{ mod }}
-            </span>
+        <template v-if="!ehProfissionalOperacional">
+          <div v-if="modulosAmigaveis.length > 0">
+            <p class="mb-2 text-xs font-medium uppercase tracking-wide text-glow-text-subtle">
+              Módulos do plano
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <span
+                v-for="mod in modulosAmigaveis"
+                :key="mod"
+                class="inline-flex rounded-full bg-glow-canvas px-2.5 py-0.5 text-xs font-medium text-glow-text"
+              >
+                {{ mod }}
+              </span>
+            </div>
           </div>
-        </div>
-        <p v-else class="text-xs text-glow-text-subtle">Nenhum módulo ativo.</p>
+          <p v-else class="text-xs text-glow-text-subtle">Nenhum módulo ativo.</p>
+        </template>
+        <p v-else class="text-xs text-glow-text-subtle">
+          Use a agenda e seus horários para acompanhar os atendimentos desta loja.
+        </p>
       </div>
     </BaseCard>
   </section>

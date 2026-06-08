@@ -10,6 +10,7 @@ import CancelarAgendamentoModal from '@/components/cliente/CancelarAgendamentoMo
 import NotificacoesIndicador from '@/components/negocio/NotificacoesIndicador.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
+import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { agendaNegocioService } from '@/services/agendaNegocioService'
@@ -31,6 +32,7 @@ function dayRange(date: Date) {
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
 const { possuiPermissao } = useNegocioContext()
+const { linkAgendamentoPublico } = useAcessoUsuario()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 
@@ -42,6 +44,25 @@ const cancelModalOpen = ref(false)
 const cancelTargetId = ref<number | null>(null)
 
 const visaoGeral = computed(() => possuiPermissao('AgendaVisualizarGeral'))
+const podeConfirmarOuCancelar = computed(
+  () => possuiPermissao('AgendaCancelar') || possuiPermissao('AgendaReagendar'),
+)
+
+const linkCopiado = ref(false)
+
+async function copiarLinkAgendamento() {
+  if (!linkAgendamentoPublico.value) return
+  try {
+    await navigator.clipboard.writeText(linkAgendamentoPublico.value)
+    linkCopiado.value = true
+    notifications.push('success', 'Link copiado!')
+    window.setTimeout(() => {
+      linkCopiado.value = false
+    }, 2000)
+  } catch {
+    notifications.push('error', 'Não foi possível copiar o link.')
+  }
+}
 
 const itensHoje = computed(() => {
   if (visaoGeral.value) {
@@ -129,10 +150,14 @@ watch(
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
         <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-          Agenda de hoje
+          {{ visaoGeral ? 'Agenda de hoje' : 'Meus agendamentos de hoje' }}
         </h1>
         <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-          Agendamentos do dia atual.
+          {{
+            visaoGeral
+              ? 'Agendamentos do dia atual.'
+              : 'Horários marcados com você nesta loja.'
+          }}
         </p>
         <NotificacoesIndicador class="mt-2" />
       </div>
@@ -145,6 +170,18 @@ watch(
         </RouterLink>
       </div>
     </div>
+
+    <BaseCard v-if="linkAgendamentoPublico" title="Seu link de agendamento">
+      <p class="mb-3 font-urbanist text-sm text-glow-text-subtle">
+        Compartilhe este link para que clientes agendem diretamente com você nesta loja.
+      </p>
+      <p class="mb-3 break-all rounded-lg bg-glow-canvas px-3 py-2 font-urbanist text-xs text-glow-text">
+        {{ linkAgendamentoPublico }}
+      </p>
+      <BaseButton variant="secondary" size="sm" @click="copiarLinkAgendamento">
+        {{ linkCopiado ? 'Copiado!' : 'Copiar link' }}
+      </BaseButton>
+    </BaseCard>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
 
@@ -182,7 +219,7 @@ watch(
           <AgendamentoStatusBadge :status="item.status" />
         </div>
         <div
-          v-if="item.status === 'PendenteConfirmacao'"
+          v-if="item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar"
           class="mt-3 flex flex-wrap gap-2"
         >
           <BaseButton

@@ -53,6 +53,10 @@ const steps = [
 
 onMounted(async () => {
   try {
+    const profissionalGuid = route.query.profissional
+    if (typeof profissionalGuid === 'string' && profissionalGuid.length > 0) {
+      selectedProfissionalGuid.value = profissionalGuid
+    }
     await init()
   } catch (err) {
     error.value = resolveError(err)
