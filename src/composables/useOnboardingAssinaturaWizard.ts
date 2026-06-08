@@ -314,7 +314,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     )
   }
 
-  async function contratarPlano(diaVencimento: number, pagamento: PagamentoAssinaturaPayload) {
+  async function contratarPlano(diaVencimento: number, pagamento?: PagamentoAssinaturaPayload) {
     erro.value = null
 
     if (!plano.value) {
@@ -355,7 +355,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
         },
         gateway: 'MercadoPago',
         diaVencimento,
-        pagamento,
+        ...(pagamento ? { pagamento } : {}),
       })
 
       assinaturaStore.setAssinatura(result)

@@ -44,4 +44,37 @@ export const onboardingRoutes: RouteRecordRaw[] = [
       query: to.query,
     }),
   },
+  {
+    path: ROUTE_PATHS.ASSINATURA_PAGAMENTO_SUCESSO,
+    name: ROUTE_NAMES.ASSINATURA_PAGAMENTO_SUCESSO,
+    component: () => import('@/views/assinatura/AssinaturaPagamentoRetornoView.vue'),
+    meta: {
+      layout: 'auth',
+      requiresAuth: true,
+      skipNegocioGuard: true,
+      title: 'Pagamento aprovado',
+    },
+  },
+  {
+    path: ROUTE_PATHS.ASSINATURA_PAGAMENTO_PENDENTE,
+    name: ROUTE_NAMES.ASSINATURA_PAGAMENTO_PENDENTE,
+    component: () => import('@/views/assinatura/AssinaturaPagamentoRetornoView.vue'),
+    meta: {
+      layout: 'auth',
+      requiresAuth: true,
+      skipNegocioGuard: true,
+      title: 'Pagamento pendente',
+    },
+  },
+  {
+    path: ROUTE_PATHS.ASSINATURA_PAGAMENTO_FALHA,
+    name: ROUTE_NAMES.ASSINATURA_PAGAMENTO_FALHA,
+    component: () => import('@/views/assinatura/AssinaturaPagamentoRetornoView.vue'),
+    meta: {
+      layout: 'auth',
+      requiresAuth: true,
+      skipNegocioGuard: true,
+      title: 'Pagamento não concluído',
+    },
+  },
 ]

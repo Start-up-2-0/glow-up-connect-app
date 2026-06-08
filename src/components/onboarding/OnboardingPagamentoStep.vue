@@ -4,6 +4,7 @@ import CheckoutResumoPlano from '@/components/checkout/CheckoutResumoPlano.vue'
 import CheckoutMetodoPagamentoTabs from '@/components/checkout/CheckoutMetodoPagamentoTabs.vue'
 import MercadoPagoCardForm from '@/components/assinatura/MercadoPagoCardForm.vue'
 import PagamentoPixForm from '@/components/assinatura/PagamentoPixForm.vue'
+import { usarCheckoutPro } from '@/config/mercadopago'
 import PagamentoPixQrPanel from '@/components/assinatura/PagamentoPixQrPanel.vue'
 import { formatBRL } from '@/utils/formatters'
 import { criarPagamentoPix, type MetodoPagamentoAssinatura } from '@/types/pagamento.types'
@@ -23,7 +24,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   back: []
-  submit: [diaVencimento: number, pagamento: PagamentoAssinaturaPayload]
+  submit: [diaVencimento: number, pagamento?: PagamentoAssinaturaPayload]
 }>()
 
 const cardFormRef = ref<InstanceType<typeof MercadoPagoCardForm> | null>(null)
@@ -37,7 +38,7 @@ const permitePix = computed(() => true)
 const exibindoPixGerado = computed(() => Boolean(props.pixQrCode?.trim()))
 
 const trialAtivo = computed(
-  () => props.promocao?.disponivel && metodoPagamento.value === 'cartao',
+  () => !usarCheckoutPro && props.promocao?.disponivel && metodoPagamento.value === 'cartao',
 )
 
 const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
@@ -45,6 +46,7 @@ const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
 const ctaLabel = computed(() => {
   if (props.aguardandoPagamento) return 'Aguardando confirmação...'
   if (tokenizando.value) return 'Validando cartão...'
+  if (usarCheckoutPro) return `Continuar para pagamento — ${formatBRL(totalHoje.value)}`
   if (metodoPagamento.value === 'pix') return `Pagar ${formatBRL(totalHoje.value)} com PIX`
   if (trialAtivo.value) return 'Iniciar período de teste'
   return `Pagar ${formatBRL(totalHoje.value)}`
@@ -76,6 +78,11 @@ async function handleSubmit() {
 
   if (diaVencimento.value === null) {
     erroLocal.value = 'Selecione o dia de vencimento da cobrança.'
+    return
+  }
+
+  if (usarCheckoutPro) {
+    emit('submit', diaVencimento.value)
     return
   }
 
@@ -144,36 +151,46 @@ async function handleSubmit() {
           />
 
           <template v-else>
-            <CheckoutMetodoPagamentoTabs
-              v-model="metodoPagamento"
-              :permite-pix="permitePix"
-            />
-
-            <p
-              v-if="promocao?.disponivel && metodoPagamento === 'pix'"
-              class="mt-4 rounded-lg bg-glow-surface px-3 py-2 text-xs text-glow-text-subtle"
+            <div
+              v-if="usarCheckoutPro"
+              class="rounded-xl border border-glow-border-soft bg-glow-surface/60 p-4 text-sm text-glow-text-subtle"
             >
-              Com PIX a cobrança é imediata e o período de teste não se aplica. Use cartão para os dias grátis.
-            </p>
-
-            <div class="mt-6">
-              <h3 class="checkout-section-title">
-                {{ metodoPagamento === 'pix' ? 'Dados para PIX' : 'Informações de pagamento' }}
-              </h3>
-
-              <PagamentoPixForm
-                v-if="metodoPagamento === 'pix'"
-                ref="pixFormRef"
-                variant="checkout"
-                :error-message="erroVisivel"
-              />
-              <MercadoPagoCardForm
-                v-else
-                ref="cardFormRef"
-                variant="checkout"
-                @error="onCardError"
-              />
+              Você será redirecionado ao Mercado Pago para escolher o meio de pagamento (cartão, PIX, boleto e outros).
+              O estabelecimento só será criado após a confirmação do pagamento.
             </div>
+
+            <template v-else>
+              <CheckoutMetodoPagamentoTabs
+                v-model="metodoPagamento"
+                :permite-pix="permitePix"
+              />
+
+              <p
+                v-if="promocao?.disponivel && metodoPagamento === 'pix'"
+                class="mt-4 rounded-lg bg-glow-surface px-3 py-2 text-xs text-glow-text-subtle"
+              >
+                Com PIX a cobrança é imediata e o período de teste não se aplica. Use cartão para os dias grátis.
+              </p>
+
+              <div class="mt-6">
+                <h3 class="checkout-section-title">
+                  {{ metodoPagamento === 'pix' ? 'Dados para PIX' : 'Informações de pagamento' }}
+                </h3>
+
+                <PagamentoPixForm
+                  v-if="metodoPagamento === 'pix'"
+                  ref="pixFormRef"
+                  variant="checkout"
+                  :error-message="erroVisivel"
+                />
+                <MercadoPagoCardForm
+                  v-else
+                  ref="cardFormRef"
+                  variant="checkout"
+                  @error="onCardError"
+                />
+              </div>
+            </template>
 
             <p v-if="erroVisivel" class="checkout-alert-error mt-4" role="alert">
               {{ erroVisivel }}
