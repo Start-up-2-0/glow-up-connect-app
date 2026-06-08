@@ -146,20 +146,9 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
             role: role.value as 'Admin' | 'Manager' | 'Receptionist',
           })
 
-      if (resultado.tipoResultado === 'Vinculado') {
-        notifications.push(
-          'success',
-          ehProfissional.value
-            ? 'Profissional vinculado à equipe.'
-            : 'Usuário adicionado à equipe.',
-        )
-        await afterVinculo()
-        return
-      }
-
       linkConvite.value = resultado.linkConvite ?? resultado.convite?.linkConvite ?? null
       sucessoDetalhe.value =
-        'Envie o link abaixo. A pessoa deve se cadastrar com este e-mail, confirmar e aceitar o convite.'
+        'Envie o link abaixo. Se já tem conta, a pessoa faz login e aceita. Se não, cria a conta com este e-mail e aceita o convite.'
       notifications.push('success', 'Convite criado com sucesso.')
     } catch (err) {
       formError.value = resolveError(err, 'Não foi possível criar o convite.')
@@ -259,12 +248,6 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
           nomePublico: nomePublico.value.trim() || nomeTrim,
           podeReceberAgendamento: podeReceberAgendamento.value,
         })
-
-        if (resultado.tipoResultado === 'Vinculado') {
-          notifications.push('success', 'Profissional vinculado à equipe.')
-          await afterVinculo()
-          return
-        }
 
         linkConvite.value = resultado.linkConvite ?? resultado.convite?.linkConvite ?? null
         if (contaRecémCriada) {

@@ -30,14 +30,13 @@
 | `/configuracoes/equipe/convites` | Convites pendentes |
 | `/configuracoes/equipe/usuario/novo` | Gerar convite (padrao) ou cadastrar manualmente |
 
-## Fluxo padrao — convite inteligente (Plus)
+## Fluxo padrao — convite por link (Plus)
 
-1. Dono informa **e-mail + funcao** em **Enviar convite**.
-2. API resolve o e-mail:
-   - Conta **ativa e confirmada** → `tipoResultado: Vinculado` (sem convite pendente).
+1. Dono informa **e-mail + funcao** em **Gerar convite**.
+2. API sempre cria convite pendente com `linkConvite` (`/convites/{token}`), exceto:
    - Conta **nao confirmada** → erro `CONVITE_USUARIO_NAO_CONFIRMADO`.
-   - **Sem conta** → `tipoResultado: Convite` com `linkConvite` (`/convites/{token}`).
-3. UI: vinculado redireciona para equipe; convite exibe link copiavel.
+   - Convite pendente duplicado → erro de convite duplicado.
+3. UI exibe link copiavel para enviar à pessoa.
 3. Convidado abre o link (sem login): ve preview do estabelecimento e funcao.
 4. Sem conta: **Criar conta** com o e-mail do convite e senha propria → confirma e-mail → volta ao link.
 5. Com conta: **Login** com redirect ao convite → aceita ou rejeita.
@@ -73,12 +72,12 @@ Sem modulo: item **Equipe** oculto. Rota direta `/configuracoes/equipe` → upgr
 
 ## Criterios de aceite
 
-- [ ] E-mail com conta ativa vincula na hora (convite inteligente).
+- [ ] E-mail com conta ativa recebe link copiavel (aceita apos login).
 - [ ] E-mail novo recebe link copiavel.
 - [ ] E-mail nao confirmado exibe erro claro.
 - [ ] Basic cadastra profissional vitrine (limite 1).
 - [ ] Profissional vitrine aparece na pagina publica da loja.
-- [ ] Dono convida por e-mail e recebe link copiavel quando necessario.
+- [ ] Dono convida por e-mail e sempre recebe link copiavel.
 - [ ] Convidado cadastra com senha propria, confirma e-mail e aceita convite.
 - [ ] E-mail divergente no aceite exibe erro claro.
 - [ ] Lista de convites pendentes com cancelamento.

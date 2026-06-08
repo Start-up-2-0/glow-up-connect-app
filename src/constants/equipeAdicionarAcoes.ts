@@ -20,10 +20,10 @@ export const EQUIPE_ADICIONAR_ACOES: EquipeAdicionarAcaoCopy[] = [
     modo: 'convite',
     titulo: 'Gerar convite',
     descricao:
-      'Se a pessoa já tem conta, entra direto. Se não, ela recebe um link para se cadastrar.',
+      'A pessoa recebe um link. Com conta, faz login e aceita. Sem conta, se cadastra e aceita.',
     tituloModal: 'Gerar convite',
     instrucao:
-      'Informe o e-mail e o cargo. O sistema verifica se a pessoa já tem conta: entra na hora ou recebe um link para se cadastrar.',
+      'Informe o e-mail e o cargo. Envie o link gerado — a pessoa aceita o convite para entrar na equipe.',
     badge: 'Recomendado',
     botaoConfirmar: 'Gerar convite',
     botaoConfirmarProfissional: 'Gerar convite',
