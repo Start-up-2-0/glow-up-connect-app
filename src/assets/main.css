@@ -49,8 +49,18 @@
     --glow-hover-surface: #2e2e2e;
   }
 
+  html {
+    height: 100%;
+  }
+
   body {
     @apply bg-glow-canvas font-satoshi antialiased;
+    min-height: 100%;
+    overflow-x: hidden;
+  }
+
+  #app {
+    min-height: 100%;
   }
 }
 
@@ -114,5 +124,71 @@
 
   .checkout-pay-button {
     @apply flex w-full items-center justify-center gap-2 rounded-xl bg-glow-gold px-5 py-3.5 text-sm font-semibold text-glow-text shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  /* Toasts globais — canto superior, fora do fluxo do documento */
+  .toast-stack {
+    @apply pointer-events-none fixed z-[60] flex flex-col;
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+    max-width: 24rem;
+    margin-left: auto;
+  }
+
+  @media (min-width: 640px) {
+    .toast-stack {
+      top: 5.5rem;
+      right: 1.5rem;
+      left: auto;
+    }
+  }
+
+  .toast-item {
+    @apply w-full;
+  }
+
+  /* Alertas no fluxo da página — próximos ao conteúdo relacionado */
+  .content-alert {
+    @apply mb-4;
+  }
+
+  .content-alert--compact {
+    @apply mb-2;
+  }
+
+  /* Campo de formulário com mensagem colada abaixo */
+  .field-group {
+    @apply flex flex-col gap-1;
+  }
+
+  .field-input--error {
+    @apply border-red-400 focus:border-red-500 focus:ring-red-500/30 dark:border-red-500/70 dark:focus:border-red-400;
+  }
+
+  /* Dashboard — uma única área de rolagem (main), sem scroll no documento */
+  .dashboard-shell {
+    @apply max-h-dvh;
+  }
+
+  .dashboard-main {
+    @apply bg-glow-canvas;
+  }
+
+  .dashboard-main__inner {
+    @apply w-full px-4 py-4 lg:px-6 lg:py-6;
+  }
+
+  /* Larguras de página no dashboard */
+  .page-shell {
+    @apply w-full;
+  }
+
+  .page-shell--form {
+    @apply mx-auto w-full max-w-4xl;
+  }
+
+  .page-shell--narrow {
+    @apply mx-auto w-full max-w-2xl;
   }
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import FieldMessage from '@/components/form/FieldMessage.vue'
 import { GLOW_INPUT_CLASS } from '@/constants/designTokens'
 import { maskTelefoneLocal, telefoneLocalFromInput } from '@/utils/formatters'
 
@@ -42,7 +43,14 @@ const dashboardInputClass =
 
 const inputClass = computed(() => {
   const base = props.variant === 'auth' ? GLOW_INPUT_CLASS : dashboardInputClass
-  return props.showDdiPrefix ? `${base} rounded-r-lg` : `${base} rounded-lg`
+  const shape = props.showDdiPrefix ? `${base} rounded-r-lg` : `${base} rounded-lg`
+  return props.error ? `${shape} field-input--error` : shape
+})
+
+const describedBy = computed(() => {
+  if (props.error) return `${inputId}-error`
+  if (props.hint) return `${inputId}-hint`
+  return undefined
 })
 
 const allowedKeys = new Set([
@@ -73,7 +81,7 @@ function onKeydown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-2">
+  <div class="field-group">
     <label
       v-if="label"
       :for="inputId"
@@ -96,12 +104,26 @@ function onKeydown(event: KeyboardEvent) {
         :required="required"
         :disabled="disabled"
         :autocomplete="autocomplete"
+        :aria-invalid="error ? true : undefined"
+        :aria-describedby="describedBy"
         :class="inputClass"
         @input="onInput"
         @keydown="onKeydown"
       />
     </div>
-    <p v-if="hint && !error" class="font-urbanist text-xs text-glow-text-subtle">{{ hint }}</p>
-    <p v-if="error" class="font-urbanist text-xs text-red-600">{{ error }}</p>
+    <FieldMessage
+      v-if="error"
+      :id="`${inputId}-error`"
+      variant="error"
+    >
+      {{ error }}
+    </FieldMessage>
+    <FieldMessage
+      v-else-if="hint"
+      :id="`${inputId}-hint`"
+      variant="hint"
+    >
+      {{ hint }}
+    </FieldMessage>
   </div>
 </template>

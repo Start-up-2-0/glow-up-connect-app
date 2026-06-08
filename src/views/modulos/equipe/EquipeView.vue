@@ -5,8 +5,8 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
+import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
-import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { equipeService } from '@/services/equipeService'
 import type { ProfissionalEquipe, UsuarioEquipe } from '@/types/negocio/equipe.types'
@@ -16,17 +16,18 @@ import { formatTelefone } from '@/utils/formatters'
 
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
-const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 
 const aba = ref<'usuarios' | 'profissionais'>('usuarios')
 const usuarios = ref<UsuarioEquipe[]>([])
 const profissionais = ref<ProfissionalEquipe[]>([])
 const loading = ref(false)
+const loadError = ref<string | null>(null)
 
 async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
+  loadError.value = null
   try {
     const [u, p] = await Promise.all([
       equipeService.listarUsuarios(estabelecimentoId.value),
@@ -35,7 +36,7 @@ async function load() {
     usuarios.value = u
     profissionais.value = p
   } catch (err) {
-    notifications.push('error', resolveError(err))
+    loadError.value = resolveError(err, 'Não foi possível carregar a equipe.')
   } finally {
     loading.value = false
   }
@@ -71,7 +72,9 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
       </div>
     </div>
 
-    <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
+    <ContentAlert v-if="contextError" variant="error" title="Não foi possível continuar">
+      {{ contextError }}
+    </ContentAlert>
 
     <div class="flex gap-2 border-b border-glow-border-soft">
       <button
@@ -99,6 +102,15 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
         Profissionais
       </button>
     </div>
+
+    <ContentAlert
+      v-if="loadError"
+      variant="error"
+      title="Erro ao carregar dados"
+      compact
+    >
+      {{ loadError }}
+    </ContentAlert>
 
     <LoadingSpinner v-if="contextLoading || loading" />
 

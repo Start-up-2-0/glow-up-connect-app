@@ -118,6 +118,41 @@ Não use `dark:` para substituir `bg-glow-surface` — o token já resolve.
 <RouterLink class="inline-flex items-center gap-1.5 font-urbanist text-sm text-glow-text-subtle transition hover:text-glow-text">
 ```
 
+## Alertas, validações e notificações
+
+Escolha o **nível correto** — nunca empilhar toast + alerta inline para o mesmo erro.
+
+| Tipo | Componente | Quando usar |
+|------|------------|-------------|
+| Toast global | `ToastContainer` (via `notifications.push`) | Ações concluídas, feedback rápido sem campo associado |
+| Erro de página | `ContentAlert` | Falha ao carregar lista/dados — **logo abaixo do título ou abas** |
+| Erro de formulário | `ContentAlert compact` no topo do `<form>` | Erro de API no submit |
+| Erro de campo | `BaseInput` / `TelefoneInput` prop `error` | Validação do campo — mensagem via `FieldMessage` |
+
+Regras:
+
+- Toasts ficam em `.toast-stack` (fixo no topo direito) — **nunca** no fluxo do documento.
+- Campos usam `.field-group` (`gap-1`) + `.field-input--error` quando inválidos.
+- `ContentAlert` usa `.content-alert` (`mb-4`) para espaçamento previsível.
+- Erros de carregamento de view: `loadError` inline, **não** `notifications.push('error')`.
+- Validação client-side: prop `error` no campo, não toast.
+
+```vue
+<!-- Campo -->
+<BaseInput v-model="email" label="E-mail" :error="emailError" />
+
+<!-- Erro de submit no formulário -->
+<form class="space-y-4">
+  <ContentAlert v-if="formError" variant="error" compact>{{ formError }}</ContentAlert>
+  ...
+</form>
+
+<!-- Erro ao carregar página -->
+<ContentAlert v-if="loadError" variant="error" title="Erro ao carregar dados" compact>
+  {{ loadError }}
+</ContentAlert>
+```
+
 ## Referência rápida de variáveis
 
 | Token CSS | Light | Dark |
@@ -128,6 +163,19 @@ Não use `dark:` para substituir `bg-glow-surface` — o token já resolve.
 | `--glow-border-soft` | rgba escuro 25% | rgba claro 15% |
 
 Arquivo completo: `src/assets/main.css`.
+
+## Layout do dashboard (scroll único)
+
+- Shell: `.dashboard-shell` com `h-dvh overflow-hidden`
+- Coluna de conteúdo e `<main class="dashboard-main">` precisam de `min-h-0`
+- **Somente** `.dashboard-main` usa `overflow-y-auto` — nunca o `body` junto
+- Sidebar: `nav` com `flex-1 min-h-0 overflow-y-auto` (scroll isolado do menu)
+- Páginas: `.page-shell--form` (`max-w-4xl`) ou `.page-shell` (largura total)
+
+```vue
+<!-- DashboardLayout já aplica dashboard-main__inner -->
+<div class="page-shell--form space-y-6">...</div>
+```
 
 ## Integração com outras skills
 

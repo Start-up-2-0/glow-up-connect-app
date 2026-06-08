@@ -58,11 +58,11 @@ function onToggleCollapsed() {
 
 <template>
   <aside
-    class="flex h-full shrink-0 flex-col border-r border-glow-border-sidebar bg-glow-surface transition-[width] duration-300 ease-in-out"
+    class="flex h-full min-h-0 shrink-0 flex-col overflow-hidden border-r border-glow-border-sidebar bg-glow-surface transition-[width] duration-300 ease-in-out"
     :class="sidebarWidthClass"
   >
     <div
-      class="flex h-full flex-col"
+      class="flex min-h-0 flex-1 flex-col"
       :class="[innerPaddingClass, collapsed ? 'items-center' : '', sectionGapClass]"
     >
       <div
@@ -77,7 +77,7 @@ function onToggleCollapsed() {
         />
       </div>
 
-      <nav class="flex w-full flex-col gap-1.5 overflow-y-auto pb-6">
+      <nav class="flex min-h-0 w-full flex-1 flex-col gap-1.5 overflow-y-auto overscroll-y-contain pb-6">
         <template v-for="item in navItems" :key="item.id">
           <SidebarNavGroup
             v-if="item.children?.length"

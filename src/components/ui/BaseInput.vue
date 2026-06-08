@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import FieldMessage from '@/components/form/FieldMessage.vue'
+
 const props = withDefaults(
   defineProps<{
     modelValue: string
@@ -20,10 +23,16 @@ const props = withDefaults(
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
 const inputId = props.id ?? `input-${Math.random().toString(36).slice(2, 9)}`
+
+const describedBy = computed(() => {
+  if (props.error) return `${inputId}-error`
+  if (props.hint) return `${inputId}-hint`
+  return undefined
+})
 </script>
 
 <template>
-  <div class="flex flex-col gap-2">
+  <div class="field-group">
     <label
       v-if="label"
       :for="inputId"
@@ -39,10 +48,25 @@ const inputId = props.id ?? `input-${Math.random().toString(36).slice(2, 9)}`
       :disabled="disabled"
       :readonly="readonly"
       :autocomplete="autocomplete"
+      :aria-invalid="error ? true : undefined"
+      :aria-describedby="describedBy"
       class="h-11 w-full rounded-lg border border-glow-border-soft bg-glow-canvas px-3.5 font-urbanist text-sm text-glow-text outline-none transition placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:opacity-60 read-only:cursor-default read-only:bg-glow-surface read-only:text-glow-text-subtle"
+      :class="{ 'field-input--error': !!error }"
       @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
     />
-    <p v-if="hint && !error" class="font-urbanist text-xs text-glow-text-subtle">{{ hint }}</p>
-    <p v-if="error" class="font-urbanist text-xs text-red-600">{{ error }}</p>
+    <FieldMessage
+      v-if="error"
+      :id="`${inputId}-error`"
+      variant="error"
+    >
+      {{ error }}
+    </FieldMessage>
+    <FieldMessage
+      v-else-if="hint"
+      :id="`${inputId}-hint`"
+      variant="hint"
+    >
+      {{ hint }}
+    </FieldMessage>
   </div>
 </template>

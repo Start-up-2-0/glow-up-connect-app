@@ -32,12 +32,12 @@ const rules = computed(() =>
 
 <style scoped>
 .password-rules__title {
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   font-family: Inter, system-ui, sans-serif;
   font-size: 12px;
   font-weight: 700;
   line-height: normal;
-  color: rgba(40, 40, 40, 0.4);
+  color: var(--glow-text-muted);
 }
 
 .password-rules__list {
@@ -50,12 +50,12 @@ const rules = computed(() =>
   font-family: Inter, system-ui, sans-serif;
   font-size: 12px;
   font-weight: 500;
-  line-height: 15px;
-  color: #e4ac04;
+  line-height: 1.35;
+  color: var(--glow-gold);
   transition: color 0.2s ease;
 }
 
 .password-rules__item--met {
-  color: rgba(40, 40, 40, 0.4);
+  color: var(--glow-text-muted);
 }
 </style>

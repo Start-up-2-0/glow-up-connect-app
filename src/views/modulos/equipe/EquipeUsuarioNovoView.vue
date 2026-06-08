@@ -5,6 +5,7 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
+import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import SegmentedControl from '@/components/ui/SegmentedControl.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import AuthPasswordRules from '@/components/auth/recovery/AuthPasswordRules.vue'
@@ -48,6 +49,12 @@ const podeReceberAgendamento = ref(true)
 const saving = ref(false)
 const sucessoDetalhe = ref<string | null>(null)
 const linkConvite = ref<string | null>(null)
+const formError = ref<string | null>(null)
+const emailError = ref<string | undefined>()
+const nomeError = ref<string | undefined>()
+const telefoneError = ref<string | undefined>()
+const senhaError = ref<string | undefined>()
+const confirmarSenhaError = ref<string | undefined>()
 
 const modoOptions = [
   { value: 'convite', label: 'Enviar convite', description: 'Recomendado' },
@@ -84,10 +91,29 @@ const submitLabel = computed(() => {
   return ehProfissional.value ? 'Vincular profissional' : 'Vincular usuário'
 })
 
+function clearFormFeedback() {
+  formError.value = null
+  emailError.value = undefined
+  nomeError.value = undefined
+  telefoneError.value = undefined
+  senhaError.value = undefined
+  confirmarSenhaError.value = undefined
+}
+
 watch(modo, () => {
   sucessoDetalhe.value = null
   linkConvite.value = null
+  clearFormFeedback()
 })
+
+watch(email, () => {
+  emailError.value = undefined
+  formError.value = null
+})
+watch(nome, () => { nomeError.value = undefined })
+watch(telefone, () => { telefoneError.value = undefined })
+watch(senha, () => { senhaError.value = undefined })
+watch(confirmarSenha, () => { confirmarSenhaError.value = undefined })
 
 function validarSenha(): string | null {
   const regras = getUnmetPasswordRules(senha.value)
@@ -113,9 +139,11 @@ async function copiarLink() {
 async function enviarConvite() {
   if (!estabelecimentoId.value) return
 
+  clearFormFeedback()
+
   const emailTrim = email.value.trim().toLowerCase()
   if (!emailTrim) {
-    notifications.push('error', 'Informe o e-mail do convidado.')
+    emailError.value = 'Informe o e-mail do convidado.'
     return
   }
 
@@ -151,7 +179,7 @@ async function enviarConvite() {
       'Envie o link abaixo. A pessoa deve se cadastrar com este e-mail, confirmar e aceitar o convite.'
     notifications.push('success', 'Convite criado com sucesso.')
   } catch (err) {
-    notifications.push('error', resolveError(err, 'Não foi possível criar o convite.'))
+    formError.value = resolveError(err, 'Não foi possível criar o convite.')
   } finally {
     saving.value = false
   }
@@ -159,10 +187,13 @@ async function enviarConvite() {
 
 async function vincularExistente() {
   if (!estabelecimentoId.value) return
+  clearFormFeedback()
+
   const emailTrim = email.value.trim()
   const telefoneTrim = telefone.value.trim()
   if (!emailTrim && !telefoneTrim) {
-    notifications.push('error', 'Informe o e-mail ou o telefone do usuário.')
+    emailError.value = 'Informe o e-mail ou o telefone.'
+    telefoneError.value = 'Informe o e-mail ou o telefone.'
     return
   }
 
@@ -186,12 +217,9 @@ async function vincularExistente() {
     }
     await router.push(ROUTE_PATHS.CONFIG_EQUIPE)
   } catch (err) {
-    notifications.push(
-      'error',
-      resolveError(
-        err,
-        'Não encontramos uma conta ativa com esses dados. Use "Enviar convite" se a pessoa ainda não se cadastrou.',
-      ),
+    formError.value = resolveError(
+      err,
+      'Não encontramos uma conta ativa com esses dados. Use "Enviar convite" se a pessoa ainda não se cadastrou.',
     )
   } finally {
     saving.value = false
@@ -234,14 +262,20 @@ async function criarNovaConta() {
   const telefoneTrim = telefone.value.trim()
   const nomeTrim = nome.value.trim()
 
-  if (!nomeTrim || !emailTrim || !telefoneTrim) {
-    notifications.push('error', 'Preencha nome, e-mail e telefone.')
-    return
-  }
+  clearFormFeedback()
+
+  if (!nomeTrim) nomeError.value = 'Informe o nome completo.'
+  if (!emailTrim) emailError.value = 'Informe o e-mail.'
+  if (!telefoneTrim) telefoneError.value = 'Informe o telefone.'
+  if (nomeError.value || emailError.value || telefoneError.value) return
 
   const erroSenha = validarSenha()
   if (erroSenha) {
-    notifications.push('error', erroSenha)
+    if (senha.value !== confirmarSenha.value) {
+      confirmarSenhaError.value = 'As senhas não conferem.'
+    } else {
+      senhaError.value = erroSenha
+    }
     return
   }
 
@@ -321,7 +355,7 @@ async function criarNovaConta() {
       'O e-mail já existe, mas ainda não foi possível vincular. Peça para confirmar o e-mail ou use "Já tem conta".',
     )
   } catch (err) {
-    notifications.push('error', resolveError(err, 'Não foi possível criar a conta.'))
+    formError.value = resolveError(err, 'Não foi possível criar a conta.')
   } finally {
     saving.value = false
   }
@@ -339,7 +373,7 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="mx-auto max-w-xl space-y-5 lg:space-y-6">
+  <div class="page-shell--form space-y-5 lg:space-y-6">
     <RouterLink
       :to="ROUTE_PATHS.CONFIG_EQUIPE"
       class="inline-flex items-center gap-1.5 font-urbanist text-sm text-glow-text-subtle transition hover:text-glow-text"
@@ -358,9 +392,9 @@ async function handleSubmit() {
       </p>
     </header>
 
-    <p v-if="contextError" class="font-urbanist text-sm text-red-600 dark:text-red-400">
+    <ContentAlert v-if="contextError" variant="error" title="Não foi possível continuar">
       {{ contextError }}
-    </p>
+    </ContentAlert>
 
     <SegmentedControl
       v-if="ready"
@@ -407,51 +441,72 @@ async function handleSubmit() {
         </p>
       </div>
 
-      <form class="space-y-5" @submit.prevent="handleSubmit">
-        <template v-if="modo === 'criar'">
-          <BaseInput v-model="nome" label="Nome completo" required placeholder="Maria Silva" />
-        </template>
+      <form class="space-y-4" @submit.prevent="handleSubmit">
+        <ContentAlert v-if="formError" variant="error" compact>
+          {{ formError }}
+        </ContentAlert>
 
-        <BaseInput
-          v-model="email"
-          label="E-mail"
-          type="email"
-          placeholder="usuario@exemplo.com"
-          required
-          :hint="modo === 'vincular' ? 'Informe e-mail ou telefone (pelo menos um).' : undefined"
-        />
-
-        <TelefoneInput
-          v-if="modo === 'criar'"
-          v-model="telefone"
-          label="Telefone"
-          required
-        />
-        <BaseInput
-          v-else-if="modo === 'vincular'"
-          v-model="telefone"
-          label="Telefone"
-          type="tel"
-          placeholder="(11) 99999-9999"
-        />
-
-        <template v-if="modo === 'criar'">
+        <div
+          class="grid gap-4"
+          :class="modo === 'criar' ? 'lg:grid-cols-2' : 'lg:grid-cols-2'"
+        >
           <BaseInput
-            v-model="senha"
-            label="Senha inicial"
-            type="password"
+            v-if="modo === 'criar'"
+            v-model="nome"
+            label="Nome completo"
             required
-            autocomplete="new-password"
+            placeholder="Maria Silva"
+            :error="nomeError"
           />
-          <AuthPasswordRules :password="senha" />
+
           <BaseInput
-            v-model="confirmarSenha"
-            label="Confirmar senha"
-            type="password"
+            v-model="email"
+            label="E-mail"
+            type="email"
+            placeholder="usuario@exemplo.com"
             required
-            autocomplete="new-password"
+            :error="emailError"
+            :hint="modo === 'vincular' && !emailError ? 'Informe e-mail ou telefone (pelo menos um).' : undefined"
           />
-        </template>
+
+          <TelefoneInput
+            v-if="modo === 'criar'"
+            v-model="telefone"
+            label="Telefone"
+            required
+            :error="telefoneError"
+          />
+          <BaseInput
+            v-else-if="modo === 'vincular'"
+            v-model="telefone"
+            label="Telefone"
+            type="tel"
+            placeholder="(11) 99999-9999"
+            :error="telefoneError"
+          />
+
+          <template v-if="modo === 'criar'">
+            <div class="space-y-1 lg:col-span-1">
+              <BaseInput
+                v-model="senha"
+                label="Senha inicial"
+                type="password"
+                required
+                autocomplete="new-password"
+                :error="senhaError"
+              />
+              <AuthPasswordRules :password="senha" />
+            </div>
+            <BaseInput
+              v-model="confirmarSenha"
+              label="Confirmar senha"
+              type="password"
+              required
+              autocomplete="new-password"
+              :error="confirmarSenhaError"
+            />
+          </template>
+        </div>
 
         <fieldset>
           <legend class="mb-2 block font-urbanist text-sm font-medium text-glow-text">
