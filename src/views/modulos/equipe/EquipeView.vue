@@ -12,7 +12,7 @@ import { useApiError } from '@/composables/useApiError'
 import { equipeService } from '@/services/equipeService'
 import type { ProfissionalEquipe, UsuarioEquipe } from '@/types/negocio/equipe.types'
 import type { ModoCadastro } from '@/composables/useEquipeAdicionarForm'
-import { EQUIPE_ADICIONAR_ACOES } from '@/constants/equipeAdicionarAcoes'
+import { EQUIPE_ADICIONAR_ACOES, normalizarModoAcao } from '@/constants/equipeAdicionarAcoes'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { establishmentRoleLabel } from '@/constants/establishmentRoles'
 import { formatTelefone } from '@/utils/formatters'
@@ -43,9 +43,7 @@ async function aoVincular() {
 }
 
 function parseAcaoQuery(): ModoCadastro | null {
-  const q = route.query.acao ?? route.query.modo
-  if (q === 'convite' || q === 'vincular' || q === 'criar') return q
-  return null
+  return normalizarModoAcao(route.query.acao ?? route.query.modo)
 }
 
 function abrirModalPorQuery() {

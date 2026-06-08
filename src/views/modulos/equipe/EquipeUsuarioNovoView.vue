@@ -4,7 +4,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import EquipeAdicionarModal from '@/components/equipe/EquipeAdicionarModal.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
-import { EQUIPE_ADICIONAR_ACOES } from '@/constants/equipeAdicionarAcoes'
+import { EQUIPE_ADICIONAR_ACOES, normalizarModoAcao } from '@/constants/equipeAdicionarAcoes'
 import { ROUTE_PATHS } from '@/constants/routes'
 import type { ModoCadastro } from '@/composables/useEquipeAdicionarForm'
 import type { EstablishmentUserRole } from '@/types/negocio/equipe.types'
@@ -21,9 +21,7 @@ const initialRole = ref<EstablishmentUserRole | undefined>(
 )
 
 function parseModoQuery(): ModoCadastro | null {
-  const q = route.query.acao ?? route.query.modo
-  if (q === 'convite' || q === 'vincular' || q === 'criar') return q
-  return null
+  return normalizarModoAcao(route.query.acao ?? route.query.modo)
 }
 
 function abrirModal(modo: ModoCadastro) {
@@ -58,7 +56,8 @@ onMounted(() => {
         Adicionar pessoa à equipe
       </h1>
       <p class="max-w-2xl font-urbanist text-sm leading-relaxed text-glow-text-subtle">
-        Toque na opção que combina com a situação da pessoa. Cada uma abre um passo a passo simples.
+        Na maioria dos casos, use <strong class="font-medium text-glow-text">Gerar convite</strong>.
+        O sistema cuida do resto.
       </p>
     </div>
 
@@ -68,7 +67,7 @@ onMounted(() => {
 
     <div
       v-if="ready"
-      class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:max-w-5xl"
+      class="grid gap-3 sm:grid-cols-2 lg:max-w-3xl"
     >
       <button
         v-for="acao in EQUIPE_ADICIONAR_ACOES"

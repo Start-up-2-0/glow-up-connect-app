@@ -28,7 +28,7 @@
 |------|------|
 | `/configuracoes/equipe` | Lista de usuarios / profissionais |
 | `/configuracoes/equipe/convites` | Convites pendentes |
-| `/configuracoes/equipe/usuario/novo` | Enviar convite (padrao), vincular ou criar manual |
+| `/configuracoes/equipe/usuario/novo` | Gerar convite (padrao) ou cadastrar manualmente |
 
 ## Fluxo padrao — convite inteligente (Plus)
 

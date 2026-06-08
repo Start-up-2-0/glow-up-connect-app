@@ -142,7 +142,7 @@ defineExpose({ resetForm })
         <h3 class="form-section__title">Dados da pessoa</h3>
         <div
           class="form-section__grid"
-          :class="modo === 'convite' || modo === 'vincular' ? 'form-section__grid--single' : ''"
+          :class="modo === 'convite' ? 'form-section__grid--single' : ''"
         >
           <BaseInput
             v-if="modo === 'criar'"
@@ -160,11 +160,6 @@ defineExpose({ resetForm })
             placeholder="usuario@exemplo.com"
             required
             :error="emailError"
-            :hint="
-              modo === 'vincular' && !emailError
-                ? 'O mesmo e-mail que a pessoa usou ao se cadastrar.'
-                : undefined
-            "
           />
 
           <TelefoneInput

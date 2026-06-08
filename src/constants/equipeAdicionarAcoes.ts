@@ -18,30 +18,21 @@ export interface EquipeAdicionarAcaoCopy {
 export const EQUIPE_ADICIONAR_ACOES: EquipeAdicionarAcaoCopy[] = [
   {
     modo: 'convite',
-    titulo: 'Pessoa ainda não entrou',
-    descricao: 'Ela ainda não usa o sistema. Você manda um link e ela cria a senha.',
-    tituloModal: 'Chamar pessoa para a equipe',
+    titulo: 'Gerar convite',
+    descricao:
+      'Se a pessoa já tem conta, entra direto. Se não, ela recebe um link para se cadastrar.',
+    tituloModal: 'Gerar convite',
     instrucao:
-      'Use o e-mail da pessoa. Se ela ainda não entrou, você recebe um link para enviar. Se já tiver conta ativa, entra direto na equipe.',
-    badge: 'Mais fácil',
-    botaoConfirmar: 'Gerar link para enviar',
-    botaoConfirmarProfissional: 'Gerar link para enviar',
-  },
-  {
-    modo: 'vincular',
-    titulo: 'Pessoa já confirmou o cadastro',
-    descricao: 'Ela já criou conta e confirmou o e-mail. Adicione direto, sem link.',
-    tituloModal: 'Adicionar quem já tem cadastro',
-    instrucao:
-      'Use o mesmo e-mail que a pessoa cadastrou. Ela entra na equipe na hora, sem precisar de link.',
-    botaoConfirmar: 'Adicionar à equipe',
-    botaoConfirmarProfissional: 'Adicionar profissional',
+      'Informe o e-mail e o cargo. O sistema verifica se a pessoa já tem conta: entra na hora ou recebe um link para se cadastrar.',
+    badge: 'Recomendado',
+    botaoConfirmar: 'Gerar convite',
+    botaoConfirmarProfissional: 'Gerar convite',
   },
   {
     modo: 'criar',
-    titulo: 'Eu crio a senha',
-    descricao: 'Use só se a pessoa não conseguir se cadastrar sozinha.',
-    tituloModal: 'Cadastrar pessoa com senha',
+    titulo: 'Cadastrar manualmente',
+    descricao: 'Você preenche os dados e cria a senha. Use só se a pessoa não conseguir sozinha.',
+    tituloModal: 'Cadastrar manualmente',
     instrucao:
       'Preencha os dados da pessoa e defina uma senha para ela entrar. Ela pode trocar a senha depois.',
     badge: 'Só se precisar',
@@ -67,4 +58,11 @@ export function equipeAdicionarBotaoConfirmar(
     return acao.botaoConfirmarProfissional
   }
   return acao.botaoConfirmar
+}
+
+/** Compatibilidade com links antigos (?acao=vincular). */
+export function normalizarModoAcao(valor: unknown): ModoCadastro | null {
+  if (valor === 'convite' || valor === 'vincular') return 'convite'
+  if (valor === 'criar') return 'criar'
+  return null
 }

@@ -11,7 +11,7 @@ import { equipeAdicionarBotaoConfirmar } from '@/constants/equipeAdicionarAcoes'
 import { getUnmetPasswordRules } from '@/utils/passwordRules'
 import type { EstablishmentUserRole } from '@/types/negocio/equipe.types'
 
-export type ModoCadastro = 'convite' | 'vincular' | 'criar'
+export type ModoCadastro = 'convite' | 'criar'
 
 export interface UseEquipeAdicionarFormOptions {
   modo: Ref<ModoCadastro>
@@ -168,43 +168,6 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
     }
   }
 
-  async function vincularExistente() {
-    if (!estabelecimentoId.value) return
-    clearFormFeedback()
-
-    const emailTrim = email.value.trim().toLowerCase()
-    if (!emailTrim) {
-      emailError.value = 'Informe o e-mail da pessoa.'
-      return
-    }
-
-    saving.value = true
-    try {
-      if (ehProfissional.value) {
-        await equipeService.vincularProfissional(estabelecimentoId.value, {
-          email: emailTrim,
-          nomePublico: nomePublico.value.trim() || undefined,
-          podeReceberAgendamento: podeReceberAgendamento.value,
-        })
-        notifications.push('success', 'Profissional vinculado à equipe.')
-      } else {
-        await equipeService.cadastrarUsuario(estabelecimentoId.value, {
-          email: emailTrim,
-          role: role.value,
-        })
-        notifications.push('success', 'Usuário adicionado à equipe.')
-      }
-      await afterVinculo()
-    } catch (err) {
-      formError.value = resolveError(
-        err,
-        'Não encontramos uma conta confirmada com este e-mail. Se a pessoa ainda não entrou, use "Pessoa ainda não entrou".',
-      )
-    } finally {
-      saving.value = false
-    }
-  }
-
   async function tentarVincularProfissional(emailTrim: string, telefoneTrim: string): Promise<boolean> {
     if (!estabelecimentoId.value) return false
     try {
@@ -324,14 +287,14 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
 
       if (contaRecémCriada) {
         sucessoDetalhe.value =
-          'Conta criada. A pessoa receberá um e-mail de confirmação. Depois, use "Já tem conta" para vincular.'
+          'Conta criada. A pessoa receberá um e-mail de confirmação. Depois, use "Gerar convite" para adicioná-la à equipe.'
         notifications.push('success', 'Conta criada. Aguardando confirmação de e-mail.')
         return
       }
 
       notifications.push(
         'info',
-        'O e-mail já existe, mas ainda não foi possível vincular. Peça para confirmar o e-mail ou use "Já tem conta".',
+        'O e-mail já existe, mas ainda não foi possível vincular. Peça para confirmar o e-mail ou use "Gerar convite".',
       )
     } catch (err) {
       formError.value = resolveError(err, 'Não foi possível criar a conta.')
@@ -343,8 +306,6 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
   async function handleSubmit() {
     if (options.modo.value === 'convite') {
       await enviarConvite()
-    } else if (options.modo.value === 'vincular') {
-      await vincularExistente()
     } else {
       await criarNovaConta()
     }
