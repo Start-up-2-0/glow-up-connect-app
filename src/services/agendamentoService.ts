@@ -43,4 +43,12 @@ export const agendamentoService = {
       .post<ApiSuccessResponse<AgendamentoCliente>>(`/agendamentos/me/${id}/remarcar`, payload)
       .then(unwrap)
   },
+
+  aceitarPropostaRemarcacao(agendamentoId: number, propostaId: number) {
+    return api
+      .post<ApiSuccessResponse<AgendamentoCliente>>(
+        `/agendamentos/me/${agendamentoId}/propostas-remarcacao/${propostaId}/aceitar`,
+      )
+      .then(unwrap)
+  },
 }

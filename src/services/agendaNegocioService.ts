@@ -37,6 +37,19 @@ export const agendaNegocioService = {
       .then(unwrapApi)
   },
 
+  sugerirRemarcacao(
+    estabelecimentoId: number,
+    agendamentoId: number,
+    payload: { data: string; horarioInicio: string; motivo: string },
+  ) {
+    return api
+      .post(
+        negocioPath(estabelecimentoId, `/agendamentos/${agendamentoId}/sugerir-remarcacao`),
+        payload,
+      )
+      .then(unwrapApi)
+  },
+
   historico(estabelecimentoId: number, agendamentoId: number) {
     return api
       .get<ApiSuccessResponse<AgendamentoHistorico[]>>(

@@ -30,6 +30,15 @@ const historico = ref<AgendamentoHistorico[]>([])
 const loading = ref(false)
 const actionLoading = ref(false)
 const cancelModalOpen = ref(false)
+const sugerirModalOpen = ref(false)
+const sugerirData = ref('')
+const sugerirHorario = ref('')
+const sugerirMotivo = ref('')
+
+const podeSugerirRemarcacao = computed(() => {
+  const status = agendamento.value?.status
+  return status === 'PendenteConfirmacao' || status === 'Confirmado' || status === 'Remarcado'
+})
 
 async function load() {
   if (!estabelecimentoId.value || !Number.isFinite(agendamentoId.value)) return
@@ -54,6 +63,32 @@ async function handleConfirmar() {
   try {
     await agendaNegocioService.confirmar(estabelecimentoId.value, agendamento.value.id)
     notifications.push('success', 'Agendamento confirmado.')
+    await load()
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+async function handleSugerirRemarcacao() {
+  if (!estabelecimentoId.value || !agendamento.value) return
+  if (!sugerirData.value || !sugerirHorario.value || !sugerirMotivo.value.trim()) {
+    notifications.push('warning', 'Informe data, horário e motivo.')
+    return
+  }
+  actionLoading.value = true
+  try {
+    await agendaNegocioService.sugerirRemarcacao(estabelecimentoId.value, agendamento.value.id, {
+      data: sugerirData.value,
+      horarioInicio: sugerirHorario.value,
+      motivo: sugerirMotivo.value.trim(),
+    })
+    notifications.push('success', 'Sugestão enviada ao cliente.')
+    sugerirModalOpen.value = false
+    sugerirData.value = ''
+    sugerirHorario.value = ''
+    sugerirMotivo.value = ''
     await load()
   } catch (err) {
     notifications.push('error', resolveError(err))
@@ -128,12 +163,28 @@ watch(
           </p>
         </div>
 
-        <div
-          v-if="agendamento.status === 'PendenteConfirmacao'"
-          class="mt-4 flex flex-wrap gap-2"
-        >
-          <BaseButton :loading="actionLoading" @click="handleConfirmar">Confirmar</BaseButton>
-          <BaseButton variant="danger" :loading="actionLoading" @click="cancelModalOpen = true">
+        <div class="mt-4 flex flex-wrap gap-2">
+          <BaseButton
+            v-if="agendamento.status === 'PendenteConfirmacao'"
+            :loading="actionLoading"
+            @click="handleConfirmar"
+          >
+            Confirmar
+          </BaseButton>
+          <BaseButton
+            v-if="podeSugerirRemarcacao"
+            variant="secondary"
+            :loading="actionLoading"
+            @click="sugerirModalOpen = true"
+          >
+            Sugerir novo horário
+          </BaseButton>
+          <BaseButton
+            v-if="agendamento.status === 'PendenteConfirmacao' || agendamento.status === 'Confirmado' || agendamento.status === 'Remarcado'"
+            variant="danger"
+            :loading="actionLoading"
+            @click="cancelModalOpen = true"
+          >
             Cancelar
           </BaseButton>
         </div>
@@ -165,5 +216,45 @@ watch(
 
     <BaseAlert v-else variant="error">Agendamento não encontrado.</BaseAlert>
     <CancelarAgendamentoModal v-model="cancelModalOpen" @confirm="handleCancelar" />
+
+    <div
+      v-if="sugerirModalOpen"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      role="dialog"
+      aria-modal="true"
+    >
+      <BaseCard title="Sugerir novo horário" class="w-full max-w-md">
+        <div class="space-y-3">
+          <div>
+            <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">Data</label>
+            <input
+              v-model="sugerirData"
+              type="date"
+              class="w-full rounded border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
+            />
+          </div>
+          <div>
+            <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">Horário</label>
+            <input
+              v-model="sugerirHorario"
+              type="time"
+              class="w-full rounded border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
+            />
+          </div>
+          <div>
+            <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">Motivo</label>
+            <textarea
+              v-model="sugerirMotivo"
+              rows="2"
+              class="w-full rounded border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
+            />
+          </div>
+        </div>
+        <div class="mt-4 flex gap-2">
+          <BaseButton variant="secondary" @click="sugerirModalOpen = false">Fechar</BaseButton>
+          <BaseButton :loading="actionLoading" @click="handleSugerirRemarcacao">Enviar sugestão</BaseButton>
+        </div>
+      </BaseCard>
+    </div>
   </div>
 </template>

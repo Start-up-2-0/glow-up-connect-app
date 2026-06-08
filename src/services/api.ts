@@ -34,7 +34,7 @@ function processQueue(error: unknown, token: string | null = null) {
   failedQueue = []
 }
 
-const PUBLIC_API_PATHS = ['/auth/login', '/auth/refresh', '/planos']
+const PUBLIC_API_PATHS = ['/auth/login', '/auth/refresh', '/planos', '/publico/']
 
 function isPublicApiPath(url?: string): boolean {
   if (!url) return false
