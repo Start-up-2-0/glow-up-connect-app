@@ -157,6 +157,17 @@ export function formatPrecoRange(min: number, max: number): string {
   return `${formatCurrency(min)} – ${formatCurrency(max)}`
 }
 
+/** Rótulo curto para datas ISO (yyyy-MM-dd) sem ambiguidade de fuso. */
+export function formatDateOnlyLabel(isoDate: string): string {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  return new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+  }).format(date)
+}
+
 export function toDateOnlyString(date: Date): string {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')

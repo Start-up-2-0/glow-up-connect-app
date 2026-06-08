@@ -10,7 +10,13 @@ import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { agendamentoDetalhePath, ROUTE_PATHS } from '@/constants/routes'
 import { authRouteWithRedirect } from '@/utils/authRedirect'
-import { formatCurrency, formatDateTime, formatPrecoRange, formatTime } from '@/utils/formatters'
+import {
+  formatCurrency,
+  formatDateOnlyLabel,
+  formatDateTime,
+  formatPrecoRange,
+  formatTime,
+} from '@/utils/formatters'
 
 const route = useRoute()
 const router = useRouter()
@@ -51,9 +57,7 @@ const {
   toggleServico,
   escolherIdentidade,
   datasAtendimento,
-  minSelectableDate,
-  maxSelectableDate,
-  handleDateChange,
+  selecionarData,
   goToHorario,
   goToConfirmar,
   confirmar,
@@ -109,9 +113,9 @@ async function handleNextFromServicos() {
   }
 }
 
-async function onDateChange() {
+async function onSelecionarData(data: string) {
   try {
-    await handleDateChange()
+    await selecionarData(data)
   } catch (err) {
     error.value = resolveError(err)
   }
@@ -221,26 +225,41 @@ async function handleConfirmar() {
     <BaseCard v-else-if="step === 'horario'" title="Escolha data e horário">
       <div class="space-y-4">
         <div>
-          <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">Data</label>
-          <input
-            v-model="selectedDate"
-            type="date"
-            :min="minSelectableDate"
-            :max="maxSelectableDate"
-            class="rounded border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
-            @change="onDateChange"
-          />
-          <p v-if="datasAtendimento.length > 0" class="mt-1 font-urbanist text-xs text-glow-text-subtle">
+          <p class="mb-2 font-urbanist text-sm font-medium text-glow-text">Dia do atendimento</p>
+          <p v-if="datasAtendimento.length > 0" class="mb-3 font-urbanist text-xs text-glow-text-subtle">
             {{ datasAtendimento.length }}
             {{ datasAtendimento.length === 1 ? 'dia disponível' : 'dias disponíveis' }}
             na agenda de {{ contexto?.profissional.nomePublico }} nos próximos 31 dias.
           </p>
           <p
             v-else-if="!loading"
-            class="mt-1 font-urbanist text-xs text-glow-text-subtle"
+            class="mb-3 font-urbanist text-xs text-glow-text-subtle"
           >
             Não há dias de atendimento para os serviços selecionados.
           </p>
+          <div
+            v-if="datasAtendimento.length > 0"
+            class="flex flex-wrap gap-2"
+            role="listbox"
+            aria-label="Dias disponíveis para agendamento"
+          >
+            <button
+              v-for="data in datasAtendimento"
+              :key="data"
+              type="button"
+              role="option"
+              :aria-selected="selectedDate === data"
+              class="rounded-lg border px-3 py-2 font-urbanist text-sm transition-colors"
+              :class="
+                selectedDate === data
+                  ? 'border-glow-gold-dark bg-glow-gold-selected font-medium text-glow-text'
+                  : 'border-glow-border-soft text-glow-text hover:bg-glow-hover-surface'
+              "
+              @click="onSelecionarData(data)"
+            >
+              {{ formatDateOnlyLabel(data) }}
+            </button>
+          </div>
         </div>
 
         <LoadingSpinner v-if="loading" />

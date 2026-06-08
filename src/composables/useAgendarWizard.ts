@@ -102,6 +102,71 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     return true
   }
 
+  function validarServicosSelecionados(): boolean {
+    if (selectedServicoIds.value.length === 0) {
+      error.value = 'Selecione ao menos um serviço.'
+      return false
+    }
+
+    const permitidos = new Set(servicos.value.map((servico) => servico.id))
+    const invalido = selectedServicoIds.value.some((id) => !permitidos.has(id))
+    if (invalido) {
+      error.value = 'Um ou mais serviços selecionados não estão disponíveis para este profissional.'
+      return false
+    }
+
+    return true
+  }
+
+  function validarSelecaoHorario(): boolean {
+    if (!validarServicosSelecionados()) return false
+    if (!garantirDataAtendimentoValida()) return false
+    if (!selectedSlot.value) {
+      error.value = 'Selecione um horário.'
+      return false
+    }
+
+    const slotPermitido = slots.value.some((slot) => slot.inicio === selectedSlot.value?.inicio)
+    if (!slotPermitido) {
+      error.value = 'O horário selecionado não está mais disponível. Escolha outro horário.'
+      return false
+    }
+
+    return true
+  }
+
+  async function revalidarHorarioSelecionado(): Promise<boolean> {
+    if (!validarServicosSelecionados()) return false
+    if (!garantirDataAtendimentoValida()) return false
+    if (!selectedSlot.value) {
+      error.value = 'Selecione um horário.'
+      return false
+    }
+
+    const horarioReservado = selectedSlot.value.inicio
+    await loadDisponibilidade()
+    const aindaDisponivel = slots.value.some((slot) => slot.inicio === horarioReservado)
+    if (!aindaDisponivel) {
+      error.value = 'O horário selecionado não está mais disponível. Escolha outro horário.'
+      selectedSlot.value = null
+      return false
+    }
+
+    selectedSlot.value = slots.value.find((slot) => slot.inicio === horarioReservado) ?? null
+    return selectedSlot.value !== null
+  }
+
+  async function selecionarData(data: string) {
+    if (!isDataAtendimentoPermitida(data)) {
+      error.value = 'Esta data não está na agenda do profissional.'
+      return
+    }
+
+    selectedDate.value = data
+    error.value = null
+    await loadDisponibilidade()
+  }
+
   function persistDraft() {
     if (!profissionalVinculado.value) return
     writeAgendarWizardDraft(publicGuid, profissionalPublicGuid, {
@@ -187,6 +252,8 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     error.value = null
     try {
       servicos.value = await publicoService.listarServicosLoja(publicGuid, profissionalPublicGuid)
+      const permitidos = new Set(servicos.value.map((servico) => servico.id))
+      selectedServicoIds.value = selectedServicoIds.value.filter((id) => permitidos.has(id))
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erro ao carregar serviços.'
       throw err
@@ -219,10 +286,11 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     loading.value = true
     error.value = null
     selectedSlot.value = null
+    const dataConsulta = selectedDate.value
     try {
       const data = await publicoService.consultarDisponibilidadeLoja(publicGuid, {
-        dataInicio: selectedDate.value,
-        dataFim: selectedDate.value,
+        dataInicio: dataConsulta,
+        dataFim: dataConsulta,
         servicoIds: selectedServicoIds.value,
         profissionalPublicGuid,
       })
@@ -230,6 +298,12 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
       if (data.datasAtendimento?.length) {
         const merged = new Set([...datasAtendimento.value, ...data.datasAtendimento])
         datasAtendimento.value = [...merged].sort()
+      } else if (!isDataAtendimentoPermitida(dataConsulta)) {
+        datasAtendimento.value = datasAtendimento.value.filter((dia) => dia !== dataConsulta)
+        if (selectedDate.value === dataConsulta) {
+          const proxima = primeiraDataAtendimentoDisponivel()
+          if (proxima) selectedDate.value = proxima
+        }
       }
       const draft = readAgendarWizardDraft(publicGuid, profissionalPublicGuid)
       if (draft?.selectedSlotInicio) {
@@ -245,24 +319,6 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     } finally {
       loading.value = false
     }
-  }
-
-  async function handleDateChange() {
-    if (!isDataAtendimentoPermitida(selectedDate.value)) {
-      const proxima = primeiraDataAtendimentoDisponivel()
-      if (proxima) {
-        selectedDate.value = proxima
-        error.value = 'Esta data não está na agenda do profissional. Selecionamos o próximo dia disponível.'
-      } else {
-        error.value = 'Esta data não está na agenda do profissional.'
-        slots.value = []
-        selectedSlot.value = null
-        return
-      }
-    } else {
-      error.value = null
-    }
-    await loadDisponibilidade()
   }
 
   function toggleServico(id: number) {
@@ -303,10 +359,7 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
   }
 
   function goToConfirmar() {
-    if (!selectedSlot.value) {
-      error.value = 'Selecione um horário.'
-      return
-    }
+    if (!validarSelecaoHorario()) return
     error.value = null
     step.value = 'confirmar'
   }
@@ -346,11 +399,12 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
   }
 
   async function confirmar(): Promise<AgendamentoCliente | AgendamentoCriado> {
-    if (!selectedSlot.value) {
-      throw new Error('Horário não selecionado.')
-    }
     if (!profissionalPublicGuid) {
       throw new Error('Profissional não informado.')
+    }
+
+    if (!(await revalidarHorarioSelecionado())) {
+      throw new Error(error.value ?? 'Seleção de horário inválida.')
     }
 
     submitting.value = true
@@ -428,8 +482,11 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     }
 
     await loadServicos()
-    if (step.value === 'horario') {
-      await loadDisponibilidade()
+    if (selectedServicoIds.value.length > 0 && step.value === 'horario') {
+      await loadDatasAtendimento()
+      if (garantirDataAtendimentoValida()) {
+        await loadDisponibilidade()
+      }
     }
   }
 
@@ -464,7 +521,7 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     toggleServico,
     escolherIdentidade,
     loadDisponibilidade,
-    handleDateChange,
+    selecionarData,
     goToHorario,
     goToConfirmar,
     confirmar,
