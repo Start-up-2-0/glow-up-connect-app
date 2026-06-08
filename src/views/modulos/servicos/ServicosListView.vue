@@ -1,21 +1,29 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import BaseInput from '@/components/ui/BaseInput.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
+import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { servicoService } from '@/services/servicoService'
 import type { Servico } from '@/types/negocio/servico.types'
+import {
+  ROUTE_PATHS,
+  servicoEditarPath,
+  servicoProfissionaisPath,
+} from '@/constants/routes'
 import { formatCurrency, formatLimite } from '@/utils/formatters'
 
+const router = useRouter()
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
+const { possuiPermissao, possuiModulo } = useNegocioContext()
 const negocioStore = useNegocioStore()
 const { limites } = storeToRefs(negocioStore)
 const notifications = useNotificationsStore()
@@ -23,22 +31,19 @@ const { resolveError } = useApiError()
 
 const servicos = ref<Servico[]>([])
 const loading = ref(false)
-const showForm = ref(false)
-const saving = ref(false)
 const togglingId = ref<number | null>(null)
 
-const form = ref<{ nome: string; descricao: string; precoBase: number; duracaoMinutos: number }>({
-  nome: '',
-  descricao: '',
-  precoBase: 0,
-  duracaoMinutos: 30,
-})
-
+const podeGerenciar = computed(() => possuiPermissao('ServicoGerenciar'))
+const temModuloProfissionais = computed(() => possuiModulo('Profissionais'))
 const limiteServicos = computed(() => limites.value?.servicos ?? null)
 const usoServicos = computed(() => servicos.value.length)
 const limiteAtingido = computed(
   () => limiteServicos.value !== null && usoServicos.value >= limiteServicos.value,
 )
+
+function profissionaisAtivos(servico: Servico): number {
+  return servico.profissionais.filter((p) => p.ativo).length
+}
 
 async function load() {
   if (!estabelecimentoId.value) return
@@ -52,29 +57,8 @@ async function load() {
   }
 }
 
-async function handleCriar() {
-  if (!estabelecimentoId.value || !form.value.nome.trim()) return
-  saving.value = true
-  try {
-    const criado = await servicoService.criar(estabelecimentoId.value, {
-      nome: form.value.nome.trim(),
-      descricao: form.value.descricao?.trim() || undefined,
-      precoBase: Number(form.value.precoBase),
-      duracaoMinutos: Number(form.value.duracaoMinutos),
-    })
-    servicos.value = [...servicos.value, criado]
-    form.value = { nome: '', descricao: '', precoBase: 0, duracaoMinutos: 30 }
-    showForm.value = false
-    notifications.push('success', 'Serviço criado.')
-  } catch (err) {
-    notifications.push('error', resolveError(err, 'Não foi possível criar o serviço.'))
-  } finally {
-    saving.value = false
-  }
-}
-
 async function handleToggleStatus(servico: Servico) {
-  if (!estabelecimentoId.value) return
+  if (!estabelecimentoId.value || !podeGerenciar.value) return
   togglingId.value = servico.id
   try {
     const atualizado = await servicoService.alterarStatus(
@@ -89,6 +73,18 @@ async function handleToggleStatus(servico: Servico) {
   } finally {
     togglingId.value = null
   }
+}
+
+function irNovo() {
+  void router.push(ROUTE_PATHS.SERVICOS_NOVO)
+}
+
+function irEditar(id: number) {
+  void router.push(servicoEditarPath(id))
+}
+
+function irProfissionais(id: number) {
+  void router.push(servicoProfissionaisPath(id))
 }
 
 watch(
@@ -108,58 +104,44 @@ watch(
           Serviços
         </h1>
         <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-          Cadastre e gerencie os serviços oferecidos pelo estabelecimento.
+          {{
+            podeGerenciar
+              ? 'Cadastre e gerencie os serviços oferecidos pelo estabelecimento.'
+              : 'Visualize os serviços oferecidos pelo estabelecimento.'
+          }}
         </p>
         <p v-if="limiteServicos !== null" class="mt-1 font-urbanist text-xs text-glow-text-subtle">
           Uso: {{ usoServicos }} / {{ formatLimite(limiteServicos) }}
         </p>
       </div>
       <BaseButton
+        v-if="podeGerenciar"
         variant="primary"
         :disabled="limiteAtingido"
-        @click="showForm = !showForm"
+        @click="irNovo"
       >
-        {{ showForm ? 'Cancelar' : 'Novo serviço' }}
+        Novo serviço
       </BaseButton>
     </div>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
-
-    <BaseCard v-if="showForm" title="Novo serviço">
-      <form class="space-y-4" @submit.prevent="handleCriar">
-        <div class="grid gap-4 sm:grid-cols-2">
-          <BaseInput v-model="form.nome" label="Nome" required />
-          <BaseInput
-            v-model="form.descricao"
-            label="Descrição"
-            placeholder="Opcional"
-          />
-          <BaseInput
-            :model-value="String(form.precoBase)"
-            label="Preço base (R$)"
-            type="number"
-            @update:model-value="form.precoBase = Number($event)"
-          />
-          <BaseInput
-            :model-value="String(form.duracaoMinutos)"
-            label="Duração (minutos)"
-            type="number"
-            @update:model-value="form.duracaoMinutos = Number($event)"
-          />
-        </div>
-        <div class="flex justify-end">
-          <BaseButton type="submit" :loading="saving">Salvar</BaseButton>
-        </div>
-      </form>
-    </BaseCard>
 
     <LoadingSpinner v-if="contextLoading || (loading && servicos.length === 0)" />
 
     <BaseCard v-else-if="servicos.length === 0">
       <EmptyState
         title="Nenhum serviço"
-        description="Cadastre o primeiro serviço para começar a receber agendamentos."
+        :description="
+          podeGerenciar
+            ? 'Cadastre o primeiro serviço para começar a receber agendamentos.'
+            : 'Nenhum serviço cadastrado neste estabelecimento.'
+        "
       />
+      <div v-if="podeGerenciar" class="mt-4 flex justify-center">
+        <BaseButton variant="primary" :disabled="limiteAtingido" @click="irNovo">
+          Novo serviço
+        </BaseButton>
+      </div>
     </BaseCard>
 
     <div v-else class="space-y-3">
@@ -188,15 +170,35 @@ watch(
           <p class="mt-1 font-urbanist text-sm text-glow-text">
             {{ formatCurrency(servico.precoBase) }} · {{ servico.duracaoMinutos }} min
           </p>
+          <p
+            v-if="temModuloProfissionais && profissionaisAtivos(servico) > 0"
+            class="mt-1 font-urbanist text-xs text-glow-text-subtle"
+          >
+            {{ profissionaisAtivos(servico) }}
+            {{ profissionaisAtivos(servico) === 1 ? 'profissional vinculado' : 'profissionais vinculados' }}
+          </p>
         </div>
-        <BaseButton
-          variant="secondary"
-          size="sm"
-          :loading="togglingId === servico.id"
-          @click="handleToggleStatus(servico)"
-        >
-          {{ servico.ativo ? 'Desativar' : 'Ativar' }}
-        </BaseButton>
+        <div v-if="podeGerenciar" class="flex flex-wrap gap-2">
+          <BaseButton variant="secondary" size="sm" @click="irEditar(servico.id)">
+            Editar
+          </BaseButton>
+          <BaseButton
+            v-if="temModuloProfissionais"
+            variant="secondary"
+            size="sm"
+            @click="irProfissionais(servico.id)"
+          >
+            Profissionais
+          </BaseButton>
+          <BaseButton
+            variant="secondary"
+            size="sm"
+            :loading="togglingId === servico.id"
+            @click="handleToggleStatus(servico)"
+          >
+            {{ servico.ativo ? 'Desativar' : 'Ativar' }}
+          </BaseButton>
+        </div>
       </div>
     </div>
   </div>

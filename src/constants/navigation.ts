@@ -48,7 +48,7 @@ export const businessNavItems: NavItem[] = [
     label: 'Serviços',
     to: ROUTE_PATHS.SERVICOS,
     requerModulo: 'Servicos',
-    requerPermissao: 'ServicoGerenciar',
+    requerPermissoes: ['ServicoVisualizar', 'ServicoGerenciar'],
   },
   {
     id: 'horarios',

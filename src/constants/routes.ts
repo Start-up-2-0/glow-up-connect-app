@@ -16,6 +16,7 @@ export const ROUTE_NAMES = {
   PERFIL: 'perfil',
   LOJA_DETALHE: 'loja-detalhe',
   LOJA_AGENDAR: 'loja-agendar',
+  AGENDAMENTO_REMARCACAO: 'agendamento-remarcacao',
   AGENDAMENTO_DETALHE: 'agendamento-detalhe',
   NOT_FOUND: 'not-found',
   LANDING: 'landing',
@@ -32,6 +33,9 @@ export const ROUTE_NAMES = {
   UPGRADE: 'upgrade',
   AGENDA: 'agenda',
   SERVICOS: 'servicos',
+  SERVICOS_NOVO: 'servicos-novo',
+  SERVICOS_EDITAR: 'servicos-editar',
+  SERVICOS_PROFISSIONAIS: 'servicos-profissionais',
   FINANCEIRO: 'financeiro',
   CONFIG_EQUIPE: 'config-equipe',
   CONFIG_WHATSAPP: 'config-whatsapp',
@@ -69,6 +73,7 @@ export const ROUTE_PATHS = {
   CONVITES: '/convites',
   PERFIL: '/perfil',
   LOJA: '/loja',
+  AGENDAMENTO_REMARCACAO: '/agendamento/remarcacao',
   MEUS_AGENDAMENTOS_DETALHE: '/meus-agendamentos',
   ONBOARDING_PLANOS: '/onboarding/planos',
   ONBOARDING_CONTRATAR: '/onboarding/contratar',
@@ -83,6 +88,8 @@ export const ROUTE_PATHS = {
   UPGRADE: '/upgrade',
   AGENDA: '/agenda',
   SERVICOS: '/servicos',
+  SERVICOS_NOVO: '/servicos/novo',
+  SERVICOS_PROFISSIONAIS: '/servicos',
   FINANCEIRO: '/financeiro',
   CONFIG_EQUIPE: '/configuracoes/equipe',
   CONFIG_WHATSAPP: '/configuracoes/whatsapp',
@@ -119,6 +126,14 @@ export function agendamentoDetalhePath(id: number): string {
 
 export function conviteResponderPath(token: string): string {
   return `${ROUTE_PATHS.CONVITES}/${encodeURIComponent(token)}`
+}
+
+export function servicoEditarPath(id: number): string {
+  return `${ROUTE_PATHS.SERVICOS}/${id}`
+}
+
+export function servicoProfissionaisPath(id: number): string {
+  return `${ROUTE_PATHS.SERVICOS}/${id}/profissionais`
 }
 
 export const LANDING_PLANOS_HASH = '#planos'
