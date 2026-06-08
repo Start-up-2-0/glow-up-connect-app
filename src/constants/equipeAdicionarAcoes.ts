@@ -19,21 +19,21 @@ export const EQUIPE_ADICIONAR_ACOES: EquipeAdicionarAcaoCopy[] = [
   {
     modo: 'convite',
     titulo: 'Pessoa ainda não entrou',
-    descricao: 'Mande um link por WhatsApp ou e-mail. A pessoa cria a própria senha.',
+    descricao: 'Ela ainda não usa o sistema. Você manda um link e ela cria a senha.',
     tituloModal: 'Chamar pessoa para a equipe',
     instrucao:
-      'Coloque o e-mail da pessoa e escolha o que ela vai fazer no negócio. Depois copie o link e envie para ela.',
+      'Use o e-mail da pessoa. Se ela ainda não entrou, você recebe um link para enviar. Se já tiver conta ativa, entra direto na equipe.',
     badge: 'Mais fácil',
     botaoConfirmar: 'Gerar link para enviar',
     botaoConfirmarProfissional: 'Gerar link para enviar',
   },
   {
     modo: 'vincular',
-    titulo: 'Pessoa já se cadastrou',
-    descricao: 'A pessoa já tem conta no Glow Up. Use o e-mail ou telefone dela.',
+    titulo: 'Pessoa já confirmou o cadastro',
+    descricao: 'Ela já criou conta e confirmou o e-mail. Adicione direto, sem link.',
     tituloModal: 'Adicionar quem já tem cadastro',
     instrucao:
-      'Informe o e-mail ou o telefone da pessoa. Ela precisa já ter confirmado o e-mail no cadastro.',
+      'Use o mesmo e-mail que a pessoa cadastrou. Ela entra na equipe na hora, sem precisar de link.',
     botaoConfirmar: 'Adicionar à equipe',
     botaoConfirmarProfissional: 'Adicionar profissional',
   },

@@ -172,11 +172,9 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
     if (!estabelecimentoId.value) return
     clearFormFeedback()
 
-    const emailTrim = email.value.trim()
-    const telefoneTrim = telefone.value.trim()
-    if (!emailTrim && !telefoneTrim) {
-      emailError.value = 'Informe o e-mail ou o telefone.'
-      telefoneError.value = 'Informe o e-mail ou o telefone.'
+    const emailTrim = email.value.trim().toLowerCase()
+    if (!emailTrim) {
+      emailError.value = 'Informe o e-mail da pessoa.'
       return
     }
 
@@ -184,16 +182,14 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
     try {
       if (ehProfissional.value) {
         await equipeService.vincularProfissional(estabelecimentoId.value, {
-          email: emailTrim || undefined,
-          telefone: telefoneTrim || undefined,
+          email: emailTrim,
           nomePublico: nomePublico.value.trim() || undefined,
           podeReceberAgendamento: podeReceberAgendamento.value,
         })
         notifications.push('success', 'Profissional vinculado à equipe.')
       } else {
         await equipeService.cadastrarUsuario(estabelecimentoId.value, {
-          email: emailTrim || undefined,
-          telefone: telefoneTrim || undefined,
+          email: emailTrim,
           role: role.value,
         })
         notifications.push('success', 'Usuário adicionado à equipe.')
@@ -202,7 +198,7 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
     } catch (err) {
       formError.value = resolveError(
         err,
-        'Não encontramos uma conta ativa com esses dados. Use "Enviar convite" se a pessoa ainda não se cadastrou.',
+        'Não encontramos uma conta confirmada com este e-mail. Se a pessoa ainda não entrou, use "Pessoa ainda não entrou".',
       )
     } finally {
       saving.value = false

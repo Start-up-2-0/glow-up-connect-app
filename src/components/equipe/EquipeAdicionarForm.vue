@@ -142,7 +142,7 @@ defineExpose({ resetForm })
         <h3 class="form-section__title">Dados da pessoa</h3>
         <div
           class="form-section__grid"
-          :class="modo === 'convite' ? 'form-section__grid--single' : ''"
+          :class="modo === 'convite' || modo === 'vincular' ? 'form-section__grid--single' : ''"
         >
           <BaseInput
             v-if="modo === 'criar'"
@@ -162,7 +162,7 @@ defineExpose({ resetForm })
             :error="emailError"
             :hint="
               modo === 'vincular' && !emailError
-                ? 'Preencha o e-mail ou o telefone. Um dos dois já basta.'
+                ? 'O mesmo e-mail que a pessoa usou ao se cadastrar.'
                 : undefined
             "
           />
@@ -172,14 +172,6 @@ defineExpose({ resetForm })
             v-model="telefone"
             label="Telefone"
             required
-            :error="telefoneError"
-          />
-          <BaseInput
-            v-else-if="modo === 'vincular'"
-            v-model="telefone"
-            label="Telefone"
-            type="tel"
-            placeholder="(11) 99999-9999"
             :error="telefoneError"
           />
         </div>
