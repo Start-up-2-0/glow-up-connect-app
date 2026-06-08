@@ -3,6 +3,7 @@ import { computed, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import { useAgendarWizard } from '@/composables/useAgendarWizard'
@@ -56,6 +57,9 @@ const {
   valorEstimado,
   toggleServico,
   escolherIdentidade,
+  voltarParaIdentidade,
+  voltarDeServicos,
+  continuarDeContato,
   datasAtendimento,
   selecionarData,
   goToHorario,
@@ -71,10 +75,13 @@ const steps = computed(() => {
     { id: 'horario', label: 'Horário' },
     { id: 'confirmar', label: 'Confirmar' },
   ]
-  if (isVisitante.value) {
-    return [{ id: 'identidade', label: 'Identificação' }, ...base]
+  if (!isVisitante.value) return base
+
+  const inicio = [{ id: 'identidade', label: 'Identificação' }]
+  if (modoIdentidade.value === 'guest') {
+    inicio.push({ id: 'contato', label: 'Seus dados' })
   }
-  return base
+  return [...inicio, ...base]
 })
 
 const loginComRedirect = computed(() =>
@@ -103,6 +110,14 @@ function handleEscolherRegister() {
 
 function handleEscolherGuest() {
   escolherIdentidade('guest')
+}
+
+async function handleContinuarDeContato() {
+  try {
+    await continuarDeContato()
+  } catch (err) {
+    error.value = resolveError(err)
+  }
 }
 
 async function handleNextFromServicos() {
@@ -179,6 +194,43 @@ async function handleConfirmar() {
         <BaseButton variant="secondary" @click="handleEscolherRegister">Criar conta e agendar</BaseButton>
         <BaseButton variant="ghost" @click="handleEscolherGuest">Agendar sem conta</BaseButton>
       </div>
+      <p class="mt-4 font-urbanist text-xs text-glow-text-subtle">
+        Em <strong class="text-glow-text">Agendar sem conta</strong>, você informa nome, e-mail e telefone
+        apenas para identificar o agendamento e receber alertas — sem criar conta nem fazer login.
+      </p>
+    </BaseCard>
+
+    <BaseCard v-else-if="step === 'contato'" title="Seus dados de contato">
+      <p class="mb-4 font-urbanist text-sm text-glow-text-subtle">
+        Informe como a loja pode identificar seu agendamento e enviar confirmações ou lembretes.
+        Não criaremos uma conta e você não precisa fazer login.
+      </p>
+      <div class="space-y-3">
+        <BaseInput
+          v-model="clienteNome"
+          label="Nome"
+          autocomplete="name"
+          placeholder="Seu nome completo"
+        />
+        <BaseInput
+          v-model="clienteEmail"
+          label="E-mail"
+          type="email"
+          autocomplete="email"
+          placeholder="seu@email.com"
+        />
+        <BaseInput
+          v-model="clienteTelefone"
+          label="Telefone"
+          type="tel"
+          autocomplete="tel"
+          placeholder="(00) 00000-0000"
+        />
+      </div>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <BaseButton variant="secondary" @click="voltarParaIdentidade">Voltar</BaseButton>
+        <BaseButton @click="handleContinuarDeContato">Continuar para serviços</BaseButton>
+      </div>
     </BaseCard>
 
     <LoadingSpinner v-else-if="loading && step === 'servicos'" />
@@ -215,7 +267,9 @@ async function handleConfirmar() {
         </label>
       </div>
       <div class="mt-4 flex gap-2">
-        <BaseButton v-if="isVisitante" variant="secondary" @click="step = 'identidade'">Voltar</BaseButton>
+        <BaseButton v-if="isVisitante" variant="secondary" @click="voltarDeServicos">
+          Voltar
+        </BaseButton>
         <BaseButton :disabled="servicos.length === 0" @click="handleNextFromServicos">
           Continuar
         </BaseButton>
@@ -347,23 +401,20 @@ async function handleConfirmar() {
         </div>
       </div>
 
-      <div v-else-if="isVisitante && modoIdentidade === 'guest'" class="mt-4 space-y-3">
-        <p class="font-urbanist text-sm text-glow-text-subtle">
-          Informe seus dados de contato para a loja confirmar o agendamento.
-        </p>
-        <div>
-          <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">Nome</label>
-          <input v-model="clienteNome" type="text" autocomplete="name" class="w-full rounded border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm" />
+      <dl v-if="isVisitante && modoIdentidade === 'guest'" class="mt-4 space-y-2 border-t border-glow-border-soft pt-4">
+        <div class="flex justify-between gap-4">
+          <dt class="text-glow-text-subtle">Nome</dt>
+          <dd class="text-right text-glow-text">{{ clienteNome }}</dd>
         </div>
-        <div>
-          <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">E-mail</label>
-          <input v-model="clienteEmail" type="email" autocomplete="email" class="w-full rounded border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm" />
+        <div class="flex justify-between gap-4">
+          <dt class="text-glow-text-subtle">E-mail</dt>
+          <dd class="text-right text-glow-text">{{ clienteEmail }}</dd>
         </div>
-        <div>
-          <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">Telefone</label>
-          <input v-model="clienteTelefone" type="tel" autocomplete="tel" class="w-full rounded border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm" />
+        <div class="flex justify-between gap-4">
+          <dt class="text-glow-text-subtle">Telefone</dt>
+          <dd class="text-right text-glow-text">{{ clienteTelefone }}</dd>
         </div>
-      </div>
+      </dl>
 
       <div class="mt-4">
         <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">
@@ -406,7 +457,11 @@ async function handleConfirmar() {
 
     <BaseCard v-else title="Agendamento confirmado">
       <BaseAlert variant="success">
-        Seu horário foi reservado. A loja pode entrar em contato para confirmar os detalhes.
+        {{
+          modoIdentidade === 'guest'
+            ? 'Seu horário foi reservado. Enviaremos alertas para o e-mail informado quando houver novidades.'
+            : 'Seu horário foi reservado. A loja pode entrar em contato para confirmar os detalhes.'
+        }}
       </BaseAlert>
 
       <dl v-if="agendamentoCriado" class="mt-4 space-y-2 font-urbanist text-sm">

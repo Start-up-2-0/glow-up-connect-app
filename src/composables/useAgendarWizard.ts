@@ -21,6 +21,7 @@ import {
 
 export type WizardStep =
   | 'identidade'
+  | 'contato'
   | 'servicos'
   | 'horario'
   | 'confirmar'
@@ -167,8 +168,20 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     await loadDisponibilidade()
   }
 
+  function limparSenhaCadastro() {
+    cadastroSenha.value = ''
+  }
+
+  function limparDadosContato() {
+    clienteNome.value = ''
+    clienteEmail.value = ''
+    clienteTelefone.value = ''
+  }
+
   function persistDraft() {
     if (!profissionalVinculado.value) return
+    if (step.value === 'sucesso' || step.value === 'sucesso_cadastro') return
+
     writeAgendarWizardDraft(publicGuid, profissionalPublicGuid, {
       step: step.value,
       modoIdentidade: modoIdentidade.value,
@@ -180,7 +193,6 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
       clienteNome: clienteNome.value,
       clienteEmail: clienteEmail.value,
       clienteTelefone: clienteTelefone.value,
-      cadastroSenha: cadastroSenha.value,
     })
   }
 
@@ -195,7 +207,7 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     clienteNome.value = draft.clienteNome
     clienteEmail.value = draft.clienteEmail
     clienteTelefone.value = draft.clienteTelefone
-    cadastroSenha.value = draft.cadastroSenha
+    limparSenhaCadastro()
 
     if (draft.selectedSlotInicio) {
       selectedSlot.value = { inicio: draft.selectedSlotInicio, fim: '', profissionalId: 0 }
@@ -217,7 +229,6 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
       clienteNome,
       clienteEmail,
       clienteTelefone,
-      cadastroSenha,
     ],
     persistDraft,
     { deep: true },
@@ -330,11 +341,56 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     }
   }
 
+  function contatoGuestPreenchido(): boolean {
+    return (
+      clienteNome.value.trim().length > 0
+      && clienteEmail.value.trim().length > 0
+      && clienteTelefone.value.trim().length > 0
+    )
+  }
+
   function escolherIdentidade(modo: ModoIdentidadeAgendamento) {
     modoIdentidade.value = modo
     error.value = null
     if (modo === 'guest') {
+      step.value = 'contato'
+      return
+    }
+    if (modo === 'register') {
       step.value = 'servicos'
+      void loadServicos()
+    }
+  }
+
+  function voltarParaIdentidade() {
+    modoIdentidade.value = null
+    error.value = null
+    limparSenhaCadastro()
+    limparDadosContato()
+    clearAgendarWizardDraft(publicGuid, profissionalPublicGuid)
+    step.value = 'identidade'
+  }
+
+  function voltarDeServicos() {
+    error.value = null
+    if (modoIdentidade.value === 'guest') {
+      step.value = 'contato'
+      return
+    }
+    voltarParaIdentidade()
+  }
+
+  async function continuarDeContato() {
+    if (!validarDadosContato()) return
+    error.value = null
+    step.value = 'servicos'
+    if (servicos.value.length === 0) {
+      loading.value = true
+      try {
+        await loadServicos()
+      } finally {
+        loading.value = false
+      }
     }
   }
 
@@ -372,7 +428,12 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     const telefone = clienteTelefone.value.trim()
 
     if (!nome || !email || !telefone) {
-      error.value = 'Informe nome, e-mail e telefone para concluir o agendamento.'
+      error.value = 'Informe nome, e-mail e telefone para continuar.'
+      return false
+    }
+
+    if (!email.includes('@') || !email.includes('.')) {
+      error.value = 'Informe um e-mail válido.'
       return false
     }
 
@@ -443,6 +504,8 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
         agendamentoCriado.value = criado
         sucessoCadastroPendente.value = true
         step.value = 'sucesso_cadastro'
+        limparSenhaCadastro()
+        limparDadosContato()
         clearAgendarWizardDraft(publicGuid, profissionalPublicGuid)
         return criado
       }
@@ -460,6 +523,7 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
         })
         agendamentoCriado.value = criado
         step.value = 'sucesso'
+        limparDadosContato()
         clearAgendarWizardDraft(publicGuid, profissionalPublicGuid)
         return criado
       }
@@ -472,6 +536,7 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
       clearAgendarWizardDraft(publicGuid, profissionalPublicGuid)
       return criado
     } finally {
+      limparSenhaCadastro()
       submitting.value = false
     }
   }
@@ -483,6 +548,11 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
 
     if (isVisitante.value && !modoIdentidade.value) {
       step.value = 'identidade'
+      return
+    }
+
+    if (isVisitante.value && modoIdentidade.value === 'guest' && !contatoGuestPreenchido()) {
+      step.value = 'contato'
       return
     }
 
@@ -525,6 +595,9 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     valorEstimado,
     toggleServico,
     escolherIdentidade,
+    voltarParaIdentidade,
+    voltarDeServicos,
+    continuarDeContato,
     loadDisponibilidade,
     selecionarData,
     goToHorario,
