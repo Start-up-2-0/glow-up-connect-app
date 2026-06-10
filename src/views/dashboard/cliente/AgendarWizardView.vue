@@ -99,7 +99,6 @@ const showBack = computed(() => {
   if (step.value === 'identidade' || step.value === 'sucesso' || step.value === 'sucesso_cadastro') {
     return false
   }
-  if (step.value === 'servicos' && !isVisitante.value) return false
   return true
 })
 

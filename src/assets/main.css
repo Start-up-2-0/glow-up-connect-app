@@ -94,10 +94,6 @@
     @apply relative min-h-screen bg-white pb-16 text-glow-text;
   }
 
-  .agendar-publico-hashtag {
-    @apply pointer-events-none absolute left-[30px] top-[61px] font-satoshi text-base font-light text-glow-text;
-  }
-
   .agendar-publico-header {
     @apply border-b border-glow-border-soft px-[68px] pb-6 pt-[29px];
   }
