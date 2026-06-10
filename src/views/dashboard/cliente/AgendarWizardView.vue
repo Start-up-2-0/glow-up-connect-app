@@ -23,12 +23,12 @@ import {
 } from '@/constants/designTokens'
 import { authRouteWithRedirect } from '@/utils/authRedirect'
 import {
+  formatAgendaDateTime,
+  formatAgendaTime,
   formatCurrency,
   formatDateOnlyLong,
   formatDateOnlyMedium,
-  formatDateTime,
   formatPrecoRange,
-  formatTime,
 } from '@/utils/formatters'
 
 const route = useRoute()
@@ -56,7 +56,7 @@ const {
   sucessoCadastroPendente,
   isVisitante,
   servicos,
-  slots,
+  slotsDoDia,
   selectedServicoIds,
   selectedDate,
   selectedSlot,
@@ -390,7 +390,7 @@ async function handleConfirmar() {
         <LoadingSpinner v-if="loading" />
 
         <p
-          v-else-if="slots.length === 0"
+          v-else-if="slotsDoDia.length === 0"
           class="font-urbanist text-sm text-glow-text-subtle"
         >
           Nenhum horário livre nesta data. Escolha outro dia da agenda do profissional.
@@ -398,14 +398,14 @@ async function handleConfirmar() {
 
         <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
           <button
-            v-for="(slot, index) in slots"
+            v-for="(slot, index) in slotsDoDia"
             :key="`${slot.inicio}-${index}`"
             type="button"
             class="agendar-slot-btn"
             :class="{ 'agendar-slot-btn--selected': selectedSlot?.inicio === slot.inicio }"
             @click="selectedSlot = slot"
           >
-            {{ formatTime(slot.inicio) }}
+            {{ formatAgendaTime(slot.inicio) }}
           </button>
         </div>
 
@@ -483,7 +483,7 @@ async function handleConfirmar() {
             <div>
               <p class="font-urbanist text-xs text-glow-text-subtle">Horário</p>
               <p class="font-urbanist text-sm text-glow-text">
-                {{ selectedSlot ? formatTime(selectedSlot.inicio) : '—' }}
+                {{ selectedSlot ? formatAgendaTime(selectedSlot.inicio) : '—' }}
               </p>
             </div>
           </div>
@@ -558,7 +558,7 @@ async function handleConfirmar() {
         <dl v-if="agendamentoCriado" class="space-y-2 text-left font-urbanist text-sm">
           <div class="flex justify-between gap-4">
             <dt class="text-glow-text-subtle">Horário</dt>
-            <dd>{{ formatDateTime(agendamentoCriado.inicio) }}</dd>
+            <dd>{{ formatAgendaDateTime(agendamentoCriado.inicio) }}</dd>
           </div>
           <div class="flex justify-between gap-4">
             <dt class="text-glow-text-subtle">Valor estimado</dt>
@@ -594,7 +594,7 @@ async function handleConfirmar() {
           </div>
           <div class="flex justify-between gap-4">
             <dt class="text-glow-text-subtle">Horário</dt>
-            <dd>{{ formatDateTime(agendamentoCriado.inicio) }}</dd>
+            <dd>{{ formatAgendaDateTime(agendamentoCriado.inicio) }}</dd>
           </div>
           <div class="flex justify-between gap-4">
             <dt class="text-glow-text-subtle">Valor estimado</dt>

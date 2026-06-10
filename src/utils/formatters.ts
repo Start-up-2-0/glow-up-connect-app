@@ -91,6 +91,38 @@ export function formatTime(iso: string): string {
   return timeFormatter.format(new Date(iso))
 }
 
+/**
+ * Horário de agenda: a API persiste o relógio local do estabelecimento com Kind UTC.
+ * Evita deslocamento de -3h ao exibir no Brasil.
+ */
+export function formatAgendaTime(iso: string): string {
+  const d = new Date(iso)
+  const hours = String(d.getUTCHours()).padStart(2, '0')
+  const minutes = String(d.getUTCMinutes()).padStart(2, '0')
+  return `${hours}:${minutes}`
+}
+
+/** Data ISO (yyyy-MM-dd) a partir de timestamp de agenda em UTC wall-clock. */
+export function toDateOnlyFromIsoUtc(iso: string): string {
+  const d = new Date(iso)
+  const year = d.getUTCFullYear()
+  const month = String(d.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(d.getUTCDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+export function formatAgendaDateTime(iso: string): string {
+  const datePart = toDateOnlyFromIsoUtc(iso)
+  const [year, month, day] = datePart.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  const label = new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date)
+  return `${label} às ${formatAgendaTime(iso)}`
+}
+
 export function formatDateTime(iso: string): string {
   return `${formatDate(iso)} às ${formatTime(iso)}`
 }

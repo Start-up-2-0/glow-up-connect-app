@@ -9,7 +9,12 @@ import type {
   ServicoPublico,
   SlotDisponivel,
 } from '@/types/agendamento.types'
-import { addDaysToDateOnly, toDateOnlyString, toTimeOnlyString } from '@/utils/formatters'
+import {
+  addDaysToDateOnly,
+  toDateOnlyFromIsoUtc,
+  toDateOnlyString,
+  toTimeOnlyString,
+} from '@/utils/formatters'
 
 const DISPONIBILIDADE_JANELA_DIAS = 31
 import {
@@ -69,6 +74,10 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
 
   const duracaoTotal = computed(() =>
     selectedServicos.value.reduce((sum, servico) => sum + servico.duracaoMinutosEstimada, 0),
+  )
+
+  const slotsDoDia = computed(() =>
+    slots.value.filter((slot) => toDateOnlyFromIsoUtc(slot.inicio) === selectedDate.value),
   )
 
   const minSelectableDate = computed(() => toDateOnlyString(new Date()))
@@ -137,7 +146,7 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
       return false
     }
 
-    const slotPermitido = slots.value.some((slot) => slot.inicio === selectedSlot.value?.inicio)
+    const slotPermitido = slotsDoDia.value.some((slot) => slot.inicio === selectedSlot.value?.inicio)
     if (!slotPermitido) {
       error.value = 'O horário selecionado não está mais disponível. Escolha outro horário.'
       return false
@@ -156,7 +165,7 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
 
     const horarioReservado = selectedSlot.value.inicio
     await loadDisponibilidade()
-    const aindaDisponivel = slots.value.some((slot) => slot.inicio === horarioReservado)
+    const aindaDisponivel = slotsDoDia.value.some((slot) => slot.inicio === horarioReservado)
     if (!aindaDisponivel) {
       error.value = 'O horário selecionado não está mais disponível. Escolha outro horário.'
       selectedSlot.value = null
@@ -319,7 +328,9 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
         servicoIds: selectedServicoIds.value,
         profissionalPublicGuid,
       })
-      slots.value = data.slots
+      slots.value = data.slots.filter(
+        (slot) => toDateOnlyFromIsoUtc(slot.inicio) === dataConsulta,
+      )
       if (data.datasAtendimento?.length) {
         datasAtendimento.value = normalizarDatasAtendimento([
           ...datasAtendimento.value,
@@ -623,6 +634,7 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     profissionalVinculado,
     servicos,
     slots,
+    slotsDoDia,
     datasAtendimento,
     minSelectableDate,
     maxSelectableDate,
