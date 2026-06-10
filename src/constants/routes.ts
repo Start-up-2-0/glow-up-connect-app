@@ -138,7 +138,7 @@ export function servicoProfissionaisPath(id: number): string {
 
 export const LANDING_PLANOS_HASH = '#planos'
 
-export type AppLayout = 'auth' | 'dashboard' | 'public' | 'landing'
+export type AppLayout = 'auth' | 'dashboard' | 'public' | 'landing' | 'agendar-publico'
 
 declare module 'vue-router' {
   interface RouteMeta {

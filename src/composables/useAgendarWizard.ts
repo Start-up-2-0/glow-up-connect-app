@@ -23,6 +23,7 @@ export type WizardStep =
   | 'identidade'
   | 'contato'
   | 'servicos'
+  | 'data'
   | 'horario'
   | 'confirmar'
   | 'sucesso'
@@ -65,6 +66,10 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     if (selected.length === 0) return 0
     return selected.reduce((sum, s) => sum + s.precoMinimo, 0)
   })
+
+  const duracaoTotal = computed(() =>
+    selectedServicos.value.reduce((sum, servico) => sum + servico.duracaoMinutosEstimada, 0),
+  )
 
   const minSelectableDate = computed(() => toDateOnlyString(new Date()))
 
@@ -157,7 +162,7 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     return selectedSlot.value !== null
   }
 
-  async function selecionarData(data: string) {
+  async function selecionarData(data: string, carregarHorarios = true) {
     if (!isDataAtendimentoPermitida(data)) {
       error.value = 'Esta data não está na agenda do profissional.'
       return
@@ -165,7 +170,10 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
 
     selectedDate.value = data
     error.value = null
-    await loadDisponibilidade()
+    selectedSlot.value = null
+    if (carregarHorarios) {
+      await loadDisponibilidade()
+    }
   }
 
   function limparSenhaCadastro() {
@@ -394,24 +402,52 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     }
   }
 
-  async function goToHorario() {
+  async function goToData() {
     if (selectedServicoIds.value.length === 0) {
       error.value = 'Selecione ao menos um serviço.'
       return
     }
-    step.value = 'horario'
+    step.value = 'data'
     loading.value = true
     error.value = null
     try {
       await loadDatasAtendimento()
       if (!garantirDataAtendimentoValida()) {
         slots.value = []
-        return
       }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function goToHorario() {
+    if (!validarServicosSelecionados()) return
+    if (!garantirDataAtendimentoValida()) return
+
+    step.value = 'horario'
+    loading.value = true
+    error.value = null
+    try {
       await loadDisponibilidade()
     } finally {
       loading.value = false
     }
+  }
+
+  function voltarDeData() {
+    error.value = null
+    step.value = 'servicos'
+  }
+
+  function voltarDeHorario() {
+    error.value = null
+    selectedSlot.value = null
+    step.value = 'data'
+  }
+
+  function voltarDeConfirmar() {
+    error.value = null
+    step.value = 'horario'
   }
 
   function goToConfirmar() {
@@ -557,9 +593,9 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     }
 
     await loadServicos()
-    if (selectedServicoIds.value.length > 0 && step.value === 'horario') {
+    if (selectedServicoIds.value.length > 0 && (step.value === 'data' || step.value === 'horario')) {
       await loadDatasAtendimento()
-      if (garantirDataAtendimentoValida()) {
+      if (garantirDataAtendimentoValida() && step.value === 'horario') {
         await loadDisponibilidade()
       }
     }
@@ -593,13 +629,18 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     cadastroSenha,
     selectedServicos,
     valorEstimado,
+    duracaoTotal,
     toggleServico,
     escolherIdentidade,
     voltarParaIdentidade,
     voltarDeServicos,
+    voltarDeData,
+    voltarDeHorario,
+    voltarDeConfirmar,
     continuarDeContato,
     loadDisponibilidade,
     selecionarData,
+    goToData,
     goToHorario,
     goToConfirmar,
     confirmar,

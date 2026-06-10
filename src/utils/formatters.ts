@@ -168,6 +168,30 @@ export function formatDateOnlyLabel(isoDate: string): string {
   }).format(date)
 }
 
+/** Rótulo longo para revisão (ex.: segunda-feira, 08 de junho de 2026). */
+export function formatDateOnlyLong(isoDate: string): string {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  return new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  }).format(date)
+}
+
+/** Rótulo médio para horário (ex.: segunda-feira, 08 de junho). */
+export function formatDateOnlyMedium(isoDate: string): string {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  const formatted = new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+  }).format(date)
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1)
+}
+
 export function toDateOnlyString(date: Date): string {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')

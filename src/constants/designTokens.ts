@@ -81,3 +81,21 @@ export const GLOW_RECOVERY_BACK_LINK_CLASS =
 
 export const GLOW_RECOVERY_ALERT_CLASS =
   'flex w-full items-center gap-2.5 rounded bg-[rgba(207,63,63,0.1)] px-2.5 py-2.5 font-inter text-xs font-medium text-[#cf3f3f]'
+
+/** Link público de agendamento — shell fixo light (Figma Fluxo Agendamento Público) */
+export const AGENDAR_WIZARD_CONTENT_CLASS = 'mx-auto w-full max-w-[695px]'
+
+export const AGENDAR_CARD_CLASS =
+  'rounded-xl border-[0.5px] border-glow-text/25 bg-white'
+
+export const AGENDAR_BTN_OUTLINE_CLASS =
+  'inline-flex h-[34px] items-center justify-center gap-2 rounded-xl border-[0.5px] border-glow-text/40 px-4 font-inter text-sm text-glow-text transition hover:bg-zinc-50'
+
+export const AGENDAR_BTN_CONTINUE_CLASS =
+  'flex h-10 w-full items-center justify-center rounded bg-glow-gold-cta px-2.5 font-satoshi text-base font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:bg-[rgba(163,163,163,0.1)] disabled:text-[#a3a3a3]'
+
+export const AGENDAR_BTN_CONTINUE_MUTED_CLASS =
+  'flex h-10 w-full items-center justify-center rounded bg-[rgba(163,163,163,0.1)] px-2.5 font-satoshi text-base font-bold text-[#a3a3a3] disabled:cursor-not-allowed'
+
+export const AGENDAR_PRICE_PILL_CLASS =
+  'inline-flex shrink-0 items-center justify-center rounded-full bg-[rgba(84,128,78,0.2)] px-4 py-1 font-urbanist text-base font-bold text-[#54804e]'

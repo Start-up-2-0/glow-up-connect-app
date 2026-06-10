@@ -55,6 +55,7 @@ function sanitizeStep(value: unknown): WizardStep | null {
     'identidade',
     'contato',
     'servicos',
+    'data',
     'horario',
     'confirmar',
   ]

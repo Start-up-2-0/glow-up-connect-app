@@ -29,7 +29,7 @@ export const clienteRoutes: RouteRecordRaw[] = [
     name: ROUTE_NAMES.LOJA_AGENDAR,
     component: () => import('@/views/dashboard/cliente/AgendarWizardView.vue'),
     meta: {
-      layout: 'public',
+      layout: 'agendar-publico',
       skipNegocioGuard: true,
       title: 'Agendar',
     },
