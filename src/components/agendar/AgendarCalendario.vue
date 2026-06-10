@@ -18,7 +18,14 @@ const emit = defineEmits<{
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as const
 
-const permitidasSet = computed(() => new Set(props.datasPermitidas))
+/** Apenas datas retornadas pela API com slots na agenda do profissional. */
+const datasDisponiveis = computed(() =>
+  [...props.datasPermitidas].filter(
+    (iso) => iso >= props.minDate && iso <= props.maxDate,
+  ),
+)
+
+const permitidasSet = computed(() => new Set(datasDisponiveis.value))
 
 const visibleMonth = ref(parseMonth(props.selectedDate || props.minDate))
 
@@ -30,7 +37,7 @@ watch(
 )
 
 watch(
-  () => props.datasPermitidas,
+  datasDisponiveis,
   (datas) => {
     if (datas.length === 0) return
     const primeiraNoMes = datas.find((iso) => {
@@ -86,7 +93,7 @@ const calendarDays = computed(() => {
 })
 
 const diasDisponiveisNoMes = computed(() =>
-  props.datasPermitidas.filter((iso) => {
+  datasDisponiveis.value.filter((iso) => {
     const [year, month] = iso.split('-').map(Number)
     return year === visibleMonth.value.year && month === visibleMonth.value.month
   }).length,

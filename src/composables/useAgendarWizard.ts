@@ -83,6 +83,11 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     return datasAtendimentoSet.value.has(isoDate)
   }
 
+  function normalizarDatasAtendimento(datas: string[]): string[] {
+    const hoje = minSelectableDate.value
+    return [...new Set(datas.filter((data) => data >= hoje))].sort()
+  }
+
   function primeiraDataAtendimentoDisponivel(): string | null {
     const hoje = minSelectableDate.value
     return datasAtendimento.value.find((data) => data >= hoje) ?? null
@@ -289,10 +294,11 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
       servicoIds: selectedServicoIds.value,
       profissionalPublicGuid,
     })
-    datasAtendimento.value = data.datasAtendimento ?? []
+    datasAtendimento.value = normalizarDatasAtendimento(data.datasAtendimento ?? [])
     if (data.mensagemIndisponibilidade && datasAtendimento.value.length === 0) {
       error.value = data.mensagemIndisponibilidade
     }
+    garantirDataAtendimentoValida()
   }
 
   async function loadDisponibilidade() {
@@ -315,8 +321,10 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
       })
       slots.value = data.slots
       if (data.datasAtendimento?.length) {
-        const merged = new Set([...datasAtendimento.value, ...data.datasAtendimento])
-        datasAtendimento.value = [...merged].sort()
+        datasAtendimento.value = normalizarDatasAtendimento([
+          ...datasAtendimento.value,
+          ...data.datasAtendimento,
+        ])
       } else if (!isDataAtendimentoPermitida(dataConsulta)) {
         datasAtendimento.value = datasAtendimento.value.filter((dia) => dia !== dataConsulta)
         if (selectedDate.value === dataConsulta) {
