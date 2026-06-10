@@ -19,7 +19,7 @@ import {
   agendaDetalhePath,
   ROUTE_PATHS,
 } from '@/constants/routes'
-import { formatCurrency, formatDateTime } from '@/utils/formatters'
+import { formatAgendaDateTime, formatCurrency } from '@/utils/formatters'
 
 function dayRange(date: Date) {
   const inicio = new Date(date)
@@ -71,7 +71,7 @@ const itensHoje = computed(() => {
       clienteNome: a.clienteNome,
       status: a.status,
       valorTotal: a.valorTotal,
-      inicio: a.itens[0]?.inicio ?? '',
+      inicio: a.inicio || a.itens[0]?.inicio || '',
       label: a.itens.map((i) => i.servicoNome).join(', '),
     }))
   }
@@ -209,7 +209,7 @@ watch(
               {{ item.clienteNome }}
             </RouterLink>
             <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-              {{ item.inicio ? formatDateTime(item.inicio) : '—' }}
+              {{ item.inicio ? formatAgendaDateTime(item.inicio) : '—' }}
             </p>
             <p class="mt-1 font-urbanist text-sm text-glow-text">{{ item.label }}</p>
             <p v-if="item.valorTotal > 0" class="mt-1 font-urbanist text-sm font-medium text-glow-text">

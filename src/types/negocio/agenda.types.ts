@@ -18,6 +18,8 @@ export interface AgendaGeral {
   clienteTelefone: string | null
   status: string
   valorTotal: number
+  inicio: string
+  fim: string
   observacao: string | null
   itens: AgendaGeralItem[]
 }

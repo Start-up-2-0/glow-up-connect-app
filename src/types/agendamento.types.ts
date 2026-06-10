@@ -67,6 +67,7 @@ export interface CriarAgendamentoPayload {
   servicoIds: number[]
   data: string
   horarioInicio: string
+  inicioSelecionado?: string
   observacao?: string
 }
 
@@ -75,6 +76,7 @@ export interface CriarAgendamentoPublicoPayload {
   servicoIds: number[]
   data: string
   horarioInicio: string
+  inicioSelecionado?: string
   clienteNome: string
   clienteEmail: string
   clienteTelefone: string
@@ -101,6 +103,7 @@ export interface CriarAgendamentoComCadastroPayload {
   servicoIds: number[]
   data: string
   horarioInicio: string
+  inicioSelecionado?: string
   observacao?: string
   cadastro: {
     nome: string
@@ -131,6 +134,7 @@ export interface CancelarAgendamentoPayload {
 export interface RemarcarAgendamentoPayload {
   data: string
   horarioInicio: string
+  inicioSelecionado?: string
   motivo: string
 }
 

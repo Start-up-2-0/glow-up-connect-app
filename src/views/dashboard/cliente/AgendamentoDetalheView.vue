@@ -23,6 +23,7 @@ import {
   formatTime,
   toDateOnlyString,
   toAgendaTimeOnlyString,
+  toDateOnlyFromIsoUtc,
 } from '@/utils/formatters'
 
 const route = useRoute()
@@ -106,9 +107,11 @@ async function handleRemarcar() {
   actionLoading.value = true
   error.value = null
   try {
+    const inicioSelecionado = remarcarSlot.value.inicio
     agendamento.value = await store.remarcar(agendamentoId.value, {
-      data: remarcarDate.value,
-      horarioInicio: toAgendaTimeOnlyString(remarcarSlot.value.inicio),
+      data: toDateOnlyFromIsoUtc(inicioSelecionado),
+      horarioInicio: toAgendaTimeOnlyString(inicioSelecionado),
+      inicioSelecionado,
       motivo: remarcarMotivo.value.trim(),
     })
     remarcarOpen.value = false

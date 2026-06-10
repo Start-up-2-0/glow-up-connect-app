@@ -13,7 +13,7 @@ import { useApiError } from '@/composables/useApiError'
 import { agendaNegocioService } from '@/services/agendaNegocioService'
 import type { AgendaGeral, AgendaProfissional } from '@/types/negocio/agenda.types'
 import { agendaDetalhePath, ROUTE_PATHS } from '@/constants/routes'
-import { formatDate, formatTime } from '@/utils/formatters'
+import { formatAgendaDateTime } from '@/utils/formatters'
 
 function monthRange(date: Date) {
   const inicio = new Date(date.getFullYear(), date.getMonth(), 1)
@@ -35,15 +35,13 @@ const visaoGeral = computed(() => possuiPermissao('AgendaVisualizarGeral'))
 
 const itens = computed(() => {
   if (visaoGeral.value) {
-    return agendaGeral.value.flatMap((a) =>
-      a.itens.map((i) => ({
-        agendamentoId: a.id,
-        clienteNome: a.clienteNome,
-        status: a.status,
-        servicoNome: i.servicoNome,
-        inicio: i.inicio,
-      })),
-    )
+    return agendaGeral.value.map((a) => ({
+      agendamentoId: a.id,
+      clienteNome: a.clienteNome,
+      status: a.status,
+      servicoNome: a.itens.map((i) => i.servicoNome).join(', '),
+      inicio: a.inicio || a.itens[0]?.inicio || '',
+    }))
   }
   return agendaPropria.value.map((a) => ({
     agendamentoId: a.agendamentoId,
@@ -115,7 +113,7 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
         <div>
           <p class="font-urbanist text-sm font-semibold text-glow-text">{{ item.clienteNome }}</p>
           <p class="font-urbanist text-xs text-glow-text-subtle">
-            {{ formatDate(item.inicio) }} às {{ formatTime(item.inicio) }} · {{ item.servicoNome }}
+            {{ formatAgendaDateTime(item.inicio) }} · {{ item.servicoNome }}
           </p>
         </div>
         <AgendamentoStatusBadge :status="item.status" />

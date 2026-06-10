@@ -531,13 +531,15 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     submitting.value = true
     error.value = null
     try {
-      const horarioInicio = toAgendaTimeOnlyString(slot.inicio)
+      const inicioSelecionado = slot.inicio
+      const horarioInicio = toAgendaTimeOnlyString(inicioSelecionado)
       const observacaoTrim = observacao.value.trim() || undefined
       const payloadBase = {
         profissionalPublicGuid,
         servicoIds: selectedServicoIds.value,
-        data: selectedDate.value,
+        data: toDateOnlyFromIsoUtc(inicioSelecionado),
         horarioInicio,
+        inicioSelecionado,
         observacao: observacaoTrim,
       }
 

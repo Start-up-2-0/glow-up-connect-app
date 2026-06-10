@@ -91,12 +91,19 @@ export function formatTime(iso: string): string {
   return timeFormatter.format(new Date(iso))
 }
 
+/** Garante interpretação UTC wall-clock quando a API omite o sufixo Z. */
+export function normalizeAgendaIso(iso: string): string {
+  if (!iso) return iso
+  if (/[zZ]$|[+-]\d{2}:\d{2}$/.test(iso)) return iso
+  return `${iso}Z`
+}
+
 /**
  * Horário de agenda: a API persiste o relógio local do estabelecimento com Kind UTC.
- * Evita deslocamento de -3h ao exibir no Brasil.
+ * Evita deslocamento de fuso ao exibir no navegador.
  */
 export function formatAgendaTime(iso: string): string {
-  const d = new Date(iso)
+  const d = new Date(normalizeAgendaIso(iso))
   const hours = String(d.getUTCHours()).padStart(2, '0')
   const minutes = String(d.getUTCMinutes()).padStart(2, '0')
   return `${hours}:${minutes}`
@@ -104,7 +111,7 @@ export function formatAgendaTime(iso: string): string {
 
 /** Data ISO (yyyy-MM-dd) a partir de timestamp de agenda em UTC wall-clock. */
 export function toDateOnlyFromIsoUtc(iso: string): string {
-  const d = new Date(iso)
+  const d = new Date(normalizeAgendaIso(iso))
   const year = d.getUTCFullYear()
   const month = String(d.getUTCMonth() + 1).padStart(2, '0')
   const day = String(d.getUTCDate()).padStart(2, '0')
@@ -244,7 +251,7 @@ export function toTimeOnlyString(date: Date): string {
 
 /** Horário HH:mm:ss para API a partir de timestamp de agenda em UTC wall-clock. */
 export function toAgendaTimeOnlyString(iso: string): string {
-  const d = new Date(iso)
+  const d = new Date(normalizeAgendaIso(iso))
   const hours = String(d.getUTCHours()).padStart(2, '0')
   const minutes = String(d.getUTCMinutes()).padStart(2, '0')
   const seconds = String(d.getUTCSeconds()).padStart(2, '0')
