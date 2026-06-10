@@ -23,6 +23,23 @@ function unwrap<T>(response: { data: ApiSuccessResponse<T> }): T {
   return response.data.data
 }
 
+/** ASP.NET Core espera servicoIds=1&servicoIds=2, não servicoIds[]=1 (formato padrão do Axios). */
+function buildDisponibilidadeQueryParams(params: ConsultarDisponibilidadeParams): URLSearchParams {
+  const query = new URLSearchParams()
+  query.set('dataInicio', params.dataInicio)
+  query.set('dataFim', params.dataFim)
+  for (const servicoId of params.servicoIds) {
+    query.append('servicoIds', String(servicoId))
+  }
+  if (params.profissionalId != null) {
+    query.set('profissionalId', String(params.profissionalId))
+  }
+  if (params.profissionalPublicGuid) {
+    query.set('profissionalPublicGuid', params.profissionalPublicGuid)
+  }
+  return query
+}
+
 export const publicoService = {
   listarProximos(params: ListarProximosParams) {
     return api
@@ -79,15 +96,7 @@ export const publicoService = {
     return api
       .get<ApiSuccessResponse<DisponibilidadeAgenda>>(
         `/publico/agendar/loja/${publicGuid}/disponibilidade`,
-        {
-          params: {
-            dataInicio: params.dataInicio,
-            dataFim: params.dataFim,
-            servicoIds: params.servicoIds,
-            profissionalId: params.profissionalId,
-            profissionalPublicGuid: params.profissionalPublicGuid,
-          },
-        },
+        { params: buildDisponibilidadeQueryParams(params) },
       )
       .then(unwrap)
   },
