@@ -240,7 +240,7 @@ async function handleConfirmar() {
       <!-- Identificação -->
       <div v-if="step === 'identidade'" class="space-y-6">
         <div>
-          <h1 class="agendar-section-title">Como deseja continuar?</h1>
+          <h1 class="agendar-section-title--identidade">Como deseja continuar?</h1>
           <p class="agendar-section-subtitle mt-2">
             Escolha a opção que melhor se encaixa para você.
           </p>
@@ -345,7 +345,7 @@ async function handleConfirmar() {
       </div>
 
       <!-- Serviços -->
-      <div v-else-if="step === 'servicos'" class="space-y-5" :class="{ 'pb-28': showResumoFooter }">
+      <div v-else-if="step === 'servicos'" class="space-y-5" :class="{ 'pb-36': showResumoFooter }">
         <AgendarProfissionalCard
           v-if="contexto"
           :nome="contexto.profissional.nomePublico"
@@ -417,7 +417,7 @@ async function handleConfirmar() {
       <div v-else-if="step === 'horario'" class="space-y-6">
         <div>
           <h2 class="agendar-section-title">Selecione o horário desejado</h2>
-          <p class="mt-2 font-satoshi text-base text-glow-text-muted">
+          <p class="agendar-section-date mt-2">
             {{ formatDateOnlyMedium(selectedDate) }}
           </p>
         </div>
@@ -431,7 +431,7 @@ async function handleConfirmar() {
           Nenhum horário livre nesta data. Escolha outro dia da agenda do profissional.
         </p>
 
-        <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+        <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <button
             v-for="(slot, index) in slotsDoDia"
             :key="`${slot.inicio}-${index}`"

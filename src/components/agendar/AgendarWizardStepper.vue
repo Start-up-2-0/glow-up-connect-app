@@ -32,7 +32,16 @@ const emit = defineEmits<{
           />
         </svg>
       </button>
-      <div class="agendar-wizard-stepper__meta" :class="{ 'ml-11': !showBack }">
+      <div
+        v-else
+        class="flex size-8 shrink-0 items-center justify-center rounded-full bg-glow-text/10 text-glow-text"
+        aria-hidden="true"
+      >
+        <svg class="size-4" viewBox="0 0 24 24" fill="none">
+          <path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+      </div>
+      <div class="agendar-wizard-stepper__meta">
         <p class="agendar-wizard-stepper__counter">
           ETAPA {{ stepIndex }} DE {{ AGENDAR_FIGMA_TOTAL }}
         </p>

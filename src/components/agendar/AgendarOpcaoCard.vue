@@ -13,7 +13,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div :class="[AGENDAR_CARD_CLASS, 'flex min-h-[80px] items-center gap-4 p-4 sm:px-5']">
+  <div :class="[AGENDAR_CARD_CLASS, 'agendar-opcao-card flex items-center gap-4 p-4 sm:px-5']">
     <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-glow-text/10 text-glow-text">
       <slot name="icon" />
     </div>

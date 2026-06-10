@@ -17,7 +17,7 @@ const iniciais = computed(() => {
 </script>
 
 <template>
-  <div :class="[AGENDAR_CARD_CLASS, compact ? 'p-4' : 'p-5']">
+  <div :class="[AGENDAR_CARD_CLASS, 'agendar-profissional-card', compact ? 'p-4' : 'p-5']">
     <p v-if="compact" class="mb-3 font-urbanist text-base font-semibold text-glow-text">
       Profissional
     </p>

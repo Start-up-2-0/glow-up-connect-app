@@ -19,13 +19,13 @@ const emit = defineEmits<{
 <template>
   <button
     type="button"
-    :class="[AGENDAR_CARD_CLASS, 'flex w-full items-start gap-4 p-4 text-left transition sm:px-5', selected ? 'ring-1 ring-glow-gold-cta' : 'hover:bg-zinc-50']"
+    :class="[AGENDAR_CARD_CLASS, 'agendar-servico-card flex w-full items-start gap-4 p-4 text-left transition sm:px-5', selected ? 'ring-1 ring-glow-gold-cta' : 'hover:bg-zinc-50']"
     :aria-pressed="selected"
     @click="emit('toggle')"
   >
     <span
       class="mt-1 flex size-3.5 shrink-0 items-center justify-center rounded-full border border-glow-text/40"
-      :class="selected ? 'border-glow-gold-cta bg-glow-gold-cta' : ''"
+      :class="selected ? 'border-glow-gold-cta bg-glow-gold-cta' : 'bg-white'"
       aria-hidden="true"
     >
       <span v-if="selected" class="size-1.5 rounded-full bg-white" />

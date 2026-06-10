@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { AGENDAR_BTN_CONTINUE_CLASS } from '@/constants/designTokens'
-import { toDateOnlyString } from '@/utils/formatters'
+import { formatDateOnlyLabel, toDateOnlyString } from '@/utils/formatters'
 
 const props = defineProps<{
   selectedDate: string
@@ -109,13 +109,20 @@ function isSelectable(iso: string): boolean {
 
 function dayClass(iso: string): string {
   if (!isSelectable(iso)) return 'agendar-calendar-day agendar-calendar-day--muted'
-  if (props.selectedDate === iso) return 'agendar-calendar-day agendar-calendar-day--available agendar-calendar-day--selected'
+  if (props.selectedDate === iso) {
+    return 'agendar-calendar-day agendar-calendar-day--available agendar-calendar-day--selected rounded-md'
+  }
   return 'agendar-calendar-day agendar-calendar-day--available'
 }
 
 const podeContinuar = computed(
   () => props.selectedDate.length > 0 && isSelectable(props.selectedDate),
 )
+
+const continuarLabel = computed(() => {
+  if (!podeContinuar.value) return 'Continuar'
+  return `Continuar - ${formatDateOnlyLabel(props.selectedDate)}`
+})
 
 function handleSelect(iso: string) {
   if (!isSelectable(iso)) return
@@ -201,7 +208,7 @@ function handleSelect(iso: string) {
       :disabled="!podeContinuar || loading"
       @click="emit('continuar')"
     >
-      Continuar
+      {{ continuarLabel }}
     </button>
   </div>
 </template>

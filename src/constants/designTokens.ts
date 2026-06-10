@@ -92,7 +92,7 @@ export const AGENDAR_BTN_OUTLINE_CLASS =
   'inline-flex h-[34px] items-center justify-center gap-2 rounded-xl border-[0.5px] border-glow-text/40 px-4 font-inter text-sm text-glow-text transition hover:bg-zinc-50'
 
 export const AGENDAR_BTN_CONTINUE_CLASS =
-  'flex h-10 w-full items-center justify-center rounded bg-glow-gold-cta px-2.5 font-satoshi text-base font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:bg-[rgba(163,163,163,0.1)] disabled:text-[#a3a3a3]'
+  'flex h-10 w-full items-center justify-center rounded bg-glow-gold px-2.5 font-satoshi text-base font-bold text-glow-text transition hover:brightness-95 disabled:cursor-not-allowed disabled:bg-[rgba(163,163,163,0.1)] disabled:text-[#a3a3a3]'
 
 export const AGENDAR_BTN_CONTINUE_MUTED_CLASS =
   'flex h-10 w-full items-center justify-center rounded bg-[rgba(163,163,163,0.1)] px-2.5 font-satoshi text-base font-bold text-[#a3a3a3] disabled:cursor-not-allowed'
