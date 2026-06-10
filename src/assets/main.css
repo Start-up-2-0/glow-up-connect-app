@@ -176,6 +176,40 @@
     @apply fixed inset-x-0 bottom-0 z-20 border-t border-glow-border-soft bg-white px-4 py-4 shadow-[0_-4px_24px_rgba(0,0,0,0.06)];
   }
 
+  .agendar-calendar-day {
+    @apply flex h-10 w-full items-center justify-center rounded font-satoshi text-sm font-bold;
+  }
+
+  .agendar-calendar-day--muted {
+    color: rgba(40, 40, 40, 0.2);
+    cursor: default;
+  }
+
+  .agendar-calendar-day--available {
+    color: #282828;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .agendar-calendar-day--available:hover {
+    background-color: rgba(230, 173, 1, 0.14);
+  }
+
+  .agendar-calendar-day--available:focus-visible {
+    outline: 2px solid #e6ad01;
+    outline-offset: 2px;
+  }
+
+  .agendar-calendar-day--selected {
+    color: #282828;
+    background-color: rgba(230, 173, 1, 0.22);
+    box-shadow: inset 0 0 0 1px rgba(230, 173, 1, 0.55);
+  }
+
+  .agendar-calendar-day--selected:hover {
+    background-color: rgba(230, 173, 1, 0.3);
+  }
+
   .checkout-shell {
     @apply rounded-2xl border border-glow-border-soft bg-glow-surface shadow-sm;
   }
