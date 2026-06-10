@@ -222,7 +222,7 @@
   }
 
   .agendar-slot-btn {
-    @apply flex h-[50px] min-w-0 items-center justify-center rounded-xl border-[0.5px] border-glow-text/40 font-satoshi text-base text-glow-text transition hover:bg-zinc-50;
+    @apply flex h-[50px] min-w-0 items-center justify-center rounded-xl border-[0.5px] border-glow-text-muted font-satoshi text-base text-glow-text transition hover:bg-zinc-50;
   }
 
   .agendar-slot-btn--selected {
