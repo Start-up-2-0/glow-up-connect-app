@@ -242,6 +242,15 @@ export function toTimeOnlyString(date: Date): string {
   return date.toTimeString().slice(0, 8)
 }
 
+/** Horário HH:mm:ss para API a partir de timestamp de agenda em UTC wall-clock. */
+export function toAgendaTimeOnlyString(iso: string): string {
+  const d = new Date(iso)
+  const hours = String(d.getUTCHours()).padStart(2, '0')
+  const minutes = String(d.getUTCMinutes()).padStart(2, '0')
+  const seconds = String(d.getUTCSeconds()).padStart(2, '0')
+  return `${hours}:${minutes}:${seconds}`
+}
+
 export function agendamentoStatusLabel(status: string): string {
   const labels: Record<string, string> = {
     PendentePagamento: 'Pagamento pendente',

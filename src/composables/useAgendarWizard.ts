@@ -11,9 +11,9 @@ import type {
 } from '@/types/agendamento.types'
 import {
   addDaysToDateOnly,
+  toAgendaTimeOnlyString,
   toDateOnlyFromIsoUtc,
   toDateOnlyString,
-  toTimeOnlyString,
 } from '@/utils/formatters'
 
 const DISPONIBILIDADE_JANELA_DIAS = 31
@@ -531,8 +531,7 @@ export function useAgendarWizard(publicGuid: string, profissionalPublicGuid: str
     submitting.value = true
     error.value = null
     try {
-      const inicio = new Date(slot.inicio)
-      const horarioInicio = toTimeOnlyString(inicio)
+      const horarioInicio = toAgendaTimeOnlyString(slot.inicio)
       const observacaoTrim = observacao.value.trim() || undefined
       const payloadBase = {
         profissionalPublicGuid,

@@ -9,6 +9,8 @@ import AgendarOpcaoCard from '@/components/agendar/AgendarOpcaoCard.vue'
 import AgendarServicoCard from '@/components/agendar/AgendarServicoCard.vue'
 import AgendarResumoFooter from '@/components/agendar/AgendarResumoFooter.vue'
 import AgendarCalendario from '@/components/agendar/AgendarCalendario.vue'
+import AgendarRevisaoStep from '@/components/agendar/AgendarRevisaoStep.vue'
+import AgendarSucessoConfirmacao from '@/components/agendar/AgendarSucessoConfirmacao.vue'
 import { useAgendarWizard } from '@/composables/useAgendarWizard'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
@@ -23,12 +25,11 @@ import {
 } from '@/constants/designTokens'
 import { authRouteWithRedirect } from '@/utils/authRedirect'
 import {
-  formatAgendaDateTime,
   formatAgendaTime,
   formatCurrency,
   formatDateOnlyLong,
   formatDateOnlyMedium,
-  formatPrecoRange,
+  toDateOnlyFromIsoUtc,
 } from '@/utils/formatters'
 
 const route = useRoute()
@@ -113,6 +114,40 @@ const showResumoFooter = computed(
   () => step.value === 'servicos' && selectedServicoIds.value.length > 0,
 )
 
+const isSuccessStep = computed(
+  () => step.value === 'sucesso' || step.value === 'sucesso_cadastro',
+)
+
+const sucessoProfissionalNome = computed(
+  () => contexto.value?.profissional?.nomePublico ?? '—',
+)
+
+const sucessoServicosLabel = computed(() =>
+  selectedServicos.value.map((servico) => servico.nome).join(', ') || '—',
+)
+
+const sucessoDataLabel = computed(() => {
+  if (!agendamentoCriado.value) return '—'
+  const isoDate = selectedDate.value || toDateOnlyFromIsoUtc(agendamentoCriado.value.inicio)
+  return formatDateOnlyLong(isoDate)
+})
+
+const sucessoHorarioLabel = computed(() =>
+  agendamentoCriado.value ? formatAgendaTime(agendamentoCriado.value.inicio) : '—',
+)
+
+const revisaoDataLabel = computed(() => formatDateOnlyLong(selectedDate.value))
+
+const revisaoHorarioLabel = computed(() =>
+  selectedSlot.value ? formatAgendaTime(selectedSlot.value.inicio) : '—',
+)
+
+const revisaoValorTotalLabel = computed(() => formatCurrency(valorEstimado.value))
+
+const showRevisaoCliente = computed(
+  () => isVisitante.value && (modoIdentidade.value === 'guest' || modoIdentidade.value === 'register'),
+)
+
 onMounted(async () => {
   try {
     await init()
@@ -184,7 +219,7 @@ async function handleConfirmar() {
 </script>
 
 <template>
-  <div :class="AGENDAR_WIZARD_CONTENT_CLASS">
+  <div :class="isSuccessStep ? 'mx-auto w-full' : AGENDAR_WIZARD_CONTENT_CLASS">
     <BaseAlert v-if="contextoInvalido" variant="error" class="mb-6">
       Link de agendamento inválido. Solicite um novo link ao profissional.
     </BaseAlert>
@@ -420,208 +455,73 @@ async function handleConfirmar() {
       </div>
 
       <!-- Revisão -->
-      <div v-else-if="step === 'confirmar'" class="space-y-4">
-        <div
-          v-if="isVisitante && (modoIdentidade === 'guest' || modoIdentidade === 'register')"
-          class="agendar-review-card"
-        >
-          <p class="agendar-review-card__title">Cliente</p>
-          <div class="grid gap-4 sm:grid-cols-3">
-            <div>
-              <p class="font-urbanist text-xs text-glow-text-subtle">Nome</p>
-              <p class="font-urbanist text-sm text-glow-text">{{ clienteNome }}</p>
-            </div>
-            <div>
-              <p class="font-urbanist text-xs text-glow-text-subtle">E-mail</p>
-              <p class="font-urbanist text-sm text-glow-text">{{ clienteEmail }}</p>
-            </div>
-            <div>
-              <p class="font-urbanist text-xs text-glow-text-subtle">Telefone</p>
-              <p class="font-urbanist text-sm text-glow-text">{{ clienteTelefone }}</p>
-            </div>
-          </div>
-        </div>
-
-        <AgendarProfissionalCard
-          v-if="contexto"
-          compact
-          :nome="contexto.profissional.nomePublico"
-          :estabelecimento-nome="contexto.estabelecimento.nome"
-        />
-
-        <div class="agendar-review-card">
-          <p class="agendar-review-card__title">Serviços</p>
-          <div class="space-y-4">
-            <div
-              v-for="(servico, index) in selectedServicos"
-              :key="servico.id"
-              class="flex items-start justify-between gap-4"
-              :class="index > 0 ? 'border-t border-glow-text/25 pt-4' : ''"
-            >
-              <div>
-                <p class="font-urbanist text-sm text-glow-text">{{ servico.nome }}</p>
-                <p class="font-urbanist text-xs text-glow-text-subtle">
-                  {{ servico.duracaoMinutosEstimada }} minutos
-                </p>
-              </div>
-              <span class="inline-flex rounded-full bg-[rgba(84,128,78,0.2)] px-4 py-1 font-urbanist text-sm font-bold text-[#54804e]">
-                {{ formatPrecoRange(servico.precoMinimo, servico.precoMaximo) }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div class="agendar-review-card">
-          <p class="agendar-review-card__title">Data e Horário</p>
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div>
-              <p class="font-urbanist text-xs text-glow-text-subtle">Data</p>
-              <p class="font-urbanist text-sm text-glow-text">
-                {{ formatDateOnlyLong(selectedDate) }}
-              </p>
-            </div>
-            <div>
-              <p class="font-urbanist text-xs text-glow-text-subtle">Horário</p>
-              <p class="font-urbanist text-sm text-glow-text">
-                {{ selectedSlot ? formatAgendaTime(selectedSlot.inicio) : '—' }}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="agendar-review-card">
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div>
-              <p class="font-urbanist text-base font-semibold text-glow-text">Tempo Total</p>
-              <p class="font-urbanist text-sm text-glow-text">{{ duracaoTotal }} minutos</p>
-            </div>
-            <div>
-              <p class="font-urbanist text-base font-semibold text-glow-text">Valor Total</p>
-              <p class="font-urbanist text-sm font-bold text-[#54804e]">
-                {{ formatCurrency(valorEstimado) }}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div
-          v-if="isVisitante && modoIdentidade === 'register'"
-          class="agendar-review-card space-y-4"
-        >
-          <p class="font-urbanist text-sm text-glow-text-subtle">
-            Defina uma senha para criar sua conta e vincular este agendamento.
-          </p>
-          <div>
-            <label :class="GLOW_LABEL_CLASS" for="agendar-senha">Senha</label>
-            <input
-              id="agendar-senha"
-              v-model="cadastroSenha"
-              type="password"
-              autocomplete="new-password"
-              :class="[GLOW_INPUT_CLASS, 'mt-2']"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label :class="GLOW_LABEL_CLASS" for="agendar-obs">Observação (opcional)</label>
-          <textarea
-            id="agendar-obs"
-            v-model="observacao"
-            rows="2"
-            class="mt-2 w-full rounded-lg border-[0.3px] border-glow-text/40 px-4 py-3 font-satoshi text-sm text-glow-text outline-none focus:border-glow-gold focus:ring-1 focus:ring-glow-gold"
-          />
-        </div>
-
-        <button
-          type="button"
-          :class="AGENDAR_BTN_CONTINUE_CLASS"
-          :disabled="submitting"
-          @click="handleConfirmar"
-        >
-          {{ submitting ? 'Confirmando…' : 'Confirmar Agendamento' }}
-        </button>
-      </div>
+      <AgendarRevisaoStep
+        v-else-if="step === 'confirmar' && contexto"
+        :show-cliente="showRevisaoCliente"
+        :cliente-nome="clienteNome"
+        :cliente-email="clienteEmail"
+        :cliente-telefone="clienteTelefone"
+        :profissional-nome="contexto.profissional.nomePublico"
+        :estabelecimento-nome="contexto.estabelecimento.nome"
+        :servicos="selectedServicos"
+        :data-label="revisaoDataLabel"
+        :horario-label="revisaoHorarioLabel"
+        :duracao-total="duracaoTotal"
+        :valor-total-label="revisaoValorTotalLabel"
+        :show-register-password="isVisitante && modoIdentidade === 'register'"
+        :submitting="submitting"
+        v-model:cadastro-senha="cadastroSenha"
+        v-model:observacao="observacao"
+        @confirm="handleConfirmar"
+      />
 
       <!-- Sucesso cadastro -->
-      <div v-else-if="step === 'sucesso_cadastro'" class="space-y-6 text-center">
-        <div class="mx-auto flex size-16 items-center justify-center rounded-full bg-[rgba(84,128,78,0.15)]">
-          <svg class="size-8 text-[#54804e]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
-        </div>
-        <h1 class="font-satoshi text-2xl font-normal text-glow-text">Conta e agendamento criados</h1>
-        <BaseAlert variant="success">
-          Enviamos um e-mail de confirmação. Após confirmar sua conta, você poderá acompanhar este
-          agendamento em "Meus agendamentos".
-        </BaseAlert>
-        <dl v-if="agendamentoCriado" class="space-y-2 text-left font-urbanist text-sm">
-          <div class="flex justify-between gap-4">
-            <dt class="text-glow-text-subtle">Horário</dt>
-            <dd>{{ formatAgendaDateTime(agendamentoCriado.inicio) }}</dd>
-          </div>
-          <div class="flex justify-between gap-4">
-            <dt class="text-glow-text-subtle">Valor estimado</dt>
-            <dd class="font-semibold">{{ formatCurrency(agendamentoCriado.valorTotal) }}</dd>
-          </div>
-        </dl>
-        <RouterLink :to="ROUTE_PATHS.CONFIRM_EMAIL">
-          <button type="button" :class="GLOW_BUTTON_PRIMARY_CLASS">
+      <AgendarSucessoConfirmacao
+        v-else-if="step === 'sucesso_cadastro' && agendamentoCriado"
+        title="Conta e agendamento criados!"
+        subtitle="Enviamos um e-mail de confirmação. Confirme sua conta para acompanhar seus agendamentos."
+        :agendamento-id="agendamentoCriado.id"
+        :profissional-nome="sucessoProfissionalNome"
+        :servicos-label="sucessoServicosLabel"
+        :data-label="sucessoDataLabel"
+        :horario-label="sucessoHorarioLabel"
+      >
+        <RouterLink :to="ROUTE_PATHS.CONFIRM_EMAIL" class="w-full">
+          <button type="button" :class="AGENDAR_BTN_CONTINUE_CLASS">
             Ir para confirmação de e-mail
           </button>
         </RouterLink>
-      </div>
+      </AgendarSucessoConfirmacao>
 
       <!-- Sucesso -->
-      <div v-else class="space-y-6 text-center">
-        <div class="mx-auto flex size-16 items-center justify-center rounded-full bg-[rgba(84,128,78,0.15)]">
-          <svg class="size-8 text-[#54804e]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
-        </div>
-        <h1 class="font-satoshi text-2xl font-normal text-glow-text">Agendamento confirmado</h1>
-        <BaseAlert variant="success">
-          {{
-            modoIdentidade === 'guest'
-              ? 'Seu horário foi reservado. Enviaremos alertas para o e-mail informado quando houver novidades.'
-              : 'Seu horário foi reservado. A loja pode entrar em contato para confirmar os detalhes.'
-          }}
-        </BaseAlert>
-        <dl v-if="agendamentoCriado" class="space-y-2 text-left font-urbanist text-sm">
-          <div class="flex justify-between gap-4">
-            <dt class="text-glow-text-subtle">Serviços</dt>
-            <dd class="text-right">{{ selectedServicos.map((s) => s.nome).join(', ') }}</dd>
-          </div>
-          <div class="flex justify-between gap-4">
-            <dt class="text-glow-text-subtle">Horário</dt>
-            <dd>{{ formatAgendaDateTime(agendamentoCriado.inicio) }}</dd>
-          </div>
-          <div class="flex justify-between gap-4">
-            <dt class="text-glow-text-subtle">Valor estimado</dt>
-            <dd class="font-semibold">{{ formatCurrency(agendamentoCriado.valorTotal) }}</dd>
-          </div>
-        </dl>
-        <div v-if="isVisitante && !sucessoCadastroPendente" class="flex flex-wrap justify-center gap-3">
-          <RouterLink :to="authRouteWithRedirect(ROUTE_PATHS.REGISTER, route.fullPath)">
-            <button type="button" :class="[AGENDAR_BTN_CONTINUE_CLASS, 'min-w-[160px]']">
+      <AgendarSucessoConfirmacao
+        v-else-if="agendamentoCriado"
+        title="Agendamento confirmado!"
+        subtitle="Seu agendamento foi realizado com sucesso."
+        :agendamento-id="agendamentoCriado.id"
+        :profissional-nome="sucessoProfissionalNome"
+        :servicos-label="sucessoServicosLabel"
+        :data-label="sucessoDataLabel"
+        :horario-label="sucessoHorarioLabel"
+      >
+        <template v-if="isVisitante && !sucessoCadastroPendente">
+          <RouterLink :to="authRouteWithRedirect(ROUTE_PATHS.REGISTER, route.fullPath)" class="w-full">
+            <button type="button" :class="AGENDAR_BTN_CONTINUE_CLASS">
               Criar conta
             </button>
           </RouterLink>
-          <RouterLink :to="loginComRedirect">
-            <button type="button" class="agendar-slot-btn min-w-[160px] px-6">
+          <RouterLink :to="loginComRedirect" class="w-full">
+            <button type="button" class="agendar-success__btn-secondary">
               Entrar
             </button>
           </RouterLink>
-        </div>
-        <RouterLink
-          v-else-if="agendamentoCriado && !isVisitante"
-          :to="agendamentoDetalhePath(agendamentoCriado.id)"
-        >
+        </template>
+        <RouterLink v-else :to="ROUTE_PATHS.MEUS_AGENDAMENTOS" class="w-full">
           <button type="button" :class="AGENDAR_BTN_CONTINUE_CLASS">
-            Ver agendamento
+            Ver meus agendamentos
           </button>
         </RouterLink>
-      </div>
+      </AgendarSucessoConfirmacao>
     </template>
   </div>
 </template>

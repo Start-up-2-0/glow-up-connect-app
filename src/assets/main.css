@@ -155,12 +155,62 @@
     @apply font-urbanist text-base font-medium text-glow-text-muted;
   }
 
+  /* Etapa revisão — Figma node 210:1154 */
+  .agendar-review-step {
+    @apply space-y-3;
+  }
+
   .agendar-review-card {
-    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-white p-5;
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-white px-[22px] py-5;
   }
 
   .agendar-review-card__title {
-    @apply mb-4 font-urbanist text-base font-semibold text-glow-text;
+    @apply mb-[18px] font-urbanist text-base font-semibold text-glow-text;
+  }
+
+  .agendar-review-field__label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .agendar-review-field__value {
+    @apply mt-1 font-urbanist text-sm text-glow-text;
+  }
+
+  .agendar-review-fields-grid {
+    @apply grid gap-4 sm:grid-cols-3;
+  }
+
+  .agendar-review-fields-grid--2 {
+    @apply grid gap-4 sm:grid-cols-2;
+  }
+
+  .agendar-review-profissional-body {
+    @apply flex items-center gap-4;
+  }
+
+  .agendar-review-avatar {
+    @apply flex size-12 shrink-0 items-center justify-center rounded-full font-urbanist text-sm font-semibold text-glow-text;
+    background-color: rgba(40, 40, 40, 0.1);
+  }
+
+  .agendar-review-service-list {
+    @apply list-none space-y-0 p-0;
+  }
+
+  .agendar-review-service-item {
+    @apply flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0;
+  }
+
+  .agendar-review-service-item + .agendar-review-service-item {
+    @apply border-t border-glow-border-soft;
+  }
+
+  .agendar-review-summary-value {
+    @apply font-urbanist text-sm font-bold text-[#54804e];
+  }
+
+  .agendar-review-textarea {
+    @apply mt-2 w-full rounded-lg border-[0.3px] border-glow-border-soft px-4 py-3 font-satoshi text-sm text-glow-text outline-none focus:border-glow-gold focus:ring-1 focus:ring-glow-gold;
   }
 
   .agendar-slot-btn {
@@ -208,6 +258,73 @@
 
   .agendar-calendar-day--selected:hover {
     background-color: rgba(230, 173, 1, 0.3);
+  }
+
+  /* Etapa conclusão — Figma node 210:1325 */
+  .agendar-success {
+    @apply mx-auto flex w-full max-w-[515px] flex-col items-center pt-4 text-center;
+  }
+
+  .agendar-success__icon {
+    @apply flex items-center justify-center;
+  }
+
+  .agendar-success__icon-outer {
+    @apply flex size-[75px] items-center justify-center rounded-full;
+    background-color: rgba(84, 128, 78, 0.15);
+  }
+
+  .agendar-success__icon-inner {
+    @apply flex size-[46px] items-center justify-center rounded-full text-white;
+    background-color: #54804e;
+  }
+
+  .agendar-success__check {
+    @apply size-5;
+  }
+
+  .agendar-success__title {
+    @apply mt-6 font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .agendar-success__subtitle {
+    @apply mt-2 font-satoshi text-xl font-normal text-glow-text-muted;
+  }
+
+  .agendar-success__card {
+    @apply mt-8 w-full rounded-xl border-[0.5px] border-glow-border-soft bg-white p-5 text-left;
+  }
+
+  .agendar-success__card-header {
+    @apply flex items-center justify-between gap-4 font-urbanist text-base;
+  }
+
+  .agendar-success__card-divider {
+    @apply my-4 border-0 border-t border-glow-border-soft;
+  }
+
+  .agendar-success__details {
+    @apply space-y-1;
+  }
+
+  .agendar-success__row {
+    @apply flex items-start justify-between gap-4 py-0.5 font-urbanist text-base;
+  }
+
+  .agendar-success__label {
+    @apply shrink-0 text-glow-text-subtle;
+  }
+
+  .agendar-success__value {
+    @apply text-right text-glow-text;
+  }
+
+  .agendar-success__actions {
+    @apply mt-6 flex w-full flex-col gap-3;
+  }
+
+  .agendar-success__btn-secondary {
+    @apply flex h-10 w-full items-center justify-center rounded border-[0.5px] border-glow-border-soft bg-white px-2.5 font-satoshi text-base font-bold text-glow-text transition hover:bg-zinc-50;
   }
 
   .checkout-shell {

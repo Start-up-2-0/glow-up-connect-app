@@ -22,7 +22,7 @@ import {
   formatEnderecoResumo,
   formatTime,
   toDateOnlyString,
-  toTimeOnlyString,
+  toAgendaTimeOnlyString,
 } from '@/utils/formatters'
 
 const route = useRoute()
@@ -106,10 +106,9 @@ async function handleRemarcar() {
   actionLoading.value = true
   error.value = null
   try {
-    const inicio = new Date(remarcarSlot.value.inicio)
     agendamento.value = await store.remarcar(agendamentoId.value, {
       data: remarcarDate.value,
-      horarioInicio: toTimeOnlyString(inicio),
+      horarioInicio: toAgendaTimeOnlyString(remarcarSlot.value.inicio),
       motivo: remarcarMotivo.value.trim(),
     })
     remarcarOpen.value = false
