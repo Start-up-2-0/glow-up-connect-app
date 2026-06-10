@@ -18,9 +18,9 @@ import {
 } from '@/types/agendamento.types'
 import {
   formatCurrency,
-  formatDateTime,
+  formatAgendaDateTime,
+  formatAgendaTime,
   formatEnderecoResumo,
-  formatTime,
   toDateOnlyString,
   toAgendaTimeOnlyString,
   toDateOnlyFromIsoUtc,
@@ -144,7 +144,7 @@ onMounted(load)
             {{ agendamento.estabelecimentoNome }}
           </h1>
           <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-            {{ formatDateTime(agendamento.inicio) }}
+            {{ formatAgendaDateTime(agendamento.inicio) }}
           </p>
         </div>
         <AgendamentoStatusBadge :status="agendamento.status" />
@@ -232,7 +232,7 @@ onMounted(load)
               "
               @click="remarcarSlot = slot"
             >
-              {{ formatTime(slot.inicio) }}
+              {{ formatAgendaTime(slot.inicio) }}
             </button>
           </div>
 

@@ -13,6 +13,7 @@ import { useApiError } from '@/composables/useApiError'
 import { agendaNegocioService } from '@/services/agendaNegocioService'
 import type { AgendaGeral, AgendamentoHistorico } from '@/types/negocio/agenda.types'
 import {
+  formatAgendaDateTime,
   formatCurrency,
   formatDateTime,
   formatTelefone,
@@ -159,7 +160,7 @@ watch(
             class="font-urbanist text-sm text-glow-text"
           >
             {{ item.servicoNome }} · {{ item.profissionalNome }} ·
-            {{ formatDateTime(item.inicio) }}
+            {{ formatAgendaDateTime(item.inicio) }}
           </p>
         </div>
 

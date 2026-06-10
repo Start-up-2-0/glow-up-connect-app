@@ -9,7 +9,7 @@ import { publicoService } from '@/services/publicoService'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import type { PropostaRemarcacao } from '@/types/agendamento.types'
-import { formatDateTime } from '@/utils/formatters'
+import { formatAgendaDateTime } from '@/utils/formatters'
 
 const route = useRoute()
 const notifications = useNotificationsStore()
@@ -79,7 +79,7 @@ async function responder(acao: 'aceitar' | 'recusar') {
         <div class="flex justify-between gap-4">
           <dt class="text-glow-text-subtle">Horário atual</dt>
           <dd class="text-glow-text">
-            {{ proposta.inicioAtual ? formatDateTime(proposta.inicioAtual) : '—' }}
+            {{ proposta.inicioAtual ? formatAgendaDateTime(proposta.inicioAtual) : '—' }}
           </dd>
         </div>
         <div class="flex justify-between gap-4">

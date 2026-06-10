@@ -10,7 +10,7 @@ import AgendamentoStatusBadge from '@/components/cliente/AgendamentoStatusBadge.
 import { useAgendamentosStore } from '@/stores/agendamentos.store'
 import { agendamentoDetalhePath } from '@/constants/routes'
 import type { AgendamentoOrdenacao } from '@/types/agendamento.types'
-import { formatCurrency, formatDateTime } from '@/utils/formatters'
+import { formatAgendaDateTime, formatCurrency } from '@/utils/formatters'
 
 const store = useAgendamentosStore()
 const { itens, total, loading } = storeToRefs(store)
@@ -75,7 +75,7 @@ onMounted(() => load(true))
               {{ item.estabelecimentoNome }}
             </p>
             <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-              {{ formatDateTime(item.inicio) }}
+              {{ formatAgendaDateTime(item.inicio) }}
             </p>
           </div>
           <AgendamentoStatusBadge :status="item.status" />
