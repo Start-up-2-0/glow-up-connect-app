@@ -1,5 +1,6 @@
 import { ROUTE_PATHS } from '@/constants/routes'
 import { isClienteRole, type UserRole } from '@/types/user.types'
+import type { NavIconName } from '@/types/navIcon.types'
 
 export interface NavGateMeta {
   requerModulo?: string
@@ -16,12 +17,14 @@ export interface NavChildItem extends NavGateMeta {
   id: string
   label: string
   to?: string
+  icon?: NavIconName
 }
 
 export interface NavItem extends NavGateMeta {
   id: string
   label: string
   to?: string
+  icon?: NavIconName
   children?: NavChildItem[]
 }
 
@@ -34,12 +37,14 @@ export const businessNavItems: NavItem[] = [
     id: 'dashboard',
     label: 'Dashboard',
     to: ROUTE_PATHS.DASHBOARD,
+    icon: 'dashboard',
     requerAssinatura: false,
   },
   {
     id: 'agenda',
     label: 'Agenda',
     to: ROUTE_PATHS.AGENDA,
+    icon: 'calendar',
     requerModulo: 'Agenda',
     requerPermissoes: ['AgendaVisualizarGeral', 'AgendaVisualizarPropria'],
   },
@@ -47,6 +52,7 @@ export const businessNavItems: NavItem[] = [
     id: 'servicos',
     label: 'Serviços',
     to: ROUTE_PATHS.SERVICOS,
+    icon: 'services',
     requerModulo: 'Servicos',
     requerPermissoes: ['ServicoVisualizar', 'ServicoGerenciar'],
   },
@@ -54,6 +60,7 @@ export const businessNavItems: NavItem[] = [
     id: 'horarios',
     label: 'Horários',
     to: ROUTE_PATHS.CONFIG_HORARIOS,
+    icon: 'clock',
     requerModulo: 'HorariosAtendimento',
     requerPermissao: 'HorarioGerenciar',
   },
@@ -61,6 +68,7 @@ export const businessNavItems: NavItem[] = [
     id: 'meus-horarios',
     label: 'Meus horários',
     to: ROUTE_PATHS.CONFIG_HORARIOS,
+    icon: 'clock',
     requerModulo: 'HorariosAtendimento',
     requerPermissao: 'HorarioGerenciarProprio',
   },
@@ -68,6 +76,7 @@ export const businessNavItems: NavItem[] = [
     id: 'profissionais-vitrine',
     label: 'Profissionais',
     to: ROUTE_PATHS.CONFIG_PROFISSIONAIS_VITRINE,
+    icon: 'team',
     requerModulo: 'HorariosAtendimento',
     requerSemModulo: 'Profissionais',
     requerPermissao: 'ProfissionalGerenciar',
@@ -76,6 +85,7 @@ export const businessNavItems: NavItem[] = [
     id: 'equipe',
     label: 'Equipe',
     to: ROUTE_PATHS.CONFIG_EQUIPE,
+    icon: 'team',
     requerModulo: 'Profissionais',
     requerPermissao: 'EquipeGerenciar',
   },
@@ -83,12 +93,14 @@ export const businessNavItems: NavItem[] = [
     id: 'whatsapp',
     label: 'WhatsApp',
     to: ROUTE_PATHS.CONFIG_WHATSAPP,
+    icon: 'whatsapp',
     requerModulo: 'WhatsApp',
     requerPermissao: 'NegocioEditar',
   },
   {
     id: 'financeiro',
     label: 'Financeiro',
+    icon: 'finance',
     requerModulos: ['Caixa', 'Financeiro'],
     requerPermissao: 'CaixaVisualizar',
     children: [
@@ -126,6 +138,7 @@ export const businessNavItems: NavItem[] = [
     id: 'perfil-estabelecimento',
     label: 'Perfil',
     to: ROUTE_PATHS.CONFIG_PERFIL,
+    icon: 'building',
     requerModulo: 'Estabelecimento',
     requerPermissao: 'NegocioEditar',
     requerAssinatura: false,
@@ -134,6 +147,7 @@ export const businessNavItems: NavItem[] = [
     id: 'assinatura',
     label: 'Assinatura',
     to: ROUTE_PATHS.CONFIG_ASSINATURA,
+    icon: 'subscription',
     requerModulo: 'Assinatura',
     requerPermissao: 'NegocioEditar',
     requerAssinatura: false,
@@ -146,6 +160,7 @@ export const profissionalNavItems: NavItem[] = [
     id: 'agenda',
     label: 'Minha agenda',
     to: ROUTE_PATHS.AGENDA,
+    icon: 'calendar',
     requerModulo: 'Agenda',
     requerPermissao: 'AgendaVisualizarPropria',
   },
@@ -153,6 +168,7 @@ export const profissionalNavItems: NavItem[] = [
     id: 'meus-horarios',
     label: 'Meus horários',
     to: ROUTE_PATHS.CONFIG_HORARIOS,
+    icon: 'clock',
     requerModulo: 'HorariosAtendimento',
     requerPermissao: 'HorarioGerenciarProprio',
   },
@@ -160,6 +176,7 @@ export const profissionalNavItems: NavItem[] = [
     id: 'meus-servicos',
     label: 'Meus serviços',
     to: ROUTE_PATHS.SERVICOS,
+    icon: 'services',
     requerModulo: 'Servicos',
     requerPermissao: 'ServicoVisualizar',
   },
@@ -173,31 +190,37 @@ export const clienteNavItems: NavItem[] = [
     id: 'inicio',
     label: 'Início',
     to: ROUTE_PATHS.DASHBOARD,
+    icon: 'home',
   },
   {
     id: 'explorar',
     label: 'Explorar lojas',
     to: ROUTE_PATHS.EXPLORAR,
+    icon: 'explore',
   },
   {
     id: 'meus-agendamentos',
     label: 'Meus agendamentos',
     to: ROUTE_PATHS.MEUS_AGENDAMENTOS,
+    icon: 'calendar',
   },
   {
     id: 'convites',
     label: 'Convites',
     to: ROUTE_PATHS.CONVITES,
+    icon: 'invites',
   },
   {
     id: 'perfil',
     label: 'Meu perfil',
     to: ROUTE_PATHS.PERFIL,
+    icon: 'user',
   },
   {
     id: 'abrir-loja',
     label: 'Abrir minha loja',
     to: ROUTE_PATHS.ONBOARDING_PLANOS,
+    icon: 'store-open',
   },
 ]
 

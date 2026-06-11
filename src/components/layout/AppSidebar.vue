@@ -8,6 +8,7 @@ import AppLogo from './AppLogo.vue'
 import SidebarToggleButton from './SidebarToggleButton.vue'
 import SidebarNavItem from './SidebarNavItem.vue'
 import SidebarNavGroup from './SidebarNavGroup.vue'
+import SidebarFooter from './SidebarFooter.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -33,8 +34,8 @@ const innerPaddingClass = computed(() => {
   return 'px-[23px] pt-[23px]'
 })
 
-const sectionGapClass = computed(() =>
-  props.mobile || collapsed.value ? 'gap-6' : 'gap-10',
+const headerGapClass = computed(() =>
+  collapsed.value ? 'gap-[65px]' : 'gap-10',
 )
 
 function isItemActive(to?: string) {
@@ -63,13 +64,13 @@ function onToggleCollapsed() {
   >
     <div
       class="flex min-h-0 flex-1 flex-col"
-      :class="[innerPaddingClass, collapsed ? 'items-center' : '', sectionGapClass]"
+      :class="[innerPaddingClass, collapsed ? 'items-center' : '', headerGapClass]"
     >
       <div
-        class="flex w-full shrink-0 items-start gap-2"
-        :class="collapsed ? 'justify-center' : 'justify-between'"
+        class="flex w-full shrink-0 items-start"
+        :class="collapsed ? 'justify-center' : 'justify-between gap-2'"
       >
-        <AppLogo v-if="!collapsed" :mobile="mobile" />
+        <AppLogo v-if="!collapsed" :mobile="mobile" sidebar />
         <SidebarToggleButton
           :collapsed="collapsed"
           :class="collapsed ? '' : 'mt-1 shrink-0'"
@@ -77,18 +78,25 @@ function onToggleCollapsed() {
         />
       </div>
 
-      <nav class="flex min-h-0 w-full flex-1 flex-col gap-1.5 overflow-y-auto overscroll-y-contain pb-6">
+      <nav
+        class="flex min-h-0 w-full flex-1 flex-col gap-1.5 overflow-y-auto overscroll-y-contain"
+        :class="collapsed ? 'pb-4' : 'pb-6'"
+      >
         <template v-for="item in navItems" :key="item.id">
           <SidebarNavGroup
             v-if="item.children?.length"
+            :id="item.id"
             :label="item.label"
+            :icon="item.icon"
             :children="item.children"
             :collapsed="collapsed"
             @navigate="onNavigate"
           />
           <SidebarNavItem
             v-else
+            :id="item.id"
             :label="item.label"
+            :icon="item.icon"
             :to="item.to"
             :collapsed="collapsed"
             :selected="isItemActive(item.to)"
@@ -96,6 +104,10 @@ function onToggleCollapsed() {
           />
         </template>
       </nav>
+    </div>
+
+    <div :class="collapsed ? 'px-[7px]' : 'px-[23px]'">
+      <SidebarFooter :collapsed="collapsed" />
     </div>
   </aside>
 </template>

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useAppStore } from '@/stores/app.store'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
-import AppNavbar from '@/components/layout/AppNavbar.vue'
 import UpgradeModal from '@/components/access/UpgradeModal.vue'
 
 const appStore = useAppStore()
@@ -38,14 +37,26 @@ const appStore = useAppStore()
       />
     </Transition>
 
-    <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-      <AppNavbar class="shrink-0" @toggle-sidebar="appStore.toggleSidebar()" />
+    <div class="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <button
+        v-if="!appStore.sidebarOpen"
+        type="button"
+        class="absolute left-4 top-4 z-30 flex size-10 items-center justify-center rounded border border-glow-border-soft bg-glow-surface text-glow-text lg:hidden"
+        aria-label="Abrir menu"
+        @click="appStore.toggleSidebar()"
+      >
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M4 6H16M4 10H16M4 14H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+      </button>
+
       <main class="dashboard-main min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain">
         <div class="dashboard-main__inner">
           <slot />
         </div>
       </main>
     </div>
+
     <UpgradeModal />
   </div>
 </template>

@@ -2,14 +2,20 @@
 import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import type { NavChildItem } from '@/constants/navigation'
-import IconDashboardGrid from './icons/IconDashboardGrid.vue'
+import type { NavIconName } from '@/types/navIcon.types'
+import { resolveNavIcon } from '@/utils/navIcon'
+import SidebarNavIcon from './icons/SidebarNavIcon.vue'
 import IconNavCaret from './icons/IconNavCaret.vue'
 
 const props = defineProps<{
+  id: string
   label: string
+  icon?: NavIconName
   children: NavChildItem[]
   collapsed?: boolean
 }>()
+
+const iconName = computed(() => resolveNavIcon(props.id, props.icon))
 
 const emit = defineEmits<{
   navigate: []
@@ -48,17 +54,18 @@ function onNavigate() {
   <div class="w-full">
     <button
       type="button"
-      class="group flex h-10 w-full items-center gap-2.5 rounded-lg py-1.5 pl-2 pr-2 transition-colors"
+      class="group flex h-11 w-full items-center gap-3 rounded-lg py-2 pl-2 pr-2 transition-colors"
       :class="[
         collapsed ? 'w-[60px] justify-center px-2' : '',
         expanded && !collapsed
-          ? 'bg-glow-gold-selected pl-3'
+          ? 'bg-glow-gold-selected pl-4'
           : 'hover:bg-black/[0.03]',
       ]"
       :aria-expanded="collapsed ? undefined : expanded"
       @click="toggleExpanded"
     >
-      <IconDashboardGrid
+      <SidebarNavIcon
+        :name="iconName"
         :size="22"
         class="shrink-0 text-glow-text"
       />
@@ -84,7 +91,7 @@ function onNavigate() {
         :key="child.id"
         :to="child.to"
         type="button"
-        class="group flex h-10 items-center rounded-lg py-1.5 transition-colors hover:bg-black/[0.03]"
+        class="group flex h-11 items-center rounded-lg py-2 transition-colors hover:bg-black/[0.03]"
         :class="isChildActive(child) ? 'gap-2.5 px-6' : 'px-5'"
         @click="onNavigate"
       >

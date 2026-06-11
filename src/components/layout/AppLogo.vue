@@ -5,9 +5,10 @@ withDefaults(
   defineProps<{
     compact?: boolean
     mobile?: boolean
+    sidebar?: boolean
     logoClass?: string
   }>(),
-  { compact: false, mobile: false },
+  { compact: false, mobile: false, sidebar: false },
 )
 </script>
 
@@ -17,7 +18,7 @@ withDefaults(
     alt="Glow Up Connect"
     :class="[
       'object-contain object-left',
-      compact ? 'h-10 w-10' : mobile ? 'h-[120px] w-[168px]' : 'h-[112px] w-[148px]',
+      compact ? 'h-10 w-10' : sidebar ? 'size-[107px]' : mobile ? 'h-[120px] w-[168px]' : 'h-[112px] w-[148px]',
       logoClass,
     ]"
   />
