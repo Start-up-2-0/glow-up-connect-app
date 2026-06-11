@@ -4,8 +4,7 @@ import { useRoute } from 'vue-router'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { useDashboardNav } from '@/composables/useDashboardNav'
 import { useAppStore } from '@/stores/app.store'
-import AppLogo from './AppLogo.vue'
-import SidebarToggleButton from './SidebarToggleButton.vue'
+import SidebarHeader from './SidebarHeader.vue'
 import SidebarNavItem from './SidebarNavItem.vue'
 import SidebarNavGroup from './SidebarNavGroup.vue'
 import SidebarFooter from './SidebarFooter.vue'
@@ -34,10 +33,6 @@ const innerPaddingClass = computed(() => {
   return 'px-[23px] pt-[23px]'
 })
 
-const headerGapClass = computed(() =>
-  collapsed.value ? 'gap-[65px]' : 'gap-10',
-)
-
 function isItemActive(to?: string) {
   if (!to) return false
   if (to === ROUTE_PATHS.DASHBOARD) return route.path === to
@@ -64,23 +59,18 @@ function onToggleCollapsed() {
   >
     <div
       class="flex min-h-0 flex-1 flex-col"
-      :class="[innerPaddingClass, collapsed ? 'items-center' : '', headerGapClass]"
+      :class="[innerPaddingClass, collapsed ? 'items-center' : '']"
     >
-      <div
-        class="flex w-full shrink-0 items-start"
-        :class="collapsed ? 'justify-center' : 'justify-between gap-2'"
-      >
-        <AppLogo v-if="!collapsed" :mobile="mobile" sidebar />
-        <SidebarToggleButton
-          :collapsed="collapsed"
-          :class="collapsed ? '' : 'mt-1 shrink-0'"
-          @toggle="onToggleCollapsed"
-        />
-      </div>
+      <SidebarHeader
+        :collapsed="collapsed"
+        :mobile="mobile"
+        class="mb-6"
+        @toggle="onToggleCollapsed"
+      />
 
       <nav
         class="flex min-h-0 w-full flex-1 flex-col gap-1.5 overflow-y-auto overscroll-y-contain"
-        :class="collapsed ? 'pb-4' : 'pb-6'"
+        :class="collapsed ? 'pb-4' : 'pb-4'"
       >
         <template v-for="item in navItems" :key="item.id">
           <SidebarNavGroup

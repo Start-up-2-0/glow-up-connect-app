@@ -41,6 +41,11 @@ const rootEl = ref<HTMLElement | null>(null)
 const roleLabel = computed(() => roleExibicao.value)
 const isSidebar = computed(() => props.variant === 'sidebar')
 
+const menuPlacementClass = computed(() => {
+  if (!isSidebar.value) return 'right-0 top-[calc(100%+8px)]'
+  return 'bottom-[calc(100%+8px)] left-0'
+})
+
 function toggleMenu() {
   open.value = !open.value
 }
@@ -85,7 +90,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="rootEl" class="relative">
+  <div ref="rootEl" class="relative w-full">
     <button
       type="button"
       class="text-left transition-colors"
@@ -94,7 +99,7 @@ onUnmounted(() => {
           ? [
               collapsed
                 ? 'flex size-[29px] items-center justify-center rounded-full'
-                : 'flex min-w-0 flex-1 items-center gap-2.5 rounded-lg py-0.5 pr-1 hover:bg-black/[0.03]',
+                : 'flex w-full min-w-0 items-center gap-2.5 rounded-lg border border-transparent px-2 py-2 hover:border-glow-border-soft hover:bg-glow-hover-surface',
             ]
           : [
               'inline-flex items-center rounded border border-glow-border-soft bg-glow-surface hover:bg-glow-hover-surface',
@@ -122,6 +127,11 @@ onUnmounted(() => {
             {{ roleLabel }}
           </p>
         </div>
+        <IconArrowDown
+          :size="14"
+          class="shrink-0 text-glow-text-subtle transition-transform duration-200"
+          :class="open ? 'rotate-180' : ''"
+        />
       </template>
 
       <template v-else-if="!isSidebar && !compact">
@@ -147,7 +157,7 @@ onUnmounted(() => {
     <div
       v-if="open"
       class="absolute z-50 min-w-[220px] overflow-hidden rounded border border-glow-border-soft bg-glow-surface py-1 shadow-lg"
-      :class="isSidebar && collapsed ? 'bottom-[calc(100%+8px)] left-0' : 'right-0 top-[calc(100%+8px)]'"
+      :class="menuPlacementClass"
       role="menu"
     >
       <template v-if="compact || (isSidebar && collapsed)">
