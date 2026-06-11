@@ -69,7 +69,7 @@ function onToggleCollapsed() {
       />
 
       <nav
-        class="flex min-h-0 w-full flex-1 flex-col gap-1.5 overflow-y-auto overscroll-y-contain"
+        class="sidebar-nav-scroll flex min-h-0 w-full flex-1 flex-col gap-1.5 overflow-y-auto overscroll-y-contain"
         :class="collapsed ? 'pb-4' : 'pb-4'"
       >
         <template v-for="item in navItems" :key="item.id">

@@ -37,18 +37,22 @@ const appStore = useAppStore()
       />
     </Transition>
 
-    <div class="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-      <button
+    <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <header
         v-if="!appStore.sidebarOpen"
-        type="button"
-        class="absolute left-4 top-4 z-30 flex size-10 items-center justify-center rounded border border-glow-border-soft bg-glow-surface text-glow-text lg:hidden"
-        aria-label="Abrir menu"
-        @click="appStore.toggleSidebar()"
+        class="flex shrink-0 items-center border-b border-glow-border-soft bg-glow-surface px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] lg:hidden"
       >
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-          <path d="M4 6H16M4 10H16M4 14H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-        </svg>
-      </button>
+        <button
+          type="button"
+          class="flex size-10 items-center justify-center rounded border border-glow-border-soft bg-glow-canvas text-glow-text"
+          aria-label="Abrir menu"
+          @click="appStore.toggleSidebar()"
+        >
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M4 6H16M4 10H16M4 14H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </button>
+      </header>
 
       <main class="dashboard-main min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain">
         <div class="dashboard-main__inner">

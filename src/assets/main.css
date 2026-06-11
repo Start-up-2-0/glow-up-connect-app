@@ -469,6 +469,16 @@
     @apply max-h-dvh;
   }
 
+  /* Sidebar nav — rolagem funcional sem barra visível */
+  .sidebar-nav-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .sidebar-nav-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
   .dashboard-main {
     @apply bg-glow-canvas;
   }
