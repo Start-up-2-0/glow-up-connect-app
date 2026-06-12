@@ -753,6 +753,22 @@
     @apply flex w-full items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-transparent px-2.5 py-2.5 font-urbanist text-sm font-normal text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-40;
   }
 
+  .agenda-pagination {
+    @apply flex flex-col items-center justify-between gap-3 border-t border-glow-border-soft pt-4 sm:flex-row;
+  }
+
+  .agenda-pagination__summary {
+    @apply font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .agenda-pagination__controls {
+    @apply flex items-center gap-2;
+  }
+
+  .agenda-pagination__button {
+    @apply inline-flex h-[38px] min-w-[108px] items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 font-urbanist text-sm font-semibold text-glow-text-subtle transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
   /* Detalhe do agendamento — Figma nodes 409:885 / 470:1460 */
   .agendamento-detail-page {
     @apply space-y-6;

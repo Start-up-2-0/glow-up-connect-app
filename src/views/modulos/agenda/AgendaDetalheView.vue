@@ -166,15 +166,25 @@ async function load() {
   loading.value = true
   try {
     if (visaoGeral.value) {
-      const lista = await agendaNegocioService.listarGeral(estabelecimentoId.value)
-      agendamento.value = lista.find((a) => a.id === agendamentoId.value) ?? null
+      const lista = await agendaNegocioService.listarGeral(estabelecimentoId.value, {
+        pagina: 1,
+        tamanhoPagina: 50,
+        inicio: new Date(2020, 0, 1).toISOString(),
+        fim: new Date(2035, 0, 1).toISOString(),
+      })
+      agendamento.value = lista.itens.find((a) => a.id === agendamentoId.value) ?? null
       historico.value = await agendaNegocioService.historico(
         estabelecimentoId.value,
         agendamentoId.value,
       )
     } else {
-      const lista = await agendaNegocioService.listarPropria(estabelecimentoId.value)
-      agendamento.value = mapProfissionalParaAgendamento(lista)
+      const lista = await agendaNegocioService.listarPropria(estabelecimentoId.value, {
+        pagina: 1,
+        tamanhoPagina: 50,
+        inicio: new Date(2020, 0, 1).toISOString(),
+        fim: new Date(2035, 0, 1).toISOString(),
+      })
+      agendamento.value = mapProfissionalParaAgendamento(lista.itens)
       historico.value = []
     }
   } catch (err) {

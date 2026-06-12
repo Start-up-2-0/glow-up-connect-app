@@ -7,8 +7,11 @@ import AgendaPageHeader from '@/components/agenda/AgendaPageHeader.vue'
 import AgendaFigmaFilter from '@/components/agenda/AgendaFigmaFilter.vue'
 import AgendaStatusFilterIcon from '@/components/agenda/AgendaStatusFilterIcon.vue'
 import AgendaCalendarFilterIcon from '@/components/agenda/AgendaCalendarFilterIcon.vue'
+import AgendaSortFilterIcon from '@/components/agenda/AgendaSortFilterIcon.vue'
+import AgendaPagination from '@/components/agenda/AgendaPagination.vue'
 import AgendamentoCard from '@/components/agenda/AgendamentoCard.vue'
 import CancelarAgendamentoModal from '@/components/cliente/CancelarAgendamentoModal.vue'
+import { AGENDA_DEFAULT_ORDENACAO } from '@/constants/agendaFilters'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useAgendaPageFilters } from '@/composables/useAgendaPageFilters'
@@ -38,18 +41,25 @@ const {
   statusFilter,
   periodFilter,
   dateFilter,
+  sortFilter,
+  pagina,
+  total,
+  totalPaginas,
   statusOptions,
   periodOptions,
-  dateRange,
-  matchesStatus,
+  sortOptions,
+  apiFiltro,
+  resetPagina,
   applyPeriodFilter,
   applyDateFilter,
   clearPeriodFilter,
   clearDateFilter,
-} = useAgendaPageFilters('hoje')
+  applySortFilter,
+  clearSortFilter,
+} = useAgendaPageFilters('mes')
 
 const periodoFromQuery = route.query.periodo
-if (periodoFromQuery === 'semana' || periodoFromQuery === 'mes') {
+if (periodoFromQuery === 'semana' || periodoFromQuery === 'mes' || periodoFromQuery === 'hoje') {
   periodFilter.value = periodoFromQuery
 }
 
@@ -72,20 +82,25 @@ const pageTitle = computed(() => {
     return visaoGeral.value ? 'Agenda do dia' : 'Meus agendamentos do dia'
   }
   if (periodFilter.value === 'semana') return visaoGeral.value ? 'Agenda da semana' : 'Meus agendamentos da semana'
-  if (periodFilter.value === 'mes') return visaoGeral.value ? 'Agenda do mês' : 'Meus agendamentos do mês'
-  return visaoGeral.value ? 'Agenda de hoje' : 'Meus agendamentos de hoje'
+  if (periodFilter.value === 'hoje') return visaoGeral.value ? 'Agenda de hoje' : 'Meus agendamentos de hoje'
+  return visaoGeral.value ? 'Agenda do mês' : 'Meus agendamentos do mês'
 })
 
 const pageSubtitle = computed(() => {
   if (dateFilter.value) return 'Agendamentos da data selecionada.'
   if (periodFilter.value === 'semana') return 'Visão semanal dos agendamentos.'
-  if (periodFilter.value === 'mes') return 'Visão mensal dos agendamentos.'
+  if (periodFilter.value === 'hoje') return 'Agendamentos do dia atual.'
+  if (periodFilter.value === 'mes' || !periodFilter.value) {
+    return 'Agendamentos do mês atual, com os horários mais recentes primeiro.'
+  }
   return visaoGeral.value
-    ? 'Agendamentos do dia atual.'
+    ? 'Agendamentos do período selecionado.'
     : 'Horários marcados com você nesta loja.'
 })
 
-const showDateInTitle = computed(() => Boolean(dateFilter.value) || periodFilter.value === 'hoje')
+const showDateInTitle = computed(
+  () => Boolean(dateFilter.value) || periodFilter.value === 'hoje',
+)
 const dateLabel = computed(() => {
   if (dateFilter.value) {
     return formatDateShortNumeric(new Date(`${dateFilter.value}T12:00:00`))
@@ -102,10 +117,10 @@ function itemComAcaoAtendimento(itens: AgendaGeral['itens'], agendamentoStatus: 
 }
 
 const itens = computed(() => {
-  const mapped = visaoGeral.value
-    ? agendaGeral.value.map((a) => {
-        const itemAcao = itemComAcaoAtendimento(a.itens, a.status) ?? a.itens[0]
-        return {
+  if (visaoGeral.value) {
+    return agendaGeral.value.map((a) => {
+      const itemAcao = itemComAcaoAtendimento(a.itens, a.status) ?? a.itens[0]
+      return {
         id: a.id,
         agendamentoItemId: itemAcao?.id ?? null,
         clienteNome: a.clienteNome,
@@ -116,21 +131,22 @@ const itens = computed(() => {
         inicio: a.inicio || itemAcao?.inicio || '',
         fim: a.fim || itemAcao?.fim || '',
         label: a.itens.map((i) => i.servicoNome).join(', '),
-      }})
-    : agendaPropria.value.map((a) => ({
-        id: a.agendamentoId,
-        agendamentoItemId: a.agendamentoItemId,
-        clienteNome: a.clienteNome,
-        status: a.agendamentoStatus || a.status,
-        agendamentoStatus: a.agendamentoStatus || a.status,
-        itemStatus: a.status,
-        valorTotal: 0,
-        inicio: a.inicio,
-        fim: a.fim,
-        label: a.servicoNome,
-      }))
+      }
+    })
+  }
 
-  return mapped.filter((item) => matchesStatus(item.status))
+  return agendaPropria.value.map((a) => ({
+    id: a.agendamentoId,
+    agendamentoItemId: a.agendamentoItemId,
+    clienteNome: a.clienteNome,
+    status: a.agendamentoStatus || a.status,
+    agendamentoStatus: a.agendamentoStatus || a.status,
+    itemStatus: a.status,
+    valorTotal: 0,
+    inicio: a.inicio,
+    fim: a.fim,
+    label: a.servicoNome,
+  }))
 })
 
 function statusPermiteIniciarCard(item: (typeof itens.value)[number]): boolean {
@@ -161,16 +177,17 @@ function podeFinalizarCard(item: (typeof itens.value)[number]): boolean {
 async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
-  const filtro = {
-    inicio: dateRange.value.inicio,
-    fim: dateRange.value.fim,
-    ...(statusFilter.value ? { status: statusFilter.value } : {}),
-  }
   try {
     if (visaoGeral.value) {
-      agendaGeral.value = await agendaNegocioService.listarGeral(estabelecimentoId.value, filtro)
+      const data = await agendaNegocioService.listarGeral(estabelecimentoId.value, apiFiltro.value)
+      agendaGeral.value = data.itens
+      total.value = data.total
+      pagina.value = data.pagina
     } else {
-      agendaPropria.value = await agendaNegocioService.listarPropria(estabelecimentoId.value, filtro)
+      const data = await agendaNegocioService.listarPropria(estabelecimentoId.value, apiFiltro.value)
+      agendaPropria.value = data.itens
+      total.value = data.total
+      pagina.value = data.pagina
     }
   } catch (err) {
     notifications.push('error', resolveError(err, 'Não foi possível carregar a agenda.'))
@@ -241,6 +258,11 @@ async function handleCancelar(motivo: string) {
   }
 }
 
+function onPaginaChange(novaPagina: number) {
+  pagina.value = novaPagina
+  void load()
+}
+
 watch(
   ready,
   (isReady) => {
@@ -249,7 +271,8 @@ watch(
   { immediate: true },
 )
 
-watch([statusFilter, periodFilter, dateFilter], () => {
+watch([statusFilter, periodFilter, dateFilter, sortFilter], () => {
+  resetPagina()
   if (ready.value) void load()
 })
 </script>
@@ -276,8 +299,8 @@ watch([statusFilter, periodFilter, dateFilter], () => {
           :model-value="periodFilter"
           label="Filtrar por Período"
           :options="periodOptions"
-          default-value="hoje"
-          clear-value="hoje"
+          default-value="mes"
+          clear-value="mes"
           @update:model-value="applyPeriodFilter"
           @clear="clearPeriodFilter"
         >
@@ -297,6 +320,21 @@ watch([statusFilter, periodFilter, dateFilter], () => {
             <AgendaCalendarFilterIcon />
           </template>
         </AgendaFigmaFilter>
+
+        <AgendaFigmaFilter
+          :model-value="sortFilter"
+          label="Ordenar por"
+          :options="sortOptions"
+          :default-value="AGENDA_DEFAULT_ORDENACAO"
+          :clear-value="AGENDA_DEFAULT_ORDENACAO"
+          min-width="220px"
+          @update:model-value="applySortFilter"
+          @clear="clearSortFilter"
+        >
+          <template #icon>
+            <AgendaSortFilterIcon />
+          </template>
+        </AgendaFigmaFilter>
       </template>
     </AgendaPageHeader>
 
@@ -310,41 +348,51 @@ watch([statusFilter, periodFilter, dateFilter], () => {
       description="Não há horários para o período e filtros selecionados."
     />
 
-    <div v-else class="agenda-cards-grid">
-      <AgendamentoCard
-        v-for="item in itens"
-        :key="`${item.id}-${item.agendamentoItemId ?? 0}`"
-        :title="item.clienteNome"
-        :subtitle="item.label"
-        :inicio="item.inicio"
-        :valor-total="item.valorTotal"
-        :status="item.status"
-        tall
-        :to="
-          item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar
-            ? undefined
-            : agendaDetalhePath(item.id)
-        "
-        :show-actions="item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar"
-        :show-atendimento-actions="
-          (podeIniciarAtendimento && statusPermiteIniciarCard(item)) ||
-          (podeFinalizarAtendimento && statusPermiteFinalizarCard(item))
-        "
-        :pode-iniciar-atendimento="podeIniciarAtendimento && statusPermiteIniciarCard(item)"
-        :pode-finalizar-atendimento="podeFinalizarAtendimento && statusPermiteFinalizarCard(item)"
-        :iniciar-atendimento-habilitado="podeIniciarCard(item)"
-        :finalizar-atendimento-habilitado="podeFinalizarCard(item)"
-        :action-loading="actionId === item.id || actionId === item.agendamentoItemId"
-        @confirm="handleConfirmar(item.id)"
-        @cancel="abrirCancelar(item.id)"
-        @iniciar-atendimento="
-          item.agendamentoItemId && handleIniciarAtendimento(item.agendamentoItemId)
-        "
-        @finalizar-atendimento="
-          item.agendamentoItemId && handleFinalizarAtendimento(item.agendamentoItemId)
-        "
+    <template v-else>
+      <div class="agenda-cards-grid">
+        <AgendamentoCard
+          v-for="item in itens"
+          :key="`${item.id}-${item.agendamentoItemId ?? 0}`"
+          :title="item.clienteNome"
+          :subtitle="item.label"
+          :inicio="item.inicio"
+          :valor-total="item.valorTotal"
+          :status="item.status"
+          tall
+          :to="
+            item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar
+              ? undefined
+              : agendaDetalhePath(item.id)
+          "
+          :show-actions="item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar"
+          :show-atendimento-actions="
+            (podeIniciarAtendimento && statusPermiteIniciarCard(item)) ||
+            (podeFinalizarAtendimento && statusPermiteFinalizarCard(item))
+          "
+          :pode-iniciar-atendimento="podeIniciarAtendimento && statusPermiteIniciarCard(item)"
+          :pode-finalizar-atendimento="podeFinalizarAtendimento && statusPermiteFinalizarCard(item)"
+          :iniciar-atendimento-habilitado="podeIniciarCard(item)"
+          :finalizar-atendimento-habilitado="podeFinalizarCard(item)"
+          :action-loading="actionId === item.id || actionId === item.agendamentoItemId"
+          @confirm="handleConfirmar(item.id)"
+          @cancel="abrirCancelar(item.id)"
+          @iniciar-atendimento="
+            item.agendamentoItemId && handleIniciarAtendimento(item.agendamentoItemId)
+          "
+          @finalizar-atendimento="
+            item.agendamentoItemId && handleFinalizarAtendimento(item.agendamentoItemId)
+          "
+        />
+      </div>
+
+      <AgendaPagination
+        :pagina="pagina"
+        :total-paginas="totalPaginas"
+        :total="total"
+        :loading="loading"
+        @update:pagina="onPaginaChange"
       />
-    </div>
+    </template>
 
     <CancelarAgendamentoModal v-model="cancelModalOpen" @confirm="handleCancelar" />
   </div>

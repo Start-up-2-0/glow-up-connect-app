@@ -39,12 +39,28 @@ export interface AgendaProfissional {
   agendamentoStatus: string
 }
 
+export type AgendaOrdenacao =
+  | 'atendimento_desc'
+  | 'atendimento_asc'
+  | 'criacao_desc'
+  | 'criacao_asc'
+
 export interface AgendaFiltro {
   profissionalId?: number
   clienteId?: number
   status?: string
   inicio?: string
   fim?: string
+  pagina?: number
+  tamanhoPagina?: number
+  ordenacao?: AgendaOrdenacao | string
+}
+
+export interface AgendaPaginada<T> {
+  total: number
+  pagina: number
+  tamanhoPagina: number
+  itens: T[]
 }
 
 export interface AgendamentoHistorico {

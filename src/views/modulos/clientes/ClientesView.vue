@@ -50,7 +50,11 @@ async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
   try {
-    agenda.value = await agendaNegocioService.listarGeral(estabelecimentoId.value)
+    const data = await agendaNegocioService.listarGeral(estabelecimentoId.value, {
+      pagina: 1,
+      tamanhoPagina: 50,
+    })
+    agenda.value = data.itens
   } catch (err) {
     notifications.push('error', resolveError(err))
   } finally {

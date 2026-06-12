@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
@@ -7,7 +7,10 @@ import AgendaPageHeader from '@/components/agenda/AgendaPageHeader.vue'
 import AgendaFigmaFilter from '@/components/agenda/AgendaFigmaFilter.vue'
 import AgendaStatusFilterIcon from '@/components/agenda/AgendaStatusFilterIcon.vue'
 import AgendaCalendarFilterIcon from '@/components/agenda/AgendaCalendarFilterIcon.vue'
+import AgendaSortFilterIcon from '@/components/agenda/AgendaSortFilterIcon.vue'
+import AgendaPagination from '@/components/agenda/AgendaPagination.vue'
 import AgendamentoCard from '@/components/agenda/AgendamentoCard.vue'
+import { AGENDA_DEFAULT_ORDENACAO, AGENDA_PAGE_SIZE } from '@/constants/agendaFilters'
 import { useAgendamentosStore } from '@/stores/agendamentos.store'
 import { useMeusAgendamentosFilters } from '@/composables/useAgendaPageFilters'
 import { agendamentoDetalhePath } from '@/constants/routes'
@@ -19,30 +22,41 @@ const {
   statusFilter,
   periodFilter,
   dateFilter,
+  sortFilter,
+  pagina,
   statusOptions,
   periodOptions,
+  sortOptions,
   apiFiltro,
+  resetPagina,
   applyPeriodFilter,
   applyDateFilter,
   clearPeriodFilter,
   clearDateFilter,
+  applySortFilter,
+  clearSortFilter,
 } = useMeusAgendamentosFilters()
 
-async function load(reset = true) {
-  await store.fetchLista({ ...apiFiltro.value, pagina: 1 }, !reset)
+const totalPaginas = computed(() => Math.max(1, Math.ceil(total.value / AGENDA_PAGE_SIZE)))
+
+async function load() {
+  const data = await store.fetchLista({ ...apiFiltro.value }, false)
+  pagina.value = data.pagina
 }
 
-async function loadMore() {
-  await store.fetchLista(
-    { ...apiFiltro.value, pagina: store.pagina + 1 },
-    true,
-  )
+function onPaginaChange(novaPagina: number) {
+  pagina.value = novaPagina
+  void load()
 }
 
-onMounted(() => load(true))
+onMounted(() => {
+  resetPagina()
+  void load()
+})
 
-watch([statusFilter, periodFilter, dateFilter], () => {
-  void load(true)
+watch([statusFilter, periodFilter, dateFilter, sortFilter], () => {
+  resetPagina()
+  void load()
 })
 </script>
 
@@ -50,7 +64,7 @@ watch([statusFilter, periodFilter, dateFilter], () => {
   <div class="agenda-page">
     <AgendaPageHeader
       title="Meus agendamentos"
-      subtitle="Acompanhe, cancele ou remarque seus horários."
+      subtitle="Agendamentos do mês atual, com os horários mais recentes primeiro."
     >
       <template #filters>
         <AgendaFigmaFilter
@@ -67,8 +81,8 @@ watch([statusFilter, periodFilter, dateFilter], () => {
           :model-value="periodFilter"
           label="Filtrar por Período"
           :options="periodOptions"
-          default-value="proximos"
-          clear-value="proximos"
+          default-value="mes"
+          clear-value="mes"
           @update:model-value="applyPeriodFilter"
           @clear="clearPeriodFilter"
         >
@@ -86,6 +100,21 @@ watch([statusFilter, periodFilter, dateFilter], () => {
         >
           <template #icon>
             <AgendaCalendarFilterIcon />
+          </template>
+        </AgendaFigmaFilter>
+
+        <AgendaFigmaFilter
+          :model-value="sortFilter"
+          label="Ordenar por"
+          :options="sortOptions"
+          :default-value="AGENDA_DEFAULT_ORDENACAO"
+          :clear-value="AGENDA_DEFAULT_ORDENACAO"
+          min-width="220px"
+          @update:model-value="applySortFilter"
+          @clear="clearSortFilter"
+        >
+          <template #icon>
+            <AgendaSortFilterIcon />
           </template>
         </AgendaFigmaFilter>
       </template>
@@ -112,16 +141,13 @@ watch([statusFilter, periodFilter, dateFilter], () => {
         />
       </div>
 
-      <div v-if="itens.length < total" class="flex justify-center pt-2">
-        <button
-          type="button"
-          class="agenda-filter-btn"
-          :disabled="loading"
-          @click="loadMore"
-        >
-          {{ loading ? 'Carregando…' : 'Carregar mais' }}
-        </button>
-      </div>
+      <AgendaPagination
+        :pagina="pagina"
+        :total-paginas="totalPaginas"
+        :total="total"
+        :loading="loading"
+        @update:pagina="onPaginaChange"
+      />
     </template>
   </div>
 </template>

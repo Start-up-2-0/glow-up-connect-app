@@ -1,5 +1,11 @@
 import { computed, ref } from 'vue'
-import type { AgendamentoStatus } from '@/types/agendamento.types'
+import type { AgendamentoFiltro } from '@/types/agendamento.types'
+import type { AgendaFiltro, AgendaOrdenacao } from '@/types/negocio/agenda.types'
+import {
+  AGENDA_DEFAULT_ORDENACAO,
+  AGENDA_PAGE_SIZE,
+  AGENDA_SORT_FILTER_OPTIONS,
+} from '@/constants/agendaFilters'
 import { AGENDA_STATUS_FILTER_OPTIONS } from '@/utils/agendamentoStatusTheme'
 import { addDaysToDateOnly, toDateOnlyString } from '@/utils/formatters'
 
@@ -19,10 +25,14 @@ export const MEUS_AGENDAMENTOS_PERIOD_OPTIONS = [
 export type AgendaPeriodFilter = (typeof AGENDA_PERIOD_FILTER_OPTIONS)[number]['value']
 export type MeusAgendamentosPeriodFilter = (typeof MEUS_AGENDAMENTOS_PERIOD_OPTIONS)[number]['value']
 
-export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'hoje') {
+export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') {
   const statusFilter = ref('')
   const periodFilter = ref<string>(defaultPeriod)
   const dateFilter = ref('')
+  const sortFilter = ref<AgendaOrdenacao>(AGENDA_DEFAULT_ORDENACAO)
+  const pagina = ref(1)
+  const total = ref(0)
+  const tamanhoPagina = AGENDA_PAGE_SIZE
 
   const statusOptions = AGENDA_STATUS_FILTER_OPTIONS.map((option) => ({
     value: option.value,
@@ -30,6 +40,11 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'hoje')
   }))
 
   const periodOptions = AGENDA_PERIOD_FILTER_OPTIONS.map((option) => ({
+    value: option.value,
+    label: option.label,
+  }))
+
+  const sortOptions = AGENDA_SORT_FILTER_OPTIONS.map((option) => ({
     value: option.value,
     label: option.label,
   }))
@@ -60,7 +75,7 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'hoje')
       return { inicio: inicio.toISOString(), fim: fim.toISOString() }
     }
 
-    if (periodFilter.value === 'mes') {
+    if (periodFilter.value === 'mes' || !periodFilter.value) {
       const inicio = new Date(now.getFullYear(), now.getMonth(), 1)
       const fim = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
       return { inicio: inicio.toISOString(), fim: fim.toISOString() }
@@ -73,14 +88,25 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'hoje')
     return { inicio: inicio.toISOString(), fim: fim.toISOString(), label: hoje }
   })
 
-  function matchesStatus(status: string) {
-    if (!statusFilter.value) return true
-    return status === statusFilter.value
+  const apiFiltro = computed<AgendaFiltro>(() => ({
+    inicio: dateRange.value.inicio,
+    fim: dateRange.value.fim,
+    pagina: pagina.value,
+    tamanhoPagina,
+    ordenacao: sortFilter.value,
+    ...(statusFilter.value ? { status: statusFilter.value } : {}),
+  }))
+
+  const totalPaginas = computed(() => Math.max(1, Math.ceil(total.value / tamanhoPagina)))
+
+  function resetPagina() {
+    pagina.value = 1
   }
 
   function applyPeriodFilter(value: string) {
     periodFilter.value = value || defaultPeriod
     dateFilter.value = ''
+    resetPagina()
   }
 
   function applyDateFilter(value: string) {
@@ -90,11 +116,13 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'hoje')
     } else if (!periodFilter.value) {
       periodFilter.value = defaultPeriod
     }
+    resetPagina()
   }
 
   function clearPeriodFilter() {
     periodFilter.value = defaultPeriod
     dateFilter.value = ''
+    resetPagina()
   }
 
   function clearDateFilter() {
@@ -102,28 +130,50 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'hoje')
     if (!periodFilter.value) {
       periodFilter.value = defaultPeriod
     }
+    resetPagina()
+  }
+
+  function applySortFilter(value: string) {
+    sortFilter.value = (value || AGENDA_DEFAULT_ORDENACAO) as AgendaOrdenacao
+    resetPagina()
+  }
+
+  function clearSortFilter() {
+    sortFilter.value = AGENDA_DEFAULT_ORDENACAO
+    resetPagina()
   }
 
   return {
     statusFilter,
     periodFilter,
     dateFilter,
+    sortFilter,
+    pagina,
+    total,
+    totalPaginas,
+    tamanhoPagina,
     statusOptions,
     periodOptions,
+    sortOptions,
     dateRange,
-    matchesStatus,
+    apiFiltro,
+    resetPagina,
     applyPeriodFilter,
     applyDateFilter,
     clearPeriodFilter,
     clearDateFilter,
+    applySortFilter,
+    clearSortFilter,
   }
 }
 
 export function useMeusAgendamentosFilters() {
   const statusFilter = ref('')
-  const periodFilter = ref<string>('proximos')
+  const periodFilter = ref<string>('mes')
   const dateFilter = ref('')
-  const defaultPeriod = 'proximos'
+  const sortFilter = ref<AgendaOrdenacao>(AGENDA_DEFAULT_ORDENACAO)
+  const pagina = ref(1)
+  const defaultPeriod = 'mes'
 
   const statusOptions = AGENDA_STATUS_FILTER_OPTIONS.map((option) => ({
     value: option.value,
@@ -135,13 +185,17 @@ export function useMeusAgendamentosFilters() {
     label: option.label,
   }))
 
-  const apiFiltro = computed(() => {
-    const filtro: {
-      status?: AgendamentoStatus | string
-      ordenacao?: 'proximos' | 'recentes'
-      dataInicio?: string
-      dataFim?: string
-    } = {}
+  const sortOptions = AGENDA_SORT_FILTER_OPTIONS.map((option) => ({
+    value: option.value,
+    label: option.label,
+  }))
+
+  const apiFiltro = computed<AgendamentoFiltro>(() => {
+    const filtro: AgendamentoFiltro = {
+      pagina: pagina.value,
+      tamanhoPagina: AGENDA_PAGE_SIZE,
+      ordenacao: sortFilter.value,
+    }
 
     if (statusFilter.value) {
       filtro.status = statusFilter.value
@@ -150,12 +204,11 @@ export function useMeusAgendamentosFilters() {
     if (dateFilter.value) {
       filtro.dataInicio = dateFilter.value
       filtro.dataFim = dateFilter.value
-      filtro.ordenacao = 'proximos'
       return filtro
     }
 
     if (periodFilter.value === 'proximos' || periodFilter.value === 'recentes') {
-      filtro.ordenacao = periodFilter.value
+      filtro.ordenacao = periodFilter.value === 'recentes' ? 'criacao_desc' : 'atendimento_asc'
       return filtro
     }
 
@@ -163,23 +216,26 @@ export function useMeusAgendamentosFilters() {
     if (periodFilter.value === 'semana') {
       filtro.dataInicio = hoje
       filtro.dataFim = addDaysToDateOnly(hoje, 6)
-      filtro.ordenacao = 'proximos'
       return filtro
     }
 
-    if (periodFilter.value === 'mes') {
+    if (periodFilter.value === 'mes' || !periodFilter.value) {
       const now = new Date()
       filtro.dataInicio = toDateOnlyString(new Date(now.getFullYear(), now.getMonth(), 1))
       filtro.dataFim = toDateOnlyString(new Date(now.getFullYear(), now.getMonth() + 1, 0))
-      filtro.ordenacao = 'proximos'
     }
 
     return filtro
   })
 
+  function resetPagina() {
+    pagina.value = 1
+  }
+
   function applyPeriodFilter(value: string) {
     periodFilter.value = value || defaultPeriod
     dateFilter.value = ''
+    resetPagina()
   }
 
   function applyDateFilter(value: string) {
@@ -189,11 +245,13 @@ export function useMeusAgendamentosFilters() {
     } else if (!periodFilter.value) {
       periodFilter.value = defaultPeriod
     }
+    resetPagina()
   }
 
   function clearPeriodFilter() {
     periodFilter.value = defaultPeriod
     dateFilter.value = ''
+    resetPagina()
   }
 
   function clearDateFilter() {
@@ -201,18 +259,35 @@ export function useMeusAgendamentosFilters() {
     if (!periodFilter.value) {
       periodFilter.value = defaultPeriod
     }
+    resetPagina()
+  }
+
+  function applySortFilter(value: string) {
+    sortFilter.value = (value || AGENDA_DEFAULT_ORDENACAO) as AgendaOrdenacao
+    resetPagina()
+  }
+
+  function clearSortFilter() {
+    sortFilter.value = AGENDA_DEFAULT_ORDENACAO
+    resetPagina()
   }
 
   return {
     statusFilter,
     periodFilter,
     dateFilter,
+    sortFilter,
+    pagina,
     statusOptions,
     periodOptions,
+    sortOptions,
     apiFiltro,
+    resetPagina,
     applyPeriodFilter,
     applyDateFilter,
     clearPeriodFilter,
     clearDateFilter,
+    applySortFilter,
+    clearSortFilter,
   }
 }

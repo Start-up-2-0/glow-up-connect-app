@@ -5,6 +5,7 @@ import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
   AgendaFiltro,
   AgendaGeral,
+  AgendaPaginada,
   AgendaProfissional,
   AgendamentoHistorico,
 } from '@/types/negocio/agenda.types'
@@ -12,13 +13,13 @@ import type {
 export const agendaNegocioService = {
   listarGeral(estabelecimentoId: number, filtro?: AgendaFiltro) {
     return api
-      .get<ApiSuccessResponse<AgendaGeral[]>>(negocioPath(estabelecimentoId, '/agenda'), { params: filtro })
+      .get<ApiSuccessResponse<AgendaPaginada<AgendaGeral>>>(negocioPath(estabelecimentoId, '/agenda'), { params: filtro })
       .then(unwrapApi)
   },
 
   listarPropria(estabelecimentoId: number, filtro?: AgendaFiltro) {
     return api
-      .get<ApiSuccessResponse<AgendaProfissional[]>>(
+      .get<ApiSuccessResponse<AgendaPaginada<AgendaProfissional>>>(
         negocioPath(estabelecimentoId, '/agenda/propria'),
         { params: filtro },
       )

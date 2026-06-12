@@ -29,7 +29,7 @@ export const useAgendamentosStore = defineStore('agendamentos', () => {
       const data = await agendamentoService.listarMeus({
         pagina: filtro.pagina ?? 1,
         tamanhoPagina: filtro.tamanhoPagina ?? 20,
-        ordenacao: filtro.ordenacao ?? 'proximos',
+        ordenacao: filtro.ordenacao ?? 'atendimento_desc',
         status: filtro.status,
       })
       total.value = data.total

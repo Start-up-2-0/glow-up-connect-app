@@ -12,7 +12,13 @@ export type AgendamentoStatus =
   | 'Remarcado'
   | 'NaoCompareceu'
 
-export type AgendamentoOrdenacao = 'proximos' | 'recentes'
+export type AgendamentoOrdenacao =
+  | 'proximos'
+  | 'recentes'
+  | 'atendimento_desc'
+  | 'atendimento_asc'
+  | 'criacao_desc'
+  | 'criacao_asc'
 
 export interface AgendamentoClienteItem {
   id: number
