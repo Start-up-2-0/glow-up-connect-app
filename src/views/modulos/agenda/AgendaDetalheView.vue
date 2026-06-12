@@ -58,14 +58,20 @@ const {
   date: sugerirDate,
   motivo: sugerirMotivo,
   slots: sugerirSlots,
+  datasAtendimento: sugerirDatasAtendimento,
   selectedSlotInicio: sugerirSlotInicio,
+  datasLoading: sugerirDatasLoading,
   slotsLoading: sugerirSlotsLoading,
-  loadSlots: loadSugerirSlots,
+  mensagemIndisponibilidade: sugerirMensagemIndisponibilidade,
+  minSelectableDate: sugerirMinDate,
+  maxSelectableDate: sugerirMaxDate,
+  initialize: initializeSugerir,
   reset: resetSugerirForm,
   getSelectedSlot: getSugerirSlot,
 } = useRemarcarAgendamentoSlots({
   getPublicGuid: () => estabelecimentoAtivo.value?.publicGuid,
   getServicoIds: () => agendamento.value?.itens.map((item) => item.servicoId) ?? [],
+  getProfissionalId: () => agendamento.value?.itens[0]?.profissionalId,
   onError: (message) => {
     notifications.push('error', message)
   },
@@ -301,7 +307,7 @@ async function handleSugerirRemarcacao() {
 function openSugerirRemarcacao() {
   sugerirModalOpen.value = true
   resetSugerirForm()
-  void loadSugerirSlots()
+  void initializeSugerir()
 }
 
 function closeSugerirRemarcacao() {
@@ -329,11 +335,6 @@ watch(
   },
   { immediate: true },
 )
-
-watch(sugerirDate, () => {
-  if (!sugerirModalOpen.value) return
-  void loadSugerirSlots()
-})
 </script>
 
 <template>
@@ -500,7 +501,12 @@ watch(sugerirDate, () => {
       primary-label="Enviar sugestão"
       secondary-label="Voltar"
       :slots="sugerirSlots"
+      :datas-atendimento="sugerirDatasAtendimento"
+      :min-date="sugerirMinDate"
+      :max-date="sugerirMaxDate"
+      :datas-loading="sugerirDatasLoading"
       :slots-loading="sugerirSlotsLoading"
+      :mensagem-indisponibilidade="sugerirMensagemIndisponibilidade"
       :confirm-loading="actionLoading"
       @confirm="handleSugerirRemarcacao"
       @cancel="closeSugerirRemarcacao"

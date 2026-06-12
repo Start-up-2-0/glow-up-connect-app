@@ -35,6 +35,18 @@ export const MEUS_AGENDAMENTOS_PERIOD_OPTIONS = [
 export type AgendaPeriodFilter = (typeof AGENDA_PERIOD_FILTER_OPTIONS)[number]['value']
 export type MeusAgendamentosPeriodFilter = (typeof MEUS_AGENDAMENTOS_PERIOD_OPTIONS)[number]['value']
 
+function inicioMesAtual(now = new Date()): Date {
+  const inicio = new Date(now.getFullYear(), now.getMonth(), 1)
+  inicio.setHours(0, 0, 0, 0)
+  return inicio
+}
+
+function fimMesAtualAteHoje(now = new Date()): Date {
+  const fim = new Date(now)
+  fim.setHours(23, 59, 59, 999)
+  return fim
+}
+
 export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') {
   const statusFilter = ref('')
   const periodFilter = ref<string>(defaultPeriod)
@@ -85,9 +97,10 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') 
     }
 
     if (periodFilter.value === 'mes' || !periodFilter.value) {
-      const inicio = new Date(now.getFullYear(), now.getMonth(), 1)
-      const fim = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
-      return { inicio: inicio.toISOString(), fim: fim.toISOString() }
+      return {
+        inicio: inicioMesAtual(now).toISOString(),
+        fim: fimMesAtualAteHoje(now).toISOString(),
+      }
     }
 
     const inicio = new Date(now)
@@ -231,8 +244,8 @@ export function useMeusAgendamentosFilters() {
 
     if (periodFilter.value === 'mes' || !periodFilter.value) {
       const now = new Date()
-      filtro.dataInicio = toDateOnlyString(new Date(now.getFullYear(), now.getMonth(), 1))
-      filtro.dataFim = toDateOnlyString(new Date(now.getFullYear(), now.getMonth() + 1, 0))
+      filtro.dataInicio = toDateOnlyString(inicioMesAtual(now))
+      filtro.dataFim = toDateOnlyString(now)
     }
 
     return filtro

@@ -1005,26 +1005,6 @@
     @apply mb-3 text-glow-text-soft;
   }
 
-  .remarcar-agendamento__date-field {
-    @apply relative inline-flex h-10 min-w-[144px] max-w-full items-center justify-center gap-2.5 rounded-lg border border-glow-border-soft bg-glow-surface px-5;
-  }
-
-  .remarcar-agendamento__date-value {
-    @apply pointer-events-none font-urbanist text-sm text-glow-text;
-  }
-
-  .remarcar-agendamento__date-value--placeholder {
-    @apply text-glow-text-muted;
-  }
-
-  .remarcar-agendamento__date-icon {
-    @apply pointer-events-none size-3 shrink-0 text-glow-text;
-  }
-
-  .remarcar-agendamento__date-input {
-    @apply absolute inset-0 cursor-pointer opacity-0;
-  }
-
   .remarcar-agendamento__slots-empty {
     @apply font-urbanist text-sm text-glow-text-subtle;
   }

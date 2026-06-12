@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
@@ -46,14 +46,20 @@ const {
   date: remarcarDate,
   motivo: remarcarMotivo,
   slots: remarcarSlots,
+  datasAtendimento: remarcarDatasAtendimento,
   selectedSlotInicio: remarcarSlotInicio,
-  slotsLoading: remarcarLoading,
-  loadSlots: loadRemarcarSlots,
+  datasLoading: remarcarDatasLoading,
+  slotsLoading: remarcarSlotsLoading,
+  mensagemIndisponibilidade: remarcarMensagemIndisponibilidade,
+  minSelectableDate: remarcarMinDate,
+  maxSelectableDate: remarcarMaxDate,
+  initialize: initializeRemarcar,
   reset: resetRemarcarForm,
   getSelectedSlot,
 } = useRemarcarAgendamentoSlots({
   getPublicGuid: () => agendamento.value?.estabelecimentoPublicGuid,
   getServicoIds: () => agendamento.value?.itens.map((item) => item.servicoId) ?? [],
+  getProfissionalId: () => agendamento.value?.itens[0]?.profissionalId,
   onError: (message) => {
     error.value = message
   },
@@ -136,17 +142,12 @@ function openRemarcar() {
   remarcarOpen.value = true
   error.value = null
   resetRemarcarForm()
-  void loadRemarcarSlots()
+  void initializeRemarcar()
 }
 
 function closeRemarcar() {
   remarcarOpen.value = false
 }
-
-watch(remarcarDate, () => {
-  if (!remarcarOpen.value) return
-  void loadRemarcarSlots()
-})
 
 onMounted(load)
 </script>
@@ -259,7 +260,12 @@ onMounted(load)
         v-model:selected-slot-inicio="remarcarSlotInicio"
         title="Remarcar agendamento"
         :slots="remarcarSlots"
-        :slots-loading="remarcarLoading"
+        :datas-atendimento="remarcarDatasAtendimento"
+        :min-date="remarcarMinDate"
+        :max-date="remarcarMaxDate"
+        :datas-loading="remarcarDatasLoading"
+        :slots-loading="remarcarSlotsLoading"
+        :mensagem-indisponibilidade="remarcarMensagemIndisponibilidade"
         :confirm-loading="actionLoading"
         @confirm="handleRemarcar"
         @cancel="closeRemarcar"

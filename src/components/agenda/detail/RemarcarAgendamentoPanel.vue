@@ -1,26 +1,33 @@
 <script setup lang="ts">
 import { computed, useId } from 'vue'
+import AgendarCalendario from '@/components/agendar/AgendarCalendario.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
-import AgendaCalendarFilterIcon from '@/components/agenda/AgendaCalendarFilterIcon.vue'
 import type { SlotDisponivel } from '@/types/agendamento.types'
-import { formatAgendaTime, formatDateOnlyFigma } from '@/utils/formatters'
+import { formatAgendaTime } from '@/utils/formatters'
 
 const props = withDefaults(
   defineProps<{
     title: string
     slots: SlotDisponivel[]
+    datasAtendimento: string[]
+    minDate: string
+    maxDate: string
+    datasLoading?: boolean
     slotsLoading?: boolean
     confirmLoading?: boolean
     primaryLabel?: string
     secondaryLabel?: string
+    mensagemIndisponibilidade?: string | null
     slotsEmptyMessage?: string
   }>(),
   {
+    datasLoading: false,
     slotsLoading: false,
     confirmLoading: false,
     primaryLabel: 'Confirmar remarcação',
     secondaryLabel: 'Voltar',
-    slotsEmptyMessage: 'Nenhum horário disponível nesta data.',
+    mensagemIndisponibilidade: null,
+    slotsEmptyMessage: 'Nenhum horário livre nesta data. Escolha outro dia da agenda do profissional.',
   },
 )
 
@@ -33,12 +40,19 @@ const emit = defineEmits<{
   cancel: []
 }>()
 
-const dateInputId = useId()
 const motivoInputId = useId()
 
-const formattedDate = computed(() =>
-  date.value ? formatDateOnlyFigma(date.value) : 'Selecione a data',
-)
+const calendarLoading = computed(() => props.datasLoading || props.slotsLoading)
+
+const slotsMessage = computed(() => {
+  if (props.mensagemIndisponibilidade && props.datasAtendimento.length === 0) {
+    return props.mensagemIndisponibilidade
+  }
+  if (props.mensagemIndisponibilidade && props.slots.length === 0) {
+    return props.mensagemIndisponibilidade
+  }
+  return props.slotsEmptyMessage
+})
 
 const canConfirm = computed(
   () => Boolean(selectedSlotInicio.value && motivo.value.trim() && date.value),
@@ -46,6 +60,10 @@ const canConfirm = computed(
 
 function selectSlot(slot: SlotDisponivel) {
   selectedSlotInicio.value = slot.inicio
+}
+
+function onSelectDate(value: string) {
+  date.value = value
 }
 </script>
 
@@ -58,30 +76,33 @@ function selectSlot(slot: SlotDisponivel) {
     <div class="remarcar-agendamento__panel">
       <div class="remarcar-agendamento__layout">
         <div class="remarcar-agendamento__left">
-          <label class="remarcar-agendamento__label" :for="dateInputId">
+          <p class="remarcar-agendamento__label">
             Escolha uma nova data
-          </label>
+          </p>
 
-          <div class="remarcar-agendamento__date-field">
-            <span
-              class="remarcar-agendamento__date-value"
-              :class="{ 'remarcar-agendamento__date-value--placeholder': !date }"
-            >
-              {{ formattedDate }}
-            </span>
-            <AgendaCalendarFilterIcon class="remarcar-agendamento__date-icon" />
-            <input
-              :id="dateInputId"
-              v-model="date"
-              type="date"
-              class="remarcar-agendamento__date-input"
-              aria-label="Escolha uma nova data"
-            />
-          </div>
+          <LoadingSpinner v-if="datasLoading && datasAtendimento.length === 0" />
 
-          <label class="remarcar-agendamento__label remarcar-agendamento__label--spacing">
+          <p
+            v-else-if="datasAtendimento.length === 0"
+            class="remarcar-agendamento__slots-empty"
+          >
+            {{ mensagemIndisponibilidade ?? 'Não há dias de atendimento disponíveis para os serviços deste agendamento.' }}
+          </p>
+
+          <AgendarCalendario
+            v-else
+            embedded
+            :selected-date="date"
+            :datas-permitidas="datasAtendimento"
+            :min-date="minDate"
+            :max-date="maxDate"
+            :loading="calendarLoading"
+            @select="onSelectDate"
+          />
+
+          <p class="remarcar-agendamento__label remarcar-agendamento__label--spacing">
             Escolha o novo horário
-          </label>
+          </p>
 
           <LoadingSpinner v-if="slotsLoading" />
 
@@ -89,7 +110,7 @@ function selectSlot(slot: SlotDisponivel) {
             v-else-if="slots.length === 0"
             class="remarcar-agendamento__slots-empty"
           >
-            {{ slotsEmptyMessage }}
+            {{ slotsMessage }}
           </p>
 
           <div v-else class="remarcar-agendamento__slot-grid" role="listbox" aria-label="Horários disponíveis">

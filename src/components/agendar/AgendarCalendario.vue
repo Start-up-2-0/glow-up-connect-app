@@ -3,13 +3,20 @@ import { computed, ref, watch } from 'vue'
 import { AGENDAR_BTN_CONTINUE_CLASS } from '@/constants/designTokens'
 import { formatDateOnlyLabel, toDateOnlyString } from '@/utils/formatters'
 
-const props = defineProps<{
-  selectedDate: string
-  datasPermitidas: string[]
-  minDate: string
-  maxDate: string
-  loading?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    selectedDate: string
+    datasPermitidas: string[]
+    minDate: string
+    maxDate: string
+    loading?: boolean
+    embedded?: boolean
+  }>(),
+  {
+    loading: false,
+    embedded: false,
+  },
+)
 
 const emit = defineEmits<{
   select: [date: string]
@@ -131,7 +138,10 @@ function handleSelect(iso: string) {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-[463px] rounded-xl border-[0.5px] border-glow-border-soft p-5">
+  <div
+    class="w-full rounded-xl border-[0.5px] border-glow-border-soft p-5"
+    :class="embedded ? 'max-w-full' : 'mx-auto max-w-[463px]'"
+  >
     <div class="mb-6 flex items-center justify-between">
       <button
         type="button"
@@ -200,15 +210,17 @@ function handleSelect(iso: string) {
       </template>
     </div>
 
-    <hr class="my-6 border-glow-border-soft" />
+    <template v-if="!embedded">
+      <hr class="my-6 border-glow-border-soft" />
 
-    <button
-      type="button"
-      :class="AGENDAR_BTN_CONTINUE_CLASS"
-      :disabled="!podeContinuar || loading"
-      @click="emit('continuar')"
-    >
-      {{ continuarLabel }}
-    </button>
+      <button
+        type="button"
+        :class="AGENDAR_BTN_CONTINUE_CLASS"
+        :disabled="!podeContinuar || loading"
+        @click="emit('continuar')"
+      >
+        {{ continuarLabel }}
+      </button>
+    </template>
   </div>
 </template>

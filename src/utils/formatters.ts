@@ -197,13 +197,6 @@ export function formatPrecoRange(min: number, max: number): string {
 }
 
 /** Rótulo curto para datas ISO (yyyy-MM-dd) sem ambiguidade de fuso. */
-/** Formato visual do Figma para campo de data (ex.: 12 / 06 / 2026). */
-export function formatDateOnlyFigma(isoDate: string): string {
-  const [year, month, day] = isoDate.split('-')
-  if (!year || !month || !day) return isoDate
-  return `${day} / ${month} / ${year}`
-}
-
 export function formatDateOnlyLabel(isoDate: string): string {
   const [year, month, day] = isoDate.split('-').map(Number)
   const date = new Date(year, month - 1, day)
