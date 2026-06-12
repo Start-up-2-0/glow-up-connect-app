@@ -969,23 +969,96 @@
     @apply min-w-[132px] border-[#cf3f3f] bg-glow-surface text-[#cf3f3f] hover:bg-red-50 dark:hover:bg-red-950/20;
   }
 
-  .agendamento-detail-remarcar-panel {
-    @apply mt-6 space-y-5 rounded-xl bg-glow-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02),0_0_0_1px_rgba(27,31,35,0.15)];
+  .remarcar-agendamento {
+    @apply mt-8 space-y-3;
   }
 
-  .agendamento-detail-remarcar-title {
+  .remarcar-agendamento__title {
     @apply font-satoshi text-sm font-medium uppercase tracking-wide text-glow-text-soft;
   }
 
-  .agendamento-detail-slot-grid {
-    @apply grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6;
+  .remarcar-agendamento__panel {
+    @apply rounded-xl border border-glow-border-soft bg-glow-hover-surface p-5 dark:bg-glow-surface;
   }
 
-  .agendamento-detail-slot-btn {
-    @apply flex h-[35px] items-center justify-center rounded-lg border border-glow-border-soft bg-glow-surface font-satoshi text-base text-glow-text transition hover:bg-glow-hover-surface;
+  .remarcar-agendamento__layout {
+    @apply grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(280px,736px)];
   }
 
-  .agendamento-detail-slot-btn--selected {
+  .remarcar-agendamento__left {
+    @apply space-y-4;
+  }
+
+  .remarcar-agendamento__right {
+    @apply flex flex-col;
+  }
+
+  .remarcar-agendamento__label {
+    @apply block font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .remarcar-agendamento__label--spacing {
+    @apply pt-2;
+  }
+
+  .remarcar-agendamento__label--motivo {
+    @apply mb-3 text-glow-text-soft;
+  }
+
+  .remarcar-agendamento__date-field {
+    @apply relative inline-flex h-10 min-w-[144px] max-w-full items-center justify-center gap-2.5 rounded-lg border border-glow-border-soft bg-glow-surface px-5;
+  }
+
+  .remarcar-agendamento__date-value {
+    @apply pointer-events-none font-urbanist text-sm text-glow-text;
+  }
+
+  .remarcar-agendamento__date-value--placeholder {
+    @apply text-glow-text-muted;
+  }
+
+  .remarcar-agendamento__date-icon {
+    @apply pointer-events-none size-3 shrink-0 text-glow-text;
+  }
+
+  .remarcar-agendamento__date-input {
+    @apply absolute inset-0 cursor-pointer opacity-0;
+  }
+
+  .remarcar-agendamento__slots-empty {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .remarcar-agendamento__slot-grid {
+    @apply grid gap-1.5;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 96px));
+  }
+
+  .remarcar-agendamento__slot-btn {
+    @apply flex h-[35px] w-[96px] items-center justify-center rounded-xl border border-glow-border-soft bg-glow-surface font-satoshi text-sm text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .remarcar-agendamento__slot-btn--selected {
     @apply border-glow-gold-dark bg-glow-gold-soft;
+  }
+
+  .remarcar-agendamento__motivo {
+    @apply min-h-[82px] w-full resize-y rounded-lg border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm text-glow-text placeholder:text-glow-placeholder outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold;
+  }
+
+  .remarcar-agendamento__actions {
+    @apply mt-auto flex flex-wrap gap-2 pt-6;
+  }
+
+  .remarcar-agendamento__btn {
+    @apply inline-flex h-8 items-center justify-center rounded-xl px-3 font-satoshi text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .remarcar-agendamento__btn--primary {
+    @apply min-w-[214px] border border-transparent bg-[#e6ad01] text-white hover:brightness-95;
+  }
+
+  .remarcar-agendamento__btn--secondary {
+    @apply min-w-[132px] border border-glow-border-soft bg-glow-hover-surface text-glow-text hover:bg-glow-surface;
   }
 }

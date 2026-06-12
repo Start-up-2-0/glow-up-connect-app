@@ -10,8 +10,10 @@ import AgendamentoDetailField from '@/components/agenda/detail/AgendamentoDetail
 import AgendamentoDetailSection from '@/components/agenda/detail/AgendamentoDetailSection.vue'
 import AgendamentoDetailServices from '@/components/agenda/detail/AgendamentoDetailServices.vue'
 import AgendamentoDetailHistorico from '@/components/agenda/detail/AgendamentoDetailHistorico.vue'
+import RemarcarAgendamentoPanel from '@/components/agenda/detail/RemarcarAgendamentoPanel.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
+import { useRemarcarAgendamentoSlots } from '@/composables/useRemarcarAgendamentoSlots'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { agendaNegocioService } from '@/services/agendaNegocioService'
@@ -33,10 +35,12 @@ import {
   formatAgendaDetailSubtitle,
   formatCurrency,
   formatTelefone,
+  toAgendaTimeOnlyString,
+  toDateOnlyFromIsoUtc,
 } from '@/utils/formatters'
 
 const route = useRoute()
-const { estabelecimentoId, ready, error: contextError } = useEstabelecimentoView()
+const { estabelecimentoId, estabelecimentoAtivo, ready, error: contextError } = useEstabelecimentoView()
 const { possuiPermissao } = useNegocioContext()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
@@ -49,9 +53,23 @@ const actionLoading = ref(false)
 const atendimentoItemLoadingId = ref<number | null>(null)
 const cancelModalOpen = ref(false)
 const sugerirModalOpen = ref(false)
-const sugerirData = ref('')
-const sugerirHorario = ref('')
-const sugerirMotivo = ref('')
+
+const {
+  date: sugerirDate,
+  motivo: sugerirMotivo,
+  slots: sugerirSlots,
+  selectedSlotInicio: sugerirSlotInicio,
+  slotsLoading: sugerirSlotsLoading,
+  loadSlots: loadSugerirSlots,
+  reset: resetSugerirForm,
+  getSelectedSlot: getSugerirSlot,
+} = useRemarcarAgendamentoSlots({
+  getPublicGuid: () => estabelecimentoAtivo.value?.publicGuid,
+  getServicoIds: () => agendamento.value?.itens.map((item) => item.servicoId) ?? [],
+  onError: (message) => {
+    notifications.push('error', message)
+  },
+})
 
 const visaoGeral = computed(() => possuiPermissao('AgendaVisualizarGeral'))
 const podeIniciarAtendimento = computed(() => possuiPermissaoIniciarAtendimento(possuiPermissao))
@@ -257,28 +275,37 @@ async function handleConcluirPrimeiroDisponivel() {
 
 async function handleSugerirRemarcacao() {
   if (!estabelecimentoId.value || !agendamento.value) return
-  if (!sugerirData.value || !sugerirHorario.value || !sugerirMotivo.value.trim()) {
-    notifications.push('warning', 'Informe data, horário e motivo.')
+  const slot = getSugerirSlot()
+  if (!slot || !sugerirMotivo.value.trim()) {
+    notifications.push('warning', 'Selecione um horário e informe o motivo.')
     return
   }
   actionLoading.value = true
   try {
     await agendaNegocioService.sugerirRemarcacao(estabelecimentoId.value, agendamento.value.id, {
-      data: sugerirData.value,
-      horarioInicio: sugerirHorario.value,
+      data: toDateOnlyFromIsoUtc(slot.inicio),
+      horarioInicio: toAgendaTimeOnlyString(slot.inicio),
       motivo: sugerirMotivo.value.trim(),
     })
     notifications.push('success', 'Sugestão enviada ao cliente.')
     sugerirModalOpen.value = false
-    sugerirData.value = ''
-    sugerirHorario.value = ''
-    sugerirMotivo.value = ''
+    resetSugerirForm()
     await load()
   } catch (err) {
     notifications.push('error', resolveError(err))
   } finally {
     actionLoading.value = false
   }
+}
+
+function openSugerirRemarcacao() {
+  sugerirModalOpen.value = true
+  resetSugerirForm()
+  void loadSugerirSlots()
+}
+
+function closeSugerirRemarcacao() {
+  sugerirModalOpen.value = false
 }
 
 async function handleCancelar(motivo: string) {
@@ -302,6 +329,11 @@ watch(
   },
   { immediate: true },
 )
+
+watch(sugerirDate, () => {
+  if (!sugerirModalOpen.value) return
+  void loadSugerirSlots()
+})
 </script>
 
 <template>
@@ -424,7 +456,7 @@ watch(
               type="button"
               class="agendamento-detail-btn agendamento-detail-btn--secondary min-w-[185px]"
               :disabled="actionLoading"
-              @click="sugerirModalOpen = true"
+              @click="openSugerirRemarcacao"
             >
               Sugerir novo horário
             </button>
@@ -459,58 +491,19 @@ watch(
 
     <CancelarAgendamentoModal v-model="cancelModalOpen" @confirm="handleCancelar" />
 
-    <div
+    <RemarcarAgendamentoPanel
       v-if="sugerirModalOpen"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      role="dialog"
-      aria-modal="true"
-    >
-      <div class="agendamento-detail-panel w-full max-w-md">
-        <div class="agendamento-detail-panel__body space-y-4">
-          <h3 class="font-satoshi text-lg font-bold text-glow-text">Sugerir novo horário</h3>
-          <div>
-            <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">Data</label>
-            <input
-              v-model="sugerirData"
-              type="date"
-              class="w-full rounded-xl border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
-            />
-          </div>
-          <div>
-            <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">Horário</label>
-            <input
-              v-model="sugerirHorario"
-              type="time"
-              class="w-full rounded-xl border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
-            />
-          </div>
-          <div>
-            <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">Motivo</label>
-            <textarea
-              v-model="sugerirMotivo"
-              rows="3"
-              class="agendamento-detail-obs-box w-full"
-            />
-          </div>
-          <div class="agendamento-detail-actions">
-            <button
-              type="button"
-              class="agendamento-detail-btn agendamento-detail-btn--secondary min-w-[132px]"
-              @click="sugerirModalOpen = false"
-            >
-              Fechar
-            </button>
-            <button
-              type="button"
-              class="agendamento-detail-btn agendamento-detail-btn--confirm min-w-[132px]"
-              :disabled="actionLoading"
-              @click="handleSugerirRemarcacao"
-            >
-              Enviar sugestão
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+      v-model:date="sugerirDate"
+      v-model:motivo="sugerirMotivo"
+      v-model:selected-slot-inicio="sugerirSlotInicio"
+      title="Sugerir novo horário"
+      primary-label="Enviar sugestão"
+      secondary-label="Voltar"
+      :slots="sugerirSlots"
+      :slots-loading="sugerirSlotsLoading"
+      :confirm-loading="actionLoading"
+      @confirm="handleSugerirRemarcacao"
+      @cancel="closeSugerirRemarcacao"
+    />
   </div>
 </template>

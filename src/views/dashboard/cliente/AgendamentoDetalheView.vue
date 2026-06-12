@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
@@ -9,24 +9,23 @@ import AgendamentoDetailHeader from '@/components/agenda/detail/AgendamentoDetai
 import AgendamentoDetailField from '@/components/agenda/detail/AgendamentoDetailField.vue'
 import AgendamentoDetailSection from '@/components/agenda/detail/AgendamentoDetailSection.vue'
 import AgendamentoDetailServices from '@/components/agenda/detail/AgendamentoDetailServices.vue'
+import RemarcarAgendamentoPanel from '@/components/agenda/detail/RemarcarAgendamentoPanel.vue'
 import { useAgendamentosStore } from '@/stores/agendamentos.store'
-import { publicoService } from '@/services/publicoService'
+import { useRemarcarAgendamentoSlots } from '@/composables/useRemarcarAgendamentoSlots'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { ROUTE_PATHS } from '@/constants/routes'
-import type { AgendamentoCliente, SlotDisponivel } from '@/types/agendamento.types'
+import type { AgendamentoCliente } from '@/types/agendamento.types'
 import {
   AGENDAMENTO_STATUS_CANCELAVEL,
   AGENDAMENTO_STATUS_REMARCAVEL,
 } from '@/types/agendamento.types'
 import {
   formatAgendaDetailSubtitle,
-  formatAgendaTime,
   formatCurrency,
   formatEnderecoResumo,
   toAgendaTimeOnlyString,
   toDateOnlyFromIsoUtc,
-  toDateOnlyString,
 } from '@/utils/formatters'
 
 const route = useRoute()
@@ -42,11 +41,23 @@ const actionLoading = ref(false)
 
 const cancelModalOpen = ref(false)
 const remarcarOpen = ref(false)
-const remarcarMotivo = ref('')
-const remarcarDate = ref(toDateOnlyString(new Date()))
-const remarcarSlots = ref<SlotDisponivel[]>([])
-const remarcarSlot = ref<SlotDisponivel | null>(null)
-const remarcarLoading = ref(false)
+
+const {
+  date: remarcarDate,
+  motivo: remarcarMotivo,
+  slots: remarcarSlots,
+  selectedSlotInicio: remarcarSlotInicio,
+  slotsLoading: remarcarLoading,
+  loadSlots: loadRemarcarSlots,
+  reset: resetRemarcarForm,
+  getSelectedSlot,
+} = useRemarcarAgendamentoSlots({
+  getPublicGuid: () => agendamento.value?.estabelecimentoPublicGuid,
+  getServicoIds: () => agendamento.value?.itens.map((item) => item.servicoId) ?? [],
+  onError: (message) => {
+    error.value = message
+  },
+})
 
 const subtitle = computed(() =>
   agendamento.value?.inicio ? formatAgendaDetailSubtitle(agendamento.value.inicio) : undefined,
@@ -96,37 +107,16 @@ async function handleCancelar(motivo: string) {
   }
 }
 
-async function loadRemarcarSlots() {
-  if (!agendamento.value) return
-  remarcarLoading.value = true
-  remarcarSlot.value = null
-  try {
-    const servicoIds = agendamento.value.itens.map((i) => i.servicoId)
-    const data = await publicoService.consultarDisponibilidadeLoja(
-      agendamento.value.estabelecimentoPublicGuid,
-      {
-        dataInicio: remarcarDate.value,
-        dataFim: remarcarDate.value,
-        servicoIds,
-      },
-    )
-    remarcarSlots.value = data.slots
-  } catch (err) {
-    error.value = resolveError(err)
-  } finally {
-    remarcarLoading.value = false
-  }
-}
-
 async function handleRemarcar() {
-  if (!remarcarSlot.value || !remarcarMotivo.value.trim()) {
+  const remarcarSlot = getSelectedSlot()
+  if (!remarcarSlot || !remarcarMotivo.value.trim()) {
     error.value = 'Selecione um horário e informe o motivo.'
     return
   }
   actionLoading.value = true
   error.value = null
   try {
-    const inicioSelecionado = remarcarSlot.value.inicio
+    const inicioSelecionado = remarcarSlot.inicio
     agendamento.value = await store.remarcar(agendamentoId.value, {
       data: toDateOnlyFromIsoUtc(inicioSelecionado),
       horarioInicio: toAgendaTimeOnlyString(inicioSelecionado),
@@ -144,10 +134,19 @@ async function handleRemarcar() {
 
 function openRemarcar() {
   remarcarOpen.value = true
-  remarcarMotivo.value = ''
-  remarcarDate.value = toDateOnlyString(new Date())
+  error.value = null
+  resetRemarcarForm()
   void loadRemarcarSlots()
 }
+
+function closeRemarcar() {
+  remarcarOpen.value = false
+}
+
+watch(remarcarDate, () => {
+  if (!remarcarOpen.value) return
+  void loadRemarcarSlots()
+})
 
 onMounted(load)
 </script>
@@ -253,74 +252,18 @@ onMounted(load)
         </div>
       </div>
 
-      <section v-if="remarcarOpen" class="agendamento-detail-remarcar-panel">
-        <h2 class="agendamento-detail-remarcar-title">Remarcar agendamento</h2>
-
-        <div class="grid gap-6 lg:grid-cols-2">
-          <div class="space-y-4">
-            <div>
-              <label class="mb-2 block font-urbanist text-sm font-medium text-glow-text">
-                Escolha uma nova data
-              </label>
-              <input
-                v-model="remarcarDate"
-                type="date"
-                class="w-full max-w-[144px] rounded-xl border border-glow-border-soft bg-glow-surface px-4 py-2 font-urbanist text-sm"
-                @change="loadRemarcarSlots"
-              />
-            </div>
-
-            <div>
-              <label class="mb-2 block font-urbanist text-sm font-medium text-glow-text">
-                Escolha o novo horário
-              </label>
-              <LoadingSpinner v-if="remarcarLoading" />
-              <div v-else class="agendamento-detail-slot-grid">
-                <button
-                  v-for="(slot, index) in remarcarSlots"
-                  :key="`${slot.inicio}-${index}`"
-                  type="button"
-                  class="agendamento-detail-slot-btn"
-                  :class="{ 'agendamento-detail-slot-btn--selected': remarcarSlot?.inicio === slot.inicio }"
-                  @click="remarcarSlot = slot"
-                >
-                  {{ formatAgendaTime(slot.inicio) }}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-2">
-            <label class="font-urbanist text-sm font-medium text-glow-text">
-              Motivo da remarcação
-            </label>
-            <textarea
-              v-model="remarcarMotivo"
-              rows="4"
-              class="agendamento-detail-obs-box min-h-[82px] w-full"
-              placeholder="Descreva o motivo da remarcação"
-            />
-          </div>
-        </div>
-
-        <div class="agendamento-detail-actions">
-          <button
-            type="button"
-            class="agendamento-detail-btn agendamento-detail-btn--secondary min-w-[132px]"
-            @click="remarcarOpen = false"
-          >
-            Voltar
-          </button>
-          <button
-            type="button"
-            class="agendamento-detail-btn agendamento-detail-btn--confirm min-w-[214px]"
-            :disabled="actionLoading"
-            @click="handleRemarcar"
-          >
-            Confirmar remarcação
-          </button>
-        </div>
-      </section>
+      <RemarcarAgendamentoPanel
+        v-if="remarcarOpen"
+        v-model:date="remarcarDate"
+        v-model:motivo="remarcarMotivo"
+        v-model:selected-slot-inicio="remarcarSlotInicio"
+        title="Remarcar agendamento"
+        :slots="remarcarSlots"
+        :slots-loading="remarcarLoading"
+        :confirm-loading="actionLoading"
+        @confirm="handleRemarcar"
+        @cancel="closeRemarcar"
+      />
     </template>
 
     <CancelarAgendamentoModal v-model="cancelModalOpen" @confirm="handleCancelar" />
