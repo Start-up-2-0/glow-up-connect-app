@@ -1,5 +1,11 @@
 import type { AgendaCustomDateRange } from '@/types/negocio/agenda.types'
 import { EMPTY_AGENDA_CUSTOM_DATE_RANGE } from '@/types/negocio/agenda.types'
+import { addDaysToDateOnly, toDateOnlyString } from '@/utils/formatters'
+
+export interface AgendaDateRangeValidation {
+  valid: boolean
+  message: string | null
+}
 
 export function hasAgendaCustomDateRange(range: AgendaCustomDateRange): boolean {
   return Boolean(range.inicio && range.fim)
@@ -16,16 +22,55 @@ export function formatDateBr(isoDate: string): string {
   return `${day}/${month}/${year}`
 }
 
+export function getAgendaCustomDateRangeMaxDate(reference = new Date()): string {
+  return toDateOnlyString(reference)
+}
+
+export function getAgendaCustomDateRangeMaxFim(inicio: string, reference = new Date()): string {
+  if (!inicio) return getAgendaCustomDateRangeMaxDate(reference)
+  const limiteUmAno = addDaysToDateOnly(inicio, 365)
+  const hoje = getAgendaCustomDateRangeMaxDate(reference)
+  return limiteUmAno < hoje ? limiteUmAno : hoje
+}
+
+export function validateAgendaCustomDateRange(
+  range: AgendaCustomDateRange,
+  reference = new Date(),
+): AgendaDateRangeValidation {
+  if (!range.inicio || !range.fim) {
+    return { valid: false, message: null }
+  }
+
+  const hoje = getAgendaCustomDateRangeMaxDate(reference)
+
+  if (range.fim < range.inicio) {
+    return { valid: false, message: 'A data final não pode ser anterior à data inicial.' }
+  }
+
+  if (range.fim > hoje) {
+    return { valid: false, message: 'A data final não pode ultrapassar a data atual.' }
+  }
+
+  const limiteUmAno = addDaysToDateOnly(range.inicio, 365)
+  if (range.fim > limiteUmAno) {
+    return { valid: false, message: 'O intervalo não pode ultrapassar 1 ano.' }
+  }
+
+  return { valid: true, message: null }
+}
+
 export function normalizeAgendaCustomDateRange(range: AgendaCustomDateRange): AgendaCustomDateRange {
-  if (!range.inicio || !range.fim) return { ...EMPTY_AGENDA_CUSTOM_DATE_RANGE }
-  if (range.inicio <= range.fim) return { inicio: range.inicio, fim: range.fim }
-  return { inicio: range.fim, fim: range.inicio }
+  const validation = validateAgendaCustomDateRange(range)
+  if (!validation.valid) return { ...EMPTY_AGENDA_CUSTOM_DATE_RANGE }
+  return { inicio: range.inicio, fim: range.fim }
 }
 
 export function customDateRangeToIso(range: AgendaCustomDateRange): { inicio: string; fim: string } | null {
   if (!hasAgendaCustomDateRange(range)) return null
-  const normalized = normalizeAgendaCustomDateRange(range)
-  const inicio = new Date(`${normalized.inicio}T00:00:00`)
-  const fim = new Date(`${normalized.fim}T23:59:59`)
+  const validation = validateAgendaCustomDateRange(range)
+  if (!validation.valid) return null
+
+  const inicio = new Date(`${range.inicio}T00:00:00`)
+  const fim = new Date(`${range.fim}T23:59:59`)
   return { inicio: inicio.toISOString(), fim: fim.toISOString() }
 }

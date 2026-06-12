@@ -6,7 +6,11 @@ import {
   type AgendaFiltro,
   type AgendaOrdenacao,
 } from '@/types/negocio/agenda.types'
-import { customDateRangeToIso, hasAgendaCustomDateRange } from '@/utils/agendaDateRange'
+import {
+  customDateRangeToIso,
+  hasAgendaCustomDateRange,
+  validateAgendaCustomDateRange,
+} from '@/utils/agendaDateRange'
 import {
   AGENDA_DEFAULT_ORDENACAO,
   AGENDA_PAGE_SIZE,
@@ -115,6 +119,7 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') 
   }
 
   function applyCustomDateRange(value: AgendaCustomDateRange) {
+    if (hasAgendaCustomDateRange(value) && !validateAgendaCustomDateRange(value).valid) return
     customDateRange.value = value
     if (hasAgendaCustomDateRange(value)) {
       periodFilter.value = ''
@@ -244,6 +249,7 @@ export function useMeusAgendamentosFilters() {
   }
 
   function applyCustomDateRange(value: AgendaCustomDateRange) {
+    if (hasAgendaCustomDateRange(value) && !validateAgendaCustomDateRange(value).valid) return
     customDateRange.value = value
     if (hasAgendaCustomDateRange(value)) {
       periodFilter.value = ''

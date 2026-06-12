@@ -762,6 +762,10 @@
     @apply size-3 cursor-pointer opacity-50;
   }
 
+  .agenda-figma-filter__date-range-error {
+    @apply px-1 font-urbanist text-xs font-normal leading-snug text-red-600;
+  }
+
   .agenda-figma-filter__divider {
     @apply mx-2.5 h-px bg-glow-border-soft;
   }

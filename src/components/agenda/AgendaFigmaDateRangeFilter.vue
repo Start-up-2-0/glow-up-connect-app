@@ -3,7 +3,13 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import AgendaCalendarFilterIcon from '@/components/agenda/AgendaCalendarFilterIcon.vue'
 import type { AgendaCustomDateRange } from '@/types/negocio/agenda.types'
 import { EMPTY_AGENDA_CUSTOM_DATE_RANGE } from '@/types/negocio/agenda.types'
-import { formatAgendaDateRangeLabel, hasAgendaCustomDateRange, normalizeAgendaCustomDateRange } from '@/utils/agendaDateRange'
+import {
+  formatAgendaDateRangeLabel,
+  getAgendaCustomDateRangeMaxDate,
+  getAgendaCustomDateRangeMaxFim,
+  hasAgendaCustomDateRange,
+  validateAgendaCustomDateRange,
+} from '@/utils/agendaDateRange'
 
 const props = withDefaults(
   defineProps<{
@@ -28,6 +34,17 @@ const rootRef = ref<HTMLElement | null>(null)
 const draftInicio = ref('')
 const draftFim = ref('')
 
+const hoje = computed(() => getAgendaCustomDateRangeMaxDate())
+
+const maxFim = computed(() => getAgendaCustomDateRangeMaxFim(draftInicio.value))
+
+const draftRange = computed<AgendaCustomDateRange>(() => ({
+  inicio: draftInicio.value,
+  fim: draftFim.value,
+}))
+
+const validation = computed(() => validateAgendaCustomDateRange(draftRange.value))
+
 const triggerLabel = computed(() => {
   if (!hasAgendaCustomDateRange(props.modelValue)) return props.label
   return formatAgendaDateRangeLabel(props.modelValue)
@@ -35,7 +52,7 @@ const triggerLabel = computed(() => {
 
 const hasAppliedValue = computed(() => hasAgendaCustomDateRange(props.modelValue))
 
-const canApply = computed(() => Boolean(draftInicio.value && draftFim.value))
+const canApply = computed(() => validation.value.valid)
 
 function syncDraftFromModel() {
   draftInicio.value = props.modelValue.inicio
@@ -50,6 +67,19 @@ watch(
   { deep: true },
 )
 
+watch(draftInicio, (inicio) => {
+  if (!inicio || !draftFim.value) return
+  const max = getAgendaCustomDateRangeMaxFim(inicio)
+  if (draftFim.value > max) draftFim.value = max
+  if (draftFim.value < inicio) draftFim.value = inicio
+})
+
+watch(draftFim, (fim) => {
+  if (!fim) return
+  if (fim > hoje.value) draftFim.value = hoje.value
+  if (draftInicio.value && fim < draftInicio.value) draftFim.value = draftInicio.value
+})
+
 function toggle() {
   open.value = !open.value
   if (open.value) syncDraftFromModel()
@@ -57,10 +87,7 @@ function toggle() {
 
 function apply() {
   if (!canApply.value) return
-  const value = normalizeAgendaCustomDateRange({
-    inicio: draftInicio.value,
-    fim: draftFim.value,
-  })
+  const value = { inicio: draftInicio.value, fim: draftFim.value }
   emit('update:modelValue', value)
   emit('apply', value)
   open.value = false
@@ -113,6 +140,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
               v-model="draftInicio"
               type="date"
               class="agenda-figma-filter__date-range-input"
+              :max="draftFim || hoje"
             />
           </div>
         </div>
@@ -127,9 +155,19 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
               v-model="draftFim"
               type="date"
               class="agenda-figma-filter__date-range-input"
+              :min="draftInicio || undefined"
+              :max="maxFim"
             />
           </div>
         </div>
+
+        <p
+          v-if="validation.message"
+          class="agenda-figma-filter__date-range-error"
+          role="alert"
+        >
+          {{ validation.message }}
+        </p>
       </div>
 
       <div class="agenda-figma-filter__divider" aria-hidden="true" />
@@ -146,7 +184,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
         <button
           type="button"
           class="agenda-figma-filter__clear"
-          :disabled="!canApply && !hasAppliedValue"
+          :disabled="!draftInicio && !draftFim && !hasAppliedValue"
           @click="clear"
         >
           Limpar
