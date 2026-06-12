@@ -5,8 +5,6 @@ import type { AgendaCustomDateRange } from '@/types/negocio/agenda.types'
 import { EMPTY_AGENDA_CUSTOM_DATE_RANGE } from '@/types/negocio/agenda.types'
 import {
   formatAgendaDateRangeLabel,
-  getAgendaCustomDateRangeMaxDate,
-  getAgendaCustomDateRangeMaxFim,
   hasAgendaCustomDateRange,
   validateAgendaCustomDateRange,
 } from '@/utils/agendaDateRange'
@@ -33,10 +31,6 @@ const open = ref(false)
 const rootRef = ref<HTMLElement | null>(null)
 const draftInicio = ref('')
 const draftFim = ref('')
-
-const hoje = computed(() => getAgendaCustomDateRangeMaxDate())
-
-const maxFim = computed(() => getAgendaCustomDateRangeMaxFim(draftInicio.value))
 
 const draftRange = computed<AgendaCustomDateRange>(() => ({
   inicio: draftInicio.value,
@@ -66,19 +60,6 @@ watch(
   },
   { deep: true },
 )
-
-watch(draftInicio, (inicio) => {
-  if (!inicio || !draftFim.value) return
-  const max = getAgendaCustomDateRangeMaxFim(inicio)
-  if (draftFim.value > max) draftFim.value = max
-  if (draftFim.value < inicio) draftFim.value = inicio
-})
-
-watch(draftFim, (fim) => {
-  if (!fim) return
-  if (fim > hoje.value) draftFim.value = hoje.value
-  if (draftInicio.value && fim < draftInicio.value) draftFim.value = draftInicio.value
-})
 
 function toggle() {
   open.value = !open.value
@@ -140,7 +121,6 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
               v-model="draftInicio"
               type="date"
               class="agenda-figma-filter__date-range-input"
-              :max="draftFim || hoje"
             />
           </div>
         </div>
@@ -155,8 +135,6 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
               v-model="draftFim"
               type="date"
               class="agenda-figma-filter__date-range-input"
-              :min="draftInicio || undefined"
-              :max="maxFim"
             />
           </div>
         </div>

@@ -2,6 +2,9 @@ import type { AgendaCustomDateRange } from '@/types/negocio/agenda.types'
 import { EMPTY_AGENDA_CUSTOM_DATE_RANGE } from '@/types/negocio/agenda.types'
 import { addDaysToDateOnly, toDateOnlyString } from '@/utils/formatters'
 
+/** Máximo de dias entre data inicial e final (intervalo de até 1 ano). */
+export const AGENDA_CUSTOM_DATE_RANGE_MAX_DAYS = 364
+
 export interface AgendaDateRangeValidation {
   valid: boolean
   message: string | null
@@ -26,13 +29,6 @@ export function getAgendaCustomDateRangeMaxDate(reference = new Date()): string 
   return toDateOnlyString(reference)
 }
 
-export function getAgendaCustomDateRangeMaxFim(inicio: string, reference = new Date()): string {
-  if (!inicio) return getAgendaCustomDateRangeMaxDate(reference)
-  const limiteUmAno = addDaysToDateOnly(inicio, 365)
-  const hoje = getAgendaCustomDateRangeMaxDate(reference)
-  return limiteUmAno < hoje ? limiteUmAno : hoje
-}
-
 export function validateAgendaCustomDateRange(
   range: AgendaCustomDateRange,
   reference = new Date(),
@@ -51,7 +47,7 @@ export function validateAgendaCustomDateRange(
     return { valid: false, message: 'A data final não pode ultrapassar a data atual.' }
   }
 
-  const limiteUmAno = addDaysToDateOnly(range.inicio, 365)
+  const limiteUmAno = addDaysToDateOnly(range.inicio, AGENDA_CUSTOM_DATE_RANGE_MAX_DAYS)
   if (range.fim > limiteUmAno) {
     return { valid: false, message: 'O intervalo não pode ultrapassar 1 ano.' }
   }
