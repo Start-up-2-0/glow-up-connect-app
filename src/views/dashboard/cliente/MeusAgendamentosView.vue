@@ -4,7 +4,9 @@ import { storeToRefs } from 'pinia'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import AgendaPageHeader from '@/components/agenda/AgendaPageHeader.vue'
-import AgendaFilterDropdown from '@/components/agenda/AgendaFilterDropdown.vue'
+import AgendaFigmaFilter from '@/components/agenda/AgendaFigmaFilter.vue'
+import AgendaStatusFilterIcon from '@/components/agenda/AgendaStatusFilterIcon.vue'
+import AgendaCalendarFilterIcon from '@/components/agenda/AgendaCalendarFilterIcon.vue'
 import AgendamentoCard from '@/components/agenda/AgendamentoCard.vue'
 import { useAgendamentosStore } from '@/stores/agendamentos.store'
 import { useMeusAgendamentosFilters } from '@/composables/useAgendaPageFilters'
@@ -16,9 +18,14 @@ const { itens, total, loading } = storeToRefs(store)
 const {
   statusFilter,
   periodFilter,
+  dateFilter,
   statusOptions,
   periodOptions,
   apiFiltro,
+  applyPeriodFilter,
+  applyDateFilter,
+  clearPeriodFilter,
+  clearDateFilter,
 } = useMeusAgendamentosFilters()
 
 async function load(reset = true) {
@@ -34,7 +41,7 @@ async function loadMore() {
 
 onMounted(() => load(true))
 
-watch([statusFilter, periodFilter], () => {
+watch([statusFilter, periodFilter, dateFilter], () => {
   void load(true)
 })
 </script>
@@ -46,31 +53,41 @@ watch([statusFilter, periodFilter], () => {
       subtitle="Acompanhe, cancele ou remarque seus horários."
     >
       <template #filters>
-        <AgendaFilterDropdown
+        <AgendaFigmaFilter
           v-model="statusFilter"
-          button-label="Filtrar por Status"
+          label="Filtrar por Status"
           :options="statusOptions"
         >
           <template #icon>
-            <svg class="size-5 shrink-0" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.2" />
-              <path d="M10 5.5V10l2.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-            </svg>
+            <AgendaStatusFilterIcon />
           </template>
-        </AgendaFilterDropdown>
+        </AgendaFigmaFilter>
 
-        <AgendaFilterDropdown
-          v-model="periodFilter"
-          button-label="Filtrar por Período"
+        <AgendaFigmaFilter
+          :model-value="periodFilter"
+          label="Filtrar por Período"
           :options="periodOptions"
+          default-value="proximos"
+          clear-value="proximos"
+          @update:model-value="applyPeriodFilter"
+          @clear="clearPeriodFilter"
         >
           <template #icon>
-            <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2" />
-              <path d="M5 1.5V4M11 1.5V4M1.5 6.5H14.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-            </svg>
+            <AgendaCalendarFilterIcon />
           </template>
-        </AgendaFilterDropdown>
+        </AgendaFigmaFilter>
+
+        <AgendaFigmaFilter
+          :model-value="dateFilter"
+          label="Filtrar por Data"
+          mode="date"
+          @update:model-value="applyDateFilter"
+          @clear="clearDateFilter"
+        >
+          <template #icon>
+            <AgendaCalendarFilterIcon />
+          </template>
+        </AgendaFigmaFilter>
       </template>
     </AgendaPageHeader>
 

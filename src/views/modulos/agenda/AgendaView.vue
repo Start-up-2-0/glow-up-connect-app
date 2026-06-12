@@ -4,7 +4,9 @@ import { useRoute } from 'vue-router'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import AgendaPageHeader from '@/components/agenda/AgendaPageHeader.vue'
-import AgendaFilterDropdown from '@/components/agenda/AgendaFilterDropdown.vue'
+import AgendaFigmaFilter from '@/components/agenda/AgendaFigmaFilter.vue'
+import AgendaStatusFilterIcon from '@/components/agenda/AgendaStatusFilterIcon.vue'
+import AgendaCalendarFilterIcon from '@/components/agenda/AgendaCalendarFilterIcon.vue'
 import AgendamentoCard from '@/components/agenda/AgendamentoCard.vue'
 import CancelarAgendamentoModal from '@/components/cliente/CancelarAgendamentoModal.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
@@ -35,10 +37,15 @@ const { resolveError } = useApiError()
 const {
   statusFilter,
   periodFilter,
+  dateFilter,
   statusOptions,
   periodOptions,
   dateRange,
   matchesStatus,
+  applyPeriodFilter,
+  applyDateFilter,
+  clearPeriodFilter,
+  clearDateFilter,
 } = useAgendaPageFilters('hoje')
 
 const periodoFromQuery = route.query.periodo
@@ -61,12 +68,16 @@ const podeIniciarAtendimento = computed(() => possuiPermissaoIniciarAtendimento(
 const podeFinalizarAtendimento = computed(() => possuiPermissaoFinalizarAtendimento(possuiPermissao))
 
 const pageTitle = computed(() => {
+  if (dateFilter.value) {
+    return visaoGeral.value ? 'Agenda do dia' : 'Meus agendamentos do dia'
+  }
   if (periodFilter.value === 'semana') return visaoGeral.value ? 'Agenda da semana' : 'Meus agendamentos da semana'
   if (periodFilter.value === 'mes') return visaoGeral.value ? 'Agenda do mês' : 'Meus agendamentos do mês'
   return visaoGeral.value ? 'Agenda de hoje' : 'Meus agendamentos de hoje'
 })
 
 const pageSubtitle = computed(() => {
+  if (dateFilter.value) return 'Agendamentos da data selecionada.'
   if (periodFilter.value === 'semana') return 'Visão semanal dos agendamentos.'
   if (periodFilter.value === 'mes') return 'Visão mensal dos agendamentos.'
   return visaoGeral.value
@@ -74,8 +85,13 @@ const pageSubtitle = computed(() => {
     : 'Horários marcados com você nesta loja.'
 })
 
-const showDateInTitle = computed(() => periodFilter.value === 'hoje')
-const dateLabel = computed(() => (showDateInTitle.value ? formatDateShortNumeric() : undefined))
+const showDateInTitle = computed(() => Boolean(dateFilter.value) || periodFilter.value === 'hoje')
+const dateLabel = computed(() => {
+  if (dateFilter.value) {
+    return formatDateShortNumeric(new Date(`${dateFilter.value}T12:00:00`))
+  }
+  return showDateInTitle.value ? formatDateShortNumeric() : undefined
+})
 
 function itemComAcaoAtendimento(itens: AgendaGeral['itens'], agendamentoStatus: string) {
   return itens.find(
@@ -233,7 +249,7 @@ watch(
   { immediate: true },
 )
 
-watch([statusFilter, periodFilter], () => {
+watch([statusFilter, periodFilter, dateFilter], () => {
   if (ready.value) void load()
 })
 </script>
@@ -246,31 +262,41 @@ watch([statusFilter, periodFilter], () => {
       :date-label="dateLabel"
     >
       <template #filters>
-        <AgendaFilterDropdown
+        <AgendaFigmaFilter
           v-model="statusFilter"
-          button-label="Filtrar por Status"
+          label="Filtrar por Status"
           :options="statusOptions"
         >
           <template #icon>
-            <svg class="size-5 shrink-0" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.2" />
-              <path d="M10 5.5V10l2.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-            </svg>
+            <AgendaStatusFilterIcon />
           </template>
-        </AgendaFilterDropdown>
+        </AgendaFigmaFilter>
 
-        <AgendaFilterDropdown
-          v-model="periodFilter"
-          button-label="Filtrar por Período"
+        <AgendaFigmaFilter
+          :model-value="periodFilter"
+          label="Filtrar por Período"
           :options="periodOptions"
+          default-value="hoje"
+          clear-value="hoje"
+          @update:model-value="applyPeriodFilter"
+          @clear="clearPeriodFilter"
         >
           <template #icon>
-            <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2" />
-              <path d="M5 1.5V4M11 1.5V4M1.5 6.5H14.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-            </svg>
+            <AgendaCalendarFilterIcon />
           </template>
-        </AgendaFilterDropdown>
+        </AgendaFigmaFilter>
+
+        <AgendaFigmaFilter
+          :model-value="dateFilter"
+          label="Filtrar por Data"
+          mode="date"
+          @update:model-value="applyDateFilter"
+          @clear="clearDateFilter"
+        >
+          <template #icon>
+            <AgendaCalendarFilterIcon />
+          </template>
+        </AgendaFigmaFilter>
       </template>
     </AgendaPageHeader>
 

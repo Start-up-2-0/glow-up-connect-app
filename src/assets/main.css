@@ -689,16 +689,68 @@
     @apply bg-glow-canvas text-glow-text-subtle;
   }
 
-  .agenda-filter-menu {
-    @apply absolute right-0 z-20 mt-2 min-w-[200px] overflow-hidden rounded-xl border border-glow-border-soft bg-glow-surface py-1 shadow-lg;
+  .agenda-figma-filter {
+    @apply relative inline-block w-[171px];
   }
 
-  .agenda-filter-menu__item {
-    @apply block w-full px-4 py-2.5 text-left font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface;
+  .agenda-figma-filter__trigger {
+    @apply flex h-[38px] w-full items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 font-urbanist text-sm font-semibold text-glow-text-subtle transition hover:bg-glow-hover-surface;
   }
 
-  .agenda-filter-menu__item--active {
-    @apply bg-glow-gold-soft font-semibold;
+  .agenda-figma-filter--open .agenda-figma-filter__trigger {
+    @apply rounded-b-none border-b-0;
+  }
+
+  .agenda-figma-filter__trigger-label {
+    @apply whitespace-nowrap;
+  }
+
+  .agenda-figma-filter__icon--status {
+    @apply size-5 shrink-0 text-glow-text-subtle;
+  }
+
+  .agenda-figma-filter__icon--calendar {
+    @apply size-4 shrink-0 text-glow-text-subtle;
+  }
+
+  .agenda-figma-filter__panel {
+    @apply absolute left-0 right-0 top-full z-30 overflow-hidden rounded-b-xl border-[0.5px] border-t-0 border-glow-border-soft bg-glow-surface shadow-[0_8px_24px_rgba(0,0,0,0.06)];
+  }
+
+  .agenda-figma-filter__options {
+    @apply flex flex-col;
+  }
+
+  .agenda-figma-filter__option {
+    @apply w-full px-2.5 py-2.5 text-center font-urbanist text-sm font-normal text-glow-text-subtle transition hover:bg-glow-hover-surface;
+  }
+
+  .agenda-figma-filter__option--selected {
+    @apply bg-glow-hover-surface;
+  }
+
+  .agenda-figma-filter__date-field {
+    @apply px-2.5 py-2.5;
+  }
+
+  .agenda-figma-filter__date-input {
+    @apply w-full rounded-xl border-[0.5px] border-glow-border-soft bg-glow-canvas px-3 py-2 text-center font-urbanist text-sm font-normal text-glow-text-subtle outline-none transition focus:border-glow-gold-dark;
+  }
+
+  .agenda-figma-filter__divider {
+    @apply mx-2.5 h-px bg-glow-border-soft;
+  }
+
+  .agenda-figma-filter__actions {
+    @apply flex flex-col gap-2 p-2.5;
+  }
+
+  .agenda-figma-filter__apply {
+    @apply flex w-full items-center justify-center rounded-xl bg-[#ffbf00] px-2.5 py-2.5 font-urbanist text-sm font-normal text-white transition hover:brightness-95;
+  }
+
+  .agenda-figma-filter__clear {
+    @apply flex w-full items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-transparent px-2.5 py-2.5 font-urbanist text-sm font-normal text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-40;
   }
 
   /* Detalhe do agendamento — Figma nodes 409:885 / 470:1460 */

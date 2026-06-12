@@ -22,6 +22,7 @@ export type MeusAgendamentosPeriodFilter = (typeof MEUS_AGENDAMENTOS_PERIOD_OPTI
 export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'hoje') {
   const statusFilter = ref('')
   const periodFilter = ref<string>(defaultPeriod)
+  const dateFilter = ref('')
 
   const statusOptions = AGENDA_STATUS_FILTER_OPTIONS.map((option) => ({
     value: option.value,
@@ -34,6 +35,16 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'hoje')
   }))
 
   const dateRange = computed(() => {
+    if (dateFilter.value) {
+      const inicio = new Date(`${dateFilter.value}T00:00:00`)
+      const fim = new Date(`${dateFilter.value}T23:59:59`)
+      return {
+        inicio: inicio.toISOString(),
+        fim: fim.toISOString(),
+        label: dateFilter.value,
+      }
+    }
+
     const now = new Date()
     const hoje = toDateOnlyString(now)
 
@@ -67,19 +78,52 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'hoje')
     return status === statusFilter.value
   }
 
+  function applyPeriodFilter(value: string) {
+    periodFilter.value = value || defaultPeriod
+    dateFilter.value = ''
+  }
+
+  function applyDateFilter(value: string) {
+    dateFilter.value = value
+    if (value) {
+      periodFilter.value = ''
+    } else if (!periodFilter.value) {
+      periodFilter.value = defaultPeriod
+    }
+  }
+
+  function clearPeriodFilter() {
+    periodFilter.value = defaultPeriod
+    dateFilter.value = ''
+  }
+
+  function clearDateFilter() {
+    dateFilter.value = ''
+    if (!periodFilter.value) {
+      periodFilter.value = defaultPeriod
+    }
+  }
+
   return {
     statusFilter,
     periodFilter,
+    dateFilter,
     statusOptions,
     periodOptions,
     dateRange,
     matchesStatus,
+    applyPeriodFilter,
+    applyDateFilter,
+    clearPeriodFilter,
+    clearDateFilter,
   }
 }
 
 export function useMeusAgendamentosFilters() {
   const statusFilter = ref('')
-  const periodFilter = ref<MeusAgendamentosPeriodFilter>('proximos')
+  const periodFilter = ref<string>('proximos')
+  const dateFilter = ref('')
+  const defaultPeriod = 'proximos'
 
   const statusOptions = AGENDA_STATUS_FILTER_OPTIONS.map((option) => ({
     value: option.value,
@@ -101,6 +145,13 @@ export function useMeusAgendamentosFilters() {
 
     if (statusFilter.value) {
       filtro.status = statusFilter.value
+    }
+
+    if (dateFilter.value) {
+      filtro.dataInicio = dateFilter.value
+      filtro.dataFim = dateFilter.value
+      filtro.ordenacao = 'proximos'
+      return filtro
     }
 
     if (periodFilter.value === 'proximos' || periodFilter.value === 'recentes') {
@@ -126,11 +177,42 @@ export function useMeusAgendamentosFilters() {
     return filtro
   })
 
+  function applyPeriodFilter(value: string) {
+    periodFilter.value = value || defaultPeriod
+    dateFilter.value = ''
+  }
+
+  function applyDateFilter(value: string) {
+    dateFilter.value = value
+    if (value) {
+      periodFilter.value = ''
+    } else if (!periodFilter.value) {
+      periodFilter.value = defaultPeriod
+    }
+  }
+
+  function clearPeriodFilter() {
+    periodFilter.value = defaultPeriod
+    dateFilter.value = ''
+  }
+
+  function clearDateFilter() {
+    dateFilter.value = ''
+    if (!periodFilter.value) {
+      periodFilter.value = defaultPeriod
+    }
+  }
+
   return {
     statusFilter,
     periodFilter,
+    dateFilter,
     statusOptions,
     periodOptions,
     apiFiltro,
+    applyPeriodFilter,
+    applyDateFilter,
+    clearPeriodFilter,
+    clearDateFilter,
   }
 }
