@@ -7,6 +7,7 @@ import AgendaPageHeader from '@/components/agenda/AgendaPageHeader.vue'
 import AgendaFigmaFilter from '@/components/agenda/AgendaFigmaFilter.vue'
 import AgendaStatusFilterIcon from '@/components/agenda/AgendaStatusFilterIcon.vue'
 import AgendaCalendarFilterIcon from '@/components/agenda/AgendaCalendarFilterIcon.vue'
+import AgendaFigmaDateRangeFilter from '@/components/agenda/AgendaFigmaDateRangeFilter.vue'
 import AgendaSortFilterIcon from '@/components/agenda/AgendaSortFilterIcon.vue'
 import AgendaPagination from '@/components/agenda/AgendaPagination.vue'
 import AgendamentoCard from '@/components/agenda/AgendamentoCard.vue'
@@ -20,6 +21,7 @@ import { useApiError } from '@/composables/useApiError'
 import { agendaNegocioService } from '@/services/agendaNegocioService'
 import type { AgendaGeral, AgendaProfissional } from '@/types/negocio/agenda.types'
 import { agendaDetalhePath } from '@/constants/routes'
+import { formatAgendaDateRangeLabel, hasAgendaCustomDateRange } from '@/utils/agendaDateRange'
 import { formatDateShortNumeric } from '@/utils/formatters'
 import {
   podeFinalizarItemAtendimento,
@@ -40,7 +42,7 @@ const { resolveError } = useApiError()
 const {
   statusFilter,
   periodFilter,
-  dateFilter,
+  customDateRange,
   sortFilter,
   pagina,
   total,
@@ -51,9 +53,9 @@ const {
   apiFiltro,
   resetPagina,
   applyPeriodFilter,
-  applyDateFilter,
+  applyCustomDateRange,
   clearPeriodFilter,
-  clearDateFilter,
+  clearCustomDateRange,
   applySortFilter,
   clearSortFilter,
 } = useAgendaPageFilters('mes')
@@ -78,8 +80,8 @@ const podeIniciarAtendimento = computed(() => possuiPermissaoIniciarAtendimento(
 const podeFinalizarAtendimento = computed(() => possuiPermissaoFinalizarAtendimento(possuiPermissao))
 
 const pageTitle = computed(() => {
-  if (dateFilter.value) {
-    return visaoGeral.value ? 'Agenda do dia' : 'Meus agendamentos do dia'
+  if (hasAgendaCustomDateRange(customDateRange.value)) {
+    return visaoGeral.value ? 'Agenda personalizada' : 'Meus agendamentos personalizados'
   }
   if (periodFilter.value === 'semana') return visaoGeral.value ? 'Agenda da semana' : 'Meus agendamentos da semana'
   if (periodFilter.value === 'hoje') return visaoGeral.value ? 'Agenda de hoje' : 'Meus agendamentos de hoje'
@@ -87,7 +89,9 @@ const pageTitle = computed(() => {
 })
 
 const pageSubtitle = computed(() => {
-  if (dateFilter.value) return 'Agendamentos da data selecionada.'
+  if (hasAgendaCustomDateRange(customDateRange.value)) {
+    return 'Agendamentos do intervalo de datas selecionado.'
+  }
   if (periodFilter.value === 'semana') return 'Visão semanal dos agendamentos.'
   if (periodFilter.value === 'hoje') return 'Agendamentos do dia atual.'
   if (periodFilter.value === 'mes' || !periodFilter.value) {
@@ -99,11 +103,11 @@ const pageSubtitle = computed(() => {
 })
 
 const showDateInTitle = computed(
-  () => Boolean(dateFilter.value) || periodFilter.value === 'hoje',
+  () => hasAgendaCustomDateRange(customDateRange.value) || periodFilter.value === 'hoje',
 )
 const dateLabel = computed(() => {
-  if (dateFilter.value) {
-    return formatDateShortNumeric(new Date(`${dateFilter.value}T12:00:00`))
+  if (hasAgendaCustomDateRange(customDateRange.value)) {
+    return formatAgendaDateRangeLabel(customDateRange.value)
   }
   return showDateInTitle.value ? formatDateShortNumeric() : undefined
 })
@@ -271,7 +275,7 @@ watch(
   { immediate: true },
 )
 
-watch([statusFilter, periodFilter, dateFilter, sortFilter], () => {
+watch([statusFilter, periodFilter, customDateRange, sortFilter], () => {
   resetPagina()
   if (ready.value) void load()
 })
@@ -309,17 +313,11 @@ watch([statusFilter, periodFilter, dateFilter, sortFilter], () => {
           </template>
         </AgendaFigmaFilter>
 
-        <AgendaFigmaFilter
-          :model-value="dateFilter"
-          label="Filtrar por Data"
-          mode="date"
-          @update:model-value="applyDateFilter"
-          @clear="clearDateFilter"
-        >
-          <template #icon>
-            <AgendaCalendarFilterIcon />
-          </template>
-        </AgendaFigmaFilter>
+        <AgendaFigmaDateRangeFilter
+          v-model="customDateRange"
+          @apply="applyCustomDateRange"
+          @clear="clearCustomDateRange"
+        />
 
         <AgendaFigmaFilter
           :model-value="sortFilter"

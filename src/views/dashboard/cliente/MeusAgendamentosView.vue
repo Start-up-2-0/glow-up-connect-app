@@ -7,6 +7,7 @@ import AgendaPageHeader from '@/components/agenda/AgendaPageHeader.vue'
 import AgendaFigmaFilter from '@/components/agenda/AgendaFigmaFilter.vue'
 import AgendaStatusFilterIcon from '@/components/agenda/AgendaStatusFilterIcon.vue'
 import AgendaCalendarFilterIcon from '@/components/agenda/AgendaCalendarFilterIcon.vue'
+import AgendaFigmaDateRangeFilter from '@/components/agenda/AgendaFigmaDateRangeFilter.vue'
 import AgendaSortFilterIcon from '@/components/agenda/AgendaSortFilterIcon.vue'
 import AgendaPagination from '@/components/agenda/AgendaPagination.vue'
 import AgendamentoCard from '@/components/agenda/AgendamentoCard.vue'
@@ -21,7 +22,7 @@ const { itens, total, loading } = storeToRefs(store)
 const {
   statusFilter,
   periodFilter,
-  dateFilter,
+  customDateRange,
   sortFilter,
   pagina,
   statusOptions,
@@ -30,9 +31,9 @@ const {
   apiFiltro,
   resetPagina,
   applyPeriodFilter,
-  applyDateFilter,
+  applyCustomDateRange,
   clearPeriodFilter,
-  clearDateFilter,
+  clearCustomDateRange,
   applySortFilter,
   clearSortFilter,
 } = useMeusAgendamentosFilters()
@@ -54,7 +55,7 @@ onMounted(() => {
   void load()
 })
 
-watch([statusFilter, periodFilter, dateFilter, sortFilter], () => {
+watch([statusFilter, periodFilter, customDateRange, sortFilter], () => {
   resetPagina()
   void load()
 })
@@ -91,17 +92,11 @@ watch([statusFilter, periodFilter, dateFilter, sortFilter], () => {
           </template>
         </AgendaFigmaFilter>
 
-        <AgendaFigmaFilter
-          :model-value="dateFilter"
-          label="Filtrar por Data"
-          mode="date"
-          @update:model-value="applyDateFilter"
-          @clear="clearDateFilter"
-        >
-          <template #icon>
-            <AgendaCalendarFilterIcon />
-          </template>
-        </AgendaFigmaFilter>
+        <AgendaFigmaDateRangeFilter
+          v-model="customDateRange"
+          @apply="applyCustomDateRange"
+          @clear="clearCustomDateRange"
+        />
 
         <AgendaFigmaFilter
           :model-value="sortFilter"

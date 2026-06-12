@@ -702,7 +702,7 @@
   }
 
   .agenda-figma-filter__trigger-label {
-    @apply whitespace-nowrap;
+    @apply max-w-[120px] truncate whitespace-nowrap;
   }
 
   .agenda-figma-filter__icon--status {
@@ -735,6 +735,31 @@
 
   .agenda-figma-filter__date-input {
     @apply w-full rounded-xl border-[0.5px] border-glow-border-soft bg-glow-canvas px-3 py-2 text-center font-urbanist text-sm font-normal text-glow-text-subtle outline-none transition focus:border-glow-gold-dark;
+  }
+
+  .agenda-figma-filter__date-range {
+    @apply space-y-3 rounded-t-xl bg-glow-surface px-2.5 pb-2.5 pt-2.5;
+  }
+
+  .agenda-figma-filter__date-range-group {
+    @apply space-y-1.5;
+  }
+
+  .agenda-figma-filter__date-range-label {
+    @apply block px-1 font-urbanist text-xs font-normal text-glow-text;
+  }
+
+  .agenda-figma-filter__date-range-input-wrap {
+    @apply relative h-[30px] rounded-none bg-glow-surface;
+  }
+
+  .agenda-figma-filter__date-range-input {
+    @apply h-[30px] w-full appearance-none rounded-none border-0 bg-glow-surface px-2 font-urbanist text-sm font-normal text-glow-text-subtle outline-none;
+    color-scheme: light;
+  }
+
+  .agenda-figma-filter__date-range-input::-webkit-calendar-picker-indicator {
+    @apply size-3 cursor-pointer opacity-50;
   }
 
   .agenda-figma-filter__divider {

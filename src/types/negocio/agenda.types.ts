@@ -45,6 +45,13 @@ export type AgendaOrdenacao =
   | 'criacao_desc'
   | 'criacao_asc'
 
+export interface AgendaCustomDateRange {
+  inicio: string
+  fim: string
+}
+
+export const EMPTY_AGENDA_CUSTOM_DATE_RANGE: AgendaCustomDateRange = { inicio: '', fim: '' }
+
 export interface AgendaFiltro {
   profissionalId?: number
   clienteId?: number

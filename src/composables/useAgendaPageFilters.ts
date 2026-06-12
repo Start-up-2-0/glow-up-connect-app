@@ -1,6 +1,12 @@
 import { computed, ref } from 'vue'
 import type { AgendamentoFiltro } from '@/types/agendamento.types'
-import type { AgendaFiltro, AgendaOrdenacao } from '@/types/negocio/agenda.types'
+import {
+  EMPTY_AGENDA_CUSTOM_DATE_RANGE,
+  type AgendaCustomDateRange,
+  type AgendaFiltro,
+  type AgendaOrdenacao,
+} from '@/types/negocio/agenda.types'
+import { customDateRangeToIso, hasAgendaCustomDateRange } from '@/utils/agendaDateRange'
 import {
   AGENDA_DEFAULT_ORDENACAO,
   AGENDA_PAGE_SIZE,
@@ -28,7 +34,7 @@ export type MeusAgendamentosPeriodFilter = (typeof MEUS_AGENDAMENTOS_PERIOD_OPTI
 export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') {
   const statusFilter = ref('')
   const periodFilter = ref<string>(defaultPeriod)
-  const dateFilter = ref('')
+  const customDateRange = ref<AgendaCustomDateRange>({ ...EMPTY_AGENDA_CUSTOM_DATE_RANGE })
   const sortFilter = ref<AgendaOrdenacao>(AGENDA_DEFAULT_ORDENACAO)
   const pagina = ref(1)
   const total = ref(0)
@@ -50,13 +56,12 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') 
   }))
 
   const dateRange = computed(() => {
-    if (dateFilter.value) {
-      const inicio = new Date(`${dateFilter.value}T00:00:00`)
-      const fim = new Date(`${dateFilter.value}T23:59:59`)
+    const customRange = customDateRangeToIso(customDateRange.value)
+    if (customRange) {
       return {
-        inicio: inicio.toISOString(),
-        fim: fim.toISOString(),
-        label: dateFilter.value,
+        inicio: customRange.inicio,
+        fim: customRange.fim,
+        label: `${customDateRange.value.inicio}_${customDateRange.value.fim}`,
       }
     }
 
@@ -105,13 +110,13 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') 
 
   function applyPeriodFilter(value: string) {
     periodFilter.value = value || defaultPeriod
-    dateFilter.value = ''
+    customDateRange.value = { ...EMPTY_AGENDA_CUSTOM_DATE_RANGE }
     resetPagina()
   }
 
-  function applyDateFilter(value: string) {
-    dateFilter.value = value
-    if (value) {
+  function applyCustomDateRange(value: AgendaCustomDateRange) {
+    customDateRange.value = value
+    if (hasAgendaCustomDateRange(value)) {
       periodFilter.value = ''
     } else if (!periodFilter.value) {
       periodFilter.value = defaultPeriod
@@ -121,12 +126,12 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') 
 
   function clearPeriodFilter() {
     periodFilter.value = defaultPeriod
-    dateFilter.value = ''
+    customDateRange.value = { ...EMPTY_AGENDA_CUSTOM_DATE_RANGE }
     resetPagina()
   }
 
-  function clearDateFilter() {
-    dateFilter.value = ''
+  function clearCustomDateRange() {
+    customDateRange.value = { ...EMPTY_AGENDA_CUSTOM_DATE_RANGE }
     if (!periodFilter.value) {
       periodFilter.value = defaultPeriod
     }
@@ -146,7 +151,7 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') 
   return {
     statusFilter,
     periodFilter,
-    dateFilter,
+    customDateRange,
     sortFilter,
     pagina,
     total,
@@ -159,9 +164,9 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') 
     apiFiltro,
     resetPagina,
     applyPeriodFilter,
-    applyDateFilter,
+    applyCustomDateRange,
     clearPeriodFilter,
-    clearDateFilter,
+    clearCustomDateRange,
     applySortFilter,
     clearSortFilter,
   }
@@ -170,7 +175,7 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') 
 export function useMeusAgendamentosFilters() {
   const statusFilter = ref('')
   const periodFilter = ref<string>('mes')
-  const dateFilter = ref('')
+  const customDateRange = ref<AgendaCustomDateRange>({ ...EMPTY_AGENDA_CUSTOM_DATE_RANGE })
   const sortFilter = ref<AgendaOrdenacao>(AGENDA_DEFAULT_ORDENACAO)
   const pagina = ref(1)
   const defaultPeriod = 'mes'
@@ -201,9 +206,9 @@ export function useMeusAgendamentosFilters() {
       filtro.status = statusFilter.value
     }
 
-    if (dateFilter.value) {
-      filtro.dataInicio = dateFilter.value
-      filtro.dataFim = dateFilter.value
+    if (hasAgendaCustomDateRange(customDateRange.value)) {
+      filtro.dataInicio = customDateRange.value.inicio
+      filtro.dataFim = customDateRange.value.fim
       return filtro
     }
 
@@ -234,13 +239,13 @@ export function useMeusAgendamentosFilters() {
 
   function applyPeriodFilter(value: string) {
     periodFilter.value = value || defaultPeriod
-    dateFilter.value = ''
+    customDateRange.value = { ...EMPTY_AGENDA_CUSTOM_DATE_RANGE }
     resetPagina()
   }
 
-  function applyDateFilter(value: string) {
-    dateFilter.value = value
-    if (value) {
+  function applyCustomDateRange(value: AgendaCustomDateRange) {
+    customDateRange.value = value
+    if (hasAgendaCustomDateRange(value)) {
       periodFilter.value = ''
     } else if (!periodFilter.value) {
       periodFilter.value = defaultPeriod
@@ -250,12 +255,12 @@ export function useMeusAgendamentosFilters() {
 
   function clearPeriodFilter() {
     periodFilter.value = defaultPeriod
-    dateFilter.value = ''
+    customDateRange.value = { ...EMPTY_AGENDA_CUSTOM_DATE_RANGE }
     resetPagina()
   }
 
-  function clearDateFilter() {
-    dateFilter.value = ''
+  function clearCustomDateRange() {
+    customDateRange.value = { ...EMPTY_AGENDA_CUSTOM_DATE_RANGE }
     if (!periodFilter.value) {
       periodFilter.value = defaultPeriod
     }
@@ -275,7 +280,7 @@ export function useMeusAgendamentosFilters() {
   return {
     statusFilter,
     periodFilter,
-    dateFilter,
+    customDateRange,
     sortFilter,
     pagina,
     statusOptions,
@@ -284,9 +289,9 @@ export function useMeusAgendamentosFilters() {
     apiFiltro,
     resetPagina,
     applyPeriodFilter,
-    applyDateFilter,
+    applyCustomDateRange,
     clearPeriodFilter,
-    clearDateFilter,
+    clearCustomDateRange,
     applySortFilter,
     clearSortFilter,
   }
