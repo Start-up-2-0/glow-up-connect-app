@@ -697,6 +697,10 @@
     @apply flex h-[38px] w-full items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 font-urbanist text-sm font-semibold text-glow-text-subtle transition hover:bg-glow-hover-surface;
   }
 
+  .agenda-figma-filter--active .agenda-figma-filter__trigger {
+    @apply border-glow-gold-dark bg-glow-gold-soft text-glow-text hover:bg-glow-gold-soft;
+  }
+
   .agenda-figma-filter--open .agenda-figma-filter__trigger {
     @apply rounded-b-none border-b-0;
   }
@@ -711,6 +715,11 @@
 
   .agenda-figma-filter__icon--calendar {
     @apply size-4 shrink-0 text-glow-text-subtle;
+  }
+
+  .agenda-figma-filter--active .agenda-figma-filter__icon--status,
+  .agenda-figma-filter--active .agenda-figma-filter__icon--calendar {
+    @apply text-glow-gold;
   }
 
   .agenda-figma-filter__panel {
