@@ -61,7 +61,7 @@ function iniciarHabilitado(item: AgendamentoDetailServiceItem): boolean {
 
 function tituloIniciar(item: AgendamentoDetailServiceItem): string | undefined {
   if (iniciarHabilitado(item)) return undefined
-  return motivoInicioIndisponivel(item.inicio, item.fim) ?? undefined
+  return motivoInicioIndisponivel(item.inicio) ?? undefined
 }
 </script>
 

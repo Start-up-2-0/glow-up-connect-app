@@ -24,27 +24,14 @@ export function possuiPermissaoFinalizarAtendimento(
   return possuiPermissao('AtendimentoFinalizar') || possuiPermissao('AgendaVisualizarGeral')
 }
 
-export function resolverFimAtendimento(inicio: string, fim?: string | null): string {
-  if (fim) {
-    const fimMs = new Date(fim).getTime()
-    if (!Number.isNaN(fimMs)) return fim
-  }
+/**
+ * Libera início a partir do horário agendado, sem limite máximo (atrasos operacionais).
+ * Compara instantes UTC quando o backend envia ISO com offset/Z.
+ */
+export function horarioPermiteIniciarAtendimento(inicio: string, agora: Date = new Date()): boolean {
   const inicioMs = new Date(inicio).getTime()
-  if (Number.isNaN(inicioMs)) return inicio
-  return new Date(inicioMs + 2 * 60 * 60 * 1000).toISOString()
-}
-
-export function horarioPermiteIniciarAtendimento(
-  inicio: string,
-  fim?: string | null,
-  agora: Date = new Date(),
-): boolean {
-  const fimResolvido = resolverFimAtendimento(inicio, fim)
-  const inicioMs = new Date(inicio).getTime()
-  const fimMs = new Date(fimResolvido).getTime()
-  const agoraMs = agora.getTime()
-  if (Number.isNaN(inicioMs) || Number.isNaN(fimMs)) return false
-  return agoraMs >= inicioMs && agoraMs <= fimMs
+  if (Number.isNaN(inicioMs)) return false
+  return agora.getTime() >= inicioMs
 }
 
 export function statusPermiteIniciarItemAtendimento(
@@ -60,20 +47,16 @@ export function podeIniciarItemAtendimento(
   itemStatus: string,
   agendamentoStatus: string,
   inicio: string,
-  fim?: string | null,
+  _fim?: string | null,
 ): boolean {
   if (!statusPermiteIniciarItemAtendimento(itemStatus, agendamentoStatus)) return false
-  return horarioPermiteIniciarAtendimento(inicio, fim)
+  return horarioPermiteIniciarAtendimento(inicio)
 }
 
-export function motivoInicioIndisponivel(inicio: string, fim?: string | null): string | null {
+export function motivoInicioIndisponivel(inicio: string): string | null {
   const inicioMs = new Date(inicio).getTime()
-  const fimResolvido = resolverFimAtendimento(inicio, fim)
-  const fimMs = new Date(fimResolvido).getTime()
-  const agoraMs = Date.now()
-  if (Number.isNaN(inicioMs) || Number.isNaN(fimMs)) return 'Horário do atendimento inválido.'
-  if (agoraMs < inicioMs) return 'O horário do atendimento ainda não chegou.'
-  if (agoraMs > fimMs) return 'O horário do atendimento já encerrou.'
+  if (Number.isNaN(inicioMs)) return 'Horário do atendimento inválido.'
+  if (Date.now() < inicioMs) return 'O horário do atendimento ainda não chegou.'
   return null
 }
 

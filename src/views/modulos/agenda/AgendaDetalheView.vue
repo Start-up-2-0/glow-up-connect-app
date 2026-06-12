@@ -128,7 +128,7 @@ const iniciarGeralHabilitado = computed(() => {
 const tituloIniciarGeral = computed(() => {
   const item = itemParaIniciar.value
   if (!item || iniciarGeralHabilitado.value) return undefined
-  return motivoInicioIndisponivel(item.inicio, item.fim) ?? undefined
+  return motivoInicioIndisponivel(item.inicio) ?? undefined
 })
 
 function mapProfissionalParaAgendamento(itens: AgendaProfissional[]): AgendaGeral | null {
@@ -207,7 +207,7 @@ async function handleIniciarAtendimento(itemId: number | string) {
   ) {
     notifications.push(
       'warning',
-      motivoInicioIndisponivel(item.inicio, item.fim) ?? 'Não é possível iniciar este atendimento agora.',
+      motivoInicioIndisponivel(item.inicio) ?? 'Não é possível iniciar este atendimento agora.',
     )
     return
   }
