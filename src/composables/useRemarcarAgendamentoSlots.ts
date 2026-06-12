@@ -10,7 +10,7 @@ import {
   normalizarDatasAtendimento,
   primeiraDataAtendimentoDisponivel,
 } from '@/utils/disponibilidadeAgenda'
-import { addDaysToDateOnly, toDateOnlyString } from '@/utils/formatters'
+import { addDaysToDateOnlyAgenda, toDateOnlyStringAgenda } from '@/utils/formatters'
 
 interface UseRemarcarAgendamentoSlotsOptions {
   getPublicGuid: () => string | undefined
@@ -23,7 +23,7 @@ interface UseRemarcarAgendamentoSlotsOptions {
 export function useRemarcarAgendamentoSlots(options: UseRemarcarAgendamentoSlotsOptions) {
   const { resolveError } = useApiError()
 
-  const date = ref(toDateOnlyString(new Date()))
+  const date = ref(toDateOnlyStringAgenda())
   const motivo = ref('')
   const slots = ref<SlotDisponivel[]>([])
   const datasAtendimento = ref<string[]>([])
@@ -33,10 +33,10 @@ export function useRemarcarAgendamentoSlots(options: UseRemarcarAgendamentoSlots
   const mensagemIndisponibilidade = ref<string | null>(null)
   const active = ref(false)
 
-  const minSelectableDate = computed(() => toDateOnlyString(new Date()))
+  const minSelectableDate = computed(() => toDateOnlyStringAgenda())
 
   const maxSelectableDate = computed(() =>
-    addDaysToDateOnly(minSelectableDate.value, DISPONIBILIDADE_JANELA_DIAS - 1),
+    addDaysToDateOnlyAgenda(minSelectableDate.value, DISPONIBILIDADE_JANELA_DIAS - 1),
   )
 
   function buildConsultaParams(
@@ -178,7 +178,7 @@ export function useRemarcarAgendamentoSlots(options: UseRemarcarAgendamentoSlots
 
   function reset() {
     active.value = false
-    date.value = toDateOnlyString(new Date())
+    date.value = toDateOnlyStringAgenda()
     motivo.value = ''
     slots.value = []
     datasAtendimento.value = []

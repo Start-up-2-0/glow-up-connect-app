@@ -17,7 +17,12 @@ import {
   AGENDA_SORT_FILTER_OPTIONS,
 } from '@/constants/agendaFilters'
 import { AGENDA_STATUS_FILTER_OPTIONS } from '@/utils/agendamentoStatusTheme'
-import { addDaysToDateOnly, toDateOnlyString } from '@/utils/formatters'
+import {
+  agendaDateRangeToIso,
+  inicioMesAtualAgendaDateOnly,
+  inicioSemanaAtualAgendaDateOnly,
+  toDateOnlyStringAgenda,
+} from '@/utils/formatters'
 
 export const AGENDA_PERIOD_FILTER_OPTIONS = [
   { value: 'hoje', label: 'Hoje' },
@@ -34,18 +39,6 @@ export const MEUS_AGENDAMENTOS_PERIOD_OPTIONS = [
 
 export type AgendaPeriodFilter = (typeof AGENDA_PERIOD_FILTER_OPTIONS)[number]['value']
 export type MeusAgendamentosPeriodFilter = (typeof MEUS_AGENDAMENTOS_PERIOD_OPTIONS)[number]['value']
-
-function inicioMesAtual(now = new Date()): Date {
-  const inicio = new Date(now.getFullYear(), now.getMonth(), 1)
-  inicio.setHours(0, 0, 0, 0)
-  return inicio
-}
-
-function fimMesAtualAteHoje(now = new Date()): Date {
-  const fim = new Date(now)
-  fim.setHours(23, 59, 59, 999)
-  return fim
-}
 
 export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') {
   const statusFilter = ref('')
@@ -82,32 +75,17 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') 
     }
 
     const now = new Date()
-    const hoje = toDateOnlyString(now)
+    const hoje = toDateOnlyStringAgenda(now)
 
     if (periodFilter.value === 'semana') {
-      const day = now.getDay()
-      const diff = now.getDate() - day + (day === 0 ? -6 : 1)
-      const inicio = new Date(now)
-      inicio.setDate(diff)
-      inicio.setHours(0, 0, 0, 0)
-      const fim = new Date(inicio)
-      fim.setDate(fim.getDate() + 6)
-      fim.setHours(23, 59, 59, 999)
-      return { inicio: inicio.toISOString(), fim: fim.toISOString() }
+      return agendaDateRangeToIso(inicioSemanaAtualAgendaDateOnly(now), hoje)
     }
 
     if (periodFilter.value === 'mes' || !periodFilter.value) {
-      return {
-        inicio: inicioMesAtual(now).toISOString(),
-        fim: fimMesAtualAteHoje(now).toISOString(),
-      }
+      return agendaDateRangeToIso(inicioMesAtualAgendaDateOnly(now), hoje)
     }
 
-    const inicio = new Date(now)
-    inicio.setHours(0, 0, 0, 0)
-    const fim = new Date(now)
-    fim.setHours(23, 59, 59, 999)
-    return { inicio: inicio.toISOString(), fim: fim.toISOString(), label: hoje }
+    return agendaDateRangeToIso(hoje, hoje)
   })
 
   const apiFiltro = computed<AgendaFiltro>(() => ({
@@ -235,17 +213,16 @@ export function useMeusAgendamentosFilters() {
       return filtro
     }
 
-    const hoje = toDateOnlyString(new Date())
+    const hoje = toDateOnlyStringAgenda(new Date())
     if (periodFilter.value === 'semana') {
-      filtro.dataInicio = hoje
-      filtro.dataFim = addDaysToDateOnly(hoje, 6)
+      filtro.dataInicio = inicioSemanaAtualAgendaDateOnly()
+      filtro.dataFim = hoje
       return filtro
     }
 
     if (periodFilter.value === 'mes' || !periodFilter.value) {
-      const now = new Date()
-      filtro.dataInicio = toDateOnlyString(inicioMesAtual(now))
-      filtro.dataFim = toDateOnlyString(now)
+      filtro.dataInicio = inicioMesAtualAgendaDateOnly()
+      filtro.dataFim = hoje
     }
 
     return filtro

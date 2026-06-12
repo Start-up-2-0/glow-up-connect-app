@@ -98,6 +98,70 @@ export function normalizeAgendaIso(iso: string): string {
   return `${iso}Z`
 }
 
+/** Fuso operacional da agenda (Brasil, UTC-3). */
+export const AGENDA_UTC_OFFSET_MINUTES = -180
+
+export function getAgendaWallClockParts(reference = new Date()): {
+  year: number
+  month: number
+  day: number
+} {
+  const shifted = new Date(
+    reference.getTime() + (reference.getTimezoneOffset() + AGENDA_UTC_OFFSET_MINUTES) * 60_000,
+  )
+  return {
+    year: shifted.getUTCFullYear(),
+    month: shifted.getUTCMonth(),
+    day: shifted.getUTCDate(),
+  }
+}
+
+/** Data civil atual no fuso da agenda (yyyy-MM-dd). */
+export function toDateOnlyStringAgenda(reference = new Date()): string {
+  const { year, month, day } = getAgendaWallClockParts(reference)
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+export function dateOnlyAgendaToStartIso(isoDate: string): string {
+  return `${isoDate}T00:00:00.000Z`
+}
+
+export function dateOnlyAgendaToEndIso(isoDate: string): string {
+  return `${isoDate}T23:59:59.999Z`
+}
+
+export function agendaDateRangeToIso(
+  inicio: string,
+  fim: string,
+): { inicio: string; fim: string } {
+  return {
+    inicio: dateOnlyAgendaToStartIso(inicio),
+    fim: dateOnlyAgendaToEndIso(fim),
+  }
+}
+
+export function inicioSemanaAtualAgendaDateOnly(reference = new Date()): string {
+  const hoje = toDateOnlyStringAgenda(reference)
+  const [year, month, day] = hoje.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+  const dow = date.getUTCDay()
+  const offset = dow === 0 ? -6 : 1 - dow
+  date.setUTCDate(date.getUTCDate() + offset)
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`
+}
+
+export function inicioMesAtualAgendaDateOnly(reference = new Date()): string {
+  const { year, month } = getAgendaWallClockParts(reference)
+  return `${year}-${String(month + 1).padStart(2, '0')}-01`
+}
+
+export function addDaysToDateOnlyAgenda(isoDate: string, days: number): string {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+  date.setUTCDate(date.getUTCDate() + days)
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`
+}
+
 /**
  * Horário de agenda: a API persiste o relógio local do estabelecimento com Kind UTC.
  * Evita deslocamento de fuso ao exibir no navegador.
