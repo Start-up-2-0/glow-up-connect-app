@@ -65,6 +65,8 @@ export interface AgendamentoFiltro {
   pagina?: number
   tamanhoPagina?: number
   ordenacao?: AgendamentoOrdenacao
+  /** Quando true, a API valida limite de data atual e intervalo de 1 ano. */
+  intervaloPersonalizado?: boolean
 }
 
 export interface CriarAgendamentoPayload {

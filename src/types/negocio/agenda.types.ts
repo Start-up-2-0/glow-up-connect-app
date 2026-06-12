@@ -61,6 +61,8 @@ export interface AgendaFiltro {
   pagina?: number
   tamanhoPagina?: number
   ordenacao?: AgendaOrdenacao | string
+  /** Quando true, a API valida limite de data atual e intervalo de 1 ano. */
+  intervaloPersonalizado?: boolean
 }
 
 export interface AgendaPaginada<T> {

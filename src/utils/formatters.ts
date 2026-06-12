@@ -155,6 +155,16 @@ export function inicioMesAtualAgendaDateOnly(reference = new Date()): string {
   return `${year}-${String(month + 1).padStart(2, '0')}-01`
 }
 
+export function fimMesAtualAgendaDateOnly(reference = new Date()): string {
+  const { year, month } = getAgendaWallClockParts(reference)
+  const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate()
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+}
+
+export function fimSemanaAtualAgendaDateOnly(reference = new Date()): string {
+  return addDaysToDateOnlyAgenda(inicioSemanaAtualAgendaDateOnly(reference), 6)
+}
+
 export function addDaysToDateOnlyAgenda(isoDate: string, days: number): string {
   const [year, month, day] = isoDate.split('-').map(Number)
   const date = new Date(Date.UTC(year, month - 1, day))

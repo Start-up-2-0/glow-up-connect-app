@@ -19,6 +19,8 @@ import {
 import { AGENDA_STATUS_FILTER_OPTIONS } from '@/utils/agendamentoStatusTheme'
 import {
   agendaDateRangeToIso,
+  fimMesAtualAgendaDateOnly,
+  fimSemanaAtualAgendaDateOnly,
   inicioMesAtualAgendaDateOnly,
   inicioSemanaAtualAgendaDateOnly,
   toDateOnlyStringAgenda,
@@ -78,11 +80,17 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') 
     const hoje = toDateOnlyStringAgenda(now)
 
     if (periodFilter.value === 'semana') {
-      return agendaDateRangeToIso(inicioSemanaAtualAgendaDateOnly(now), hoje)
+      return agendaDateRangeToIso(
+        inicioSemanaAtualAgendaDateOnly(now),
+        fimSemanaAtualAgendaDateOnly(now),
+      )
     }
 
     if (periodFilter.value === 'mes' || !periodFilter.value) {
-      return agendaDateRangeToIso(inicioMesAtualAgendaDateOnly(now), hoje)
+      return agendaDateRangeToIso(
+        inicioMesAtualAgendaDateOnly(now),
+        fimMesAtualAgendaDateOnly(now),
+      )
     }
 
     return agendaDateRangeToIso(hoje, hoje)
@@ -95,6 +103,7 @@ export function useAgendaPageFilters(defaultPeriod: AgendaPeriodFilter = 'mes') 
     tamanhoPagina,
     ordenacao: sortFilter.value,
     ...(statusFilter.value ? { status: statusFilter.value } : {}),
+    ...(hasAgendaCustomDateRange(customDateRange.value) ? { intervaloPersonalizado: true } : {}),
   }))
 
   const totalPaginas = computed(() => Math.max(1, Math.ceil(total.value / tamanhoPagina)))
@@ -205,6 +214,7 @@ export function useMeusAgendamentosFilters() {
     if (hasAgendaCustomDateRange(customDateRange.value)) {
       filtro.dataInicio = customDateRange.value.inicio
       filtro.dataFim = customDateRange.value.fim
+      filtro.intervaloPersonalizado = true
       return filtro
     }
 
@@ -213,16 +223,15 @@ export function useMeusAgendamentosFilters() {
       return filtro
     }
 
-    const hoje = toDateOnlyStringAgenda(new Date())
     if (periodFilter.value === 'semana') {
       filtro.dataInicio = inicioSemanaAtualAgendaDateOnly()
-      filtro.dataFim = hoje
+      filtro.dataFim = fimSemanaAtualAgendaDateOnly()
       return filtro
     }
 
     if (periodFilter.value === 'mes' || !periodFilter.value) {
       filtro.dataInicio = inicioMesAtualAgendaDateOnly()
-      filtro.dataFim = hoje
+      filtro.dataFim = fimMesAtualAgendaDateOnly()
     }
 
     return filtro
