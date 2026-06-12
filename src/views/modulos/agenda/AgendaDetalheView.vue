@@ -22,8 +22,12 @@ import type {
   AgendamentoHistorico,
 } from '@/types/negocio/agenda.types'
 import {
-  podeFinalizarItemAtendimento,
+  motivoInicioIndisponivel,
   podeIniciarItemAtendimento,
+  possuiPermissaoFinalizarAtendimento,
+  possuiPermissaoIniciarAtendimento,
+  statusPermiteFinalizarItemAtendimento,
+  statusPermiteIniciarItemAtendimento,
 } from '@/utils/agendamentoAtendimento'
 import {
   formatAgendaDetailSubtitle,
@@ -50,8 +54,8 @@ const sugerirHorario = ref('')
 const sugerirMotivo = ref('')
 
 const visaoGeral = computed(() => possuiPermissao('AgendaVisualizarGeral'))
-const podeIniciarAtendimento = computed(() => possuiPermissao('AtendimentoIniciar'))
-const podeFinalizarAtendimento = computed(() => possuiPermissao('AtendimentoFinalizar'))
+const podeIniciarAtendimento = computed(() => possuiPermissaoIniciarAtendimento(possuiPermissao))
+const podeFinalizarAtendimento = computed(() => possuiPermissaoFinalizarAtendimento(possuiPermissao))
 const podeGerenciarAgenda = computed(
   () => possuiPermissao('AgendaCancelar') || possuiPermissao('AgendaReagendar'),
 )
@@ -84,23 +88,47 @@ const showCancelar = computed(() => {
   return status === 'PendenteConfirmacao' || status === 'Confirmado' || status === 'Remarcado'
 })
 
-const showIniciarAtendimentoGeral = computed(() => {
-  if (!agendamento.value || !podeIniciarAtendimento.value) return false
-  return agendamento.value.itens.some((item) =>
-    podeIniciarItemAtendimento(
-      item.status,
-      agendamento.value!.status,
-      item.inicio,
-      item.fim,
-    ),
+const itemParaIniciar = computed(() => {
+  if (!agendamento.value) return null
+  return (
+    agendamento.value.itens.find((item) =>
+      statusPermiteIniciarItemAtendimento(item.status, agendamento.value!.status),
+    ) ?? null
   )
 })
 
-const showConcluirAtendimentoGeral = computed(() => {
-  if (!agendamento.value || !podeFinalizarAtendimento.value) return false
-  return agendamento.value.itens.some((item) =>
-    podeFinalizarItemAtendimento(item.status, agendamento.value!.status),
+const itemParaConcluir = computed(() => {
+  if (!agendamento.value) return null
+  return (
+    agendamento.value.itens.find((item) =>
+      statusPermiteFinalizarItemAtendimento(item.status, agendamento.value!.status),
+    ) ?? null
   )
+})
+
+const showIniciarAtendimentoGeral = computed(
+  () => !!itemParaIniciar.value && podeIniciarAtendimento.value,
+)
+
+const showConcluirAtendimentoGeral = computed(
+  () => !!itemParaConcluir.value && podeFinalizarAtendimento.value,
+)
+
+const iniciarGeralHabilitado = computed(() => {
+  const item = itemParaIniciar.value
+  if (!item || !agendamento.value) return false
+  return podeIniciarItemAtendimento(
+    item.status,
+    agendamento.value.status,
+    item.inicio,
+    item.fim,
+  )
+})
+
+const tituloIniciarGeral = computed(() => {
+  const item = itemParaIniciar.value
+  if (!item || iniciarGeralHabilitado.value) return undefined
+  return motivoInicioIndisponivel(item.inicio, item.fim) ?? undefined
 })
 
 function mapProfissionalParaAgendamento(itens: AgendaProfissional[]): AgendaGeral | null {
@@ -171,7 +199,18 @@ async function handleConfirmar() {
 }
 
 async function handleIniciarAtendimento(itemId: number | string) {
-  if (!estabelecimentoId.value) return
+  if (!estabelecimentoId.value || !agendamento.value) return
+  const item = agendamento.value.itens.find((i) => i.id === Number(itemId))
+  if (
+    item &&
+    !podeIniciarItemAtendimento(item.status, agendamento.value.status, item.inicio, item.fim)
+  ) {
+    notifications.push(
+      'warning',
+      motivoInicioIndisponivel(item.inicio, item.fim) ?? 'Não é possível iniciar este atendimento agora.',
+    )
+    return
+  }
   atendimentoItemLoadingId.value = Number(itemId)
   try {
     await agendaNegocioService.iniciarAtendimento(estabelecimentoId.value, Number(itemId))
@@ -199,17 +238,11 @@ async function handleFinalizarAtendimento(itemId: number | string) {
 }
 
 async function handleIniciarPrimeiroDisponivel() {
-  const item = agendamento.value?.itens.find((i) =>
-    podeIniciarItemAtendimento(i.status, agendamento.value!.status, i.inicio, i.fim),
-  )
-  if (item) await handleIniciarAtendimento(item.id)
+  if (itemParaIniciar.value) await handleIniciarAtendimento(itemParaIniciar.value.id)
 }
 
 async function handleConcluirPrimeiroDisponivel() {
-  const item = agendamento.value?.itens.find((i) =>
-    podeFinalizarItemAtendimento(i.status, agendamento.value!.status),
-  )
-  if (item) await handleFinalizarAtendimento(item.id)
+  if (itemParaConcluir.value) await handleFinalizarAtendimento(itemParaConcluir.value.id)
 }
 
 async function handleSugerirRemarcacao() {
@@ -361,7 +394,8 @@ watch(
               v-if="showIniciarAtendimentoGeral"
               type="button"
               class="agendamento-detail-btn agendamento-detail-btn--confirm min-w-[185px]"
-              :disabled="!!atendimentoItemLoadingId"
+              :disabled="!!atendimentoItemLoadingId || !iniciarGeralHabilitado"
+              :title="tituloIniciarGeral"
               @click="handleIniciarPrimeiroDisponivel"
             >
               Iniciar atendimento

@@ -13,35 +13,82 @@ const STATUS_BLOQUEADOS_INICIO: readonly string[] = [
 
 const STATUS_AGENDAMENTO_INICIAVEL: readonly string[] = ['Confirmado', 'EmAtendimento']
 
+/** Fallback de permissão para equipe da loja com agenda geral (sessão pode não listar AtendimentoIniciar ainda). */
+export function possuiPermissaoIniciarAtendimento(possuiPermissao: (permissao: string) => boolean): boolean {
+  return possuiPermissao('AtendimentoIniciar') || possuiPermissao('AgendaVisualizarGeral')
+}
+
+export function possuiPermissaoFinalizarAtendimento(
+  possuiPermissao: (permissao: string) => boolean,
+): boolean {
+  return possuiPermissao('AtendimentoFinalizar') || possuiPermissao('AgendaVisualizarGeral')
+}
+
+export function resolverFimAtendimento(inicio: string, fim?: string | null): string {
+  if (fim) {
+    const fimMs = new Date(fim).getTime()
+    if (!Number.isNaN(fimMs)) return fim
+  }
+  const inicioMs = new Date(inicio).getTime()
+  if (Number.isNaN(inicioMs)) return inicio
+  return new Date(inicioMs + 2 * 60 * 60 * 1000).toISOString()
+}
+
 export function horarioPermiteIniciarAtendimento(
   inicio: string,
-  fim: string,
+  fim?: string | null,
   agora: Date = new Date(),
 ): boolean {
+  const fimResolvido = resolverFimAtendimento(inicio, fim)
   const inicioMs = new Date(inicio).getTime()
-  const fimMs = new Date(fim).getTime()
+  const fimMs = new Date(fimResolvido).getTime()
   const agoraMs = agora.getTime()
   if (Number.isNaN(inicioMs) || Number.isNaN(fimMs)) return false
   return agoraMs >= inicioMs && agoraMs <= fimMs
+}
+
+export function statusPermiteIniciarItemAtendimento(
+  itemStatus: string,
+  agendamentoStatus: string,
+): boolean {
+  if (itemStatus !== 'Confirmado') return false
+  if (STATUS_BLOQUEADOS_INICIO.includes(agendamentoStatus)) return false
+  return STATUS_AGENDAMENTO_INICIAVEL.includes(agendamentoStatus)
 }
 
 export function podeIniciarItemAtendimento(
   itemStatus: string,
   agendamentoStatus: string,
   inicio: string,
-  fim: string,
+  fim?: string | null,
 ): boolean {
-  if (itemStatus !== 'Confirmado') return false
-  if (STATUS_BLOQUEADOS_INICIO.includes(agendamentoStatus)) return false
-  if (!STATUS_AGENDAMENTO_INICIAVEL.includes(agendamentoStatus)) return false
+  if (!statusPermiteIniciarItemAtendimento(itemStatus, agendamentoStatus)) return false
   return horarioPermiteIniciarAtendimento(inicio, fim)
+}
+
+export function motivoInicioIndisponivel(inicio: string, fim?: string | null): string | null {
+  const inicioMs = new Date(inicio).getTime()
+  const fimResolvido = resolverFimAtendimento(inicio, fim)
+  const fimMs = new Date(fimResolvido).getTime()
+  const agoraMs = Date.now()
+  if (Number.isNaN(inicioMs) || Number.isNaN(fimMs)) return 'Horário do atendimento inválido.'
+  if (agoraMs < inicioMs) return 'O horário do atendimento ainda não chegou.'
+  if (agoraMs > fimMs) return 'O horário do atendimento já encerrou.'
+  return null
+}
+
+export function statusPermiteFinalizarItemAtendimento(
+  itemStatus: string,
+  agendamentoStatus: string,
+): boolean {
+  return itemStatus === 'EmAtendimento' && agendamentoStatus === 'EmAtendimento'
 }
 
 export function podeFinalizarItemAtendimento(
   itemStatus: string,
   agendamentoStatus: string,
 ): boolean {
-  return itemStatus === 'EmAtendimento' && agendamentoStatus === 'EmAtendimento'
+  return statusPermiteFinalizarItemAtendimento(itemStatus, agendamentoStatus)
 }
 
 export function labelStatusItemAtendimento(status: string): string {

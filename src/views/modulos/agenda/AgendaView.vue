@@ -19,6 +19,10 @@ import { formatDateShortNumeric } from '@/utils/formatters'
 import {
   podeFinalizarItemAtendimento,
   podeIniciarItemAtendimento,
+  possuiPermissaoFinalizarAtendimento,
+  possuiPermissaoIniciarAtendimento,
+  statusPermiteFinalizarItemAtendimento,
+  statusPermiteIniciarItemAtendimento,
 } from '@/utils/agendamentoAtendimento'
 
 const route = useRoute()
@@ -53,8 +57,8 @@ const visaoGeral = computed(() => possuiPermissao('AgendaVisualizarGeral'))
 const podeConfirmarOuCancelar = computed(
   () => possuiPermissao('AgendaCancelar') || possuiPermissao('AgendaReagendar'),
 )
-const podeIniciarAtendimento = computed(() => possuiPermissao('AtendimentoIniciar'))
-const podeFinalizarAtendimento = computed(() => possuiPermissao('AtendimentoFinalizar'))
+const podeIniciarAtendimento = computed(() => possuiPermissaoIniciarAtendimento(possuiPermissao))
+const podeFinalizarAtendimento = computed(() => possuiPermissaoFinalizarAtendimento(possuiPermissao))
 
 const pageTitle = computed(() => {
   if (periodFilter.value === 'semana') return visaoGeral.value ? 'Agenda da semana' : 'Meus agendamentos da semana'
@@ -76,8 +80,8 @@ const dateLabel = computed(() => (showDateInTitle.value ? formatDateShortNumeric
 function itemComAcaoAtendimento(itens: AgendaGeral['itens'], agendamentoStatus: string) {
   return itens.find(
     (item) =>
-      podeIniciarItemAtendimento(item.status, agendamentoStatus, item.inicio, item.fim) ||
-      podeFinalizarItemAtendimento(item.status, agendamentoStatus),
+      statusPermiteIniciarItemAtendimento(item.status, agendamentoStatus) ||
+      statusPermiteFinalizarItemAtendimento(item.status, agendamentoStatus),
   )
 }
 
@@ -112,6 +116,16 @@ const itens = computed(() => {
 
   return mapped.filter((item) => matchesStatus(item.status))
 })
+
+function statusPermiteIniciarCard(item: (typeof itens.value)[number]): boolean {
+  if (!item.agendamentoItemId) return false
+  return statusPermiteIniciarItemAtendimento(item.itemStatus, item.agendamentoStatus)
+}
+
+function statusPermiteFinalizarCard(item: (typeof itens.value)[number]): boolean {
+  if (!item.agendamentoItemId) return false
+  return statusPermiteFinalizarItemAtendimento(item.itemStatus, item.agendamentoStatus)
+}
 
 function podeIniciarCard(item: (typeof itens.value)[number]): boolean {
   if (!item.agendamentoItemId) return false
@@ -282,18 +296,20 @@ watch([statusFilter, periodFilter], () => {
         tall
         :to="
           (item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar) ||
-          (podeIniciarAtendimento && podeIniciarCard(item)) ||
-          (podeFinalizarAtendimento && podeFinalizarCard(item))
+          (podeIniciarAtendimento && statusPermiteIniciarCard(item)) ||
+          (podeFinalizarAtendimento && statusPermiteFinalizarCard(item))
             ? undefined
             : agendaDetalhePath(item.id)
         "
         :show-actions="item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar"
         :show-atendimento-actions="
-          (podeIniciarAtendimento && podeIniciarCard(item)) ||
-          (podeFinalizarAtendimento && podeFinalizarCard(item))
+          (podeIniciarAtendimento && statusPermiteIniciarCard(item)) ||
+          (podeFinalizarAtendimento && statusPermiteFinalizarCard(item))
         "
-        :pode-iniciar-atendimento="podeIniciarAtendimento && podeIniciarCard(item)"
-        :pode-finalizar-atendimento="podeFinalizarAtendimento && podeFinalizarCard(item)"
+        :pode-iniciar-atendimento="podeIniciarAtendimento && statusPermiteIniciarCard(item)"
+        :pode-finalizar-atendimento="podeFinalizarAtendimento && statusPermiteFinalizarCard(item)"
+        :iniciar-atendimento-habilitado="podeIniciarCard(item)"
+        :finalizar-atendimento-habilitado="podeFinalizarCard(item)"
         :action-loading="actionId === item.id || actionId === item.agendamentoItemId"
         @confirm="handleConfirmar(item.id)"
         @cancel="abrirCancelar(item.id)"

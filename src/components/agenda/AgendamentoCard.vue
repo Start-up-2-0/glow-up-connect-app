@@ -18,6 +18,8 @@ const props = defineProps<{
   showAtendimentoActions?: boolean
   podeIniciarAtendimento?: boolean
   podeFinalizarAtendimento?: boolean
+  iniciarAtendimentoHabilitado?: boolean
+  finalizarAtendimentoHabilitado?: boolean
   actionLoading?: boolean
 }>()
 
@@ -110,7 +112,7 @@ const cardClasses = computed(() => [
           v-if="podeIniciarAtendimento"
           type="button"
           class="agendamento-card__btn-confirm"
-          :disabled="actionLoading"
+          :disabled="actionLoading || iniciarAtendimentoHabilitado === false"
           @click.stop="emit('iniciarAtendimento')"
         >
           Iniciar atendimento
@@ -119,7 +121,7 @@ const cardClasses = computed(() => [
           v-if="podeFinalizarAtendimento"
           type="button"
           class="agendamento-card__btn-cancel border-glow-border-soft text-glow-text"
-          :disabled="actionLoading"
+          :disabled="actionLoading || finalizarAtendimentoHabilitado === false"
           @click.stop="emit('finalizarAtendimento')"
         >
           Concluir atendimento

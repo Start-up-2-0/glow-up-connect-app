@@ -7,8 +7,10 @@ import {
 } from '@/utils/formatters'
 import {
   labelStatusItemAtendimento,
-  podeFinalizarItemAtendimento,
+  motivoInicioIndisponivel,
   podeIniciarItemAtendimento,
+  statusPermiteFinalizarItemAtendimento,
+  statusPermiteIniciarItemAtendimento,
 } from '@/utils/agendamentoAtendimento'
 
 export interface AgendamentoDetailServiceItem {
@@ -37,15 +39,29 @@ const emit = defineEmits<{
 function showIniciar(item: AgendamentoDetailServiceItem): boolean {
   return (
     !!props.podeIniciar &&
-    podeIniciarItemAtendimento(item.status, props.agendamentoStatus, item.inicio, item.fim)
+    statusPermiteIniciarItemAtendimento(item.status, props.agendamentoStatus)
   )
 }
 
 function showFinalizar(item: AgendamentoDetailServiceItem): boolean {
   return (
     !!props.podeFinalizar &&
-    podeFinalizarItemAtendimento(item.status, props.agendamentoStatus)
+    statusPermiteFinalizarItemAtendimento(item.status, props.agendamentoStatus)
   )
+}
+
+function iniciarHabilitado(item: AgendamentoDetailServiceItem): boolean {
+  return podeIniciarItemAtendimento(
+    item.status,
+    props.agendamentoStatus,
+    item.inicio,
+    item.fim,
+  )
+}
+
+function tituloIniciar(item: AgendamentoDetailServiceItem): string | undefined {
+  if (iniciarHabilitado(item)) return undefined
+  return motivoInicioIndisponivel(item.inicio, item.fim) ?? undefined
 }
 </script>
 
@@ -80,7 +96,8 @@ function showFinalizar(item: AgendamentoDetailServiceItem): boolean {
               v-if="showIniciar(item)"
               type="button"
               class="agendamento-detail-btn agendamento-detail-btn--confirm min-w-0 px-2 text-xs"
-              :disabled="actionLoadingId === item.id"
+              :disabled="actionLoadingId === item.id || !iniciarHabilitado(item)"
+              :title="tituloIniciar(item)"
               @click="emit('iniciar', item.id)"
             >
               Iniciar
