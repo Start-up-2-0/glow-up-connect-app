@@ -1,29 +1,32 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import BaseCard from '@/components/ui/BaseCard.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import AgendamentoStatusBadge from '@/components/cliente/AgendamentoStatusBadge.vue'
 import CancelarAgendamentoModal from '@/components/cliente/CancelarAgendamentoModal.vue'
+import AgendamentoDetailHeader from '@/components/agenda/detail/AgendamentoDetailHeader.vue'
+import AgendamentoDetailField from '@/components/agenda/detail/AgendamentoDetailField.vue'
+import AgendamentoDetailSection from '@/components/agenda/detail/AgendamentoDetailSection.vue'
+import AgendamentoDetailServices from '@/components/agenda/detail/AgendamentoDetailServices.vue'
 import { useAgendamentosStore } from '@/stores/agendamentos.store'
 import { publicoService } from '@/services/publicoService'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
+import { ROUTE_PATHS } from '@/constants/routes'
 import type { AgendamentoCliente, SlotDisponivel } from '@/types/agendamento.types'
 import {
   AGENDAMENTO_STATUS_CANCELAVEL,
   AGENDAMENTO_STATUS_REMARCAVEL,
 } from '@/types/agendamento.types'
 import {
-  formatCurrency,
-  formatAgendaDateTime,
+  formatAgendaDetailSubtitle,
   formatAgendaTime,
+  formatCurrency,
   formatEnderecoResumo,
-  toDateOnlyString,
   toAgendaTimeOnlyString,
   toDateOnlyFromIsoUtc,
+  toDateOnlyString,
 } from '@/utils/formatters'
 
 const route = useRoute()
@@ -44,6 +47,20 @@ const remarcarDate = ref(toDateOnlyString(new Date()))
 const remarcarSlots = ref<SlotDisponivel[]>([])
 const remarcarSlot = ref<SlotDisponivel | null>(null)
 const remarcarLoading = ref(false)
+
+const subtitle = computed(() =>
+  agendamento.value?.inicio ? formatAgendaDetailSubtitle(agendamento.value.inicio) : undefined,
+)
+
+const serviceItens = computed(() =>
+  (agendamento.value?.itens ?? []).map((item) => ({
+    id: item.id,
+    servicoNome: item.servicoNome,
+    profissionalNome: item.profissionalNome,
+    inicio: item.inicio,
+    valor: item.valor,
+  })),
+)
 
 const podeCancelar = computed(() =>
   agendamento.value ? AGENDAMENTO_STATUS_CANCELAVEL.includes(agendamento.value.status) : false,
@@ -127,131 +144,179 @@ function openRemarcar() {
   remarcarOpen.value = true
   remarcarMotivo.value = ''
   remarcarDate.value = toDateOnlyString(new Date())
-  loadRemarcarSlots()
+  void loadRemarcarSlots()
 }
 
 onMounted(load)
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
+  <div class="agendamento-detail-page">
+    <AgendamentoDetailHeader
+      v-if="agendamento"
+      :title="agendamento.estabelecimentoNome"
+      :subtitle="subtitle"
+      :back-to="ROUTE_PATHS.MEUS_AGENDAMENTOS"
+    >
+      <template #badge>
+        <AgendamentoStatusBadge :status="agendamento.status" />
+      </template>
+    </AgendamentoDetailHeader>
+
+    <AgendamentoDetailHeader
+      v-else
+      title="Detalhe do agendamento"
+      :back-to="ROUTE_PATHS.MEUS_AGENDAMENTOS"
+    />
+
     <LoadingSpinner v-if="loading" />
+    <BaseAlert v-else-if="error && !agendamento" variant="error">{{ error }}</BaseAlert>
 
     <template v-else-if="agendamento">
-      <div class="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 class="font-satoshi text-xl font-bold text-glow-text lg:text-2xl">
-            {{ agendamento.estabelecimentoNome }}
-          </h1>
-          <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-            {{ formatAgendaDateTime(agendamento.inicio) }}
-          </p>
-        </div>
-        <AgendamentoStatusBadge :status="agendamento.status" />
-      </div>
+      <BaseAlert v-if="error" variant="error" class="mb-0">{{ error }}</BaseAlert>
 
-      <BaseAlert v-if="error" variant="error">{{ error }}</BaseAlert>
+      <div class="agendamento-detail-grid">
+        <div class="agendamento-detail-column">
+          <AgendamentoDetailSection title="Detalhes">
+            <div class="agendamento-detail-panel__header">
+              <span />
+              <AgendamentoStatusBadge :status="agendamento.status" />
+            </div>
 
-      <BaseCard title="Detalhes">
-        <dl class="space-y-3 font-urbanist text-sm">
-          <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4">
-            <dt class="shrink-0 font-medium text-glow-text-subtle sm:w-32">Endereço</dt>
-            <dd class="text-glow-text">{{ formatEnderecoResumo(agendamento.endereco) }}</dd>
-          </div>
-          <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4">
-            <dt class="shrink-0 font-medium text-glow-text-subtle sm:w-32">Valor</dt>
-            <dd class="text-glow-text">{{ formatCurrency(agendamento.valorTotal) }}</dd>
-          </div>
-          <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4">
-            <dt class="shrink-0 font-medium text-glow-text-subtle sm:w-32">Duração</dt>
-            <dd class="text-glow-text">{{ agendamento.duracaoTotalMinutos }} min</dd>
-          </div>
-          <div v-if="agendamento.observacao" class="flex flex-col gap-0.5 sm:flex-row sm:gap-4">
-            <dt class="shrink-0 font-medium text-glow-text-subtle sm:w-32">Observação</dt>
-            <dd class="text-glow-text">{{ agendamento.observacao }}</dd>
-          </div>
-        </dl>
-      </BaseCard>
+            <AgendamentoDetailField label="Endereço">
+              <template #icon>
+                <svg class="size-4" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <rect x="2" y="4" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+                  <path d="M6 8h6M6 11h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                </svg>
+              </template>
+              {{ formatEnderecoResumo(agendamento.endereco) }}
+            </AgendamentoDetailField>
 
-      <BaseCard title="Serviços">
-        <ul class="space-y-2">
-          <li
-            v-for="item in agendamento.itens"
-            :key="item.id"
-            class="flex flex-wrap justify-between gap-2 font-urbanist text-sm"
+            <AgendamentoDetailField label="Duração">
+              <template #icon>
+                <svg class="size-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2" />
+                  <path d="M8 4.5V8L10 9.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                </svg>
+              </template>
+              {{ agendamento.duracaoTotalMinutos }} minutos
+            </AgendamentoDetailField>
+
+            <div class="agendamento-detail-divider" />
+
+            <div class="agendamento-detail-total-row">
+              <span class="agendamento-detail-total-label">Valor total</span>
+              <span class="agendamento-detail-total-value">
+                {{ formatCurrency(agendamento.valorTotal) }}
+              </span>
+            </div>
+
+            <div v-if="agendamento.observacao" class="space-y-2">
+              <p class="agendamento-detail-obs-label">Observação</p>
+              <div class="agendamento-detail-obs-box">{{ agendamento.observacao }}</div>
+            </div>
+          </AgendamentoDetailSection>
+
+          <div
+            v-if="podeCancelar || podeRemarcar"
+            class="agendamento-detail-actions"
           >
-            <span class="text-glow-text">{{ item.servicoNome }} · {{ item.profissionalNome }}</span>
-            <span class="text-glow-text-subtle">{{ formatCurrency(item.valor) }}</span>
-          </li>
-        </ul>
-      </BaseCard>
-
-      <div v-if="podeCancelar || podeRemarcar" class="flex flex-wrap gap-2">
-        <BaseButton
-          v-if="podeRemarcar"
-          variant="secondary"
-          :loading="actionLoading"
-          @click="openRemarcar"
-        >
-          Remarcar
-        </BaseButton>
-        <BaseButton
-          v-if="podeCancelar"
-          variant="danger"
-          :loading="actionLoading"
-          @click="cancelModalOpen = true"
-        >
-          Cancelar
-        </BaseButton>
-      </div>
-
-      <BaseCard v-if="remarcarOpen" title="Remarcar agendamento">
-        <div class="space-y-4">
-          <div>
-            <label class="mb-1 block font-urbanist text-sm font-medium">Nova data</label>
-            <input
-              v-model="remarcarDate"
-              type="date"
-              class="rounded border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
-              @change="loadRemarcarSlots"
-            />
-          </div>
-
-          <LoadingSpinner v-if="remarcarLoading" />
-
-          <div v-else class="grid grid-cols-3 gap-2 sm:grid-cols-4">
             <button
-              v-for="(slot, index) in remarcarSlots"
-              :key="`${slot.inicio}-${index}`"
+              v-if="podeRemarcar"
               type="button"
-              class="rounded-lg border px-2 py-2 font-urbanist text-sm"
-              :class="
-                remarcarSlot?.inicio === slot.inicio
-                  ? 'border-glow-gold-dark bg-glow-gold-selected'
-                  : 'border-glow-border-soft'
-              "
-              @click="remarcarSlot = slot"
+              class="agendamento-detail-btn agendamento-detail-btn--secondary min-w-[132px]"
+              :disabled="actionLoading"
+              @click="openRemarcar"
             >
-              {{ formatAgendaTime(slot.inicio) }}
+              Remarcar
+            </button>
+            <button
+              v-if="podeCancelar"
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--danger"
+              :disabled="actionLoading"
+              @click="cancelModalOpen = true"
+            >
+              Cancelar
             </button>
           </div>
+        </div>
 
-          <textarea
-            v-model="remarcarMotivo"
-            rows="2"
-            placeholder="Motivo da remarcação"
-            class="w-full rounded border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
-          />
+        <div class="agendamento-detail-column">
+          <AgendamentoDetailServices :itens="serviceItens" />
+        </div>
+      </div>
 
-          <div class="flex gap-2">
-            <BaseButton variant="secondary" @click="remarcarOpen = false">Cancelar</BaseButton>
-            <BaseButton :loading="actionLoading" @click="handleRemarcar">Confirmar remarcação</BaseButton>
+      <section v-if="remarcarOpen" class="agendamento-detail-remarcar-panel">
+        <h2 class="agendamento-detail-remarcar-title">Remarcar agendamento</h2>
+
+        <div class="grid gap-6 lg:grid-cols-2">
+          <div class="space-y-4">
+            <div>
+              <label class="mb-2 block font-urbanist text-sm font-medium text-glow-text">
+                Escolha uma nova data
+              </label>
+              <input
+                v-model="remarcarDate"
+                type="date"
+                class="w-full max-w-[144px] rounded-xl border border-glow-border-soft bg-glow-surface px-4 py-2 font-urbanist text-sm"
+                @change="loadRemarcarSlots"
+              />
+            </div>
+
+            <div>
+              <label class="mb-2 block font-urbanist text-sm font-medium text-glow-text">
+                Escolha o novo horário
+              </label>
+              <LoadingSpinner v-if="remarcarLoading" />
+              <div v-else class="agendamento-detail-slot-grid">
+                <button
+                  v-for="(slot, index) in remarcarSlots"
+                  :key="`${slot.inicio}-${index}`"
+                  type="button"
+                  class="agendamento-detail-slot-btn"
+                  :class="{ 'agendamento-detail-slot-btn--selected': remarcarSlot?.inicio === slot.inicio }"
+                  @click="remarcarSlot = slot"
+                >
+                  {{ formatAgendaTime(slot.inicio) }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="font-urbanist text-sm font-medium text-glow-text">
+              Motivo da remarcação
+            </label>
+            <textarea
+              v-model="remarcarMotivo"
+              rows="4"
+              class="agendamento-detail-obs-box min-h-[82px] w-full"
+              placeholder="Descreva o motivo da remarcação"
+            />
           </div>
         </div>
-      </BaseCard>
-    </template>
 
-    <BaseAlert v-else variant="error">{{ error ?? 'Agendamento não encontrado.' }}</BaseAlert>
+        <div class="agendamento-detail-actions">
+          <button
+            type="button"
+            class="agendamento-detail-btn agendamento-detail-btn--secondary min-w-[132px]"
+            @click="remarcarOpen = false"
+          >
+            Voltar
+          </button>
+          <button
+            type="button"
+            class="agendamento-detail-btn agendamento-detail-btn--confirm min-w-[214px]"
+            :disabled="actionLoading"
+            @click="handleRemarcar"
+          >
+            Confirmar remarcação
+          </button>
+        </div>
+      </section>
+    </template>
 
     <CancelarAgendamentoModal v-model="cancelModalOpen" @confirm="handleCancelar" />
   </div>

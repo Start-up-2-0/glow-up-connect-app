@@ -1,23 +1,25 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import BaseCard from '@/components/ui/BaseCard.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import AgendamentoStatusBadge from '@/components/cliente/AgendamentoStatusBadge.vue'
 import CancelarAgendamentoModal from '@/components/cliente/CancelarAgendamentoModal.vue'
+import AgendamentoDetailHeader from '@/components/agenda/detail/AgendamentoDetailHeader.vue'
+import AgendamentoDetailField from '@/components/agenda/detail/AgendamentoDetailField.vue'
+import AgendamentoDetailSection from '@/components/agenda/detail/AgendamentoDetailSection.vue'
+import AgendamentoDetailServices from '@/components/agenda/detail/AgendamentoDetailServices.vue'
+import AgendamentoDetailHistorico from '@/components/agenda/detail/AgendamentoDetailHistorico.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { agendaNegocioService } from '@/services/agendaNegocioService'
+import { ROUTE_PATHS } from '@/constants/routes'
 import type { AgendaGeral, AgendamentoHistorico } from '@/types/negocio/agenda.types'
 import {
-  formatAgendaDateTime,
+  formatAgendaDetailSubtitle,
   formatCurrency,
-  formatDateTime,
   formatTelefone,
-  agendamentoStatusLabel,
 } from '@/utils/formatters'
 
 const route = useRoute()
@@ -36,7 +38,28 @@ const sugerirData = ref('')
 const sugerirHorario = ref('')
 const sugerirMotivo = ref('')
 
+const subtitle = computed(() =>
+  agendamento.value?.inicio ? formatAgendaDetailSubtitle(agendamento.value.inicio) : undefined,
+)
+
+const serviceItens = computed(() =>
+  (agendamento.value?.itens ?? []).map((item) => ({
+    id: item.id,
+    servicoNome: item.servicoNome,
+    profissionalNome: item.profissionalNome,
+    inicio: item.inicio,
+    valor: item.valor,
+  })),
+)
+
 const podeSugerirRemarcacao = computed(() => {
+  const status = agendamento.value?.status
+  return status === 'PendenteConfirmacao' || status === 'Confirmado' || status === 'Remarcado'
+})
+
+const showConfirmar = computed(() => agendamento.value?.status === 'PendenteConfirmacao')
+
+const showCancelar = computed(() => {
   const status = agendamento.value?.status
   return status === 'PendenteConfirmacao' || status === 'Confirmado' || status === 'Remarcado'
 })
@@ -122,100 +145,125 @@ watch(
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div>
-      <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-        Detalhe do agendamento
-      </h1>
-    </div>
+  <div class="agendamento-detail-page">
+    <AgendamentoDetailHeader
+      title="Detalhe do agendamento"
+      :subtitle="subtitle"
+      :back-to="ROUTE_PATHS.AGENDA"
+    />
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
     <LoadingSpinner v-if="loading" />
 
     <template v-else-if="agendamento">
-      <BaseCard title="Resumo">
-        <div class="space-y-3 font-urbanist text-sm">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="font-semibold text-glow-text">{{ agendamento.clienteNome }}</span>
-            <AgendamentoStatusBadge :status="agendamento.status" />
+      <div class="agendamento-detail-grid">
+        <div class="agendamento-detail-column">
+          <AgendamentoDetailSection title="Resumo">
+            <div class="agendamento-detail-panel__header">
+              <span />
+              <div
+                v-if="agendamento.status === 'PendenteConfirmacao'"
+                class="agendamento-detail-pending-alert"
+              >
+                <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M8 4.5V8.5M8 11.5H8.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                  <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2" />
+                </svg>
+                Aguardando confirmação
+              </div>
+              <AgendamentoStatusBadge v-else :status="agendamento.status" />
+            </div>
+
+            <AgendamentoDetailField label="Cliente">
+              <template #icon>
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.2" />
+                  <path d="M5 19c0-3 3.1-5 7-5s7 2 7 5" stroke="currentColor" stroke-width="1.2" />
+                </svg>
+              </template>
+              {{ agendamento.clienteNome }}
+            </AgendamentoDetailField>
+
+            <AgendamentoDetailField v-if="agendamento.clienteEmail" label="E-mail">
+              <template #icon>
+                <svg class="size-4" viewBox="0 0 16 14" fill="none" aria-hidden="true">
+                  <rect x="1" y="2" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+                  <path d="M1 4L8 8.5L15 4" stroke="currentColor" stroke-width="1.2" />
+                </svg>
+              </template>
+              {{ agendamento.clienteEmail }}
+            </AgendamentoDetailField>
+
+            <AgendamentoDetailField v-if="agendamento.clienteTelefone" label="Telefone">
+              <template #icon>
+                <svg class="size-4" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <path d="M5 3h2l1.5 4-2 1.5a9 9 0 0 0 4 4L12 10.5 16 12v2a2 2 0 0 1-2 2C7.6 16 2 10.4 2 3a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.2" />
+                </svg>
+              </template>
+              {{ formatTelefone(agendamento.clienteTelefone) }}
+            </AgendamentoDetailField>
+
+            <div class="agendamento-detail-divider" />
+
+            <div class="agendamento-detail-total-row">
+              <span class="agendamento-detail-total-label">Valor total</span>
+              <span class="agendamento-detail-total-value">
+                {{ formatCurrency(agendamento.valorTotal) }}
+              </span>
+            </div>
+
+            <div v-if="agendamento.observacao" class="space-y-2">
+              <p class="agendamento-detail-obs-label">Observação</p>
+              <div class="agendamento-detail-obs-box">{{ agendamento.observacao }}</div>
+            </div>
+          </AgendamentoDetailSection>
+
+          <div
+            v-if="showConfirmar || podeSugerirRemarcacao || showCancelar"
+            class="agendamento-detail-actions"
+          >
+            <button
+              v-if="showConfirmar"
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--confirm"
+              :disabled="actionLoading"
+              @click="handleConfirmar"
+            >
+              <svg class="size-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              Confirmar
+            </button>
+            <button
+              v-if="podeSugerirRemarcacao"
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--secondary min-w-[185px]"
+              :disabled="actionLoading"
+              @click="sugerirModalOpen = true"
+            >
+              Sugerir novo horário
+            </button>
+            <button
+              v-if="showCancelar"
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--danger"
+              :disabled="actionLoading"
+              @click="cancelModalOpen = true"
+            >
+              Cancelar
+            </button>
           </div>
-          <p v-if="agendamento.clienteEmail" class="text-glow-text-subtle">
-            {{ agendamento.clienteEmail }}
-          </p>
-          <p v-if="agendamento.clienteTelefone" class="text-glow-text-subtle">
-            {{ formatTelefone(agendamento.clienteTelefone) }}
-          </p>
-          <p class="font-medium text-glow-text">
-            Total: {{ formatCurrency(agendamento.valorTotal) }}
-          </p>
-          <p v-if="agendamento.observacao" class="text-glow-text-subtle">
-            {{ agendamento.observacao }}
-          </p>
         </div>
 
-        <div class="mt-4 space-y-2 border-t border-glow-border-soft pt-4">
-          <p
-            v-for="item in agendamento.itens"
-            :key="item.id"
-            class="font-urbanist text-sm text-glow-text"
-          >
-            {{ item.servicoNome }} · {{ item.profissionalNome }} ·
-            {{ formatAgendaDateTime(item.inicio) }}
-          </p>
+        <div class="agendamento-detail-column">
+          <AgendamentoDetailServices :itens="serviceItens" />
+          <AgendamentoDetailHistorico :itens="historico" />
         </div>
-
-        <div class="mt-4 flex flex-wrap gap-2">
-          <BaseButton
-            v-if="agendamento.status === 'PendenteConfirmacao'"
-            :loading="actionLoading"
-            @click="handleConfirmar"
-          >
-            Confirmar
-          </BaseButton>
-          <BaseButton
-            v-if="podeSugerirRemarcacao"
-            variant="secondary"
-            :loading="actionLoading"
-            @click="sugerirModalOpen = true"
-          >
-            Sugerir novo horário
-          </BaseButton>
-          <BaseButton
-            v-if="agendamento.status === 'PendenteConfirmacao' || agendamento.status === 'Confirmado' || agendamento.status === 'Remarcado'"
-            variant="danger"
-            :loading="actionLoading"
-            @click="cancelModalOpen = true"
-          >
-            Cancelar
-          </BaseButton>
-        </div>
-      </BaseCard>
-
-      <BaseCard title="Histórico">
-        <div v-if="historico.length === 0" class="font-urbanist text-sm text-glow-text-subtle">
-          Nenhum registro no histórico.
-        </div>
-        <ol v-else class="space-y-3">
-          <li
-            v-for="h in historico"
-            :key="h.id"
-            class="border-l-2 border-glow-border-soft pl-4 font-urbanist text-sm"
-          >
-            <p class="font-medium text-glow-text">
-              {{ agendamentoStatusLabel(h.statusAnterior) }} →
-              {{ agendamentoStatusLabel(h.statusNovo) }}
-            </p>
-            <p class="text-xs text-glow-text-subtle">{{ formatDateTime(h.criadoEm) }}</p>
-            <p v-if="h.usuarioExecutorNome" class="text-xs text-glow-text-subtle">
-              por {{ h.usuarioExecutorNome }}
-            </p>
-            <p v-if="h.motivo" class="text-xs text-glow-text-subtle">{{ h.motivo }}</p>
-          </li>
-        </ol>
-      </BaseCard>
+      </div>
     </template>
 
     <BaseAlert v-else variant="error">Agendamento não encontrado.</BaseAlert>
+
     <CancelarAgendamentoModal v-model="cancelModalOpen" @confirm="handleCancelar" />
 
     <div
@@ -224,14 +272,15 @@ watch(
       role="dialog"
       aria-modal="true"
     >
-      <BaseCard title="Sugerir novo horário" class="w-full max-w-md">
-        <div class="space-y-3">
+      <div class="agendamento-detail-panel w-full max-w-md">
+        <div class="agendamento-detail-panel__body space-y-4">
+          <h3 class="font-satoshi text-lg font-bold text-glow-text">Sugerir novo horário</h3>
           <div>
             <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">Data</label>
             <input
               v-model="sugerirData"
               type="date"
-              class="w-full rounded border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
+              class="w-full rounded-xl border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
             />
           </div>
           <div>
@@ -239,23 +288,36 @@ watch(
             <input
               v-model="sugerirHorario"
               type="time"
-              class="w-full rounded border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
+              class="w-full rounded-xl border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
             />
           </div>
           <div>
             <label class="mb-1 block font-urbanist text-sm font-medium text-glow-text">Motivo</label>
             <textarea
               v-model="sugerirMotivo"
-              rows="2"
-              class="w-full rounded border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
+              rows="3"
+              class="agendamento-detail-obs-box w-full"
             />
           </div>
+          <div class="agendamento-detail-actions">
+            <button
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--secondary min-w-[132px]"
+              @click="sugerirModalOpen = false"
+            >
+              Fechar
+            </button>
+            <button
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--confirm min-w-[132px]"
+              :disabled="actionLoading"
+              @click="handleSugerirRemarcacao"
+            >
+              Enviar sugestão
+            </button>
+          </div>
         </div>
-        <div class="mt-4 flex gap-2">
-          <BaseButton variant="secondary" @click="sugerirModalOpen = false">Fechar</BaseButton>
-          <BaseButton :loading="actionLoading" @click="handleSugerirRemarcacao">Enviar sugestão</BaseButton>
-        </div>
-      </BaseCard>
+      </div>
     </div>
   </div>
 </template>

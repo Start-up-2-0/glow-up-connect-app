@@ -531,4 +531,364 @@
   .equipe-acao-card {
     @apply rounded-xl border border-glow-border-soft bg-glow-surface p-5 shadow-sm transition hover:border-glow-gold-dark hover:bg-glow-hover-surface;
   }
+
+  /* Agenda + Meus agendamentos — Figma nodes 460:657 / 487:1404 */
+  .agenda-page {
+    @apply space-y-6;
+  }
+
+  .agenda-page__header {
+    @apply flex flex-col gap-4 border-b border-glow-border-soft pb-6 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .agenda-page__title-row {
+    @apply flex flex-wrap items-baseline gap-x-2 gap-y-1;
+  }
+
+  .agenda-page__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .agenda-page__title-date {
+    @apply inline-flex items-center gap-2 font-satoshi text-sm font-medium text-glow-text-muted;
+  }
+
+  .agenda-page__title-dot {
+    @apply size-1.5 rounded-full bg-glow-text-muted;
+  }
+
+  .agenda-page__subtitle {
+    @apply mt-1 font-satoshi text-base text-glow-text-subtle;
+  }
+
+  .agenda-page__filters {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .agenda-filter-btn {
+    @apply inline-flex h-[38px] items-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 font-urbanist text-sm font-semibold text-glow-text-subtle transition hover:bg-glow-hover-surface;
+  }
+
+  .agenda-filter-btn--active {
+    @apply border-glow-gold-dark bg-glow-gold-soft text-glow-text;
+  }
+
+  .agenda-cards-grid {
+    @apply grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 min-[1800px]:grid-cols-5;
+  }
+
+  .agendamento-card {
+    @apply relative flex min-h-[154px] flex-col rounded-xl border-l-4 bg-glow-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02),0_0_0_1px_rgba(27,31,35,0.15)] transition hover:bg-glow-hover-surface;
+  }
+
+  .agendamento-card--tall {
+    @apply min-h-[177px];
+  }
+
+  .agendamento-card--interactive {
+    @apply cursor-pointer;
+  }
+
+  .agendamento-card--confirmado {
+    @apply border-l-[#0d5428];
+  }
+
+  .agendamento-card--pendente {
+    @apply border-l-[#ffbf00];
+  }
+
+  .agendamento-card--em-atendimento {
+    @apply border-l-[#7a7b7a];
+  }
+
+  .agendamento-card--concluido {
+    @apply border-l-[#3c5ccf];
+  }
+
+  .agendamento-card--remarcado {
+    @apply border-l-[#aa682d];
+  }
+
+  .agendamento-card--cancelado {
+    @apply border-l-[#cf3f3f];
+  }
+
+  .agendamento-card--default {
+    @apply border-l-glow-border-soft;
+  }
+
+  .agendamento-card__title {
+    @apply font-urbanist text-base font-semibold text-glow-text;
+  }
+
+  .agendamento-card__subtitle {
+    @apply mt-1 line-clamp-2 font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .agendamento-card__meta-row {
+    @apply mt-3 flex items-center gap-2 font-urbanist text-sm font-medium text-glow-text-hover;
+  }
+
+  .agendamento-card__meta-icon {
+    @apply size-3.5 shrink-0 text-glow-text-hover;
+  }
+
+  .agendamento-card__footer {
+    @apply mt-auto flex items-end justify-between gap-2 pt-4;
+  }
+
+  .agendamento-card__price {
+    @apply inline-flex items-center rounded-full bg-[#c4f2cc] px-4 py-0.5 font-urbanist text-sm font-bold text-[#0d5428] dark:bg-emerald-900/30 dark:text-emerald-300;
+  }
+
+  .agendamento-card__pending-label {
+    @apply mb-2 font-urbanist text-xs font-semibold uppercase tracking-wide text-glow-text;
+  }
+
+  .agendamento-card__actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .agendamento-card__btn-confirm {
+    @apply inline-flex h-8 min-w-[126px] items-center justify-center gap-1 rounded-xl border-[0.5px] border-glow-border-soft bg-[#4bc281] px-3 font-satoshi text-xs font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .agendamento-card__btn-cancel {
+    @apply inline-flex h-8 min-w-[126px] items-center justify-center gap-1 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3 font-satoshi text-xs font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .agendamento-badge {
+    @apply inline-flex items-center justify-center rounded-full px-4 py-1 font-urbanist text-xs font-medium;
+  }
+
+  .agendamento-badge--confirmado {
+    @apply bg-[#c4f2cc] text-[#0d5428] dark:bg-emerald-900/30 dark:text-emerald-300;
+  }
+
+  .agendamento-badge--pendente {
+    @apply bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-200;
+  }
+
+  .agendamento-badge--em-atendimento {
+    @apply bg-[rgba(122,123,122,0.1)] text-[#7a7b7a];
+  }
+
+  .agendamento-badge--concluido {
+    @apply bg-[rgba(60,92,207,0.2)] text-[#3c5ccf] dark:bg-blue-900/30 dark:text-blue-300;
+  }
+
+  .agendamento-badge--remarcado {
+    @apply bg-[rgba(170,104,45,0.2)] text-[#aa682d] dark:bg-orange-900/30 dark:text-orange-300;
+  }
+
+  .agendamento-badge--cancelado {
+    @apply bg-[rgba(207,63,63,0.2)] text-[#cf3f3f] dark:bg-red-900/30 dark:text-red-300;
+  }
+
+  .agendamento-badge--default {
+    @apply bg-glow-canvas text-glow-text-subtle;
+  }
+
+  .agenda-filter-menu {
+    @apply absolute right-0 z-20 mt-2 min-w-[200px] overflow-hidden rounded-xl border border-glow-border-soft bg-glow-surface py-1 shadow-lg;
+  }
+
+  .agenda-filter-menu__item {
+    @apply block w-full px-4 py-2.5 text-left font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .agenda-filter-menu__item--active {
+    @apply bg-glow-gold-soft font-semibold;
+  }
+
+  /* Detalhe do agendamento — Figma nodes 409:885 / 470:1460 */
+  .agendamento-detail-page {
+    @apply space-y-6;
+  }
+
+  .agendamento-detail-header {
+    @apply flex items-start gap-3 border-b border-glow-border-soft pb-6;
+  }
+
+  .agendamento-detail-back {
+    @apply mt-1 flex size-8 shrink-0 items-center justify-center rounded-lg border border-glow-border-soft bg-glow-surface text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .agendamento-detail-header__text {
+    @apply min-w-0 flex-1;
+  }
+
+  .agendamento-detail-title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .agendamento-detail-subtitle {
+    @apply mt-1 font-satoshi text-base font-medium text-glow-text-muted;
+  }
+
+  .agendamento-detail-grid {
+    @apply grid gap-6 xl:grid-cols-2;
+  }
+
+  .agendamento-detail-column {
+    @apply space-y-6;
+  }
+
+  .agendamento-detail-section-title {
+    @apply mb-3 font-satoshi text-sm font-medium uppercase tracking-wide text-glow-text-soft;
+  }
+
+  .agendamento-detail-panel {
+    @apply overflow-hidden rounded-xl bg-glow-surface shadow-[0_1px_3px_rgba(0,0,0,0.02),0_0_0_1px_rgba(27,31,35,0.15)];
+  }
+
+  .agendamento-detail-panel__body {
+    @apply space-y-5 p-5;
+  }
+
+  .agendamento-detail-panel__header {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  .agendamento-detail-pending-alert {
+    @apply inline-flex items-center gap-1 rounded-xl border border-[#c3a600] bg-[#fbed99] px-5 py-1 font-urbanist text-sm font-medium text-[#524917];
+  }
+
+  .agendamento-detail-field {
+    @apply flex gap-3;
+  }
+
+  .agendamento-detail-field__icon {
+    @apply flex size-[30px] shrink-0 items-center justify-center rounded border border-glow-border-soft bg-glow-canvas text-glow-text-subtle;
+  }
+
+  .agendamento-detail-field__label {
+    @apply font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .agendamento-detail-field__value {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .agendamento-detail-divider {
+    @apply border-t border-glow-border-soft;
+  }
+
+  .agendamento-detail-total-row {
+    @apply flex items-center justify-between gap-3 pt-1;
+  }
+
+  .agendamento-detail-total-label {
+    @apply font-urbanist text-sm font-medium text-glow-text-soft;
+  }
+
+  .agendamento-detail-total-value {
+    @apply font-urbanist text-xl font-bold text-glow-text;
+  }
+
+  .agendamento-detail-obs-label {
+    @apply font-urbanist text-sm font-medium text-glow-text-soft;
+  }
+
+  .agendamento-detail-obs-box {
+    @apply min-h-[82px] rounded-xl border border-glow-text-subtle px-5 py-3 font-urbanist text-sm text-glow-text;
+  }
+
+  .agendamento-detail-service-row {
+    @apply flex items-start gap-3 border-b border-glow-border-soft pb-4 last:border-b-0 last:pb-0;
+  }
+
+  .agendamento-detail-service-avatar {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-full bg-glow-text-subtle font-urbanist text-sm font-semibold text-white;
+  }
+
+  .agendamento-detail-service-main {
+    @apply min-w-0 flex-1;
+  }
+
+  .agendamento-detail-service-name {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .agendamento-detail-service-professional {
+    @apply mt-0.5 font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .agendamento-detail-service-side {
+    @apply shrink-0 text-right;
+  }
+
+  .agendamento-detail-service-time {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .agendamento-detail-service-price {
+    @apply mt-0.5 font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .agendamento-detail-historico {
+    @apply relative space-y-5 pl-6;
+  }
+
+  .agendamento-detail-historico::before {
+    content: '';
+    @apply absolute bottom-2 left-[6px] top-2 w-px bg-glow-border-soft;
+  }
+
+  .agendamento-detail-historico-item {
+    @apply relative;
+  }
+
+  .agendamento-detail-historico-item::before {
+    content: '';
+    @apply absolute -left-6 top-1.5 size-3.5 rounded-full border-2 border-glow-surface bg-[#4bc281];
+  }
+
+  .agendamento-detail-historico-status {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .agendamento-detail-historico-meta {
+    @apply mt-0.5 font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .agendamento-detail-actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .agendamento-detail-btn {
+    @apply inline-flex h-8 items-center justify-center gap-1 rounded-xl border-[0.5px] px-3 font-satoshi text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .agendamento-detail-btn--confirm {
+    @apply min-w-[132px] border-glow-border-soft bg-[#4bc281] text-white hover:brightness-95;
+  }
+
+  .agendamento-detail-btn--secondary {
+    @apply border-glow-border-soft bg-glow-surface text-glow-text hover:bg-glow-hover-surface;
+  }
+
+  .agendamento-detail-btn--danger {
+    @apply min-w-[132px] border-[#cf3f3f] bg-glow-surface text-[#cf3f3f] hover:bg-red-50 dark:hover:bg-red-950/20;
+  }
+
+  .agendamento-detail-remarcar-panel {
+    @apply mt-6 space-y-5 rounded-xl bg-glow-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02),0_0_0_1px_rgba(27,31,35,0.15)];
+  }
+
+  .agendamento-detail-remarcar-title {
+    @apply font-satoshi text-sm font-medium uppercase tracking-wide text-glow-text-soft;
+  }
+
+  .agendamento-detail-slot-grid {
+    @apply grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6;
+  }
+
+  .agendamento-detail-slot-btn {
+    @apply flex h-[35px] items-center justify-center rounded-lg border border-glow-border-soft bg-glow-surface font-satoshi text-base text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .agendamento-detail-slot-btn--selected {
+    @apply border-glow-gold-dark bg-glow-gold-soft;
+  }
 }

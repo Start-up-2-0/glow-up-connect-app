@@ -1,95 +1,110 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import BaseCard from '@/components/ui/BaseCard.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
-import AgendamentoStatusBadge from '@/components/cliente/AgendamentoStatusBadge.vue'
+import AgendaPageHeader from '@/components/agenda/AgendaPageHeader.vue'
+import AgendaFilterDropdown from '@/components/agenda/AgendaFilterDropdown.vue'
+import AgendamentoCard from '@/components/agenda/AgendamentoCard.vue'
 import { useAgendamentosStore } from '@/stores/agendamentos.store'
+import { useMeusAgendamentosFilters } from '@/composables/useAgendaPageFilters'
 import { agendamentoDetalhePath } from '@/constants/routes'
-import type { AgendamentoOrdenacao } from '@/types/agendamento.types'
-import { formatAgendaDateTime, formatCurrency } from '@/utils/formatters'
 
 const store = useAgendamentosStore()
 const { itens, total, loading } = storeToRefs(store)
 
-const ordenacao = ref<AgendamentoOrdenacao>('proximos')
+const {
+  statusFilter,
+  periodFilter,
+  statusOptions,
+  periodOptions,
+  apiFiltro,
+} = useMeusAgendamentosFilters()
 
 async function load(reset = true) {
-  await store.fetchLista({ ordenacao: ordenacao.value, pagina: 1 }, !reset)
+  await store.fetchLista({ ...apiFiltro.value, pagina: 1 }, !reset)
 }
 
 async function loadMore() {
   await store.fetchLista(
-    { ordenacao: ordenacao.value, pagina: store.pagina + 1 },
+    { ...apiFiltro.value, pagina: store.pagina + 1 },
     true,
   )
 }
 
 onMounted(() => load(true))
+
+watch([statusFilter, periodFilter], () => {
+  void load(true)
+})
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-          Meus agendamentos
-        </h1>
-        <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-          Acompanhe, cancele ou remarque seus horários.
-        </p>
-      </div>
+  <div class="agenda-page">
+    <AgendaPageHeader
+      title="Meus agendamentos"
+      subtitle="Acompanhe, cancele ou remarque seus horários."
+    >
+      <template #filters>
+        <AgendaFilterDropdown
+          v-model="statusFilter"
+          button-label="Filtrar por Status"
+          :options="statusOptions"
+        >
+          <template #icon>
+            <svg class="size-5 shrink-0" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.2" />
+              <path d="M10 5.5V10l2.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+          </template>
+        </AgendaFilterDropdown>
 
-      <select
-        v-model="ordenacao"
-        class="rounded border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
-        @change="load(true)"
-      >
-        <option value="proximos">Próximos</option>
-        <option value="recentes">Recentes</option>
-      </select>
-    </div>
+        <AgendaFilterDropdown
+          v-model="periodFilter"
+          button-label="Filtrar por Período"
+          :options="periodOptions"
+        >
+          <template #icon>
+            <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+              <path d="M5 1.5V4M11 1.5V4M1.5 6.5H14.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+          </template>
+        </AgendaFilterDropdown>
+      </template>
+    </AgendaPageHeader>
 
     <LoadingSpinner v-if="loading && itens.length === 0" />
 
-    <BaseCard v-else-if="itens.length === 0">
-      <EmptyState
-        title="Nenhum agendamento"
-        description="Quando você agendar em uma loja, seus horários aparecerão aqui."
-      />
-    </BaseCard>
+    <EmptyState
+      v-else-if="itens.length === 0"
+      title="Nenhum agendamento"
+      description="Quando você agendar em uma loja, seus horários aparecerão aqui."
+    />
 
-    <div v-else class="space-y-3">
-      <RouterLink
-        v-for="item in itens"
-        :key="item.id"
-        :to="agendamentoDetalhePath(item.id)"
-        class="block rounded-lg border border-glow-border-soft bg-glow-surface p-4 transition-colors hover:border-glow-gold-dark hover:bg-glow-hover-surface"
-      >
-        <div class="flex flex-wrap items-start justify-between gap-2">
-          <div class="min-w-0">
-            <p class="font-urbanist text-base font-semibold text-glow-text">
-              {{ item.estabelecimentoNome }}
-            </p>
-            <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-              {{ formatAgendaDateTime(item.inicio) }}
-            </p>
-          </div>
-          <AgendamentoStatusBadge :status="item.status" />
-        </div>
-        <p class="mt-2 font-urbanist text-sm font-medium text-glow-text">
-          {{ formatCurrency(item.valorTotal) }}
-        </p>
-      </RouterLink>
+    <template v-else>
+      <div class="agenda-cards-grid">
+        <AgendamentoCard
+          v-for="item in itens"
+          :key="item.id"
+          :title="item.estabelecimentoNome"
+          :inicio="item.inicio"
+          :valor-total="item.valorTotal"
+          :status="item.status"
+          :to="agendamentoDetalhePath(item.id)"
+        />
+      </div>
 
       <div v-if="itens.length < total" class="flex justify-center pt-2">
-        <BaseButton variant="secondary" :loading="loading" @click="loadMore">
-          Carregar mais
-        </BaseButton>
+        <button
+          type="button"
+          class="agenda-filter-btn"
+          :disabled="loading"
+          @click="loadMore"
+        >
+          {{ loading ? 'Carregando…' : 'Carregar mais' }}
+        </button>
       </div>
-    </div>
+    </template>
   </div>
 </template>

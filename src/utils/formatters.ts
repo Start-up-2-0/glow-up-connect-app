@@ -219,6 +219,43 @@ export function formatDateOnlyLong(isoDate: string): string {
   }).format(date)
 }
 
+/** Data curta numérica (ex.: 10/06/2026) para cabeçalhos de agenda. */
+export function formatDateShortNumeric(date: Date = new Date()): string {
+  return new Intl.DateTimeFormat('pt-BR').format(date)
+}
+
+/** Data em card de agenda (ex.: 10 de junho de 2026). */
+export function formatAgendaDetailSubtitle(iso: string): string {
+  const datePart = toDateOnlyFromIsoUtc(iso)
+  return `${formatDateOnlyMedium(datePart)}, às ${formatAgendaTime(iso)}`
+}
+
+export function initialsFromName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+}
+
+export function formatHistoricoMeta(iso: string, executor?: string | null): string {
+  const d = new Date(iso)
+  const date = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(d)
+  const time = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', hour12: false })
+  return executor ? `${date} ${time} - por ${executor}` : `${date} ${time}`
+}
+
+export function formatAgendaCardDate(iso: string): string {
+  const isoDate = iso.includes('T') ? toDateOnlyFromIsoUtc(iso) : iso
+  const [year, month, day] = isoDate.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  const formatted = new Intl.DateTimeFormat('pt-BR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(date)
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1)
+}
+
 /** Rótulo médio para horário (ex.: segunda-feira, 08 de junho). */
 export function formatDateOnlyMedium(isoDate: string): string {
   const [year, month, day] = isoDate.split('-').map(Number)

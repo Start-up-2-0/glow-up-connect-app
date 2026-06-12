@@ -1,40 +1,42 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { RouterLink } from 'vue-router'
-import BaseCard from '@/components/ui/BaseCard.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
+import { useRoute } from 'vue-router'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
-import AgendamentoStatusBadge from '@/components/cliente/AgendamentoStatusBadge.vue'
+import AgendaPageHeader from '@/components/agenda/AgendaPageHeader.vue'
+import AgendaFilterDropdown from '@/components/agenda/AgendaFilterDropdown.vue'
+import AgendamentoCard from '@/components/agenda/AgendamentoCard.vue'
 import CancelarAgendamentoModal from '@/components/cliente/CancelarAgendamentoModal.vue'
-import NotificacoesIndicador from '@/components/negocio/NotificacoesIndicador.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
-import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
+import { useAgendaPageFilters } from '@/composables/useAgendaPageFilters'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { agendaNegocioService } from '@/services/agendaNegocioService'
 import type { AgendaGeral, AgendaProfissional } from '@/types/negocio/agenda.types'
-import {
-  agendaDetalhePath,
-  ROUTE_PATHS,
-} from '@/constants/routes'
-import { formatAgendaDateTime, formatCurrency } from '@/utils/formatters'
+import { agendaDetalhePath } from '@/constants/routes'
+import { formatDateShortNumeric } from '@/utils/formatters'
 
-function dayRange(date: Date) {
-  const inicio = new Date(date)
-  inicio.setHours(0, 0, 0, 0)
-  const fim = new Date(date)
-  fim.setHours(23, 59, 59, 999)
-  return { inicio: inicio.toISOString(), fim: fim.toISOString() }
-}
-
+const route = useRoute()
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
 const { possuiPermissao } = useNegocioContext()
-const { linkAgendamentoPublico } = useAcessoUsuario()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
+
+const {
+  statusFilter,
+  periodFilter,
+  statusOptions,
+  periodOptions,
+  dateRange,
+  matchesStatus,
+} = useAgendaPageFilters('hoje')
+
+const periodoFromQuery = route.query.periodo
+if (periodoFromQuery === 'semana' || periodoFromQuery === 'mes') {
+  periodFilter.value = periodoFromQuery
+}
 
 const agendaGeral = ref<AgendaGeral[]>([])
 const agendaPropria = ref<AgendaProfissional[]>([])
@@ -48,47 +50,53 @@ const podeConfirmarOuCancelar = computed(
   () => possuiPermissao('AgendaCancelar') || possuiPermissao('AgendaReagendar'),
 )
 
-const linkCopiado = ref(false)
+const pageTitle = computed(() => {
+  if (periodFilter.value === 'semana') return visaoGeral.value ? 'Agenda da semana' : 'Meus agendamentos da semana'
+  if (periodFilter.value === 'mes') return visaoGeral.value ? 'Agenda do mês' : 'Meus agendamentos do mês'
+  return visaoGeral.value ? 'Agenda de hoje' : 'Meus agendamentos de hoje'
+})
 
-async function copiarLinkAgendamento() {
-  if (!linkAgendamentoPublico.value) return
-  try {
-    await navigator.clipboard.writeText(linkAgendamentoPublico.value)
-    linkCopiado.value = true
-    notifications.push('success', 'Link copiado!')
-    window.setTimeout(() => {
-      linkCopiado.value = false
-    }, 2000)
-  } catch {
-    notifications.push('error', 'Não foi possível copiar o link.')
-  }
-}
+const pageSubtitle = computed(() => {
+  if (periodFilter.value === 'semana') return 'Visão semanal dos agendamentos.'
+  if (periodFilter.value === 'mes') return 'Visão mensal dos agendamentos.'
+  return visaoGeral.value
+    ? 'Agendamentos do dia atual.'
+    : 'Horários marcados com você nesta loja.'
+})
 
-const itensHoje = computed(() => {
-  if (visaoGeral.value) {
-    return agendaGeral.value.map((a) => ({
-      id: a.id,
-      clienteNome: a.clienteNome,
-      status: a.status,
-      valorTotal: a.valorTotal,
-      inicio: a.inicio || a.itens[0]?.inicio || '',
-      label: a.itens.map((i) => i.servicoNome).join(', '),
-    }))
-  }
-  return agendaPropria.value.map((a) => ({
-    id: a.agendamentoId,
-    clienteNome: a.clienteNome,
-    status: a.status,
-    valorTotal: 0,
-    inicio: a.inicio,
-    label: a.servicoNome,
-  }))
+const showDateInTitle = computed(() => periodFilter.value === 'hoje')
+const dateLabel = computed(() => (showDateInTitle.value ? formatDateShortNumeric() : undefined))
+
+const itens = computed(() => {
+  const mapped = visaoGeral.value
+    ? agendaGeral.value.map((a) => ({
+        id: a.id,
+        clienteNome: a.clienteNome,
+        status: a.status,
+        valorTotal: a.valorTotal,
+        inicio: a.inicio || a.itens[0]?.inicio || '',
+        label: a.itens.map((i) => i.servicoNome).join(', '),
+      }))
+    : agendaPropria.value.map((a) => ({
+        id: a.agendamentoId,
+        clienteNome: a.clienteNome,
+        status: a.status,
+        valorTotal: 0,
+        inicio: a.inicio,
+        label: a.servicoNome,
+      }))
+
+  return mapped.filter((item) => matchesStatus(item.status))
 })
 
 async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
-  const filtro = dayRange(new Date())
+  const filtro = {
+    inicio: dateRange.value.inicio,
+    fim: dateRange.value.fim,
+    ...(statusFilter.value ? { status: statusFilter.value } : {}),
+  }
   try {
     if (visaoGeral.value) {
       agendaGeral.value = await agendaNegocioService.listarGeral(estabelecimentoId.value, filtro)
@@ -143,102 +151,78 @@ watch(
   },
   { immediate: true },
 )
+
+watch([statusFilter, periodFilter], () => {
+  if (ready.value) void load()
+})
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-          {{ visaoGeral ? 'Agenda de hoje' : 'Meus agendamentos de hoje' }}
-        </h1>
-        <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-          {{
-            visaoGeral
-              ? 'Agendamentos do dia atual.'
-              : 'Horários marcados com você nesta loja.'
-          }}
-        </p>
-        <NotificacoesIndicador class="mt-2" />
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <RouterLink :to="ROUTE_PATHS.AGENDA_SEMANA">
-          <BaseButton variant="secondary" size="sm">Semana</BaseButton>
-        </RouterLink>
-        <RouterLink :to="ROUTE_PATHS.AGENDA_MES">
-          <BaseButton variant="secondary" size="sm">Mês</BaseButton>
-        </RouterLink>
-      </div>
-    </div>
+  <div class="agenda-page">
+    <AgendaPageHeader
+      :title="pageTitle"
+      :subtitle="pageSubtitle"
+      :date-label="dateLabel"
+    >
+      <template #filters>
+        <AgendaFilterDropdown
+          v-model="statusFilter"
+          button-label="Filtrar por Status"
+          :options="statusOptions"
+        >
+          <template #icon>
+            <svg class="size-5 shrink-0" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.2" />
+              <path d="M10 5.5V10l2.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+          </template>
+        </AgendaFilterDropdown>
 
-    <BaseCard v-if="linkAgendamentoPublico" title="Seu link de agendamento">
-      <p class="mb-3 font-urbanist text-sm text-glow-text-subtle">
-        Compartilhe este link para que clientes agendem diretamente com você nesta loja.
-      </p>
-      <p class="mb-3 break-all rounded-lg bg-glow-canvas px-3 py-2 font-urbanist text-xs text-glow-text">
-        {{ linkAgendamentoPublico }}
-      </p>
-      <BaseButton variant="secondary" size="sm" @click="copiarLinkAgendamento">
-        {{ linkCopiado ? 'Copiado!' : 'Copiar link' }}
-      </BaseButton>
-    </BaseCard>
+        <AgendaFilterDropdown
+          v-model="periodFilter"
+          button-label="Filtrar por Período"
+          :options="periodOptions"
+        >
+          <template #icon>
+            <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+              <path d="M5 1.5V4M11 1.5V4M1.5 6.5H14.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+          </template>
+        </AgendaFilterDropdown>
+      </template>
+    </AgendaPageHeader>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
 
-    <LoadingSpinner v-if="contextLoading || (loading && itensHoje.length === 0)" />
+    <LoadingSpinner v-if="contextLoading || (loading && itens.length === 0)" />
 
-    <BaseCard v-else-if="itensHoje.length === 0">
-      <EmptyState
-        title="Nenhum agendamento hoje"
-        description="Não há horários marcados para o dia de hoje."
-      />
-    </BaseCard>
+    <EmptyState
+      v-else-if="itens.length === 0"
+      title="Nenhum agendamento"
+      description="Não há horários para o período e filtros selecionados."
+    />
 
-    <div v-else class="space-y-3">
-      <div
-        v-for="item in itensHoje"
+    <div v-else class="agenda-cards-grid">
+      <AgendamentoCard
+        v-for="item in itens"
         :key="item.id"
-        class="rounded-lg border border-glow-border-soft bg-glow-surface p-4"
-      >
-        <div class="flex flex-wrap items-start justify-between gap-2">
-          <div class="min-w-0">
-            <RouterLink
-              :to="agendaDetalhePath(item.id)"
-              class="font-urbanist text-base font-semibold text-glow-text hover:text-glow-gold-dark"
-            >
-              {{ item.clienteNome }}
-            </RouterLink>
-            <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-              {{ item.inicio ? formatAgendaDateTime(item.inicio) : '—' }}
-            </p>
-            <p class="mt-1 font-urbanist text-sm text-glow-text">{{ item.label }}</p>
-            <p v-if="item.valorTotal > 0" class="mt-1 font-urbanist text-sm font-medium text-glow-text">
-              {{ formatCurrency(item.valorTotal) }}
-            </p>
-          </div>
-          <AgendamentoStatusBadge :status="item.status" />
-        </div>
-        <div
-          v-if="item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar"
-          class="mt-3 flex flex-wrap gap-2"
-        >
-          <BaseButton
-            size="sm"
-            :loading="actionId === item.id"
-            @click="handleConfirmar(item.id)"
-          >
-            Confirmar
-          </BaseButton>
-          <BaseButton
-            variant="danger"
-            size="sm"
-            :loading="actionId === item.id"
-            @click="abrirCancelar(item.id)"
-          >
-            Cancelar
-          </BaseButton>
-        </div>
-      </div>
+        :title="item.clienteNome"
+        :subtitle="item.label"
+        :inicio="item.inicio"
+        :valor-total="item.valorTotal"
+        :status="item.status"
+        tall
+        :to="
+          item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar
+            ? undefined
+            : agendaDetalhePath(item.id)
+        "
+        :show-actions="item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar"
+        :action-loading="actionId === item.id"
+        @confirm="handleConfirmar(item.id)"
+        @cancel="abrirCancelar(item.id)"
+      />
     </div>
 
     <CancelarAgendamentoModal v-model="cancelModalOpen" @confirm="handleCancelar" />
