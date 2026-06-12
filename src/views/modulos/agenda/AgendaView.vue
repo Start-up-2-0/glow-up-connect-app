@@ -295,9 +295,7 @@ watch([statusFilter, periodFilter], () => {
         :status="item.status"
         tall
         :to="
-          (item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar) ||
-          (podeIniciarAtendimento && statusPermiteIniciarCard(item)) ||
-          (podeFinalizarAtendimento && statusPermiteFinalizarCard(item))
+          item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar
             ? undefined
             : agendaDetalhePath(item.id)
         "
