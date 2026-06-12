@@ -15,17 +15,24 @@ const props = defineProps<{
   tall?: boolean
   to?: string | undefined
   showActions?: boolean
+  showAtendimentoActions?: boolean
+  podeIniciarAtendimento?: boolean
+  podeFinalizarAtendimento?: boolean
   actionLoading?: boolean
 }>()
 
 const emit = defineEmits<{
   confirm: []
   cancel: []
+  iniciarAtendimento: []
+  finalizarAtendimento: []
 }>()
 
 const theme = computed(() => resolveAgendamentoStatusTheme(props.status))
 const isPending = computed(() => props.status === 'PendenteConfirmacao')
-const showStatusBadge = computed(() => !isPending.value || !props.showActions)
+const showStatusBadge = computed(
+  () => (!isPending.value || !props.showActions) && !props.showAtendimentoActions,
+)
 const rootTag = computed(() => (props.to ? RouterLink : 'div'))
 
 const cardClasses = computed(() => [
@@ -93,6 +100,29 @@ const cardClasses = computed(() => [
             <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
           </svg>
           Cancelar
+        </button>
+      </div>
+    </div>
+
+    <div v-else-if="showAtendimentoActions" class="mt-3">
+      <div class="agendamento-card__actions">
+        <button
+          v-if="podeIniciarAtendimento"
+          type="button"
+          class="agendamento-card__btn-confirm"
+          :disabled="actionLoading"
+          @click.stop="emit('iniciarAtendimento')"
+        >
+          Iniciar atendimento
+        </button>
+        <button
+          v-if="podeFinalizarAtendimento"
+          type="button"
+          class="agendamento-card__btn-cancel border-glow-border-soft text-glow-text"
+          :disabled="actionLoading"
+          @click.stop="emit('finalizarAtendimento')"
+        >
+          Concluir atendimento
         </button>
       </div>
     </div>

@@ -15,6 +15,7 @@ export const API_ERROR_MESSAGES: Record<string, string> = {
   LOCALIZACAO_CLIENTE_INVALIDA: 'Localização inválida. Verifique as coordenadas ou tente novamente.',
   AGENDAMENTO_NAO_ENCONTRADO: 'Agendamento não encontrado.',
   AGENDAMENTO_STATUS_INVALIDO: 'Esta ação não é permitida para o status atual do agendamento.',
+  ATENDIMENTO_STATUS_INVALIDO: 'Esta ação não é permitida para o status atual do atendimento.',
   HORARIO_INDISPONIVEL: 'Horário indisponível. Escolha outro horário.',
   CONVITE_NEGOCIO_NAO_ENCONTRADO: 'Convite não encontrado ou inválido.',
   CONVITE_NEGOCIO_INVALIDO: 'Convite expirado, já respondido ou destinado a outro e-mail.',

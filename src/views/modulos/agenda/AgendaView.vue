@@ -16,6 +16,10 @@ import { agendaNegocioService } from '@/services/agendaNegocioService'
 import type { AgendaGeral, AgendaProfissional } from '@/types/negocio/agenda.types'
 import { agendaDetalhePath } from '@/constants/routes'
 import { formatDateShortNumeric } from '@/utils/formatters'
+import {
+  podeFinalizarItemAtendimento,
+  podeIniciarItemAtendimento,
+} from '@/utils/agendamentoAtendimento'
 
 const route = useRoute()
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
@@ -49,6 +53,8 @@ const visaoGeral = computed(() => possuiPermissao('AgendaVisualizarGeral'))
 const podeConfirmarOuCancelar = computed(
   () => possuiPermissao('AgendaCancelar') || possuiPermissao('AgendaReagendar'),
 )
+const podeIniciarAtendimento = computed(() => possuiPermissao('AtendimentoIniciar'))
+const podeFinalizarAtendimento = computed(() => possuiPermissao('AtendimentoFinalizar'))
 
 const pageTitle = computed(() => {
   if (periodFilter.value === 'semana') return visaoGeral.value ? 'Agenda da semana' : 'Meus agendamentos da semana'
@@ -67,27 +73,60 @@ const pageSubtitle = computed(() => {
 const showDateInTitle = computed(() => periodFilter.value === 'hoje')
 const dateLabel = computed(() => (showDateInTitle.value ? formatDateShortNumeric() : undefined))
 
+function itemComAcaoAtendimento(itens: AgendaGeral['itens'], agendamentoStatus: string) {
+  return itens.find(
+    (item) =>
+      podeIniciarItemAtendimento(item.status, agendamentoStatus, item.inicio, item.fim) ||
+      podeFinalizarItemAtendimento(item.status, agendamentoStatus),
+  )
+}
+
 const itens = computed(() => {
   const mapped = visaoGeral.value
-    ? agendaGeral.value.map((a) => ({
+    ? agendaGeral.value.map((a) => {
+        const itemAcao = itemComAcaoAtendimento(a.itens, a.status) ?? a.itens[0]
+        return {
         id: a.id,
+        agendamentoItemId: itemAcao?.id ?? null,
         clienteNome: a.clienteNome,
         status: a.status,
+        agendamentoStatus: a.status,
+        itemStatus: itemAcao?.status ?? a.status,
         valorTotal: a.valorTotal,
-        inicio: a.inicio || a.itens[0]?.inicio || '',
+        inicio: a.inicio || itemAcao?.inicio || '',
+        fim: a.fim || itemAcao?.fim || '',
         label: a.itens.map((i) => i.servicoNome).join(', '),
-      }))
+      }})
     : agendaPropria.value.map((a) => ({
         id: a.agendamentoId,
+        agendamentoItemId: a.agendamentoItemId,
         clienteNome: a.clienteNome,
-        status: a.status,
+        status: a.agendamentoStatus || a.status,
+        agendamentoStatus: a.agendamentoStatus || a.status,
+        itemStatus: a.status,
         valorTotal: 0,
         inicio: a.inicio,
+        fim: a.fim,
         label: a.servicoNome,
       }))
 
   return mapped.filter((item) => matchesStatus(item.status))
 })
+
+function podeIniciarCard(item: (typeof itens.value)[number]): boolean {
+  if (!item.agendamentoItemId) return false
+  return podeIniciarItemAtendimento(
+    item.itemStatus,
+    item.agendamentoStatus,
+    item.inicio,
+    item.fim,
+  )
+}
+
+function podeFinalizarCard(item: (typeof itens.value)[number]): boolean {
+  if (!item.agendamentoItemId) return false
+  return podeFinalizarItemAtendimento(item.itemStatus, item.agendamentoStatus)
+}
 
 async function load() {
   if (!estabelecimentoId.value) return
@@ -127,6 +166,34 @@ async function handleConfirmar(id: number) {
 function abrirCancelar(id: number) {
   cancelTargetId.value = id
   cancelModalOpen.value = true
+}
+
+async function handleIniciarAtendimento(itemId: number) {
+  if (!estabelecimentoId.value) return
+  actionId.value = itemId
+  try {
+    await agendaNegocioService.iniciarAtendimento(estabelecimentoId.value, itemId)
+    notifications.push('success', 'Atendimento iniciado.')
+    await load()
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    actionId.value = null
+  }
+}
+
+async function handleFinalizarAtendimento(itemId: number) {
+  if (!estabelecimentoId.value) return
+  actionId.value = itemId
+  try {
+    await agendaNegocioService.finalizarAtendimento(estabelecimentoId.value, itemId)
+    notifications.push('success', 'Atendimento concluído.')
+    await load()
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    actionId.value = null
+  }
 }
 
 async function handleCancelar(motivo: string) {
@@ -206,7 +273,7 @@ watch([statusFilter, periodFilter], () => {
     <div v-else class="agenda-cards-grid">
       <AgendamentoCard
         v-for="item in itens"
-        :key="item.id"
+        :key="`${item.id}-${item.agendamentoItemId ?? 0}`"
         :title="item.clienteNome"
         :subtitle="item.label"
         :inicio="item.inicio"
@@ -214,14 +281,28 @@ watch([statusFilter, periodFilter], () => {
         :status="item.status"
         tall
         :to="
-          item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar
+          (item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar) ||
+          (podeIniciarAtendimento && podeIniciarCard(item)) ||
+          (podeFinalizarAtendimento && podeFinalizarCard(item))
             ? undefined
             : agendaDetalhePath(item.id)
         "
         :show-actions="item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar"
-        :action-loading="actionId === item.id"
+        :show-atendimento-actions="
+          (podeIniciarAtendimento && podeIniciarCard(item)) ||
+          (podeFinalizarAtendimento && podeFinalizarCard(item))
+        "
+        :pode-iniciar-atendimento="podeIniciarAtendimento && podeIniciarCard(item)"
+        :pode-finalizar-atendimento="podeFinalizarAtendimento && podeFinalizarCard(item)"
+        :action-loading="actionId === item.id || actionId === item.agendamentoItemId"
         @confirm="handleConfirmar(item.id)"
         @cancel="abrirCancelar(item.id)"
+        @iniciar-atendimento="
+          item.agendamentoItemId && handleIniciarAtendimento(item.agendamentoItemId)
+        "
+        @finalizar-atendimento="
+          item.agendamentoItemId && handleFinalizarAtendimento(item.agendamentoItemId)
+        "
       />
     </div>
 

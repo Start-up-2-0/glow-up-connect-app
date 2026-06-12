@@ -58,7 +58,9 @@ const serviceItens = computed(() =>
     servicoNome: item.servicoNome,
     profissionalNome: item.profissionalNome,
     inicio: item.inicio,
+    fim: item.fim,
     valor: item.valor,
+    status: item.status,
   })),
 )
 
@@ -244,7 +246,10 @@ onMounted(load)
         </div>
 
         <div class="agendamento-detail-column">
-          <AgendamentoDetailServices :itens="serviceItens" />
+          <AgendamentoDetailServices
+            :itens="serviceItens"
+            :agendamento-status="agendamento.status"
+          />
         </div>
       </div>
 

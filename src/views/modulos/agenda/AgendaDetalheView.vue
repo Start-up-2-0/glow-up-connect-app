@@ -11,11 +11,20 @@ import AgendamentoDetailSection from '@/components/agenda/detail/AgendamentoDeta
 import AgendamentoDetailServices from '@/components/agenda/detail/AgendamentoDetailServices.vue'
 import AgendamentoDetailHistorico from '@/components/agenda/detail/AgendamentoDetailHistorico.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
+import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { agendaNegocioService } from '@/services/agendaNegocioService'
 import { ROUTE_PATHS } from '@/constants/routes'
-import type { AgendaGeral, AgendamentoHistorico } from '@/types/negocio/agenda.types'
+import type {
+  AgendaGeral,
+  AgendaProfissional,
+  AgendamentoHistorico,
+} from '@/types/negocio/agenda.types'
+import {
+  podeFinalizarItemAtendimento,
+  podeIniciarItemAtendimento,
+} from '@/utils/agendamentoAtendimento'
 import {
   formatAgendaDetailSubtitle,
   formatCurrency,
@@ -24,6 +33,7 @@ import {
 
 const route = useRoute()
 const { estabelecimentoId, ready, error: contextError } = useEstabelecimentoView()
+const { possuiPermissao } = useNegocioContext()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 
@@ -32,11 +42,19 @@ const agendamento = ref<AgendaGeral | null>(null)
 const historico = ref<AgendamentoHistorico[]>([])
 const loading = ref(false)
 const actionLoading = ref(false)
+const atendimentoItemLoadingId = ref<number | null>(null)
 const cancelModalOpen = ref(false)
 const sugerirModalOpen = ref(false)
 const sugerirData = ref('')
 const sugerirHorario = ref('')
 const sugerirMotivo = ref('')
+
+const visaoGeral = computed(() => possuiPermissao('AgendaVisualizarGeral'))
+const podeIniciarAtendimento = computed(() => possuiPermissao('AtendimentoIniciar'))
+const podeFinalizarAtendimento = computed(() => possuiPermissao('AtendimentoFinalizar'))
+const podeGerenciarAgenda = computed(
+  () => possuiPermissao('AgendaCancelar') || possuiPermissao('AgendaReagendar'),
+)
 
 const subtitle = computed(() =>
   agendamento.value?.inicio ? formatAgendaDetailSubtitle(agendamento.value.inicio) : undefined,
@@ -48,7 +66,9 @@ const serviceItens = computed(() =>
     servicoNome: item.servicoNome,
     profissionalNome: item.profissionalNome,
     inicio: item.inicio,
+    fim: item.fim,
     valor: item.valor,
+    status: item.status,
   })),
 )
 
@@ -64,16 +84,71 @@ const showCancelar = computed(() => {
   return status === 'PendenteConfirmacao' || status === 'Confirmado' || status === 'Remarcado'
 })
 
+const showIniciarAtendimentoGeral = computed(() => {
+  if (!agendamento.value || !podeIniciarAtendimento.value) return false
+  return agendamento.value.itens.some((item) =>
+    podeIniciarItemAtendimento(
+      item.status,
+      agendamento.value!.status,
+      item.inicio,
+      item.fim,
+    ),
+  )
+})
+
+const showConcluirAtendimentoGeral = computed(() => {
+  if (!agendamento.value || !podeFinalizarAtendimento.value) return false
+  return agendamento.value.itens.some((item) =>
+    podeFinalizarItemAtendimento(item.status, agendamento.value!.status),
+  )
+})
+
+function mapProfissionalParaAgendamento(itens: AgendaProfissional[]): AgendaGeral | null {
+  const doAgendamento = itens.filter((item) => item.agendamentoId === agendamentoId.value)
+  if (doAgendamento.length === 0) return null
+
+  const primeiro = doAgendamento[0]!
+  return {
+    id: primeiro.agendamentoId,
+    usuarioClienteId: primeiro.usuarioClienteId,
+    clienteNome: primeiro.clienteNome,
+    clienteEmail: primeiro.clienteEmail,
+    clienteTelefone: primeiro.clienteTelefone,
+    status: primeiro.agendamentoStatus || primeiro.status,
+    valorTotal: 0,
+    inicio: primeiro.inicio,
+    fim: primeiro.fim,
+    observacao: null,
+    itens: doAgendamento.map((item) => ({
+      id: item.agendamentoItemId,
+      servicoId: item.servicoId,
+      servicoNome: item.servicoNome,
+      profissionalId: 0,
+      profissionalNome: '',
+      inicio: item.inicio,
+      fim: item.fim,
+      valor: 0,
+      status: item.status,
+    })),
+  }
+}
+
 async function load() {
   if (!estabelecimentoId.value || !Number.isFinite(agendamentoId.value)) return
   loading.value = true
   try {
-    const lista = await agendaNegocioService.listarGeral(estabelecimentoId.value)
-    agendamento.value = lista.find((a) => a.id === agendamentoId.value) ?? null
-    historico.value = await agendaNegocioService.historico(
-      estabelecimentoId.value,
-      agendamentoId.value,
-    )
+    if (visaoGeral.value) {
+      const lista = await agendaNegocioService.listarGeral(estabelecimentoId.value)
+      agendamento.value = lista.find((a) => a.id === agendamentoId.value) ?? null
+      historico.value = await agendaNegocioService.historico(
+        estabelecimentoId.value,
+        agendamentoId.value,
+      )
+    } else {
+      const lista = await agendaNegocioService.listarPropria(estabelecimentoId.value)
+      agendamento.value = mapProfissionalParaAgendamento(lista)
+      historico.value = []
+    }
   } catch (err) {
     notifications.push('error', resolveError(err, 'Agendamento não encontrado.'))
   } finally {
@@ -93,6 +168,48 @@ async function handleConfirmar() {
   } finally {
     actionLoading.value = false
   }
+}
+
+async function handleIniciarAtendimento(itemId: number | string) {
+  if (!estabelecimentoId.value) return
+  atendimentoItemLoadingId.value = Number(itemId)
+  try {
+    await agendaNegocioService.iniciarAtendimento(estabelecimentoId.value, Number(itemId))
+    notifications.push('success', 'Atendimento iniciado.')
+    await load()
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    atendimentoItemLoadingId.value = null
+  }
+}
+
+async function handleFinalizarAtendimento(itemId: number | string) {
+  if (!estabelecimentoId.value) return
+  atendimentoItemLoadingId.value = Number(itemId)
+  try {
+    await agendaNegocioService.finalizarAtendimento(estabelecimentoId.value, Number(itemId))
+    notifications.push('success', 'Atendimento concluído.')
+    await load()
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    atendimentoItemLoadingId.value = null
+  }
+}
+
+async function handleIniciarPrimeiroDisponivel() {
+  const item = agendamento.value?.itens.find((i) =>
+    podeIniciarItemAtendimento(i.status, agendamento.value!.status, i.inicio, i.fim),
+  )
+  if (item) await handleIniciarAtendimento(item.id)
+}
+
+async function handleConcluirPrimeiroDisponivel() {
+  const item = agendamento.value?.itens.find((i) =>
+    podeFinalizarItemAtendimento(i.status, agendamento.value!.status),
+  )
+  if (item) await handleFinalizarAtendimento(item.id)
 }
 
 async function handleSugerirRemarcacao() {
@@ -136,7 +253,7 @@ async function handleCancelar(motivo: string) {
 }
 
 watch(
-  [ready, agendamentoId],
+  [ready, agendamentoId, visaoGeral],
   () => {
     if (ready.value) void load()
   },
@@ -219,11 +336,17 @@ watch(
           </AgendamentoDetailSection>
 
           <div
-            v-if="showConfirmar || podeSugerirRemarcacao || showCancelar"
+            v-if="
+              showConfirmar ||
+              podeSugerirRemarcacao ||
+              showCancelar ||
+              showIniciarAtendimentoGeral ||
+              showConcluirAtendimentoGeral
+            "
             class="agendamento-detail-actions"
           >
             <button
-              v-if="showConfirmar"
+              v-if="showConfirmar && podeGerenciarAgenda"
               type="button"
               class="agendamento-detail-btn agendamento-detail-btn--confirm"
               :disabled="actionLoading"
@@ -235,7 +358,25 @@ watch(
               Confirmar
             </button>
             <button
-              v-if="podeSugerirRemarcacao"
+              v-if="showIniciarAtendimentoGeral"
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--confirm min-w-[185px]"
+              :disabled="!!atendimentoItemLoadingId"
+              @click="handleIniciarPrimeiroDisponivel"
+            >
+              Iniciar atendimento
+            </button>
+            <button
+              v-if="showConcluirAtendimentoGeral"
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--secondary min-w-[185px]"
+              :disabled="!!atendimentoItemLoadingId"
+              @click="handleConcluirPrimeiroDisponivel"
+            >
+              Concluir atendimento
+            </button>
+            <button
+              v-if="podeSugerirRemarcacao && podeGerenciarAgenda"
               type="button"
               class="agendamento-detail-btn agendamento-detail-btn--secondary min-w-[185px]"
               :disabled="actionLoading"
@@ -244,7 +385,7 @@ watch(
               Sugerir novo horário
             </button>
             <button
-              v-if="showCancelar"
+              v-if="showCancelar && podeGerenciarAgenda"
               type="button"
               class="agendamento-detail-btn agendamento-detail-btn--danger"
               :disabled="actionLoading"
@@ -256,8 +397,16 @@ watch(
         </div>
 
         <div class="agendamento-detail-column">
-          <AgendamentoDetailServices :itens="serviceItens" />
-          <AgendamentoDetailHistorico :itens="historico" />
+          <AgendamentoDetailServices
+            :itens="serviceItens"
+            :agendamento-status="agendamento.status"
+            :pode-iniciar="podeIniciarAtendimento"
+            :pode-finalizar="podeFinalizarAtendimento"
+            :action-loading-id="atendimentoItemLoadingId"
+            @iniciar="handleIniciarAtendimento"
+            @finalizar="handleFinalizarAtendimento"
+          />
+          <AgendamentoDetailHistorico v-if="visaoGeral" :itens="historico" />
         </div>
       </div>
     </template>

@@ -36,6 +36,7 @@ export interface AgendaProfissional {
   inicio: string
   fim: string
   status: string
+  agendamentoStatus: string
 }
 
 export interface AgendaFiltro {
