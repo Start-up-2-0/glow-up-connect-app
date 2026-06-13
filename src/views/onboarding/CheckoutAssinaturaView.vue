@@ -18,7 +18,7 @@ import { useUserStore } from '@/stores/user.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
-import { formatBRL } from '@/utils/formatters'
+import { formatBRL, telefoneToApi } from '@/utils/formatters'
 import { USER_ROLE } from '@/types/user.types'
 const route = useRoute()
 const router = useRouter()
@@ -142,7 +142,7 @@ async function finalizarCheckout() {
         profissionalAutonomo: {
           nomePublico: nome.value,
           logo,
-          telefone: telefone.value,
+          telefone: telefoneToApi(telefone.value),
           email: email.value,
           endereco,
         },
@@ -156,7 +156,7 @@ async function finalizarCheckout() {
         estabelecimento: {
           nome: nome.value,
           logo,
-          telefone: telefone.value,
+          telefone: telefoneToApi(telefone.value),
           email: email.value,
           endereco,
         },

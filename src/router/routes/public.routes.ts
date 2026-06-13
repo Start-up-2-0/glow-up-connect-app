@@ -8,4 +8,14 @@ export const publicRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/public/LandingView.vue'),
     meta: { layout: 'landing', skipNegocioGuard: true, title: 'Início' },
   },
+  {
+    path: ROUTE_PATHS.CONFIRM_WHATSAPP,
+    name: ROUTE_NAMES.CONFIRM_WHATSAPP,
+    component: () => import('@/views/public/ConfirmarWhatsappView.vue'),
+    meta: { layout: 'landing', skipNegocioGuard: true, title: 'Confirmar WhatsApp' },
+  },
+  {
+    path: `${ROUTE_PATHS.CONFIRM_WHATSAPP_LEGACY}/:token`,
+    redirect: (to) => `/c/${String(to.params.token ?? '')}`,
+  },
 ]

@@ -343,7 +343,8 @@ async function handleSolicitarWhatsApp() {
                   v-if="whatsAppState === 'pendente' || instrucoes"
                   class="font-urbanist text-sm text-glow-text"
                 >
-                  Verifique seu e-mail e confirme pelo link no celular.
+                  Verifique o WhatsApp e seu e-mail. Toque em "Abrir WhatsApp" e envie a mensagem do
+                  número cadastrado.
                 </p>
                 <p v-else class="font-urbanist text-sm text-glow-text-subtle">
                   Confirme
@@ -388,7 +389,7 @@ async function handleSolicitarWhatsApp() {
                 :loading="solicitando"
                 @click="handleSolicitarWhatsApp"
               >
-                Enviar confirmação por e-mail
+                Reenviar instruções
               </BaseButton>
             </template>
           </div>

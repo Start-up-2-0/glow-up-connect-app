@@ -20,6 +20,7 @@ export const ROUTE_NAMES = {
   AGENDAMENTO_DETALHE: 'agendamento-detalhe',
   NOT_FOUND: 'not-found',
   LANDING: 'landing',
+  CONFIRM_WHATSAPP: 'confirm-whatsapp',
   ONBOARDING_PLANOS: 'onboarding-planos',
   ONBOARDING_CONTRATAR: 'onboarding-contratar',
   ONBOARDING_CHECKOUT: 'onboarding-checkout',
@@ -56,6 +57,9 @@ export const ROUTE_NAMES = {
 
 export const ROUTE_PATHS = {
   HOME: '/',
+  CONFIRM_WHATSAPP: '/c/:token',
+  /** Alias legado documentado */
+  CONFIRM_WHATSAPP_LEGACY: '/confirmar-whatsapp',
   LOGIN: '/auth/login',
   REGISTER: '/auth/register',
   CONFIRM_EMAIL: '/auth/confirmar-email',

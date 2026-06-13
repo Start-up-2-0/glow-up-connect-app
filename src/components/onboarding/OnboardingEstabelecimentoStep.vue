@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
+import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { readFileAsDataUrl } from '@/utils/avatarFile'
+import { telefoneLocalFromApi, telefoneToApi } from '@/utils/formatters'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 
 const props = defineProps<{
@@ -18,7 +20,7 @@ const emit = defineEmits<{
 
 const nome = ref(props.initial.nome)
 const descricao = ref(props.initial.descricao)
-const telefone = ref(props.initial.telefone)
+const telefone = ref(telefoneLocalFromApi(props.initial.telefone))
 const email = ref(props.initial.email)
 const cep = ref(props.initial.cep)
 const logradouro = ref(props.initial.logradouro)
@@ -47,7 +49,7 @@ function handleSubmit() {
   emit('submit', {
     nome: nome.value,
     descricao: descricao.value,
-    telefone: telefone.value,
+    telefone: telefoneToApi(telefone.value),
     email: email.value,
     cep: cep.value,
     logradouro: logradouro.value,
@@ -86,7 +88,7 @@ function handleSubmit() {
         hint="Opcional — breve apresentação do negócio"
       />
       <AuthAvatarUpload label="Logo" @change="onLogoChange" @error="(msg) => (logoError = msg)" />
-      <BaseInput v-model="telefone" label="Telefone comercial" required />
+      <TelefoneInput v-model="telefone" label="Telefone comercial" required />
       <BaseInput v-model="email" label="E-mail comercial" type="email" required />
       <BaseInput v-model="cep" label="CEP" required />
       <BaseInput v-model="logradouro" label="Logradouro" required />

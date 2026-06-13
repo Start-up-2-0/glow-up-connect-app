@@ -10,6 +10,7 @@ import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { ROUTE_PATHS } from '@/constants/routes'
+import { telefoneToApi } from '@/utils/formatters'
 import {
   authRouteWithRedirect,
   extractConviteTokenFromPath,
@@ -125,7 +126,7 @@ async function handleSubmit() {
     const payload = {
       nome: nome.value.trim(),
       email: email.value.trim(),
-      telefone: telefone.value.trim(),
+      telefone: telefoneToApi(telefone.value),
       senha: senha.value,
     } as {
       nome: string

@@ -18,6 +18,7 @@ import type {
   EstabelecimentoOnboardingContexto,
 } from '@/types/assinaturaOnboarding.types'
 import { ASSINATURA_LOGADA_WIZARD_STEPS } from '@/types/assinaturaOnboarding.types'
+import { telefoneToApi } from '@/utils/formatters'
 
 const STORAGE_KEY = 'guc_assinatura_logada'
 
@@ -252,7 +253,10 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       return
     }
 
-    draft.value.estabelecimento = { ...estabelecimento }
+    draft.value.estabelecimento = {
+      ...estabelecimento,
+      telefone: telefoneToApi(estabelecimento.telefone),
+    }
     draft.value.estabelecimentoId = null
     step.value = 'confirmar'
     persist()
@@ -328,7 +332,7 @@ export function useAssinaturaLogadaWizard(planoId: number) {
                 nome: draft.value.estabelecimento.nome.trim(),
                 descricao: draft.value.estabelecimento.descricao.trim(),
                 logo: draft.value.estabelecimento.logoDataUrl!,
-                telefone: draft.value.estabelecimento.telefone.trim(),
+                telefone: telefoneToApi(draft.value.estabelecimento.telefone),
                 email: draft.value.estabelecimento.email.trim(),
                 endereco: {
                   cep: draft.value.estabelecimento.cep,

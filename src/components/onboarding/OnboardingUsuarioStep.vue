@@ -9,6 +9,7 @@ import {
   GLOW_LABEL_CLASS,
 } from '@/constants/designTokens'
 import type { OnboardingUsuarioDraft } from '@/types/onboardingAssinatura.types'
+import { telefoneLocalFromApi } from '@/utils/formatters'
 
 const props = defineProps<{
   initial: OnboardingUsuarioDraft
@@ -33,7 +34,7 @@ const emit = defineEmits<{
 }>()
 
 const nome = ref(props.initial.nome)
-const telefone = ref(props.initial.telefone)
+const telefone = ref(telefoneLocalFromApi(props.initial.telefone))
 const email = ref(props.initial.email)
 const confirmarEmail = ref(props.initial.email)
 const senha = ref('')

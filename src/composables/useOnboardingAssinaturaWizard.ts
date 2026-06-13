@@ -18,6 +18,7 @@ import type {
   OnboardingUsuarioDraft,
   OnboardingWizardStep,
 } from '@/types/onboardingAssinatura.types'
+import { telefoneToApi } from '@/utils/formatters'
 
 const STORAGE_KEY = 'guc_onboarding_assinatura'
 
@@ -193,10 +194,11 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
 
     loading.value = true
     try {
+      const telefoneApi = telefoneToApi(payload.telefone)
       const { data } = await userService.cadastrar({
         nome: payload.nome.trim(),
         email: payload.email.trim(),
-        telefone: payload.telefone.trim(),
+        telefone: telefoneApi,
         senha: payload.senha,
         avatarBase64: payload.avatarBase64,
         avatarContentType: payload.avatarContentType,
@@ -204,7 +206,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
 
       draft.value.usuario = {
         nome: payload.nome.trim(),
-        telefone: payload.telefone.trim(),
+        telefone: telefoneApi,
         email: payload.email.trim(),
         contaCriada: true,
         emailConfirmado: false,
@@ -284,7 +286,10 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
       return
     }
 
-    draft.value.estabelecimento = { ...estabelecimento }
+    draft.value.estabelecimento = {
+      ...estabelecimento,
+      telefone: telefoneToApi(estabelecimento.telefone),
+    }
     step.value = 'assinatura'
     persist()
   }
@@ -349,7 +354,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
           nome: negocio.nome.trim(),
           descricao: negocio.descricao.trim(),
           logo: negocio.logoDataUrl!,
-          telefone: negocio.telefone.trim(),
+          telefone: telefoneToApi(negocio.telefone),
           email: negocio.email.trim(),
           endereco,
         },

@@ -6,7 +6,13 @@ import type { WhatsAppConfirmacaoInstrucoes } from '@/types/whatsapp.types'
 const POLL_INTERVAL_MS = 5_000
 const POLL_TIMEOUT_MS = 5 * 60_000
 
-export function useWhatsAppConfirmacao() {
+export interface UseWhatsAppConfirmacaoOptions {
+  solicitarConfirmacao?: () => Promise<WhatsAppConfirmacaoInstrucoes>
+  pollConfirmado?: () => Promise<boolean>
+  atualizarOptIn?: (optIn: boolean) => Promise<void>
+}
+
+export function useWhatsAppConfirmacao(options: UseWhatsAppConfirmacaoOptions = {}) {
   const userStore = useUserStore()
   const instrucoes = ref<WhatsAppConfirmacaoInstrucoes | null>(null)
   const solicitando = ref(false)
@@ -25,6 +31,10 @@ export function useWhatsAppConfirmacao() {
   }
 
   async function pollOnce(): Promise<boolean> {
+    if (options.pollConfirmado) {
+      return options.pollConfirmado()
+    }
+
     await userStore.fetchMe(true)
     return Boolean(userStore.profile?.whatsAppConfirmado)
   }
@@ -38,7 +48,7 @@ export function useWhatsAppConfirmacao() {
     pollTimer = setInterval(async () => {
       if (Date.now() - pollStartedAt > POLL_TIMEOUT_MS) {
         stopPolling()
-        pollError.value = 'Tempo esgotado. Verifique seu e-mail e tente novamente.'
+        pollError.value = 'Tempo esgotado. Verifique o WhatsApp e tente novamente.'
         return
       }
 
@@ -59,7 +69,9 @@ export function useWhatsAppConfirmacao() {
     solicitando.value = true
     pollError.value = null
     try {
-      instrucoes.value = await userService.solicitarConfirmacaoWhatsApp()
+      instrucoes.value = options.solicitarConfirmacao
+        ? await options.solicitarConfirmacao()
+        : await userService.solicitarConfirmacaoWhatsApp()
       startPolling()
     } finally {
       solicitando.value = false
@@ -67,6 +79,11 @@ export function useWhatsAppConfirmacao() {
   }
 
   async function toggleOptIn(optIn: boolean) {
+    if (options.atualizarOptIn) {
+      await options.atualizarOptIn(optIn)
+      return
+    }
+
     await userService.atualizarWhatsAppOptIn({ optIn })
     await userStore.fetchMe(true)
   }
@@ -81,5 +98,6 @@ export function useWhatsAppConfirmacao() {
     solicitarConfirmacao,
     toggleOptIn,
     stopPolling,
+    pollOnce,
   }
 }
