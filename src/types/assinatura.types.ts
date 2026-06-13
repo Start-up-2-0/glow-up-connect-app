@@ -108,3 +108,13 @@ export interface CobrancaAssinatura {
   gatewayPaymentId: string
   pagoEm: string | null
 }
+
+export interface AdicionarEstabelecimentoPayload {
+  estabelecimento: EstabelecimentoOnboarding
+}
+
+export interface AdicionarEstabelecimentoResponse {
+  estabelecimentoId: number
+  nome: string
+  assinaturaId: number
+}

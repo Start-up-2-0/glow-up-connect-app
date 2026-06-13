@@ -17,10 +17,10 @@ const { resolveError } = useApiError()
 const erro = ref<string | null>(null)
 const planoDetalhesAberto = ref<Plano | null>(null)
 
-const planoPlus = computed(() => planos.value.find((p) => p.nome === 'Plus'))
+const planoEssencial = computed(() => planos.value.find((p) => p.nome === 'Essencial'))
 
 function isPopular(plano: Plano): boolean {
-  return plano.id === planoPlus.value?.id
+  return plano.id === planoEssencial.value?.id
 }
 
 function abrirDetalhesPlano(plano: Plano) {
@@ -74,7 +74,7 @@ onMounted(async () => {
 
       <div
         v-else
-        class="mt-16 grid items-stretch gap-6 lg:grid-cols-3"
+        class="mt-16 grid items-stretch gap-6 md:grid-cols-2"
         :class="promocao?.disponivel ? 'mt-10' : ''"
       >
         <LandingPlanoCard

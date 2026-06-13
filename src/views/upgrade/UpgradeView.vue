@@ -39,7 +39,7 @@ onMounted(() => planosStore.fetchPlanos())
     </BaseCard>
 
     <LoadingSpinner v-if="planosStore.loading" />
-    <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div v-else class="grid gap-6 md:grid-cols-2">
       <PlanoCard
         v-for="plano in planosStore.planos"
         :key="plano.id"

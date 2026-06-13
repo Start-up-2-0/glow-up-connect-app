@@ -2,6 +2,8 @@ import api from './api'
 import type { ApiSuccessResponse, ApiSuccessResponseVoid } from '@/types/api.types'
 import type {
   Assinatura,
+  AdicionarEstabelecimentoPayload,
+  AdicionarEstabelecimentoResponse,
   CobrancaAssinatura,
   CriarAssinaturaPayload,
   TrocarPlanoPayload,
@@ -46,6 +48,15 @@ export const assinaturaService = {
       .get<ApiSuccessResponse<Assinatura>>('/assinaturas/atual', {
         params: { estabelecimentoId },
       })
+      .then(unwrap)
+  },
+
+  adicionarEstabelecimento(assinaturaId: number, payload: AdicionarEstabelecimentoPayload) {
+    return api
+      .post<ApiSuccessResponse<AdicionarEstabelecimentoResponse>>(
+        `/assinaturas/${assinaturaId}/estabelecimentos`,
+        payload,
+      )
       .then(unwrap)
   },
 }

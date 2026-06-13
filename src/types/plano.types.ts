@@ -9,6 +9,7 @@ export interface Plano {
   limiteAgendamentos: number | null
   limiteUsuarios: number | null
   limiteAgendamentosPorDia: number | null
+  limiteEstabelecimentos: number | null
   prioridadeListagemPublica: boolean
   modulos: string[]
   funcionalidades: string[]

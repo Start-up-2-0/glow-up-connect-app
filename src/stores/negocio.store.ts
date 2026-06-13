@@ -49,6 +49,7 @@ export const useNegocioStore = defineStore('negocio', () => {
         agendamentos: null,
         usuarios: null,
         agendamentosPorDia: null,
+        estabelecimentos: null,
         prioridadeListagemPublica: false,
       },
   )

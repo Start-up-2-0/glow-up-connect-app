@@ -132,7 +132,22 @@ export const businessNavItems: NavItem[] = [
         requerModulo: 'Financeiro',
         requerPermissao: 'CaixaVisualizar',
       },
+      {
+        id: 'financeiro-rede',
+        label: 'Painel da rede',
+        to: ROUTE_PATHS.FINANCEIRO_REDE,
+        requerModulo: 'Financeiro',
+        requerPermissao: 'CaixaVisualizar',
+      },
     ],
+  },
+  {
+    id: 'clientes',
+    label: 'Clientes',
+    to: ROUTE_PATHS.CONFIG_CLIENTES,
+    icon: 'team',
+    requerModulo: 'Clientes',
+    requerPermissao: 'ClienteVisualizarGeral',
   },
   {
     id: 'perfil-estabelecimento',
@@ -151,6 +166,14 @@ export const businessNavItems: NavItem[] = [
     requerModulo: 'Assinatura',
     requerPermissao: 'NegocioEditar',
     requerAssinatura: false,
+  },
+  {
+    id: 'auditoria',
+    label: 'Auditoria',
+    to: ROUTE_PATHS.CONFIG_AUDITORIA,
+    icon: 'finance',
+    requerModulo: 'Financeiro',
+    requerPermissao: 'NegocioVisualizar',
   },
 ]
 

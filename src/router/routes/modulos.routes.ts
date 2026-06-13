@@ -164,6 +164,19 @@ export const modulosRoutes: RouteRecordRaw[] = [
     },
   },
   {
+    path: ROUTE_PATHS.FINANCEIRO_REDE,
+    name: ROUTE_NAMES.FINANCEIRO_REDE,
+    component: () => import('@/views/modulos/financeiro/RedeView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'Financeiro',
+      requerPermissao: 'CaixaVisualizar',
+      title: 'Painel da rede',
+    },
+  },
+  {
     path: ROUTE_PATHS.CONFIG_EQUIPE,
     name: ROUTE_NAMES.CONFIG_EQUIPE,
     component: () => import('@/views/modulos/equipe/EquipeView.vue'),
@@ -278,7 +291,7 @@ export const modulosRoutes: RouteRecordRaw[] = [
       layout: 'dashboard',
       requiresAuth: true,
       businessOnly: true,
-      requerModulo: 'Agenda',
+      requerModulo: 'Clientes',
       requerPermissao: 'ClienteVisualizarGeral',
       title: 'Clientes',
     },

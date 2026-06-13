@@ -18,7 +18,9 @@ const emit = defineEmits<{
 
 const planosSuperiores = computed(() => {
   if (!props.planoAtualId) return props.planos
-  return props.planos.filter((p) => p.id > props.planoAtualId!)
+  const atual = props.planos.find((p) => p.id === props.planoAtualId)
+  if (!atual) return props.planos
+  return props.planos.filter((p) => p.preco > atual.preco)
 })
 </script>
 

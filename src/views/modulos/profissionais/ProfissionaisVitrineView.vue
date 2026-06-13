@@ -3,7 +3,6 @@ import { ref, watch } from 'vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
-import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
@@ -139,11 +138,6 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
         Adicionar profissional
       </BaseButton>
     </div>
-
-    <BaseAlert variant="info">
-      No plano Basic, cadastre profissionais apenas para exibição na vitrine pública.
-      Para equipe com login e convites, faça upgrade para o Plus.
-    </BaseAlert>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
 

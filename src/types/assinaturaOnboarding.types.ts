@@ -3,6 +3,7 @@ export type AssinaturaOnboardingEtapa =
   | 'CadastrarEstabelecimento'
   | 'AssinarPlano'
   | 'GerenciarAssinatura'
+  | 'AdicionarLoja'
 
 export interface EstabelecimentoOnboardingContexto {
   estabelecimentoId: number
@@ -18,6 +19,10 @@ export interface AssinaturaOnboardingContexto {
   estabelecimentos: EstabelecimentoOnboardingContexto[]
   proximaEtapa: AssinaturaOnboardingEtapa
   estabelecimentoIdSugerido: number | null
+  podeAdicionarLoja: boolean
+  lojasVinculadas: number
+  limiteLojas: number | null
+  assinaturaPremiumId: number | null
 }
 
 export type AssinaturaLogadaWizardStep = 'estabelecimento' | 'confirmar' | 'assinatura'

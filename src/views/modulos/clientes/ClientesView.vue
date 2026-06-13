@@ -4,57 +4,45 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
+import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
-import { agendaNegocioService } from '@/services/agendaNegocioService'
-import type { AgendaGeral } from '@/types/negocio/agenda.types'
-import { formatTelefone } from '@/utils/formatters'
+import { clienteNegocioService } from '@/services/clienteNegocioService'
+import { formatTelefone, formatDateTime } from '@/utils/formatters'
 
-interface ClienteResumo {
-  id: number | null
+interface ClienteItem {
   nome: string
   email: string | null
   telefone: string | null
   agendamentos: number
+  ultimoAgendamentoEm: string | null
 }
 
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
+const { possuiModulo } = useNegocioContext()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 
-const agenda = ref<AgendaGeral[]>([])
+const clientes = ref<ClienteItem[]>([])
 const loading = ref(false)
 
-const clientes = computed(() => {
-  const map = new Map<string, ClienteResumo>()
-  for (const a of agenda.value) {
-    const key = a.usuarioClienteId !== null ? `u-${a.usuarioClienteId}` : `n-${a.clienteNome}`
-    const existente = map.get(key)
-    if (existente) {
-      existente.agendamentos += 1
-    } else {
-      map.set(key, {
-        id: a.usuarioClienteId,
-        nome: a.clienteNome,
-        email: a.clienteEmail,
-        telefone: a.clienteTelefone,
-        agendamentos: 1,
-      })
-    }
-  }
-  return [...map.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-})
+const usaApiPremium = computed(() => possuiModulo('Clientes'))
 
 async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
   try {
-    const data = await agendaNegocioService.listarGeral(estabelecimentoId.value, {
-      pagina: 1,
-      tamanhoPagina: 50,
-    })
-    agenda.value = data.itens
+    if (usaApiPremium.value) {
+      const data = await clienteNegocioService.listar(estabelecimentoId.value)
+      clientes.value = data.map((c) => ({
+        nome: c.nome,
+        email: c.email,
+        telefone: c.telefone,
+        agendamentos: c.totalAgendamentos,
+        ultimoAgendamentoEm: c.ultimoAgendamentoEm,
+      }))
+    }
   } catch (err) {
     notifications.push('error', resolveError(err))
   } finally {
@@ -62,7 +50,9 @@ async function load() {
   }
 }
 
-watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
+watch(ready, (isReady) => {
+  if (isReady) void load()
+}, { immediate: true })
 </script>
 
 <template>
@@ -72,7 +62,7 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
         Clientes
       </h1>
       <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-        Clientes identificados a partir dos agendamentos.
+        CRM com histórico consolidado de agendamentos (Premium).
       </p>
     </div>
 
@@ -89,7 +79,7 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
     <div v-else class="space-y-2">
       <div
         v-for="(c, idx) in clientes"
-        :key="`${c.id ?? 'anon'}-${idx}`"
+        :key="`${c.nome}-${idx}`"
         class="rounded-lg border border-glow-border-soft bg-glow-surface p-4"
       >
         <div class="flex flex-wrap items-center justify-between gap-2">
@@ -101,6 +91,9 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
         <p v-if="c.email" class="mt-1 font-urbanist text-xs text-glow-text-subtle">{{ c.email }}</p>
         <p v-if="c.telefone" class="font-urbanist text-xs text-glow-text-subtle">
           {{ formatTelefone(c.telefone) }}
+        </p>
+        <p v-if="c.ultimoAgendamentoEm" class="mt-1 font-urbanist text-xs text-glow-text-subtle">
+          Último agendamento: {{ formatDateTime(c.ultimoAgendamentoEm) }}
         </p>
       </div>
     </div>

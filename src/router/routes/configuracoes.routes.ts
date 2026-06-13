@@ -56,4 +56,17 @@ export const configuracoesRoutes: RouteRecordRaw[] = [
       title: 'Upgrade',
     },
   },
+  {
+    path: ROUTE_PATHS.CONFIG_AUDITORIA,
+    name: ROUTE_NAMES.CONFIG_AUDITORIA,
+    component: () => import('@/views/configuracoes/AuditoriaView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'Financeiro',
+      requerPermissao: 'NegocioVisualizar',
+      title: 'Auditoria',
+    },
+  },
 ]
