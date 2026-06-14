@@ -48,6 +48,7 @@ onMounted(() => {
 
 <template>
   <OnboardingAssinaturaShell
+    variant="dashboard"
     :is-checkout-step="isCheckoutStep"
     :show-stepper="!isCheckoutStep"
     :stepper-index="stepperIndex"
@@ -58,6 +59,7 @@ onMounted(() => {
     <template v-else-if="plano">
       <OnboardingEstabelecimentoStep
         v-if="step === 'estabelecimento'"
+        variant="dashboard"
         :initial="draft.estabelecimento"
         :loading="loading"
         :error-message="erro"
@@ -77,6 +79,7 @@ onMounted(() => {
 
       <OnboardingPagamentoStep
         v-else
+        variant="dashboard"
         :plano="plano"
         :promocao="promocao"
         :dias-permitidos="diasPermitidos"

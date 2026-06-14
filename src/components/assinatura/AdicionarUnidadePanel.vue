@@ -50,6 +50,7 @@ function handleSubmit(draft: OnboardingEstabelecimentoDraft) {
 
 <template>
   <OnboardingEstabelecimentoStep
+    variant="dashboard"
     :initial="draftInicial"
     :loading="loading"
     :error-message="errorMessage"

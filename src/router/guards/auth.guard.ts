@@ -34,6 +34,16 @@ export const authGuard: NavigationGuard = async (to) => {
     return { path: ROUTE_PATHS.DASHBOARD }
   }
 
+  if (
+    authStore.isAuthenticated
+    && to.matched.some((record) => record.meta.onboardingAssinatura)
+  ) {
+    return {
+      path: ROUTE_PATHS.ONBOARDING_CONTRATAR,
+      query: to.query.planoId ? { planoId: to.query.planoId } : to.query,
+    }
+  }
+
   if (requiresAuth && authStore.isAuthenticated && !userStore.profile) {
     try {
       await userStore.fetchMe()

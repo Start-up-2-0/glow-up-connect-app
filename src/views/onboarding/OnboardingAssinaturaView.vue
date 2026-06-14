@@ -8,6 +8,7 @@ import OnboardingConfirmarEmailStep from '@/components/onboarding/OnboardingConf
 import OnboardingEstabelecimentoStep from '@/components/onboarding/OnboardingEstabelecimentoStep.vue'
 import OnboardingPagamentoStep from '@/components/onboarding/OnboardingPagamentoStep.vue'
 import { useOnboardingAssinaturaWizard } from '@/composables/useOnboardingAssinaturaWizard'
+import { resolvePublicOnboardingStep } from '@/constants/onboardingWizardSteps'
 
 const route = useRoute()
 const planoId = computed(() => Number(route.query.planoId))
@@ -17,7 +18,6 @@ const wizard = useOnboardingAssinaturaWizard(planoId.value)
 const {
   draft,
   step,
-  stepperIndex,
   plano,
   promocao,
   loading,
@@ -37,6 +37,8 @@ const {
 
 const isCheckoutStep = computed(() => step.value === 'assinatura')
 
+const publicStep = computed(() => resolvePublicOnboardingStep(step.value))
+
 const diasPermitidos = computed(
   () => promocao.value?.diasVencimentoPermitidos ?? [5, 10, 15, 20],
 )
@@ -46,18 +48,30 @@ onMounted(() => {
 })
 
 async function handleConfirmarEmail(codigo: string) {
-  const ok = await confirmarEmailCodigo(codigo)
-  if (!ok) {
-    // erro já preenchido no composable
+  await confirmarEmailCodigo(codigo)
+}
+
+function handlePublicBack() {
+  if (step.value === 'confirmar-email' && !draft.value.usuario.contaCriada) {
+    step.value = 'conta'
+    return
+  }
+
+  if (step.value === 'estabelecimento') {
+    step.value = draft.value.usuario.emailConfirmado ? 'confirmar-email' : 'conta'
   }
 }
 </script>
 
 <template>
   <OnboardingAssinaturaShell
+    variant="public"
     :is-checkout-step="isCheckoutStep"
-    :show-stepper="!isCheckoutStep"
-    :stepper-index="stepperIndex"
+    :show-stepper="publicStep.showStepper"
+    :public-step-index="publicStep.index"
+    :public-step-label="publicStep.label"
+    :public-show-back="publicStep.showBack"
+    @back="handlePublicBack"
   >
     <LoadingSpinner v-if="loading && !plano" />
 
@@ -73,6 +87,7 @@ async function handleConfirmarEmail(codigo: string) {
 
       <OnboardingEstabelecimentoStep
         v-else-if="step === 'estabelecimento'"
+        variant="public"
         :initial="draft.estabelecimento"
         :loading="loading"
         :error-message="erro"
@@ -81,6 +96,7 @@ async function handleConfirmarEmail(codigo: string) {
 
       <OnboardingPagamentoStep
         v-else-if="step === 'assinatura'"
+        variant="public"
         :plano="plano"
         :promocao="promocao"
         :dias-permitidos="diasPermitidos"

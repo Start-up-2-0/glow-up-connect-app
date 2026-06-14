@@ -30,27 +30,25 @@ function onInvalid() {
 </script>
 
 <template>
-  <div class="w-full">
-    <header class="mb-10 w-full text-center">
-      <h1 class="font-satoshi text-[32px] font-bold leading-normal text-glow-text">
-        Confirme seu e-mail
-      </h1>
-      <p class="mt-[5px] font-satoshi text-xl font-normal leading-normal text-glow-text-muted">
+  <div class="space-y-6">
+    <div>
+      <h1 class="agendar-section-title">Confirme seu e-mail</h1>
+      <p class="agendar-section-subtitle mt-2">
         Enviamos um código de 6 dígitos para
         <span class="font-semibold text-glow-gold">{{ maskedEmail }}</span
         >. Depois disso você segue para o cadastro do estabelecimento.
       </p>
-    </header>
+    </div>
 
     <AuthOtpInput v-model="codigo" :disabled="loading" @complete="handleComplete" />
 
-    <p v-if="invalidCode || errorMessage" class="mt-4 text-sm text-red-600" role="alert">
+    <p v-if="invalidCode || errorMessage" class="text-sm text-red-600" role="alert">
       {{ errorMessage || 'Código inválido ou expirado.' }}
     </p>
 
     <button
       type="button"
-      class="mt-6 text-sm font-medium text-glow-gold hover:underline"
+      class="text-sm font-medium text-glow-gold hover:underline"
       @click="onInvalid"
     >
       Limpar e digitar novamente

@@ -8,19 +8,26 @@ import { usarCheckoutPro } from '@/config/mercadopago'
 import PagamentoPixQrPanel from '@/components/assinatura/PagamentoPixQrPanel.vue'
 import { formatBRL } from '@/utils/formatters'
 import { criarPagamentoPix, type MetodoPagamentoAssinatura } from '@/types/pagamento.types'
+import type { OnboardingUiVariant } from '@/constants/onboardingWizardSteps'
 import type { Plano, PromocaoLancamento } from '@/types/plano.types'
 import type { PagamentoAssinaturaPayload } from '@/types/assinatura.types'
 
-const props = defineProps<{
-  plano: Plano
-  promocao: PromocaoLancamento | null
-  diasPermitidos: number[]
-  submitting?: boolean
-  aguardandoPagamento?: boolean
-  errorMessage?: string | null
-  pixQrCode?: string | null
-  pixCheckoutUrl?: string | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    plano: Plano
+    promocao: PromocaoLancamento | null
+    diasPermitidos: number[]
+    submitting?: boolean
+    aguardandoPagamento?: boolean
+    errorMessage?: string | null
+    pixQrCode?: string | null
+    pixCheckoutUrl?: string | null
+    variant?: OnboardingUiVariant
+  }>(),
+  {
+    variant: 'public',
+  },
+)
 
 const emit = defineEmits<{
   back: []
@@ -57,6 +64,7 @@ const ctaLabel = computed(() => {
 })
 
 const erroVisivel = computed(() => props.errorMessage ?? erroLocal.value)
+const isPublic = computed(() => props.variant === 'public')
 const processando = computed(
   () => props.submitting || props.aguardandoPagamento || tokenizando.value,
 )
@@ -119,18 +127,30 @@ async function handleSubmit() {
 
 <template>
   <div class="checkout-page w-full">
-    <header class="mb-10 flex flex-wrap items-end justify-between gap-4">
-      <div class="text-center sm:text-left">
-        <h1 class="font-satoshi text-[32px] font-bold leading-normal text-glow-text">
+    <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h1
+          :class="
+            isPublic
+              ? 'agendar-section-title'
+              : 'font-satoshi text-2xl font-bold text-glow-text lg:text-3xl'
+          "
+        >
           Finalize sua assinatura
         </h1>
-        <p class="mt-[5px] font-satoshi text-xl font-normal leading-normal text-glow-text-muted">
+        <p
+          :class="
+            isPublic
+              ? 'agendar-section-subtitle mt-2'
+              : 'mt-1 text-sm text-glow-text-subtle'
+          "
+        >
           Escolha o vencimento e conclua o pagamento para ativar seu plano.
         </p>
       </div>
       <button
         type="button"
-        class="font-satoshi text-sm font-bold text-glow-gold-dark transition hover:underline"
+        class="text-sm font-medium text-glow-text-subtle transition hover:text-glow-text"
         @click="emit('back')"
       >
         ← Voltar
