@@ -19,7 +19,7 @@ export const onboardingRoutes: RouteRecordRaw[] = [
     name: ROUTE_NAMES.ONBOARDING_CONTRATAR,
     component: () => import('@/views/onboarding/AssinaturaContaAtivaView.vue'),
     meta: {
-      layout: 'dashboard',
+      layout: 'auth',
       requiresAuth: true,
       assinaturaOnboardingLogado: true,
       skipNegocioGuard: true,

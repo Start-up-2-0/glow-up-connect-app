@@ -2,7 +2,7 @@
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
-import OnboardingStepper from '@/components/onboarding/OnboardingStepper.vue'
+import OnboardingAssinaturaShell from '@/components/onboarding/OnboardingAssinaturaShell.vue'
 import OnboardingEstabelecimentoStep from '@/components/onboarding/OnboardingEstabelecimentoStep.vue'
 import OnboardingConfirmarDadosStep from '@/components/onboarding/OnboardingConfirmarDadosStep.vue'
 import OnboardingPagamentoStep from '@/components/onboarding/OnboardingPagamentoStep.vue'
@@ -35,6 +35,8 @@ const {
   finalizarAssinatura,
 } = wizard
 
+const isCheckoutStep = computed(() => step.value === 'assinatura')
+
 const diasPermitidos = computed(
   () => promocao.value?.diasVencimentoPermitidos ?? [5, 10, 15, 20],
 )
@@ -45,16 +47,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="mx-auto w-full" :class="step === 'assinatura' ? 'max-w-6xl' : 'max-w-3xl'">
-    <div v-if="step !== 'assinatura'" class="mb-8">
-      <h1 class="font-satoshi text-2xl font-bold text-glow-text lg:text-3xl">Contratar plano</h1>
-      <p class="mt-2 text-glow-text-subtle">
-        Complete as etapas para vincular o plano ao seu estabelecimento.
-      </p>
-    </div>
-
-    <OnboardingStepper v-if="step !== 'assinatura'" :current="stepperIndex" :steps="wizardSteps" />
-
+  <OnboardingAssinaturaShell
+    :is-checkout-step="isCheckoutStep"
+    :show-stepper="!isCheckoutStep"
+    :stepper-index="stepperIndex"
+    :steps="wizardSteps"
+  >
     <LoadingSpinner v-if="loading && !plano" />
 
     <template v-else-if="plano">
@@ -91,5 +89,5 @@ onMounted(() => {
         @submit="finalizarAssinatura"
       />
     </template>
-  </div>
+  </OnboardingAssinaturaShell>
 </template>
