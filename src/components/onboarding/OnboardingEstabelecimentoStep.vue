@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import BaseInput from '@/components/ui/BaseInput.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
+import {
+  GLOW_AUTH_FORM_GRID_CLASS,
+  GLOW_BUTTON_PRIMARY_CLASS,
+  GLOW_INPUT_CLASS,
+  GLOW_LABEL_CLASS,
+} from '@/constants/designTokens'
 import { readFileAsDataUrl } from '@/utils/avatarFile'
 import { telefoneLocalFromApi, telefoneToApi } from '@/utils/formatters'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
@@ -64,47 +68,167 @@ function handleSubmit() {
 </script>
 
 <template>
-  <div>
-    <header class="mb-6">
-      <h2 class="font-satoshi text-2xl font-bold text-zinc-800">Cadastre seu estabelecimento</h2>
-      <p class="mt-1 font-satoshi text-base text-zinc-800/50">
+  <div class="w-full">
+    <header class="mb-10 w-full text-center">
+      <h1 class="font-satoshi text-[32px] font-bold leading-normal text-glow-text">
+        Cadastre seu estabelecimento
+      </h1>
+      <p class="mt-[5px] font-satoshi text-xl font-normal leading-normal text-glow-text-muted">
         Informe os dados do negócio que será vinculado à assinatura.
       </p>
     </header>
 
     <p
       v-if="errorMessage || logoError"
-      class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      class="mb-4 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
       role="alert"
     >
       {{ errorMessage || logoError }}
     </p>
 
-    <form class="space-y-4" @submit.prevent="handleSubmit">
-      <BaseInput v-model="nome" label="Nome do estabelecimento" required />
-      <BaseInput
-        v-model="descricao"
-        label="Descrição"
-        hint="Opcional — breve apresentação do negócio"
-      />
-      <AuthAvatarUpload label="Logo" @change="onLogoChange" @error="(msg) => (logoError = msg)" />
-      <TelefoneInput v-model="telefone" label="Telefone comercial" required />
-      <BaseInput v-model="email" label="E-mail comercial" type="email" required />
-      <BaseInput v-model="cep" label="CEP" required />
-      <BaseInput v-model="logradouro" label="Logradouro" required />
-      <div class="grid grid-cols-2 gap-4">
-        <BaseInput v-model="numero" label="Número" required />
-        <BaseInput v-model="bairro" label="Bairro" required />
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <BaseInput v-model="cidade" label="Cidade" required />
-        <BaseInput v-model="estado" label="Estado" maxlength="2" required />
-      </div>
-      <BaseInput v-model="complemento" label="Complemento" hint="Opcional" />
+    <form class="flex w-full flex-col gap-6" @submit.prevent="handleSubmit">
+      <div :class="GLOW_AUTH_FORM_GRID_CLASS">
+        <div class="flex flex-col gap-2 sm:col-span-2">
+          <label for="onb-est-nome" :class="GLOW_LABEL_CLASS">Nome do estabelecimento</label>
+          <input
+            id="onb-est-nome"
+            v-model="nome"
+            type="text"
+            required
+            placeholder="Nome do seu negócio"
+            :class="GLOW_INPUT_CLASS"
+          />
+        </div>
 
-      <BaseButton type="submit" variant="primary" block class="mt-2" :loading="loading">
+        <div class="flex flex-col gap-2 sm:col-span-2">
+          <label for="onb-est-descricao" :class="GLOW_LABEL_CLASS">Descrição</label>
+          <input
+            id="onb-est-descricao"
+            v-model="descricao"
+            type="text"
+            placeholder="Opcional — breve apresentação do negócio"
+            :class="GLOW_INPUT_CLASS"
+          />
+        </div>
+
+        <div class="sm:col-span-2">
+          <AuthAvatarUpload label="Logo" @change="onLogoChange" @error="(msg) => (logoError = msg)" />
+        </div>
+
+        <TelefoneInput
+          id="onb-est-telefone"
+          v-model="telefone"
+          label="Telefone comercial"
+          variant="auth"
+          required
+          placeholder="(00) 0 0000-0000"
+        />
+
+        <div class="flex flex-col gap-2">
+          <label for="onb-est-email" :class="GLOW_LABEL_CLASS">E-mail comercial</label>
+          <input
+            id="onb-est-email"
+            v-model="email"
+            type="email"
+            required
+            placeholder="contato@seunegocio.com"
+            :class="GLOW_INPUT_CLASS"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="onb-est-cep" :class="GLOW_LABEL_CLASS">CEP</label>
+          <input
+            id="onb-est-cep"
+            v-model="cep"
+            type="text"
+            required
+            placeholder="00000-000"
+            :class="GLOW_INPUT_CLASS"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2 sm:col-span-2">
+          <label for="onb-est-logradouro" :class="GLOW_LABEL_CLASS">Logradouro</label>
+          <input
+            id="onb-est-logradouro"
+            v-model="logradouro"
+            type="text"
+            required
+            placeholder="Rua, avenida..."
+            :class="GLOW_INPUT_CLASS"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="onb-est-numero" :class="GLOW_LABEL_CLASS">Número</label>
+          <input
+            id="onb-est-numero"
+            v-model="numero"
+            type="text"
+            required
+            :class="GLOW_INPUT_CLASS"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="onb-est-bairro" :class="GLOW_LABEL_CLASS">Bairro</label>
+          <input
+            id="onb-est-bairro"
+            v-model="bairro"
+            type="text"
+            required
+            :class="GLOW_INPUT_CLASS"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="onb-est-cidade" :class="GLOW_LABEL_CLASS">Cidade</label>
+          <input
+            id="onb-est-cidade"
+            v-model="cidade"
+            type="text"
+            required
+            :class="GLOW_INPUT_CLASS"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="onb-est-estado" :class="GLOW_LABEL_CLASS">Estado</label>
+          <input
+            id="onb-est-estado"
+            v-model="estado"
+            type="text"
+            maxlength="2"
+            required
+            placeholder="UF"
+            :class="GLOW_INPUT_CLASS"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2 sm:col-span-2">
+          <label for="onb-est-complemento" :class="GLOW_LABEL_CLASS">Complemento</label>
+          <input
+            id="onb-est-complemento"
+            v-model="complemento"
+            type="text"
+            placeholder="Opcional"
+            :class="GLOW_INPUT_CLASS"
+          />
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        :disabled="loading"
+        :class="[GLOW_BUTTON_PRIMARY_CLASS, 'font-satoshi text-xl font-medium text-white']"
+      >
+        <span
+          v-if="loading"
+          class="mr-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
+        />
         Continuar para assinatura
-      </BaseButton>
+      </button>
     </form>
   </div>
 </template>

@@ -4,6 +4,7 @@ import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import {
+  GLOW_AUTH_FORM_GRID_CLASS,
   GLOW_BUTTON_PRIMARY_CLASS,
   GLOW_INPUT_CLASS,
   GLOW_LABEL_CLASS,
@@ -96,68 +97,91 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div>
-    <header class="mb-6">
-      <h2 class="font-satoshi text-2xl font-bold text-zinc-800">Crie sua conta</h2>
-      <p class="mt-1 font-satoshi text-base text-zinc-800/50">
-        Primeiro passo para contratar o plano e configurar seu estabelecimento.
+  <div class="w-full">
+    <header class="mb-10 w-full text-center">
+      <h1 class="font-satoshi text-[32px] font-bold leading-normal text-glow-text">
+        Crie sua conta para assinar
+      </h1>
+      <p class="mt-[5px] font-satoshi text-xl font-normal leading-normal text-glow-text-muted">
+        Cadastre-se para configurar seu estabelecimento e contratar o plano escolhido.
       </p>
     </header>
 
     <p
       v-if="errorMessage"
-      class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      class="mb-4 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
       role="alert"
     >
       {{ errorMessage }}
     </p>
 
-    <form class="flex flex-col gap-5" @submit.prevent="handleSubmit">
-      <div class="flex flex-col gap-2">
-        <label for="onb-nome" :class="GLOW_LABEL_CLASS">Nome completo</label>
-        <input id="onb-nome" v-model="nome" type="text" required :class="GLOW_INPUT_CLASS" />
-        <p v-if="getFieldError(...FIELD_KEYS.nome)" class="text-sm text-red-600">
-          {{ getFieldError(...FIELD_KEYS.nome) }}
-        </p>
-      </div>
+    <form class="flex w-full flex-col gap-6" @submit.prevent="handleSubmit">
+      <div :class="GLOW_AUTH_FORM_GRID_CLASS">
+        <div class="flex flex-col gap-2">
+          <label for="onb-nome" :class="GLOW_LABEL_CLASS">Nome completo</label>
+          <input
+            id="onb-nome"
+            v-model="nome"
+            type="text"
+            autocomplete="name"
+            required
+            placeholder="Informe seu nome completo"
+            :class="GLOW_INPUT_CLASS"
+          />
+          <p v-if="getFieldError(...FIELD_KEYS.nome)" class="text-sm text-red-600">
+            {{ getFieldError(...FIELD_KEYS.nome) }}
+          </p>
+        </div>
 
-      <TelefoneInput
-        id="onb-telefone"
-        v-model="telefone"
-        label="Telefone"
-        variant="auth"
-        required
-        :error="getFieldError(...FIELD_KEYS.telefone)"
-      />
+        <TelefoneInput
+          id="onb-telefone"
+          v-model="telefone"
+          label="Telefone"
+          variant="auth"
+          autocomplete="tel"
+          required
+          placeholder="(00) 0 0000-0000"
+          :error="getFieldError(...FIELD_KEYS.telefone)"
+        />
 
-      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div class="flex flex-col gap-2">
           <label for="onb-email" :class="GLOW_LABEL_CLASS">E-mail</label>
-          <input id="onb-email" v-model="email" type="email" required :class="GLOW_INPUT_CLASS" />
+          <input
+            id="onb-email"
+            v-model="email"
+            type="email"
+            autocomplete="email"
+            required
+            placeholder="ex: usuario01@exemplo.com"
+            :class="GLOW_INPUT_CLASS"
+          />
           <p v-if="getFieldError(...FIELD_KEYS.email)" class="text-sm text-red-600">
             {{ getFieldError(...FIELD_KEYS.email) }}
           </p>
         </div>
+
         <div class="flex flex-col gap-2">
-          <label for="onb-confirmar-email" :class="GLOW_LABEL_CLASS">Confirmar e-mail</label>
+          <label for="onb-confirmar-email" :class="GLOW_LABEL_CLASS">Confirmar E-mail</label>
           <input
             id="onb-confirmar-email"
             v-model="confirmarEmail"
             type="email"
+            autocomplete="email"
             required
+            placeholder="ex: usuario01@exemplo.com"
             :class="GLOW_INPUT_CLASS"
           />
         </div>
-      </div>
 
-      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div class="relative flex flex-col gap-2">
           <label for="onb-senha" :class="GLOW_LABEL_CLASS">Senha</label>
           <input
             id="onb-senha"
             v-model="senha"
             :type="mostrarSenha ? 'text' : 'password'"
+            autocomplete="new-password"
             required
+            placeholder="Informe a sua senha"
             :class="[GLOW_INPUT_CLASS, 'pr-12']"
           />
           <AuthPasswordToggle :pressed="mostrarSenha" @click="mostrarSenha = !mostrarSenha" />
@@ -165,13 +189,16 @@ async function handleSubmit() {
             {{ getFieldError(...FIELD_KEYS.senha) }}
           </p>
         </div>
+
         <div class="relative flex flex-col gap-2">
-          <label for="onb-confirmar-senha" :class="GLOW_LABEL_CLASS">Confirmar senha</label>
+          <label for="onb-confirmar-senha" :class="GLOW_LABEL_CLASS">Confirmar Senha</label>
           <input
             id="onb-confirmar-senha"
             v-model="confirmarSenha"
             :type="mostrarConfirmarSenha ? 'text' : 'password'"
+            autocomplete="new-password"
             required
+            placeholder="Confirme a sua senha"
             :class="[GLOW_INPUT_CLASS, 'pr-12']"
           />
           <AuthPasswordToggle
@@ -179,15 +206,21 @@ async function handleSubmit() {
             @click="mostrarConfirmarSenha = !mostrarConfirmarSenha"
           />
         </div>
-      </div>
 
-      <AuthAvatarUpload @change="(file) => (avatarFile = file)" @error="() => {}" />
+        <div class="sm:col-span-2">
+          <AuthAvatarUpload @change="(file) => (avatarFile = file)" @error="() => {}" />
+        </div>
+      </div>
 
       <button
         type="submit"
         :disabled="loading"
-        :class="[GLOW_BUTTON_PRIMARY_CLASS, 'font-satoshi text-lg font-medium text-white']"
+        :class="[GLOW_BUTTON_PRIMARY_CLASS, 'font-satoshi text-xl font-medium text-white']"
       >
+        <span
+          v-if="loading"
+          class="mr-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
+        />
         Continuar para confirmação
       </button>
     </form>

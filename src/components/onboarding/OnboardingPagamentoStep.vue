@@ -118,15 +118,19 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="checkout-page">
-    <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <p class="text-sm font-medium uppercase tracking-wide text-glow-text-subtle">Checkout</p>
-        <h2 class="font-satoshi text-2xl font-bold text-glow-text lg:text-3xl">Finalize sua assinatura</h2>
+  <div class="checkout-page w-full">
+    <header class="mb-10 flex flex-wrap items-end justify-between gap-4">
+      <div class="text-center sm:text-left">
+        <h1 class="font-satoshi text-[32px] font-bold leading-normal text-glow-text">
+          Finalize sua assinatura
+        </h1>
+        <p class="mt-[5px] font-satoshi text-xl font-normal leading-normal text-glow-text-muted">
+          Escolha o vencimento e conclua o pagamento para ativar seu plano.
+        </p>
       </div>
       <button
         type="button"
-        class="text-sm font-medium text-glow-text-subtle transition hover:text-glow-text"
+        class="font-satoshi text-sm font-bold text-glow-gold-dark transition hover:underline"
         @click="emit('back')"
       >
         ← Voltar

@@ -2,7 +2,6 @@
 import { computed, ref } from 'vue'
 import AuthOtpInput from '@/components/auth/recovery/AuthOtpInput.vue'
 import { maskEmail } from '@/composables/useConfirmEmail'
-import { GLOW_RECOVERY_SUBTITLE_CLASS, GLOW_RECOVERY_TITLE_CLASS } from '@/constants/designTokens'
 
 const props = defineProps<{
   email: string
@@ -31,10 +30,12 @@ function onInvalid() {
 </script>
 
 <template>
-  <div>
-    <header class="mb-6">
-      <h2 :class="GLOW_RECOVERY_TITLE_CLASS">Confirme seu e-mail</h2>
-      <p :class="[GLOW_RECOVERY_SUBTITLE_CLASS, 'mt-2 text-left']">
+  <div class="w-full">
+    <header class="mb-10 w-full text-center">
+      <h1 class="font-satoshi text-[32px] font-bold leading-normal text-glow-text">
+        Confirme seu e-mail
+      </h1>
+      <p class="mt-[5px] font-satoshi text-xl font-normal leading-normal text-glow-text-muted">
         Enviamos um código de 6 dígitos para
         <span class="font-semibold text-glow-gold">{{ maskedEmail }}</span
         >. Depois disso você segue para o cadastro do estabelecimento.

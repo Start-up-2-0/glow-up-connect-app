@@ -24,20 +24,20 @@ const visibleSteps = computed(() => props.steps ?? ONBOARDING_WIZARD_STEPS)
             ? 'bg-glow-gold text-white'
             : index === current
               ? 'bg-glow-gold/15 text-glow-gold ring-2 ring-glow-gold'
-              : 'bg-zinc-100 text-zinc-400'
+              : 'bg-glow-text/5 text-glow-text-muted'
         "
       >
         {{ index + 1 }}
       </span>
       <span
         class="font-satoshi text-sm font-medium"
-        :class="index <= current ? 'text-zinc-800' : 'text-zinc-400'"
+        :class="index <= current ? 'text-glow-text' : 'text-glow-text-muted'"
       >
         {{ item.label }}
       </span>
       <span
         v-if="index < visibleSteps.length - 1"
-        class="hidden h-px w-8 bg-zinc-200 sm:block lg:w-12"
+        class="hidden h-px w-8 bg-glow-text/15 sm:block lg:w-12"
         aria-hidden="true"
       />
     </li>
