@@ -34,7 +34,7 @@ const displayValue = computed(() => maskTelefoneLocal(props.modelValue))
 
 const prefixClass = computed(() =>
   props.variant === 'auth'
-    ? 'inline-flex h-[49px] shrink-0 items-center rounded-l-lg border-[0.3px] border-r-0 border-glow-text/40 bg-glow-surface px-4 font-satoshi text-sm font-medium text-glow-text-subtle'
+    ? 'inline-flex h-[49px] shrink-0 items-center rounded-l-lg border-[0.3px] border-r-0 border-glow-text/40 bg-white px-4 font-satoshi text-sm font-medium text-glow-text-subtle'
     : 'inline-flex h-11 shrink-0 items-center rounded-l-lg border border-r-0 border-glow-border-soft bg-glow-surface px-3.5 font-urbanist text-sm font-medium text-glow-text-subtle',
 )
 

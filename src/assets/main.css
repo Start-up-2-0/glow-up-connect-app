@@ -88,8 +88,10 @@
     --glow-text-soft: rgba(40, 40, 40, 0.8);
     --glow-text-subtle: rgba(40, 40, 40, 0.6);
     --glow-border-soft: rgba(40, 40, 40, 0.25);
+    --glow-surface: #f3f3f3;
     --glow-canvas: #ffffff;
     --glow-placeholder: rgba(99, 99, 99, 0.6);
+    --glow-hover-surface: #ffffff;
     color-scheme: light;
     @apply relative min-h-screen bg-white pb-16 text-glow-text;
   }
