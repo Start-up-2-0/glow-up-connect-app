@@ -3,7 +3,12 @@ import { ref } from 'vue'
 import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
-import { AGENDAR_BTN_CONTINUE_CLASS, GLOW_INPUT_CLASS, GLOW_LABEL_CLASS } from '@/constants/designTokens'
+import {
+  AGENDAR_BTN_CONTINUE_CLASS,
+  GLOW_AUTH_FORM_GRID_CLASS,
+  GLOW_INPUT_CLASS,
+  GLOW_LABEL_CLASS,
+} from '@/constants/designTokens'
 import type { OnboardingUsuarioDraft } from '@/types/onboardingAssinatura.types'
 import { telefoneLocalFromApi } from '@/utils/formatters'
 
@@ -108,98 +113,102 @@ async function handleSubmit() {
       {{ errorMessage }}
     </p>
 
-    <form class="space-y-6" @submit.prevent="handleSubmit">
-      <div>
-        <label for="onb-nome" :class="GLOW_LABEL_CLASS">Nome completo</label>
-        <input
-          id="onb-nome"
-          v-model="nome"
-          type="text"
-          autocomplete="name"
+    <form class="flex w-full flex-col gap-6" @submit.prevent="handleSubmit">
+      <div :class="GLOW_AUTH_FORM_GRID_CLASS">
+        <div class="flex flex-col gap-2">
+          <label for="onb-nome" :class="GLOW_LABEL_CLASS">Nome completo</label>
+          <input
+            id="onb-nome"
+            v-model="nome"
+            type="text"
+            autocomplete="name"
+            required
+            placeholder="Informe seu nome completo"
+            :class="GLOW_INPUT_CLASS"
+          />
+          <p v-if="getFieldError(...FIELD_KEYS.nome)" class="text-sm text-red-600">
+            {{ getFieldError(...FIELD_KEYS.nome) }}
+          </p>
+        </div>
+
+        <TelefoneInput
+          id="onb-telefone"
+          v-model="telefone"
+          label="Telefone"
+          variant="auth"
+          autocomplete="tel"
           required
-          placeholder="Informe seu nome completo"
-          :class="[GLOW_INPUT_CLASS, 'mt-2']"
+          placeholder="(00) 0 0000-0000"
+          :error="getFieldError(...FIELD_KEYS.telefone)"
         />
-        <p v-if="getFieldError(...FIELD_KEYS.nome)" class="mt-1 text-sm text-red-600">
-          {{ getFieldError(...FIELD_KEYS.nome) }}
-        </p>
+
+        <div class="flex flex-col gap-2">
+          <label for="onb-email" :class="GLOW_LABEL_CLASS">E-mail</label>
+          <input
+            id="onb-email"
+            v-model="email"
+            type="email"
+            autocomplete="email"
+            required
+            placeholder="ex: usuario01@exemplo.com"
+            :class="GLOW_INPUT_CLASS"
+          />
+          <p v-if="getFieldError(...FIELD_KEYS.email)" class="text-sm text-red-600">
+            {{ getFieldError(...FIELD_KEYS.email) }}
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="onb-confirmar-email" :class="GLOW_LABEL_CLASS">Confirmar E-mail</label>
+          <input
+            id="onb-confirmar-email"
+            v-model="confirmarEmail"
+            type="email"
+            autocomplete="email"
+            required
+            placeholder="ex: usuario01@exemplo.com"
+            :class="GLOW_INPUT_CLASS"
+          />
+        </div>
+
+        <div class="relative flex flex-col gap-2">
+          <label for="onb-senha" :class="GLOW_LABEL_CLASS">Senha</label>
+          <input
+            id="onb-senha"
+            v-model="senha"
+            :type="mostrarSenha ? 'text' : 'password'"
+            autocomplete="new-password"
+            required
+            placeholder="Informe a sua senha"
+            :class="[GLOW_INPUT_CLASS, 'pr-12']"
+          />
+          <AuthPasswordToggle :pressed="mostrarSenha" @click="mostrarSenha = !mostrarSenha" />
+          <p v-if="getFieldError(...FIELD_KEYS.senha)" class="text-sm text-red-600">
+            {{ getFieldError(...FIELD_KEYS.senha) }}
+          </p>
+        </div>
+
+        <div class="relative flex flex-col gap-2">
+          <label for="onb-confirmar-senha" :class="GLOW_LABEL_CLASS">Confirmar Senha</label>
+          <input
+            id="onb-confirmar-senha"
+            v-model="confirmarSenha"
+            :type="mostrarConfirmarSenha ? 'text' : 'password'"
+            autocomplete="new-password"
+            required
+            placeholder="Confirme a sua senha"
+            :class="[GLOW_INPUT_CLASS, 'pr-12']"
+          />
+          <AuthPasswordToggle
+            :pressed="mostrarConfirmarSenha"
+            @click="mostrarConfirmarSenha = !mostrarConfirmarSenha"
+          />
+        </div>
+
+        <div class="sm:col-span-2">
+          <AuthAvatarUpload @change="(file) => (avatarFile = file)" @error="() => {}" />
+        </div>
       </div>
-
-      <TelefoneInput
-        id="onb-telefone"
-        v-model="telefone"
-        label="Telefone"
-        variant="auth"
-        autocomplete="tel"
-        required
-        placeholder="(00) 0 0000-0000"
-        :error="getFieldError(...FIELD_KEYS.telefone)"
-      />
-
-      <div>
-        <label for="onb-email" :class="GLOW_LABEL_CLASS">E-mail</label>
-        <input
-          id="onb-email"
-          v-model="email"
-          type="email"
-          autocomplete="email"
-          required
-          placeholder="ex: usuario01@exemplo.com"
-          :class="[GLOW_INPUT_CLASS, 'mt-2']"
-        />
-        <p v-if="getFieldError(...FIELD_KEYS.email)" class="mt-1 text-sm text-red-600">
-          {{ getFieldError(...FIELD_KEYS.email) }}
-        </p>
-      </div>
-
-      <div>
-        <label for="onb-confirmar-email" :class="GLOW_LABEL_CLASS">Confirmar e-mail</label>
-        <input
-          id="onb-confirmar-email"
-          v-model="confirmarEmail"
-          type="email"
-          autocomplete="email"
-          required
-          placeholder="ex: usuario01@exemplo.com"
-          :class="[GLOW_INPUT_CLASS, 'mt-2']"
-        />
-      </div>
-
-      <div class="relative">
-        <label for="onb-senha" :class="GLOW_LABEL_CLASS">Senha</label>
-        <input
-          id="onb-senha"
-          v-model="senha"
-          :type="mostrarSenha ? 'text' : 'password'"
-          autocomplete="new-password"
-          required
-          placeholder="Informe a sua senha"
-          :class="[GLOW_INPUT_CLASS, 'mt-2 pr-12']"
-        />
-        <AuthPasswordToggle :pressed="mostrarSenha" @click="mostrarSenha = !mostrarSenha" />
-        <p v-if="getFieldError(...FIELD_KEYS.senha)" class="mt-1 text-sm text-red-600">
-          {{ getFieldError(...FIELD_KEYS.senha) }}
-        </p>
-      </div>
-
-      <div class="relative">
-        <label for="onb-confirmar-senha" :class="GLOW_LABEL_CLASS">Confirmar senha</label>
-        <input
-          id="onb-confirmar-senha"
-          v-model="confirmarSenha"
-          :type="mostrarConfirmarSenha ? 'text' : 'password'"
-          autocomplete="new-password"
-          required
-          placeholder="Confirme a sua senha"
-          :class="[GLOW_INPUT_CLASS, 'mt-2 pr-12']"
-        />
-        <AuthPasswordToggle
-          :pressed="mostrarConfirmarSenha"
-          @click="mostrarConfirmarSenha = !mostrarConfirmarSenha"
-        />
-      </div>
-
-      <AuthAvatarUpload @change="(file) => (avatarFile = file)" @error="() => {}" />
 
       <button type="submit" :disabled="loading" :class="AGENDAR_BTN_CONTINUE_CLASS">
         <span

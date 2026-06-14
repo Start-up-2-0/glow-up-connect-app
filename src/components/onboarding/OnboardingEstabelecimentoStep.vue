@@ -4,7 +4,7 @@ import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
-import { AGENDAR_BTN_CONTINUE_CLASS, GLOW_INPUT_CLASS, GLOW_LABEL_CLASS } from '@/constants/designTokens'
+import { AGENDAR_BTN_CONTINUE_CLASS, GLOW_AUTH_FORM_GRID_CLASS, GLOW_INPUT_CLASS, GLOW_LABEL_CLASS } from '@/constants/designTokens'
 import type { OnboardingUiVariant } from '@/constants/onboardingWizardSteps'
 import { readFileAsDataUrl } from '@/utils/avatarFile'
 import { telefoneLocalFromApi, telefoneToApi } from '@/utils/formatters'
@@ -99,115 +99,117 @@ function handleSubmit() {
     </p>
 
     <form
-      :class="isPublic ? 'space-y-6' : 'space-y-4'"
+      :class="isPublic ? 'flex w-full flex-col gap-6' : 'space-y-4'"
       @submit.prevent="handleSubmit"
     >
       <template v-if="isPublic">
-        <div>
-          <label for="onb-est-nome" :class="GLOW_LABEL_CLASS">Nome do estabelecimento</label>
-          <input
-            id="onb-est-nome"
-            v-model="nome"
-            type="text"
+        <div :class="GLOW_AUTH_FORM_GRID_CLASS">
+          <div class="flex flex-col gap-2 sm:col-span-2">
+            <label for="onb-est-nome" :class="GLOW_LABEL_CLASS">Nome do estabelecimento</label>
+            <input
+              id="onb-est-nome"
+              v-model="nome"
+              type="text"
+              required
+              placeholder="Nome do seu negócio"
+              :class="GLOW_INPUT_CLASS"
+            />
+          </div>
+
+          <div class="flex flex-col gap-2 sm:col-span-2">
+            <label for="onb-est-descricao" :class="GLOW_LABEL_CLASS">Descrição</label>
+            <input
+              id="onb-est-descricao"
+              v-model="descricao"
+              type="text"
+              placeholder="Opcional — breve apresentação do negócio"
+              :class="GLOW_INPUT_CLASS"
+            />
+          </div>
+
+          <div class="sm:col-span-2">
+            <AuthAvatarUpload label="Logo" @change="onLogoChange" @error="(msg) => (logoError = msg)" />
+          </div>
+
+          <TelefoneInput
+            id="onb-est-telefone"
+            v-model="telefone"
+            label="Telefone comercial"
+            variant="auth"
             required
-            placeholder="Nome do seu negócio"
-            :class="[GLOW_INPUT_CLASS, 'mt-2']"
+            placeholder="(00) 0 0000-0000"
           />
-        </div>
 
-        <div>
-          <label for="onb-est-descricao" :class="GLOW_LABEL_CLASS">Descrição</label>
-          <input
-            id="onb-est-descricao"
-            v-model="descricao"
-            type="text"
-            placeholder="Opcional — breve apresentação do negócio"
-            :class="[GLOW_INPUT_CLASS, 'mt-2']"
-          />
-        </div>
+          <div class="flex flex-col gap-2">
+            <label for="onb-est-email" :class="GLOW_LABEL_CLASS">E-mail comercial</label>
+            <input
+              id="onb-est-email"
+              v-model="email"
+              type="email"
+              required
+              placeholder="contato@seunegocio.com"
+              :class="GLOW_INPUT_CLASS"
+            />
+          </div>
 
-        <AuthAvatarUpload label="Logo" @change="onLogoChange" @error="(msg) => (logoError = msg)" />
+          <div class="flex flex-col gap-2">
+            <label for="onb-est-cep" :class="GLOW_LABEL_CLASS">CEP</label>
+            <input
+              id="onb-est-cep"
+              v-model="cep"
+              type="text"
+              required
+              placeholder="00000-000"
+              :class="GLOW_INPUT_CLASS"
+            />
+          </div>
 
-        <TelefoneInput
-          id="onb-est-telefone"
-          v-model="telefone"
-          label="Telefone comercial"
-          variant="auth"
-          required
-          placeholder="(00) 0 0000-0000"
-        />
+          <div class="flex flex-col gap-2 sm:col-span-2">
+            <label for="onb-est-logradouro" :class="GLOW_LABEL_CLASS">Logradouro</label>
+            <input
+              id="onb-est-logradouro"
+              v-model="logradouro"
+              type="text"
+              required
+              placeholder="Rua, avenida..."
+              :class="GLOW_INPUT_CLASS"
+            />
+          </div>
 
-        <div>
-          <label for="onb-est-email" :class="GLOW_LABEL_CLASS">E-mail comercial</label>
-          <input
-            id="onb-est-email"
-            v-model="email"
-            type="email"
-            required
-            placeholder="contato@seunegocio.com"
-            :class="[GLOW_INPUT_CLASS, 'mt-2']"
-          />
-        </div>
-
-        <div>
-          <label for="onb-est-cep" :class="GLOW_LABEL_CLASS">CEP</label>
-          <input
-            id="onb-est-cep"
-            v-model="cep"
-            type="text"
-            required
-            placeholder="00000-000"
-            :class="[GLOW_INPUT_CLASS, 'mt-2']"
-          />
-        </div>
-
-        <div>
-          <label for="onb-est-logradouro" :class="GLOW_LABEL_CLASS">Logradouro</label>
-          <input
-            id="onb-est-logradouro"
-            v-model="logradouro"
-            type="text"
-            required
-            placeholder="Rua, avenida..."
-            :class="[GLOW_INPUT_CLASS, 'mt-2']"
-          />
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
+          <div class="flex flex-col gap-2">
             <label for="onb-est-numero" :class="GLOW_LABEL_CLASS">Número</label>
             <input
               id="onb-est-numero"
               v-model="numero"
               type="text"
               required
-              :class="[GLOW_INPUT_CLASS, 'mt-2']"
+              :class="GLOW_INPUT_CLASS"
             />
           </div>
-          <div>
+
+          <div class="flex flex-col gap-2">
             <label for="onb-est-bairro" :class="GLOW_LABEL_CLASS">Bairro</label>
             <input
               id="onb-est-bairro"
               v-model="bairro"
               type="text"
               required
-              :class="[GLOW_INPUT_CLASS, 'mt-2']"
+              :class="GLOW_INPUT_CLASS"
             />
           </div>
-        </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div>
+          <div class="flex flex-col gap-2">
             <label for="onb-est-cidade" :class="GLOW_LABEL_CLASS">Cidade</label>
             <input
               id="onb-est-cidade"
               v-model="cidade"
               type="text"
               required
-              :class="[GLOW_INPUT_CLASS, 'mt-2']"
+              :class="GLOW_INPUT_CLASS"
             />
           </div>
-          <div>
+
+          <div class="flex flex-col gap-2">
             <label for="onb-est-estado" :class="GLOW_LABEL_CLASS">Estado</label>
             <input
               id="onb-est-estado"
@@ -216,20 +218,20 @@ function handleSubmit() {
               maxlength="2"
               required
               placeholder="UF"
-              :class="[GLOW_INPUT_CLASS, 'mt-2']"
+              :class="GLOW_INPUT_CLASS"
             />
           </div>
-        </div>
 
-        <div>
-          <label for="onb-est-complemento" :class="GLOW_LABEL_CLASS">Complemento</label>
-          <input
-            id="onb-est-complemento"
-            v-model="complemento"
-            type="text"
-            placeholder="Opcional"
-            :class="[GLOW_INPUT_CLASS, 'mt-2']"
-          />
+          <div class="flex flex-col gap-2 sm:col-span-2">
+            <label for="onb-est-complemento" :class="GLOW_LABEL_CLASS">Complemento</label>
+            <input
+              id="onb-est-complemento"
+              v-model="complemento"
+              type="text"
+              placeholder="Opcional"
+              :class="GLOW_INPUT_CLASS"
+            />
+          </div>
         </div>
 
         <button type="submit" :disabled="loading" :class="AGENDAR_BTN_CONTINUE_CLASS">
