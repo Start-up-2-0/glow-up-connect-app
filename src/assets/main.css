@@ -31,6 +31,7 @@
     --glow-secondary: #a38a2d;
     --glow-avatar-bg: #171717;
     --glow-hover-surface: #ffffff;
+    --glow-surface-tint: rgba(40, 40, 40, 0.04);
   }
 
   .dark {
@@ -47,6 +48,7 @@
     --glow-placeholder: rgba(243, 243, 243, 0.4);
     --glow-avatar-bg: #1f1f1f;
     --glow-hover-surface: #2e2e2e;
+    --glow-surface-tint: rgba(243, 243, 243, 0.04);
   }
 
   html {
@@ -427,7 +429,7 @@
   }
 
   .onboarding-contratar-checkout-shell {
-    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-white shadow-sm;
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface shadow-sm;
   }
 
   .onboarding-contratar-checkout-panel {
@@ -435,19 +437,19 @@
   }
 
   .onboarding-contratar-plan-card {
-    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-[rgba(40,40,40,0.04)] p-4;
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface-tint p-4;
   }
 
   .onboarding-contratar-promo-card {
-    @apply flex items-center gap-3 rounded-xl border border-dashed border-glow-border-soft bg-[rgba(40,40,40,0.04)] px-4 py-3;
+    @apply flex items-center gap-3 rounded-xl border border-dashed border-glow-border-soft bg-glow-surface-tint px-4 py-3;
   }
 
   .onboarding-contratar-info-box {
-    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-[rgba(40,40,40,0.04)] p-4 text-sm leading-relaxed text-glow-text-subtle;
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface-tint p-4 text-sm leading-relaxed text-glow-text-subtle;
   }
 
   .onboarding-contratar-vencimento-btn {
-    @apply flex h-[37px] min-w-[74px] items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-[#f3f3f3] px-3 font-satoshi text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface;
+    @apply flex h-[37px] min-w-[74px] items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3 font-satoshi text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface;
   }
 
   .onboarding-contratar-vencimento-btn--active {

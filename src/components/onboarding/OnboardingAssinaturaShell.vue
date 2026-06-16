@@ -66,7 +66,7 @@ const emit = defineEmits<{
       <header v-else class="flex items-start gap-4">
         <button
           type="button"
-          class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-glow-text/20 bg-white text-glow-text/70 transition hover:bg-glow-hover-surface hover:text-glow-text"
+          class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-glow-border-soft bg-glow-hover-surface text-glow-text-subtle transition hover:bg-glow-surface hover:text-glow-text"
           aria-label="Voltar"
           @click="emit('back')"
         >

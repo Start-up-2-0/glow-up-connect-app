@@ -41,6 +41,7 @@ export default {
           secondary: 'var(--glow-secondary)',
           'avatar-bg': 'var(--glow-avatar-bg)',
           'hover-surface': 'var(--glow-hover-surface)',
+          'surface-tint': 'var(--glow-surface-tint)',
         },
       },
       borderRadius: {

@@ -180,3 +180,5 @@ Arquivo completo: `src/assets/main.css`.
 ## Integração com outras skills
 
 Ao criar views ou componentes UI, carregar também `glow-up-connect-frontend` para estrutura de pastas e convenções Vue 3.
+
+**Dashboard (área logada):** carregar `glow-up-connect-dashboard-theming` — layouts do painel devem funcionar em light e dark. Telas de auth e agendamento público são exceção (shell light fixo).
