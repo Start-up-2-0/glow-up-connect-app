@@ -4,13 +4,14 @@ import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatur
 import type { EstabelecimentoOnboarding } from '@/types/assinatura.types'
 import { draftEnderecoToApi } from '@/utils/enderecoPayload'
 
-const props = defineProps<{
+defineProps<{
   loading?: boolean
   errorMessage?: string | null
 }>()
 
 const emit = defineEmits<{
   submit: [estabelecimento: EstabelecimentoOnboarding]
+  cancel: []
 }>()
 
 const draftInicial: OnboardingEstabelecimentoDraft = {
@@ -43,10 +44,15 @@ function handleSubmit(draft: OnboardingEstabelecimentoDraft) {
 
 <template>
   <OnboardingEstabelecimentoStep
-    variant="dashboard"
+    variant="contratar"
+    embedded
     :initial="draftInicial"
     :loading="loading"
     :error-message="errorMessage"
+    submit-label="Adicionar unidade"
+    back-label="Cancelar"
+    show-back
     @submit="handleSubmit"
+    @back="emit('cancel')"
   />
 </template>

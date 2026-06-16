@@ -54,7 +54,7 @@ const isContratar = computed(() => props.variant === 'contratar')
       </button>
     </div>
     <p v-if="error" class="text-xs text-red-600">{{ error }}</p>
-    <p v-else class="text-xs text-glow-text/50">
+    <p v-else class="text-xs text-glow-text-muted">
       Vencimento todo dia {{ modelValue ?? '—' }} de cada mês.
     </p>
   </div>

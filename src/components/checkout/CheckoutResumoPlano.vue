@@ -53,11 +53,11 @@ const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
             <h3 class="font-satoshi text-base font-bold text-glow-text">{{ plano.nome }}</h3>
-            <p class="mt-1 font-urbanist text-sm text-glow-text/60">{{ plano.descricao }}</p>
+            <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">{{ plano.descricao }}</p>
           </div>
           <p class="shrink-0 font-satoshi text-base font-bold text-glow-text">
             {{ formatBRL(plano.preco) }}
-            <span class="font-urbanist text-sm font-normal text-glow-text/40">/mês</span>
+            <span class="font-urbanist text-sm font-normal text-glow-text-muted">/mês</span>
           </p>
         </div>
 
@@ -65,7 +65,7 @@ const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
           <li
             v-for="modulo in modulosExibidos"
             :key="modulo"
-            class="flex items-center gap-2.5 font-urbanist text-sm text-glow-text/80"
+            class="flex items-center gap-2.5 font-urbanist text-sm text-glow-text-soft"
           >
             <span
               class="flex size-3.5 shrink-0 items-center justify-center rounded-full bg-glow-gold text-[9px] text-white"
@@ -91,15 +91,15 @@ const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
       </span>
       <div class="min-w-0 flex-1">
         <p class="font-urbanist text-sm font-bold text-glow-text">Promoção de lançamento</p>
-        <p class="mt-0.5 font-urbanist text-xs text-glow-text/60">
+        <p class="mt-0.5 font-urbanist text-xs text-glow-text-subtle">
           {{ promocao.diasTrial }} dias grátis com cartão
-          <span class="mx-1.5 inline-block size-1 rounded-full bg-glow-text/30 align-middle" />
+          <span class="mx-1.5 inline-block size-1 rounded-full bg-glow-border-soft align-middle" />
           {{ promocao.vagasRestantes }} vagas
         </p>
       </div>
     </div>
 
-    <hr v-if="isContratar" class="my-6 border-glow-text/20" />
+    <hr v-if="isContratar" class="my-6 border-glow-border-soft" />
 
     <div :class="isContratar ? '' : 'mt-6 border-t border-glow-border-soft pt-5'">
       <DiaVencimentoSelect
@@ -110,34 +110,34 @@ const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
       />
     </div>
 
-    <hr v-if="isContratar" class="my-6 border-glow-text/20" />
+    <hr v-if="isContratar" class="my-6 border-glow-border-soft" />
 
     <div :class="isContratar ? 'space-y-3' : 'mt-6 space-y-3 border-t border-glow-border-soft pt-5'">
-      <div class="flex items-center justify-between font-urbanist text-sm text-glow-text/80">
+      <div class="flex items-center justify-between font-urbanist text-sm text-glow-text-soft">
         <span>Subtotal</span>
         <span>{{ formatBRL(plano.preco) }}/mês</span>
       </div>
       <div
         v-if="trialAtivo"
-        class="flex items-center justify-between font-urbanist text-sm text-emerald-700"
+        class="flex items-center justify-between font-urbanist text-sm text-emerald-700 dark:text-emerald-400"
       >
         <span>Período de teste</span>
         <span>− {{ formatBRL(plano.preco) }}</span>
       </div>
       <div
         v-else-if="metodoPagamento === 'pix'"
-        class="flex items-center justify-between font-urbanist text-sm text-glow-text/80"
+        class="flex items-center justify-between font-urbanist text-sm text-glow-text-soft"
       >
         <span>Cobrança</span>
         <span>Imediata via PIX</span>
       </div>
 
-      <hr v-if="isContratar" class="border-glow-text/20" />
+      <hr v-if="isContratar" class="border-glow-border-soft" />
 
       <div class="flex items-end justify-between pt-1">
         <div>
-          <span class="font-urbanist text-sm text-glow-text/80">Total hoje</span>
-          <p v-if="trialAtivo" class="mt-1 font-urbanist text-xs text-glow-text/50">
+          <span class="font-urbanist text-sm text-glow-text-soft">Total hoje</span>
+          <p v-if="trialAtivo" class="mt-1 font-urbanist text-xs text-glow-text-muted">
             Primeira cobrança após {{ promocao?.diasTrial }} dias de teste.
           </p>
         </div>

@@ -138,6 +138,7 @@ async function adicionarUnidade(estabelecimento: EstabelecimentoOnboarding) {
         :loading="adicionandoUnidade"
         :error-message="erroUnidade"
         @submit="adicionarUnidade"
+        @cancel="exibirFormUnidade = false"
       />
     </BaseCard>
 

@@ -1,6 +1,6 @@
 import type { OnboardingWizardStep } from '@/types/onboardingAssinatura.types'
 
-export type OnboardingUiVariant = 'public' | 'dashboard'
+export type OnboardingUiVariant = 'public' | 'dashboard' | 'contratar'
 
 /** Ordem real do fluxo público de assinatura */
 export const PUBLIC_ONBOARDING_FLOW_STEPS = [
