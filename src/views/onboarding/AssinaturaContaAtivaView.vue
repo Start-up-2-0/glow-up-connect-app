@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import OnboardingAssinaturaShell from '@/components/onboarding/OnboardingAssinaturaShell.vue'
 import OnboardingInformacoesBasicasStep from '@/components/onboarding/OnboardingInformacoesBasicasStep.vue'
@@ -9,8 +9,10 @@ import OnboardingConfirmarDadosStep from '@/components/onboarding/OnboardingConf
 import OnboardingPagamentoStep from '@/components/onboarding/OnboardingPagamentoStep.vue'
 import { useAssinaturaLogadaWizard } from '@/composables/useAssinaturaLogadaWizard'
 import { ASSINATURA_LOGADA_STEP_SUBTITLES } from '@/types/assinaturaOnboarding.types'
+import { ROUTE_PATHS } from '@/constants/routes'
 
 const route = useRoute()
+const router = useRouter()
 const planoId = computed(() => Number(route.query.planoId))
 
 const wizard = useAssinaturaLogadaWizard(planoId.value)
@@ -57,6 +59,10 @@ function onShellBack() {
     voltarParaConfirmar()
   }
 }
+
+function voltarDeInformacoesBasicas() {
+  void router.push(ROUTE_PATHS.ONBOARDING_PLANOS)
+}
 </script>
 
 <template>
@@ -78,6 +84,7 @@ function onShellBack() {
         :loading="loading"
         :error-message="erro"
         @submit="avancarDeInformacoesBasicas"
+        @back="voltarDeInformacoesBasicas"
       />
 
       <OnboardingEnderecoStep

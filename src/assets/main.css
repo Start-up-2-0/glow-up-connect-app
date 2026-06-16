@@ -426,6 +426,38 @@
     @apply flex w-full items-center justify-center gap-2 rounded-xl bg-[#e6ad01] px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
   }
 
+  .onboarding-contratar-checkout-shell {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-white shadow-sm;
+  }
+
+  .onboarding-contratar-checkout-panel {
+    @apply p-6 lg:p-8;
+  }
+
+  .onboarding-contratar-plan-card {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-[rgba(40,40,40,0.04)] p-4;
+  }
+
+  .onboarding-contratar-promo-card {
+    @apply flex items-center gap-3 rounded-xl border border-dashed border-glow-border-soft bg-[rgba(40,40,40,0.04)] px-4 py-3;
+  }
+
+  .onboarding-contratar-info-box {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-[rgba(40,40,40,0.04)] p-4 text-sm leading-relaxed text-glow-text-subtle;
+  }
+
+  .onboarding-contratar-vencimento-btn {
+    @apply flex h-[37px] min-w-[74px] items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-[#f3f3f3] px-3 font-satoshi text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .onboarding-contratar-vencimento-btn--active {
+    @apply border-glow-gold bg-glow-gold-soft text-glow-text;
+  }
+
+  .onboarding-contratar-pay-cta {
+    @apply flex h-10 w-full items-center justify-center gap-3 rounded-xl bg-[#e6ad01] px-4 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
   /* Toasts globais — canto superior, fora do fluxo do documento */
   .toast-stack {
     @apply pointer-events-none fixed z-[60] flex flex-col;

@@ -101,13 +101,24 @@ export const AGENDAR_PRICE_PILL_CLASS =
   'inline-flex shrink-0 items-center justify-center rounded-full bg-[rgba(84,128,78,0.2)] px-4 py-1 font-urbanist text-base font-bold text-[#54804e]'
 
 /** Card central do wizard Contratar Plano (dashboard, Figma) */
+export const ONBOARDING_CONTRATAR_PAGE_CLASS =
+  '-mx-4 -mt-4 min-h-full bg-[#e5e5e5] px-4 pb-8 pt-9 lg:-mx-6 lg:-mt-6 lg:px-8'
+
 export const ONBOARDING_CONTRATAR_CARD_CLASS =
-  'rounded-xl border-[0.5px] border-glow-text/25 bg-glow-surface p-6 shadow-sm sm:p-8 lg:p-10'
+  'rounded-xl border-[0.5px] border-glow-text/25 bg-white px-6 py-8 shadow-sm sm:px-10 sm:py-10'
 
 export const ONBOARDING_CONTRATAR_FORM_CLASS = 'flex w-full flex-col gap-6'
 
+export const ONBOARDING_CONTRATAR_FIELD_CLASS = 'flex flex-col gap-2'
+
+export const ONBOARDING_CONTRATAR_INPUT_CLASS =
+  'h-[49px] w-full rounded-lg border-[0.3px] border-glow-text/80 bg-white px-[18px] font-inter text-sm text-glow-text placeholder:font-inter placeholder:text-sm placeholder:text-[rgba(99,99,99,0.6)] outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold'
+
+export const ONBOARDING_CONTRATAR_LABEL_CLASS =
+  'font-satoshi text-sm font-normal text-glow-text'
+
 export const ONBOARDING_CONTRATAR_BTN_PRIMARY_CLASS =
-  'flex h-10 flex-1 items-center justify-center rounded-xl bg-[#e6ad01] px-2.5 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60'
+  'flex h-10 w-full items-center justify-center rounded-xl bg-[#e6ad01] px-2.5 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60'
 
 export const ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS =
-  'flex h-10 flex-1 items-center justify-center rounded-xl border-[0.5px] border-glow-text/25 bg-glow-canvas px-3.5 font-satoshi text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60'
+  'flex h-10 w-full items-center justify-center rounded-xl border-[0.5px] border-glow-text/25 bg-[#f3f3f3] px-3.5 font-satoshi text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60'

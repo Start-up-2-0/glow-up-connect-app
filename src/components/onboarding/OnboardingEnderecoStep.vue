@@ -2,10 +2,11 @@
 import { ref } from 'vue'
 import OnboardingContratarFormActions from '@/components/onboarding/OnboardingContratarFormActions.vue'
 import {
-  GLOW_INPUT_CLASS,
-  GLOW_LABEL_CLASS,
   ONBOARDING_CONTRATAR_CARD_CLASS,
+  ONBOARDING_CONTRATAR_FIELD_CLASS,
   ONBOARDING_CONTRATAR_FORM_CLASS,
+  ONBOARDING_CONTRATAR_INPUT_CLASS,
+  ONBOARDING_CONTRATAR_LABEL_CLASS,
 } from '@/constants/designTokens'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 
@@ -53,68 +54,68 @@ function handleSubmit() {
     </p>
 
     <form :class="ONBOARDING_CONTRATAR_FORM_CLASS" @submit.prevent="handleSubmit">
-      <div class="flex flex-col gap-2">
-        <label for="onb-end-cep" :class="GLOW_LABEL_CLASS">CEP</label>
+      <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+        <label for="onb-end-cep" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">CEP</label>
         <input
           id="onb-end-cep"
           v-model="cep"
           type="text"
           required
           placeholder="00000-000"
-          :class="GLOW_INPUT_CLASS"
+          :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
         />
       </div>
 
-      <div class="flex flex-col gap-2">
-        <label for="onb-end-logradouro" :class="GLOW_LABEL_CLASS">Logradouro</label>
+      <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+        <label for="onb-end-logradouro" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">Logradouro</label>
         <input
           id="onb-end-logradouro"
           v-model="logradouro"
           type="text"
           required
           placeholder="Rua, avenida..."
-          :class="GLOW_INPUT_CLASS"
+          :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
         />
       </div>
 
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-x-4">
-        <div class="flex flex-col gap-2">
-          <label for="onb-end-numero" :class="GLOW_LABEL_CLASS">Número</label>
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-x-3.5">
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label for="onb-end-numero" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">Número</label>
           <input
             id="onb-end-numero"
             v-model="numero"
             type="text"
             required
-            :class="GLOW_INPUT_CLASS"
+            :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
           />
         </div>
 
-        <div class="flex flex-col gap-2">
-          <label for="onb-end-bairro" :class="GLOW_LABEL_CLASS">Bairro</label>
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label for="onb-end-bairro" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">Bairro</label>
           <input
             id="onb-end-bairro"
             v-model="bairro"
             type="text"
             required
-            :class="GLOW_INPUT_CLASS"
+            :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
           />
         </div>
       </div>
 
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-x-4">
-        <div class="flex flex-col gap-2">
-          <label for="onb-end-cidade" :class="GLOW_LABEL_CLASS">Cidade</label>
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-x-3.5">
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label for="onb-end-cidade" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">Cidade</label>
           <input
             id="onb-end-cidade"
             v-model="cidade"
             type="text"
             required
-            :class="GLOW_INPUT_CLASS"
+            :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
           />
         </div>
 
-        <div class="flex flex-col gap-2">
-          <label for="onb-end-estado" :class="GLOW_LABEL_CLASS">Estado</label>
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label for="onb-end-estado" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">Estado</label>
           <input
             id="onb-end-estado"
             v-model="estado"
@@ -122,26 +123,22 @@ function handleSubmit() {
             maxlength="2"
             required
             placeholder="UF"
-            :class="GLOW_INPUT_CLASS"
+            :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
           />
         </div>
       </div>
 
-      <div class="flex flex-col gap-2">
-        <label for="onb-end-complemento" :class="GLOW_LABEL_CLASS">Complemento (opcional)</label>
+      <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+        <label for="onb-end-complemento" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">Complemento (opcional)</label>
         <input
           id="onb-end-complemento"
           v-model="complemento"
           type="text"
-          :class="GLOW_INPUT_CLASS"
+          :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
         />
       </div>
 
-      <OnboardingContratarFormActions
-        :loading="loading"
-        @submit="handleSubmit"
-        @back="emit('back')"
-      />
+      <OnboardingContratarFormActions :loading="loading" @back="emit('back')" />
     </form>
   </div>
 </template>

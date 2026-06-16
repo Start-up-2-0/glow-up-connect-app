@@ -34,7 +34,7 @@ function formatEndereco(est: OnboardingEstabelecimentoDraft): string {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-[718px] space-y-4">
+  <div class="mx-auto w-full space-y-4">
     <article :class="ONBOARDING_CONTRATAR_CARD_CLASS">
       <p class="font-urbanist text-sm font-bold text-glow-text">Plano escolhido</p>
       <p class="mt-2 font-urbanist text-base font-black text-[#e3ac09]">{{ plano.nome }}</p>
@@ -66,7 +66,7 @@ function formatEndereco(est: OnboardingEstabelecimentoDraft): string {
       <div class="mt-4 flex gap-4">
         <div
           v-if="estabelecimento.logoDataUrl"
-          class="size-14 shrink-0 overflow-hidden rounded"
+          class="size-14 shrink-0 overflow-hidden rounded sm:size-[56px]"
         >
           <img
             :src="estabelecimento.logoDataUrl"
@@ -76,7 +76,7 @@ function formatEndereco(est: OnboardingEstabelecimentoDraft): string {
         </div>
         <div
           v-else
-          class="flex size-14 shrink-0 items-center justify-center rounded bg-glow-canvas font-urbanist text-xl font-bold text-glow-text/40"
+          class="flex size-14 shrink-0 items-center justify-center rounded bg-glow-canvas font-urbanist text-xl font-bold text-glow-text/40 sm:size-[56px]"
           aria-hidden="true"
         >
           {{ estabelecimento.nome.charAt(0) }}
@@ -130,7 +130,7 @@ function formatEndereco(est: OnboardingEstabelecimentoDraft): string {
 
     <p v-if="errorMessage" class="text-sm text-red-600" role="alert">{{ errorMessage }}</p>
 
-    <div class="flex flex-col gap-3 sm:flex-row">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
       <button
         type="button"
         :disabled="loading"

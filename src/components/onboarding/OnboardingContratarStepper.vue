@@ -17,13 +17,9 @@ const items = computed(() =>
 </script>
 
 <template>
-  <ol class="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:gap-x-[13px]">
-    <li
-      v-for="(item, index) in items"
-      :key="item.id"
-      class="flex items-center gap-2 sm:gap-[13px]"
-    >
-      <div class="flex items-center gap-2 sm:gap-[13px]">
+  <ol class="flex flex-wrap items-center justify-center gap-y-2">
+    <template v-for="(item, index) in items" :key="item.id">
+      <li class="flex items-center gap-[13px]">
         <span
           v-if="item.isActive"
           class="flex size-[30px] shrink-0 items-center justify-center rounded-full bg-glow-gold font-urbanist text-sm font-bold text-white"
@@ -33,8 +29,7 @@ const items = computed(() =>
         </span>
         <span
           v-else
-          class="font-urbanist text-sm"
-          :class="item.isCompleted ? 'font-normal text-glow-text/50' : 'font-normal text-glow-text/50'"
+          class="font-urbanist text-sm font-normal text-glow-text/50"
         >
           {{ index + 1 }}
         </span>
@@ -45,14 +40,14 @@ const items = computed(() =>
         >
           {{ item.label }}
         </span>
-      </div>
+      </li>
 
-      <span
+      <li
         v-if="index < items.length - 1"
-        class="hidden h-0.5 w-10 shrink-0 rounded-full sm:block"
+        class="mx-[13px] hidden h-0.5 w-10 shrink-0 rounded-full sm:block"
         :class="index < current ? 'bg-glow-gold' : 'bg-glow-text/20'"
         aria-hidden="true"
       />
-    </li>
+    </template>
   </ol>
 </template>

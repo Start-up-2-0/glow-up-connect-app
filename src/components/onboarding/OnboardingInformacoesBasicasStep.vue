@@ -4,10 +4,11 @@ import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import OnboardingContratarFormActions from '@/components/onboarding/OnboardingContratarFormActions.vue'
 import {
-  GLOW_INPUT_CLASS,
-  GLOW_LABEL_CLASS,
   ONBOARDING_CONTRATAR_CARD_CLASS,
+  ONBOARDING_CONTRATAR_FIELD_CLASS,
   ONBOARDING_CONTRATAR_FORM_CLASS,
+  ONBOARDING_CONTRATAR_INPUT_CLASS,
+  ONBOARDING_CONTRATAR_LABEL_CLASS,
 } from '@/constants/designTokens'
 import { readFileAsDataUrl } from '@/utils/avatarFile'
 import { telefoneLocalFromApi, telefoneToApi } from '@/utils/formatters'
@@ -67,26 +68,26 @@ function handleSubmit() {
     </p>
 
     <form :class="ONBOARDING_CONTRATAR_FORM_CLASS" @submit.prevent="handleSubmit">
-      <div class="flex flex-col gap-2">
-        <label for="onb-info-nome" :class="GLOW_LABEL_CLASS">Nome do estabelecimento</label>
+      <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+        <label for="onb-info-nome" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">Nome do estabelecimento</label>
         <input
           id="onb-info-nome"
           v-model="nome"
           type="text"
           required
           placeholder="Informe o nome do seu estabelecimento"
-          :class="GLOW_INPUT_CLASS"
+          :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
         />
       </div>
 
-      <div class="flex flex-col gap-2">
-        <label for="onb-info-descricao" :class="GLOW_LABEL_CLASS">Descrição (opcional)</label>
+      <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+        <label for="onb-info-descricao" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">Descrição (opcional)</label>
         <input
           id="onb-info-descricao"
           v-model="descricao"
           type="text"
           placeholder="Breve apresentação do seu negócio"
-          :class="GLOW_INPUT_CLASS"
+          :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
         />
       </div>
 
@@ -96,15 +97,15 @@ function handleSubmit() {
         @error="(msg) => (logoError = msg)"
       />
 
-      <div class="flex flex-col gap-2">
-        <label for="onb-info-email" :class="GLOW_LABEL_CLASS">E-mail comercial</label>
+      <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+        <label for="onb-info-email" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">E-mail comercial</label>
         <input
           id="onb-info-email"
           v-model="email"
           type="email"
           required
           placeholder="ex: usuario01@gmail.com"
-          :class="GLOW_INPUT_CLASS"
+          :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
         />
       </div>
 
@@ -117,10 +118,7 @@ function handleSubmit() {
         placeholder="(00) 0 0000-0000"
       />
 
-      <OnboardingContratarFormActions
-        :loading="loading"
-        :show-back="false"
-      />
+      <OnboardingContratarFormActions :loading="loading" @back="emit('back')" />
     </form>
   </div>
 </template>
