@@ -47,7 +47,7 @@ function handleSubmit() {
   <div :class="ONBOARDING_CONTRATAR_CARD_CLASS">
     <p
       v-if="errorMessage"
-      class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      class="checkout-alert-error mb-6 px-4 py-3"
       role="alert"
     >
       {{ errorMessage }}

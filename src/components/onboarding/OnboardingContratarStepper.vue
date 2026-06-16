@@ -29,14 +29,14 @@ const items = computed(() =>
         </span>
         <span
           v-else
-          class="font-urbanist text-sm font-normal text-glow-text/50"
+          class="font-urbanist text-sm font-normal text-glow-text-subtle"
         >
           {{ index + 1 }}
         </span>
 
         <span
           class="font-urbanist text-base whitespace-nowrap"
-          :class="item.isActive ? 'font-bold text-glow-text' : 'font-normal text-glow-text/50'"
+          :class="item.isActive ? 'font-bold text-glow-text' : 'font-normal text-glow-text-subtle'"
         >
           {{ item.label }}
         </span>
@@ -45,7 +45,7 @@ const items = computed(() =>
       <li
         v-if="index < items.length - 1"
         class="mx-[13px] hidden h-0.5 w-10 shrink-0 rounded-full sm:block"
-        :class="index < current ? 'bg-glow-gold' : 'bg-glow-text/20'"
+        :class="index < current ? 'bg-glow-gold' : 'bg-glow-border-soft'"
         aria-hidden="true"
       />
     </template>

@@ -122,3 +122,12 @@ export const ONBOARDING_CONTRATAR_BTN_PRIMARY_CLASS =
 
 export const ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS =
   'flex h-10 w-full items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3.5 font-satoshi text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60'
+
+export const ONBOARDING_CONTRATAR_DROPZONE_CLASS =
+  'flex h-[49px] w-full cursor-pointer items-center rounded-lg border border-dashed border-glow-border-soft bg-glow-hover-surface transition hover:border-glow-gold'
+
+export const ONBOARDING_CONTRATAR_DROPZONE_TEXT_CLASS =
+  'font-inter text-sm text-glow-placeholder'
+
+export const ONBOARDING_CONTRATAR_TELEFONE_PREFIX_CLASS =
+  'inline-flex h-[49px] shrink-0 items-center rounded-l-lg border-[0.3px] border-r-0 border-glow-border-soft bg-glow-hover-surface px-[18px] font-inter text-sm text-glow-text-subtle'

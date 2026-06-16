@@ -53,7 +53,8 @@ ONBOARDING_CONTRATAR_BTN_SECONDARY → bg-glow-surface (não bg-[#f3f3f3])
 - `bg-white`, `bg-black`, `bg-[#e5e5e5]`, `bg-[#f3f3f3]`, `bg-zinc-*`
 - `text-zinc-*`, `text-gray-*` para texto principal
 - `rgba(40,40,40,0.04)` fixo — usar `bg-glow-surface-tint`
-- Copiar tokens de auth (`GLOW_INPUT_CLASS`, `GLOW_LOGIN_PAGE_CLASS`) em views logadas
+- `text-glow-text/50`, `text-glow-text/40` — opacidade não funciona com CSS vars; usar `text-glow-text-subtle`, `text-glow-text-muted`, `text-glow-text-soft`
+- Copiar tokens de auth (`GLOW_INPUT_CLASS`, `GLOW_LOGIN_PAGE_CLASS`, `variant="auth"`) em views logadas — usar `variant="contratar"` ou tokens `ONBOARDING_CONTRATAR_*`
 
 ## Checklist ao criar/editar tela no dashboard
 

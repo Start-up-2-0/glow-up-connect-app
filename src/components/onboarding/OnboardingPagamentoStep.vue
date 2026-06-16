@@ -223,10 +223,10 @@ async function handleSubmit() {
               {{ erroVisivel }}
             </p>
 
-            <hr class="my-6 border-glow-text/20" />
+            <hr class="my-6 border-glow-border-soft" />
 
             <div class="mb-5 flex items-end justify-between">
-              <span class="font-urbanist text-sm text-glow-text/80">Total hoje</span>
+              <span class="font-urbanist text-sm text-glow-text-soft">Total hoje</span>
               <span class="font-satoshi text-2xl font-bold text-glow-text">
                 {{ formatBRL(totalHoje) }}
               </span>
@@ -255,7 +255,7 @@ async function handleSubmit() {
               </span>
             </button>
 
-            <p class="mt-3 text-center font-urbanist text-xs text-glow-text/50">
+            <p class="mt-3 text-center font-urbanist text-xs text-glow-text-subtle">
               Pagamento processado com segurança via Mercado Pago
             </p>
           </template>

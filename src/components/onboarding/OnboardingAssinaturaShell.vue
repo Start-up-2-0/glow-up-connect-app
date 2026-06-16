@@ -58,7 +58,7 @@ const emit = defineEmits<{
     <div class="space-y-6">
       <header v-if="!isCheckoutStep">
         <h1 class="font-satoshi text-2xl font-bold text-glow-text">Contratar plano</h1>
-        <p class="mt-2 font-satoshi text-base text-glow-text/50">
+        <p class="mt-2 font-satoshi text-base text-glow-text-subtle">
           Complete as etapas para vincular o plano ao seu estabelecimento.
         </p>
       </header>
@@ -76,13 +76,13 @@ const emit = defineEmits<{
         </button>
         <div>
           <h1 class="font-satoshi text-2xl font-bold text-glow-text">Finalize a sua assinatura</h1>
-          <p class="mt-2 font-satoshi text-base text-glow-text/50">
+          <p class="mt-2 font-satoshi text-base text-glow-text-subtle">
             Escolha o vencimento e conclua o pagamento para ativar seu plano.
           </p>
         </div>
       </header>
 
-      <hr class="border-glow-text/20" />
+      <hr class="border-glow-border-soft" />
 
       <OnboardingContratarStepper
         v-if="showStepper && steps"
@@ -92,7 +92,7 @@ const emit = defineEmits<{
 
       <p
         v-if="!isCheckoutStep && stepSubtitle"
-        class="text-center font-satoshi text-base text-glow-text/50"
+        class="text-center font-satoshi text-base text-glow-text-subtle"
       >
         {{ stepSubtitle }}
       </p>

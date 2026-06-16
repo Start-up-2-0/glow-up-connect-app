@@ -61,7 +61,7 @@ function handleSubmit() {
   <div :class="ONBOARDING_CONTRATAR_CARD_CLASS">
     <p
       v-if="errorMessage || logoError"
-      class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      class="checkout-alert-error mb-6 px-4 py-3"
       role="alert"
     >
       {{ errorMessage || logoError }}
@@ -93,6 +93,7 @@ function handleSubmit() {
 
       <AuthAvatarUpload
         label="Logo do estabelecimento"
+        variant="contratar"
         @change="onLogoChange"
         @error="(msg) => (logoError = msg)"
       />
@@ -113,7 +114,7 @@ function handleSubmit() {
         id="onb-info-telefone"
         v-model="telefone"
         label="Telefone comercial"
-        variant="auth"
+        variant="contratar"
         required
         placeholder="(00) 0 0000-0000"
       />

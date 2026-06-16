@@ -1,17 +1,38 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { GLOW_AVATAR_DROPZONE_CLASS, GLOW_LABEL_CLASS, GLOW_PLACEHOLDER_TEXT_CLASS } from '@/constants/designTokens'
+import { ref, computed } from 'vue'
+import {
+  GLOW_AVATAR_DROPZONE_CLASS,
+  GLOW_LABEL_CLASS,
+  GLOW_PLACEHOLDER_TEXT_CLASS,
+  ONBOARDING_CONTRATAR_DROPZONE_CLASS,
+  ONBOARDING_CONTRATAR_DROPZONE_TEXT_CLASS,
+  ONBOARDING_CONTRATAR_LABEL_CLASS,
+} from '@/constants/designTokens'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_SIZE_BYTES = 5 * 1024 * 1024
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     label?: string
+    variant?: 'auth' | 'contratar'
   }>(),
   {
     label: 'Avatar',
+    variant: 'auth',
   },
+)
+
+const labelClass = computed(() =>
+  props.variant === 'contratar' ? ONBOARDING_CONTRATAR_LABEL_CLASS : GLOW_LABEL_CLASS,
+)
+
+const dropzoneClass = computed(() =>
+  props.variant === 'contratar' ? ONBOARDING_CONTRATAR_DROPZONE_CLASS : GLOW_AVATAR_DROPZONE_CLASS,
+)
+
+const placeholderClass = computed(() =>
+  props.variant === 'contratar' ? ONBOARDING_CONTRATAR_DROPZONE_TEXT_CLASS : GLOW_PLACEHOLDER_TEXT_CLASS,
 )
 
 const emit = defineEmits<{
@@ -62,13 +83,13 @@ function openPicker() {
 
 <template>
   <div class="flex flex-col gap-2">
-    <label :class="GLOW_LABEL_CLASS">{{ label }}</label>
+    <label :class="labelClass">{{ label }}</label>
     <div
       role="button"
       tabindex="0"
       :class="[
-        GLOW_AVATAR_DROPZONE_CLASS,
-        isDragging ? 'border-glow-gold bg-glow-gold/5' : '',
+        dropzoneClass,
+        isDragging ? 'border-glow-gold bg-glow-gold-soft' : '',
       ]"
       @click="openPicker"
       @keydown.enter.prevent="openPicker"
@@ -95,7 +116,7 @@ function openPicker() {
             d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm4 18H6V4h7v5h5v11z"
           />
         </svg>
-        <p :class="GLOW_PLACEHOLDER_TEXT_CLASS">
+        <p :class="placeholderClass">
           <span v-if="fileName">{{ fileName }}</span>
           <span v-else>Solte arquivos para anexar ou navegue até eles.</span>
         </p>
