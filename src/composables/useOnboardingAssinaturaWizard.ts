@@ -19,6 +19,7 @@ import type {
   OnboardingWizardStep,
 } from '@/types/onboardingAssinatura.types'
 import { telefoneToApi } from '@/utils/formatters'
+import { draftEnderecoToApi, validateEnderecoForSubmit } from '@/utils/enderecoPayload'
 
 const STORAGE_KEY = 'guc_onboarding_assinatura'
 
@@ -281,8 +282,9 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
       erro.value = 'Envie a logo do estabelecimento.'
       return
     }
-    if (!estabelecimento.cep.trim() || !estabelecimento.logradouro.trim()) {
-      erro.value = 'Preencha o endereço do estabelecimento.'
+    const enderecoError = validateEnderecoForSubmit(estabelecimento)
+    if (enderecoError) {
+      erro.value = enderecoError
       return
     }
 
@@ -335,15 +337,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     }
 
     const negocio = draft.value.estabelecimento
-    const endereco = {
-      cep: negocio.cep,
-      logradouro: negocio.logradouro,
-      numero: negocio.numero,
-      bairro: negocio.bairro,
-      cidade: negocio.cidade,
-      estado: negocio.estado,
-      complemento: negocio.complemento || undefined,
-    }
+    const endereco = draftEnderecoToApi(negocio)
 
     submitting.value = true
     try {

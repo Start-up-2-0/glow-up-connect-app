@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { assinaturaService } from '@/services/assinaturaService'
+import { estabelecimentoPerfilService } from '@/services/estabelecimentoPerfilService'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUserStore } from '@/stores/user.store'
 import { usePlanosStore } from '@/stores/planos.store'
@@ -12,6 +13,7 @@ import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagam
 import type { PagamentoAssinaturaPayload } from '@/types/assinatura.types'
 import { ROUTE_PATHS } from '@/constants/routes'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
+import type { EstabelecimentoPerfilCompleto } from '@/types/estabelecimento.types'
 import type {
   AssinaturaLogadaWizardStep,
   AssinaturaOnboardingContexto,
@@ -19,6 +21,8 @@ import type {
 } from '@/types/assinaturaOnboarding.types'
 import { ASSINATURA_LOGADA_WIZARD_STEPS } from '@/types/assinaturaOnboarding.types'
 import { telefoneToApi } from '@/utils/formatters'
+import { draftEnderecoToApi, validateEnderecoForSubmit } from '@/utils/enderecoPayload'
+import { buildAtualizarPerfilPayload } from '@/utils/perfilPayload'
 
 function normalizeStoredStep(step: string): AssinaturaLogadaWizardStep {
   if (step === 'estabelecimento') return 'informacoes-basicas'
@@ -80,21 +84,28 @@ function saveDraft(draft: AssinaturaLogadaDraft) {
 
 function mapEstabelecimentoExistente(
   estabelecimento: EstabelecimentoOnboardingContexto,
+  perfil?: EstabelecimentoPerfilCompleto | null,
 ): OnboardingEstabelecimentoDraft {
+  const endereco = perfil?.endereco
   return {
-    nome: estabelecimento.nome,
-    descricao: '',
-    telefone: '',
-    email: '',
-    cep: '',
-    logradouro: '',
-    numero: '',
-    bairro: '',
-    cidade: '',
-    estado: '',
-    complemento: '',
-    logoDataUrl: estabelecimento.logo,
+    nome: perfil?.nome ?? estabelecimento.nome,
+    descricao: perfil?.descricao ?? '',
+    telefone: perfil?.telefone ?? '',
+    email: perfil?.email ?? '',
+    cep: endereco?.cep ?? '',
+    logradouro: endereco?.logradouro ?? '',
+    numero: endereco?.numero ?? '',
+    bairro: endereco?.bairro ?? '',
+    cidade: endereco?.cidade ?? '',
+    estado: endereco?.estado ?? '',
+    complemento: endereco?.complemento ?? '',
+    logoDataUrl: perfil?.logo ?? estabelecimento.logo,
   }
+}
+
+function precisaCompletarEndereco(perfil: EstabelecimentoPerfilCompleto | null): boolean {
+  if (!perfil?.endereco) return true
+  return perfil.endereco.enderecoCompleto !== true
 }
 
 export function useAssinaturaLogadaWizard(planoId: number) {
@@ -118,6 +129,8 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     storedDraft?.planoId === planoId ? storedDraft : createDraft(planoId),
   )
   const contexto = ref<AssinaturaOnboardingContexto | null>(null)
+  const perfilExistente = ref<EstabelecimentoPerfilCompleto | null>(null)
+  const requerComplementoEndereco = ref(false)
   const loading = ref(false)
   const submitting = ref(false)
   const erro = ref<string | null>(null)
@@ -137,10 +150,13 @@ export function useAssinaturaLogadaWizard(planoId: number) {
   )
 
   const wizardSteps = computed(() => {
-    if (usaEstabelecimentoExistente.value) {
+    if (usaEstabelecimentoExistente.value && !requerComplementoEndereco.value) {
       return ASSINATURA_LOGADA_WIZARD_STEPS.filter(
         (item) => item.id !== 'informacoes-basicas' && item.id !== 'endereco',
       )
+    }
+    if (usaEstabelecimentoExistente.value && requerComplementoEndereco.value) {
+      return ASSINATURA_LOGADA_WIZARD_STEPS.filter((item) => item.id !== 'informacoes-basicas')
     }
     return ASSINATURA_LOGADA_WIZARD_STEPS
   })
@@ -170,7 +186,7 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     }
   }
 
-  function aplicarContexto(data: AssinaturaOnboardingContexto) {
+  async function aplicarContexto(data: AssinaturaOnboardingContexto) {
     contexto.value = data
 
     if (data.proximaEtapa === 'GerenciarAssinatura') {
@@ -188,10 +204,21 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       const existente = data.estabelecimentos.find(
         (item) => item.estabelecimentoId === data.estabelecimentoIdSugerido,
       )
-      if (existente) {
-        draft.value.estabelecimento = mapEstabelecimentoExistente(existente)
+
+      let perfil: EstabelecimentoPerfilCompleto | null = null
+      try {
+        perfil = await estabelecimentoPerfilService.obterPerfil(data.estabelecimentoIdSugerido)
+      } catch {
+        perfil = null
       }
-      step.value = 'confirmar'
+
+      if (existente) {
+        draft.value.estabelecimento = mapEstabelecimentoExistente(existente, perfil)
+      }
+
+      perfilExistente.value = perfil
+      requerComplementoEndereco.value = precisaCompletarEndereco(perfil)
+      step.value = requerComplementoEndereco.value ? 'endereco' : 'confirmar'
     } else if (step.value === 'confirmar' && !data.temEstabelecimentoProprio) {
       step.value = 'informacoes-basicas'
     }
@@ -238,7 +265,7 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       preencherDadosUsuario()
 
       const data = await assinaturaService.obterContextoOnboarding()
-      if (!aplicarContexto(data)) {
+      if (!(await aplicarContexto(data))) {
         return
       }
     } catch (err) {
@@ -286,19 +313,12 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     persist()
   }
 
-  function avancarDeEndereco(estabelecimento: OnboardingEstabelecimentoDraft) {
+  async function avancarDeEndereco(estabelecimento: OnboardingEstabelecimentoDraft) {
     erro.value = null
 
-    if (!estabelecimento.cep.trim() || !estabelecimento.logradouro.trim()) {
-      erro.value = 'Preencha o endereço do estabelecimento.'
-      return
-    }
-    if (!estabelecimento.numero.trim() || !estabelecimento.bairro.trim()) {
-      erro.value = 'Informe número e bairro.'
-      return
-    }
-    if (!estabelecimento.cidade.trim() || !estabelecimento.estado.trim()) {
-      erro.value = 'Informe cidade e estado.'
+    const enderecoError = validateEnderecoForSubmit(estabelecimento)
+    if (enderecoError) {
+      erro.value = enderecoError
       return
     }
 
@@ -312,7 +332,39 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       estado: estabelecimento.estado,
       complemento: estabelecimento.complemento,
     }
-    draft.value.estabelecimentoId = null
+
+    if (usaEstabelecimentoExistente.value && draft.value.estabelecimentoId) {
+      submitting.value = true
+      try {
+        const perfilBase: EstabelecimentoPerfilCompleto =
+          perfilExistente.value ?? {
+            id: draft.value.estabelecimentoId,
+            publicGuid: '',
+            nome: draft.value.estabelecimento.nome,
+            logo: draft.value.estabelecimento.logoDataUrl ?? '',
+            telefone: draft.value.estabelecimento.telefone,
+            email: draft.value.estabelecimento.email,
+            endereco: null,
+          }
+
+        const atualizado = await estabelecimentoPerfilService.atualizarPerfil(
+          draft.value.estabelecimentoId,
+          buildAtualizarPerfilPayload(perfilBase, {
+            endereco: draftEnderecoToApi(estabelecimento),
+          }),
+        )
+        perfilExistente.value = atualizado
+        requerComplementoEndereco.value = precisaCompletarEndereco(atualizado)
+      } catch (err) {
+        erro.value = resolveError(err)
+        return
+      } finally {
+        submitting.value = false
+      }
+    } else {
+      draft.value.estabelecimentoId = null
+    }
+
     step.value = 'confirmar'
     persist()
   }
@@ -394,15 +446,7 @@ export function useAssinaturaLogadaWizard(planoId: number) {
                 logo: draft.value.estabelecimento.logoDataUrl!,
                 telefone: telefoneToApi(draft.value.estabelecimento.telefone),
                 email: draft.value.estabelecimento.email.trim(),
-                endereco: {
-                  cep: draft.value.estabelecimento.cep,
-                  logradouro: draft.value.estabelecimento.logradouro,
-                  numero: draft.value.estabelecimento.numero,
-                  bairro: draft.value.estabelecimento.bairro,
-                  cidade: draft.value.estabelecimento.cidade,
-                  estado: draft.value.estabelecimento.estado,
-                  complemento: draft.value.estabelecimento.complemento || undefined,
-                },
+                endereco: draftEnderecoToApi(draft.value.estabelecimento),
               },
             },
       )
@@ -432,7 +476,7 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       const code = resolveErrorCode(err)
       if (code === 'ESTABELECIMENTO_ONBOARDING_DUPLICADO') {
         const data = await assinaturaService.obterContextoOnboarding()
-        aplicarContexto(data)
+        await aplicarContexto(data)
         erro.value = 'Você já possui um estabelecimento. Confirme os dados para assinar o plano.'
         step.value = 'confirmar'
         persist()

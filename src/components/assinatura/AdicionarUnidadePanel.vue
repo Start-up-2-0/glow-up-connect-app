@@ -2,6 +2,7 @@
 import OnboardingEstabelecimentoStep from '@/components/onboarding/OnboardingEstabelecimentoStep.vue'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 import type { EstabelecimentoOnboarding } from '@/types/assinatura.types'
+import { draftEnderecoToApi } from '@/utils/enderecoPayload'
 
 const props = defineProps<{
   loading?: boolean
@@ -35,15 +36,7 @@ function handleSubmit(draft: OnboardingEstabelecimentoDraft) {
     logo: draft.logoDataUrl,
     telefone: draft.telefone,
     email: draft.email,
-    endereco: {
-      cep: draft.cep,
-      logradouro: draft.logradouro,
-      numero: draft.numero,
-      complemento: draft.complemento,
-      bairro: draft.bairro,
-      cidade: draft.cidade,
-      estado: draft.estado,
-    },
+    endereco: draftEnderecoToApi(draft),
   })
 }
 </script>

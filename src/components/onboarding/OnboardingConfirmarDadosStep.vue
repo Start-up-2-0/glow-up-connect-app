@@ -4,7 +4,7 @@ import {
   ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS,
   ONBOARDING_CONTRATAR_CARD_CLASS,
 } from '@/constants/designTokens'
-import { formatBRL, telefoneLocalFromApi } from '@/utils/formatters'
+import { formatBRL, formatEnderecoOnboarding, telefoneLocalFromApi } from '@/utils/formatters'
 import type { Plano } from '@/types/plano.types'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 
@@ -22,15 +22,6 @@ const emit = defineEmits<{
   edit: []
 }>()
 
-function formatEndereco(est: OnboardingEstabelecimentoDraft): string {
-  const partes = [
-    est.logradouro,
-    est.numero ? `${est.numero}` : '',
-    est.bairro ? `- ${est.bairro}` : '',
-    est.cidade && est.estado ? `, ${est.cidade}/${est.estado}` : est.cidade || est.estado,
-  ].filter(Boolean)
-  return partes.join(' ').replace(/\s+/g, ' ').trim()
-}
 </script>
 
 <template>
@@ -121,7 +112,7 @@ function formatEndereco(est: OnboardingEstabelecimentoDraft): string {
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                 <circle cx="12" cy="10" r="3" />
               </svg>
-              {{ formatEndereco(estabelecimento) }}
+              {{ formatEnderecoOnboarding(estabelecimento) }}
             </li>
           </ul>
         </div>

@@ -40,6 +40,48 @@ export interface ListarProximosParams {
   tamanhoPagina?: number
 }
 
+export interface EnderecoPerfil {
+  cep: string
+  logradouro: string
+  numero: string
+  bairro: string
+  cidade: string
+  estado: string
+  complemento?: string | null
+  enderecoCompleto: boolean
+}
+
+export interface EstabelecimentoPerfilCompleto {
+  id: number
+  publicGuid: string
+  nome: string
+  descricao?: string | null
+  logo: string
+  telefone: string
+  email: string
+  whatsAppConfirmado?: boolean
+  whatsAppOptIn?: boolean
+  whatsAppPendenteConfirmacao?: boolean
+  endereco: EnderecoPerfil | null
+}
+
+export interface AtualizarEstabelecimentoPerfilPayload {
+  nome?: string
+  logo?: string
+  descricao?: string
+  telefone?: string
+  email?: string
+  endereco?: {
+    cep: string
+    logradouro: string
+    numero: string
+    bairro: string
+    cidade: string
+    estado: string
+    complemento?: string
+  }
+}
+
 export interface ObterEstabelecimentoParams {
   latitude?: number
   longitude?: number

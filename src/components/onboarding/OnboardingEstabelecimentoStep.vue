@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
+import EnderecoForm from '@/components/form/EnderecoForm.vue'
 import {
   AGENDAR_BTN_CONTINUE_CLASS,
   GLOW_AUTH_FORM_GRID_CLASS,
@@ -12,6 +13,7 @@ import {
 import type { OnboardingUiVariant } from '@/constants/onboardingWizardSteps'
 import { readFileAsDataUrl } from '@/utils/avatarFile'
 import { telefoneLocalFromApi, telefoneToApi } from '@/utils/formatters'
+import type { EnderecoFormFields } from '@/types/endereco.types'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 
 const props = withDefaults(
@@ -44,6 +46,27 @@ const bairro = ref(props.initial.bairro)
 const cidade = ref(props.initial.cidade)
 const estado = ref(props.initial.estado)
 const complemento = ref(props.initial.complemento)
+
+const endereco = computed<EnderecoFormFields>({
+  get: () => ({
+    cep: cep.value,
+    logradouro: logradouro.value,
+    numero: numero.value,
+    bairro: bairro.value,
+    cidade: cidade.value,
+    estado: estado.value,
+    complemento: complemento.value,
+  }),
+  set: (value) => {
+    cep.value = value.cep
+    logradouro.value = value.logradouro
+    numero.value = value.numero
+    bairro.value = value.bairro
+    cidade.value = value.cidade
+    estado.value = value.estado
+    complemento.value = value.complemento
+  },
+})
 const logoDataUrl = ref<string | null>(props.initial.logoDataUrl)
 const logoError = ref<string | null>(null)
 
@@ -153,86 +176,12 @@ function handleSubmit() {
           />
         </div>
 
-        <div class="flex flex-col gap-2">
-          <label :for="`${fieldIdPrefix}-cep`" :class="GLOW_LABEL_CLASS">CEP</label>
-          <input
-            :id="`${fieldIdPrefix}-cep`"
-            v-model="cep"
-            type="text"
-            required
-            placeholder="00000-000"
-            :class="GLOW_INPUT_CLASS"
-          />
-        </div>
-
-        <div class="flex flex-col gap-2 sm:col-span-2">
-          <label :for="`${fieldIdPrefix}-logradouro`" :class="GLOW_LABEL_CLASS">Logradouro</label>
-          <input
-            :id="`${fieldIdPrefix}-logradouro`"
-            v-model="logradouro"
-            type="text"
-            required
-            placeholder="Rua, avenida..."
-            :class="GLOW_INPUT_CLASS"
-          />
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <label :for="`${fieldIdPrefix}-numero`" :class="GLOW_LABEL_CLASS">Número</label>
-          <input
-            :id="`${fieldIdPrefix}-numero`"
-            v-model="numero"
-            type="text"
-            required
-            :class="GLOW_INPUT_CLASS"
-          />
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <label :for="`${fieldIdPrefix}-bairro`" :class="GLOW_LABEL_CLASS">Bairro</label>
-          <input
-            :id="`${fieldIdPrefix}-bairro`"
-            v-model="bairro"
-            type="text"
-            required
-            :class="GLOW_INPUT_CLASS"
-          />
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <label :for="`${fieldIdPrefix}-cidade`" :class="GLOW_LABEL_CLASS">Cidade</label>
-          <input
-            :id="`${fieldIdPrefix}-cidade`"
-            v-model="cidade"
-            type="text"
-            required
-            :class="GLOW_INPUT_CLASS"
-          />
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <label :for="`${fieldIdPrefix}-estado`" :class="GLOW_LABEL_CLASS">Estado</label>
-          <input
-            :id="`${fieldIdPrefix}-estado`"
-            v-model="estado"
-            type="text"
-            maxlength="2"
-            required
-            placeholder="UF"
-            :class="GLOW_INPUT_CLASS"
-          />
-        </div>
-
-        <div class="flex flex-col gap-2 sm:col-span-2">
-          <label :for="`${fieldIdPrefix}-complemento`" :class="GLOW_LABEL_CLASS">Complemento</label>
-          <input
-            :id="`${fieldIdPrefix}-complemento`"
-            v-model="complemento"
-            type="text"
-            placeholder="Opcional"
-            :class="GLOW_INPUT_CLASS"
-          />
-        </div>
+        <EnderecoForm
+          v-model="endereco"
+          :variant="isPublic ? 'auth' : 'dashboard'"
+          :id-prefix="`${fieldIdPrefix}-end`"
+          grid-class="contents"
+        />
       </div>
 
       <button

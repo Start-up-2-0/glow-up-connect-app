@@ -1,4 +1,6 @@
 import type { EnderecoResumo } from '@/types/estabelecimento.types'
+import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
+import { maskCep } from '@/utils/cep'
 
 const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
   day: '2-digit',
@@ -263,6 +265,21 @@ export function formatEnderecoResumo(endereco: EnderecoResumo | null | undefined
   if (!endereco) return 'Endereço não informado'
   const partes = [endereco.logradouro, endereco.bairro, `${endereco.cidade}/${endereco.estado}`]
   return partes.filter(Boolean).join(', ')
+}
+
+export function formatEnderecoOnboarding(est: Pick<
+  OnboardingEstabelecimentoDraft,
+  'cep' | 'logradouro' | 'numero' | 'bairro' | 'cidade' | 'estado' | 'complemento'
+>): string {
+  const partes = [
+    est.logradouro,
+    est.numero ? `nº ${est.numero}` : '',
+    est.bairro ? `- ${est.bairro}` : '',
+    est.cidade && est.estado ? `, ${est.cidade}/${est.estado}` : est.cidade || est.estado,
+    est.cep ? ` — CEP ${maskCep(est.cep.replace(/\D/g, ''))}` : '',
+    est.complemento ? ` (${est.complemento})` : '',
+  ]
+  return partes.filter(Boolean).join(' ').replace(/\s+/g, ' ').trim()
 }
 
 export function formatPrecoRange(min: number, max: number): string {

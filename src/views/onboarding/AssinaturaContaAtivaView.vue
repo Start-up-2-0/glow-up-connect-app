@@ -90,7 +90,7 @@ function voltarDeInformacoesBasicas() {
       <OnboardingEnderecoStep
         v-else-if="step === 'endereco'"
         :initial="draft.estabelecimento"
-        :loading="loading"
+        :loading="submitting"
         :error-message="erro"
         @submit="avancarDeEndereco"
         @back="voltarDeEndereco"
