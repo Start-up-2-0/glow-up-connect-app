@@ -127,24 +127,10 @@ async function handleSubmit() {
 
 <template>
   <div class="checkout-page w-full">
-    <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <header v-if="isPublic" class="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1
-          :class="
-            isPublic
-              ? 'agendar-section-title'
-              : 'font-satoshi text-2xl font-bold text-glow-text lg:text-3xl'
-          "
-        >
-          Finalize sua assinatura
-        </h1>
-        <p
-          :class="
-            isPublic
-              ? 'agendar-section-subtitle mt-2'
-              : 'mt-1 text-sm text-glow-text-subtle'
-          "
-        >
+        <h1 class="agendar-section-title">Finalize sua assinatura</h1>
+        <p class="agendar-section-subtitle mt-2">
           Escolha o vencimento e conclua o pagamento para ativar seu plano.
         </p>
       </div>

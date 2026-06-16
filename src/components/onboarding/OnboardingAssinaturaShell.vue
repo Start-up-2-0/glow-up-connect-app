@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import OnboardingStepper from '@/components/onboarding/OnboardingStepper.vue'
 import OnboardingPublicWizardStepper from '@/components/onboarding/OnboardingPublicWizardStepper.vue'
+import OnboardingContratarStepper from '@/components/onboarding/OnboardingContratarStepper.vue'
 import {
   PUBLIC_ONBOARDING_TOTAL,
   type OnboardingUiVariant,
@@ -16,6 +16,7 @@ withDefaults(
     publicStepIndex?: number
     publicStepLabel?: string
     publicShowBack?: boolean
+    stepSubtitle?: string
     steps?: ReadonlyArray<{ id: string; label: string }>
   }>(),
   {
@@ -25,6 +26,7 @@ withDefaults(
     publicStepIndex: 1,
     publicStepLabel: '',
     publicShowBack: false,
+    stepSubtitle: '',
   },
 )
 
@@ -52,20 +54,48 @@ const emit = defineEmits<{
   <div
     v-else
     class="space-y-6"
-    :class="isCheckoutStep ? 'page-shell max-w-6xl' : 'page-shell--form'"
+    :class="isCheckoutStep ? 'page-shell max-w-6xl' : 'mx-auto w-full max-w-[721px]'"
   >
     <header v-if="!isCheckoutStep">
-      <h1 class="font-satoshi text-2xl font-bold text-glow-text lg:text-3xl">Contratar plano</h1>
-      <p class="mt-2 text-glow-text-subtle">
+      <h1 class="font-satoshi text-2xl font-bold text-glow-text">Contratar plano</h1>
+      <p class="mt-2 text-base text-glow-text/50">
         Complete as etapas para vincular o plano ao seu estabelecimento.
       </p>
     </header>
 
-    <OnboardingStepper
-      v-if="showStepper && !isCheckoutStep"
+    <header v-else class="flex items-start gap-4">
+      <button
+        type="button"
+        class="mt-1 flex size-8 shrink-0 items-center justify-center rounded-full border border-glow-text/20 text-glow-text/70 transition hover:bg-glow-hover-surface hover:text-glow-text"
+        aria-label="Voltar"
+        @click="emit('back')"
+      >
+        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
+      <div>
+        <h1 class="font-satoshi text-2xl font-bold text-glow-text">Finalize a sua assinatura</h1>
+        <p class="mt-2 text-base text-glow-text/50">
+          Escolha o vencimento e conclua o pagamento para ativar seu plano.
+        </p>
+      </div>
+    </header>
+
+    <hr class="border-glow-text/20" />
+
+    <OnboardingContratarStepper
+      v-if="showStepper && steps"
       :current="stepperIndex"
       :steps="steps"
     />
+
+    <p
+      v-if="!isCheckoutStep && stepSubtitle"
+      class="text-center text-base text-glow-text/50"
+    >
+      {{ stepSubtitle }}
+    </p>
 
     <slot />
   </div>

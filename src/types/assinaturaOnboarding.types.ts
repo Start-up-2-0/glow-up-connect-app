@@ -25,10 +25,23 @@ export interface AssinaturaOnboardingContexto {
   assinaturaPremiumId: number | null
 }
 
-export type AssinaturaLogadaWizardStep = 'estabelecimento' | 'confirmar' | 'assinatura'
+export type AssinaturaLogadaWizardStep =
+  | 'informacoes-basicas'
+  | 'endereco'
+  | 'confirmar'
+  | 'assinatura'
 
 export const ASSINATURA_LOGADA_WIZARD_STEPS = [
-  { id: 'estabelecimento', label: 'Estabelecimento' },
+  { id: 'informacoes-basicas', label: 'Informações básicas' },
+  { id: 'endereco', label: 'Endereço' },
   { id: 'confirmar', label: 'Confirmar dados' },
   { id: 'assinatura', label: 'Assinatura' },
 ] as const
+
+export const ASSINATURA_LOGADA_STEP_SUBTITLES: Record<AssinaturaLogadaWizardStep, string> = {
+  'informacoes-basicas':
+    'Preencha os dados básicos que identificarão o seu negócio na plataforma.',
+  endereco: 'Informe o endereço onde seu estabelecimento está localizado.',
+  confirmar: 'Revise o plano e o estabelecimento antes de concluir a assinatura.',
+  assinatura: '',
+}

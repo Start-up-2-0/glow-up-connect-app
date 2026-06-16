@@ -378,7 +378,7 @@
   }
 
   .checkout-item-card {
-    @apply flex gap-4 rounded-xl border border-glow-border-soft bg-glow-canvas p-4;
+    @apply flex gap-4 rounded-xl border border-glow-border-soft bg-[rgba(40,40,40,0.04)] p-4;
   }
 
   .checkout-promo-row {
@@ -423,7 +423,7 @@
   }
 
   .checkout-pay-button {
-    @apply flex w-full items-center justify-center gap-2 rounded-xl bg-glow-gold px-5 py-3.5 text-sm font-semibold text-glow-text shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply flex w-full items-center justify-center gap-2 rounded-xl bg-[#e6ad01] px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   /* Toasts globais — canto superior, fora do fluxo do documento */

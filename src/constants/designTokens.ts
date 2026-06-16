@@ -99,3 +99,15 @@ export const AGENDAR_BTN_CONTINUE_MUTED_CLASS =
 
 export const AGENDAR_PRICE_PILL_CLASS =
   'inline-flex shrink-0 items-center justify-center rounded-full bg-[rgba(84,128,78,0.2)] px-4 py-1 font-urbanist text-base font-bold text-[#54804e]'
+
+/** Card central do wizard Contratar Plano (dashboard, Figma) */
+export const ONBOARDING_CONTRATAR_CARD_CLASS =
+  'rounded-xl border-[0.5px] border-glow-text/25 bg-glow-surface p-6 shadow-sm sm:p-8 lg:p-10'
+
+export const ONBOARDING_CONTRATAR_FORM_CLASS = 'flex w-full flex-col gap-6'
+
+export const ONBOARDING_CONTRATAR_BTN_PRIMARY_CLASS =
+  'flex h-10 flex-1 items-center justify-center rounded-xl bg-[#e6ad01] px-2.5 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60'
+
+export const ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS =
+  'flex h-10 flex-1 items-center justify-center rounded-xl border-[0.5px] border-glow-text/25 bg-glow-canvas px-3.5 font-satoshi text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60'

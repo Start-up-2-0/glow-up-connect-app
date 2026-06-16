@@ -57,7 +57,12 @@ const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
             :key="modulo"
             class="flex items-center gap-2 text-sm text-glow-text-subtle"
           >
-            <span class="text-glow-gold" aria-hidden="true">✓</span>
+            <span
+              class="flex size-3.5 shrink-0 items-center justify-center rounded-full bg-glow-gold text-[10px] text-white"
+              aria-hidden="true"
+            >
+              ✓
+            </span>
             {{ modulo }}
           </li>
         </ul>
