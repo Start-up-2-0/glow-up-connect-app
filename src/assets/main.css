@@ -1086,4 +1086,221 @@
   .remarcar-agendamento__btn--secondary {
     @apply min-w-[132px] border border-glow-border-soft bg-glow-hover-surface text-glow-text hover:bg-glow-surface;
   }
+
+  /* Área cliente — Explorar lojas / Detalhe (Figma) */
+  .cliente-explorar-page {
+    @apply space-y-6;
+  }
+
+  .cliente-loja-detalhe-page {
+    @apply space-y-6;
+  }
+
+  .cliente-page-header-block {
+    @apply space-y-6;
+  }
+
+  .cliente-page-header-block__row {
+    @apply flex items-center gap-[33px];
+  }
+
+  .cliente-page-header-block__back {
+    @apply flex size-8 shrink-0 items-center justify-center text-glow-text transition hover:opacity-70;
+  }
+
+  .cliente-page-header {
+    @apply flex flex-wrap items-start justify-between gap-4;
+  }
+
+  .cliente-page-divider {
+    @apply border-t border-glow-border-soft;
+  }
+
+  .cliente-explorar-toolbar {
+    @apply flex justify-end;
+  }
+
+  .cliente-explorar-grid {
+    @apply grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4;
+  }
+
+  .cliente-empty-panel {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-6 py-12;
+  }
+
+  .cliente-card {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface transition-colors hover:border-glow-gold-dark;
+  }
+
+  .cliente-estab-card {
+    @apply cliente-card relative flex h-[126px] overflow-hidden;
+  }
+
+  .cliente-estab-card__logo {
+    @apply absolute left-5 top-5 size-14 shrink-0 overflow-hidden rounded bg-glow-canvas;
+  }
+
+  .cliente-estab-card__logo-fallback {
+    @apply flex size-full items-center justify-center font-satoshi text-xl font-bold text-glow-text-subtle;
+  }
+
+  .cliente-estab-card__body {
+    @apply absolute left-[91px] right-5 top-5 flex min-w-0 flex-col;
+  }
+
+  .cliente-estab-card__title-row {
+    @apply flex items-start justify-between gap-2;
+  }
+
+  .cliente-estab-card__name {
+    @apply truncate font-urbanist text-base font-bold leading-none text-glow-text;
+  }
+
+  .cliente-estab-card__destaque {
+    @apply shrink-0 rounded-full bg-glow-gold-soft px-2 py-0.5 font-urbanist text-[10px] font-medium text-glow-gold-dark;
+  }
+
+  .cliente-estab-card__meta {
+    @apply mt-[9px] flex items-center gap-1 font-urbanist text-xs leading-none text-glow-text-subtle;
+  }
+
+  .cliente-estab-card__rating {
+    @apply mt-[6px] flex items-center gap-1.5 font-urbanist text-xs leading-none text-glow-text-subtle;
+  }
+
+  .cliente-estab-card__rating-value {
+    @apply font-bold text-glow-text;
+  }
+
+  .cliente-estab-card__rating-count {
+    @apply text-glow-text-subtle;
+  }
+
+  .cliente-estab-card__address {
+    @apply mt-[6px] flex items-center gap-2.5 font-urbanist text-sm leading-none text-glow-text;
+  }
+
+  .cliente-loja-detalhe-layout {
+    @apply grid items-start gap-8 xl:grid-cols-[minmax(0,723px)_minmax(280px,1fr)] xl:gap-10;
+  }
+
+  .cliente-loja-panel {
+    @apply cliente-card min-h-[382px] p-10;
+  }
+
+  .cliente-loja-panel__top {
+    @apply mb-6 flex items-start justify-between gap-4;
+  }
+
+  .cliente-loja-panel__nome {
+    @apply mb-6 font-urbanist text-2xl font-bold text-glow-text;
+  }
+
+  .cliente-loja-badge {
+    @apply inline-flex h-[22px] items-center gap-2.5 rounded bg-glow-hover-surface px-3.5 font-urbanist text-xs font-semibold text-glow-text;
+  }
+
+  .cliente-loja-badge__dot {
+    @apply size-2 shrink-0 rounded-full bg-[#54804e];
+  }
+
+  .cliente-loja-rating {
+    @apply text-right;
+  }
+
+  .cliente-loja-rating__score {
+    @apply inline-flex h-[22px] items-center justify-center gap-1.5 rounded bg-glow-hover-surface px-3 font-urbanist text-base font-bold text-glow-text;
+  }
+
+  .cliente-loja-rating__count {
+    @apply mt-1 font-urbanist text-xs text-glow-text;
+  }
+
+  .cliente-loja-stats-row {
+    @apply mb-6 grid gap-4 sm:grid-cols-2;
+  }
+
+  .cliente-loja-stat-box {
+    @apply flex h-[84px] items-center gap-4 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-5;
+  }
+
+  .cliente-loja-stat-box__icon-wrap {
+    @apply flex size-[42px] shrink-0 items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface text-glow-text;
+  }
+
+  .cliente-loja-stat-box__label {
+    @apply font-urbanist text-sm text-glow-text;
+  }
+
+  .cliente-loja-stat-box__value {
+    @apply font-urbanist text-base font-bold text-glow-text;
+  }
+
+  .cliente-loja-stat-box__horarios-grid {
+    @apply grid grid-cols-2 gap-6;
+  }
+
+  .cliente-loja-address-bar {
+    @apply mb-6 flex h-[47px] items-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-5;
+  }
+
+  .cliente-loja-address-bar__text {
+    @apply truncate font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .cliente-loja-servicos {
+    @apply space-y-4;
+  }
+
+  .cliente-loja-servicos-grid {
+    @apply grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-2;
+  }
+
+  .cliente-servico-card {
+    @apply cliente-card relative flex h-20 items-center px-5;
+  }
+
+  .cliente-servico-card__icon {
+    @apply flex size-[50px] shrink-0 items-center justify-center rounded border-[0.5px] border-glow-border-soft bg-glow-hover-surface text-glow-text;
+  }
+
+  .cliente-servico-card__content {
+    @apply ml-3 min-w-0 flex-1 pr-16;
+  }
+
+  .cliente-servico-card__nome {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .cliente-servico-card__duracao {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .cliente-servico-card__preco {
+    @apply absolute right-5 top-1/2 -translate-y-1/2 font-urbanist text-sm font-bold text-glow-text;
+  }
+
+  .cliente-section-label {
+    @apply font-satoshi text-sm font-medium text-glow-text-soft;
+  }
+
+  .agendar-interno-breadcrumb {
+    @apply mb-6 flex items-center gap-2 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .agendar-prof-modo-card {
+    @apply cliente-card flex w-full items-start gap-4 p-5 text-left transition hover:border-glow-gold-dark;
+  }
+
+  .agendar-prof-modo-card--selected {
+    @apply ring-1 ring-glow-gold-cta;
+  }
+
+  .agendar-prof-pick-card {
+    @apply cliente-card relative flex h-[89px] w-full items-center gap-4 px-5 text-left transition hover:border-glow-gold-dark;
+  }
+
+  .agendar-prof-pick-card--selected {
+    @apply ring-1 ring-glow-gold-cta;
+  }
 }

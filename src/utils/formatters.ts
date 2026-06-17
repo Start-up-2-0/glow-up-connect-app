@@ -261,10 +261,29 @@ export function formatDistanciaKm(km: number): string {
   return `${km.toFixed(1).replace('.', ',')} km`
 }
 
+/** Preço no formato Figma marketplace (ex.: 25,00). */
+export function formatPrecoFigma(value: number): string {
+  return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+/** Horário HH:mm para exibição no detalhe da loja. */
+export function formatHorarioFigma(value: string): string {
+  const trimmed = value.trim()
+  if (/^\d{2}:\d{2}$/.test(trimmed)) return trimmed
+  if (/^\d{2}:\d{2}:\d{2}$/.test(trimmed)) return trimmed.slice(0, 5)
+  return trimmed
+}
+
 export function formatEnderecoResumo(endereco: EnderecoResumo | null | undefined): string {
   if (!endereco) return 'Endereço não informado'
   const partes = [endereco.logradouro, endereco.bairro, `${endereco.cidade}/${endereco.estado}`]
   return partes.filter(Boolean).join(', ')
+}
+
+/** Endereço curto para cards de marketplace (Figma: logradouro, bairro). */
+export function formatEnderecoCard(endereco: EnderecoResumo | null | undefined): string {
+  if (!endereco) return 'Endereço não informado'
+  return [endereco.logradouro, endereco.bairro].filter(Boolean).join(', ')
 }
 
 export function formatEnderecoOnboarding(est: Pick<

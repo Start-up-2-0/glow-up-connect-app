@@ -131,3 +131,26 @@ export const ONBOARDING_CONTRATAR_DROPZONE_TEXT_CLASS =
 
 export const ONBOARDING_CONTRATAR_TELEFONE_PREFIX_CLASS =
   'inline-flex h-[49px] shrink-0 items-center rounded-l-lg border-[0.3px] border-r-0 border-glow-border-soft bg-glow-hover-surface px-[18px] font-inter text-sm text-glow-text-subtle'
+
+/** Área cliente — Explorar lojas / Detalhe (Figma) */
+export const CLIENTE_PAGE_HEADER_CLASS = 'cliente-page-header'
+
+export const CLIENTE_PAGE_TITLE_CLASS =
+  'font-satoshi text-2xl font-bold leading-tight text-glow-text'
+
+export const CLIENTE_PAGE_SUBTITLE_CLASS =
+  'font-satoshi text-base text-glow-text-muted'
+
+export const CLIENTE_PAGE_DIVIDER_CLASS = 'cliente-page-divider'
+
+export const CLIENTE_BTN_OUTLINE_CLASS =
+  'cliente-btn-outline inline-flex h-[34px] items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-4 font-urbanist text-sm text-glow-text transition hover:bg-glow-surface disabled:cursor-not-allowed disabled:opacity-60'
+
+export const CLIENTE_CARD_CLASS =
+  'cliente-card rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface'
+
+export const CLIENTE_BTN_CTA_CLASS =
+  'cliente-btn-cta inline-flex h-10 w-full items-center justify-center gap-2.5 rounded-xl bg-glow-gold-cta px-2.5 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60'
+
+/** Wizard agendamento interno (dashboard) */
+export const AGENDAR_INTERNO_CONTENT_CLASS = 'mx-auto w-full max-w-[926px]'

@@ -13,6 +13,8 @@ export interface EstabelecimentoProximo {
   distanciaKm: number
   endereco: EnderecoResumo
   destaqueMarketplace?: boolean
+  notaMedia?: number
+  totalAvaliacoes?: number
 }
 
 export interface EstabelecimentosProximosResponse {
@@ -30,6 +32,11 @@ export interface EstabelecimentoPublico {
   descricao: string
   endereco: EnderecoResumo | null
   distanciaKm: number | null
+  notaMedia?: number
+  totalAvaliacoes?: number
+  abertoAgora?: boolean
+  horarioAbertura?: string
+  horarioFechamento?: string
 }
 
 export interface ListarProximosParams {
