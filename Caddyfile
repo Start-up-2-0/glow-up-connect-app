@@ -1,4 +1,5 @@
-# global options
+# Usado apenas em desenvolvimento local. Em producao o caddy-entrypoint.sh
+# gera /tmp/Caddyfile.generated (mTLS ou HTTP interno).
 {
 	admin off
 	persist_config off
@@ -13,7 +14,6 @@
 	}
 }
 
-# Railway atribui $PORT automaticamente
 :{$PORT:3000} {
 	log {
 		format json
@@ -30,13 +30,9 @@
 	respond /health 200
 
 	route {
-		# /api* cobre rotas aninhadas (/api/auth/login); /api/* so cobre um segmento.
 		handle /api* {
-			reverse_proxy {$API_UPSTREAM} {
-				header_up X-Glow-Proxy-Secret {$GLOW_PROXY_SECRET}
-				header_up X-Forwarded-For {remote_host}
-				header_up X-Forwarded-Proto {scheme}
-				header_up Host {upstream_hostport}
+			reverse_proxy {$API_UPSTREAM:http://host.docker.internal:8080} {
+				header_up X-Glow-Proxy-Secret {$GLOW_PROXY_SECRET:dev-local-secret}
 			}
 		}
 

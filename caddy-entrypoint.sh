@@ -2,15 +2,24 @@
 set -e
 
 CERT_DIR="/tmp/mtls"
+CADDY_CONFIG="/tmp/Caddyfile.generated"
 mkdir -p "$CERT_DIR"
 
 write_pem_if_set() {
 	var_name="$1"
 	dest="$2"
-	eval "content=\${$var_name}"
-	if [ -n "$content" ]; then
-		printf '%b' "$content" > "$dest"
+	content=$(printenv "$var_name" 2>/dev/null || true)
+	if [ -z "$content" ]; then
+		return 1
 	fi
+
+	printf '%b' "$content" > "$dest"
+	if ! grep -q 'BEGIN' "$dest"; then
+		echo "PEM invalido em ${var_name} (esperado -----BEGIN ...-----)." >&2
+		return 1
+	fi
+	chmod 600 "$dest"
+	return 0
 }
 
 extract_host_from_url() {
@@ -59,29 +68,47 @@ setup_mtls_upstream() {
 
 	echo "${ip} ${MTLS_SERVER_NAME}" >> /etc/hosts
 	export API_UPSTREAM="https://${MTLS_SERVER_NAME}:${internal_port}"
-	echo "mTLS upstream ${API_UPSTREAM} (${internal_host} -> ${ip})" >&2
+	echo "caddy: mTLS upstream ${API_UPSTREAM} (${internal_host} -> ${ip})" >&2
 }
 
-write_pem_if_set MTLS_CLIENT_CERT "$CERT_DIR/client.pem"
-write_pem_if_set MTLS_CLIENT_KEY "$CERT_DIR/client.key"
-write_pem_if_set MTLS_CA_CERT "$CERT_DIR/ca.pem"
+setup_http_upstream() {
+	internal_host="${API_INTERNAL_HOST:-}"
+	internal_port="${API_INTERNAL_PORT:-8080}"
 
-MTLS_SERVER_NAME="${MTLS_SERVER_NAME:-glowapi.internal}"
+	if [ -z "$internal_host" ] && [ -n "$API_INTERNAL_URL" ]; then
+		internal_host=$(extract_host_from_url "$API_INTERNAL_URL")
+	fi
 
-if [ -z "$API_UPSTREAM" ]; then
-	if [ -n "$API_INTERNAL_URL" ]; then
-		export API_UPSTREAM="$API_INTERNAL_URL"
-	elif [ -n "$API_INTERNAL_HOST" ]; then
-		if [ -f "$CERT_DIR/client.pem" ] && [ -f "$CERT_DIR/client.key" ]; then
-			export API_UPSTREAM="https://${API_INTERNAL_HOST}:8443"
-		else
-			api_port="${API_INTERNAL_PORT:-8080}"
-			export API_UPSTREAM="http://${API_INTERNAL_HOST}:${api_port}"
+	if [ -z "$internal_host" ] && [ -n "$API_UPSTREAM" ]; then
+		internal_host=$(extract_host_from_url "$API_UPSTREAM")
+		port_from_url=$(extract_port_from_url "$API_UPSTREAM")
+		if [ -n "$port_from_url" ] && printf '%s' "$API_UPSTREAM" | grep -q '^http://'; then
+			internal_port="$port_from_url"
 		fi
-	else
-		echo "API_UPSTREAM ou API_INTERNAL_HOST nao configurado." >&2
+	fi
+
+	if [ -z "$internal_host" ]; then
+		echo "API_INTERNAL_HOST obrigatorio para proxy HTTP interno." >&2
 		exit 1
 	fi
+
+	export API_UPSTREAM="http://${internal_host}:${internal_port}"
+	echo "caddy: HTTP upstream ${API_UPSTREAM}" >&2
+}
+
+MTLS_SERVER_NAME="${MTLS_SERVER_NAME:-glowapi.internal}"
+MTLS_MODE=false
+
+if write_pem_if_set MTLS_CLIENT_CERT "$CERT_DIR/client.pem" \
+	&& write_pem_if_set MTLS_CLIENT_KEY "$CERT_DIR/client.key"; then
+	write_pem_if_set MTLS_CA_CERT "$CERT_DIR/ca.pem" || true
+	MTLS_MODE=true
+	echo "caddy: certificados cliente mTLS carregados." >&2
+elif [ -n "${MTLS_CLIENT_CERT:-}" ] || [ -n "${MTLS_CLIENT_KEY:-}" ]; then
+	echo "caddy: MTLS_CLIENT_CERT/KEY definidos mas PEM invalido. Revise as variaveis no Railway." >&2
+	exit 1
+else
+	echo "caddy: MTLS_CLIENT_CERT/KEY ausentes — modo HTTP interno (Fase A)." >&2
 fi
 
 if [ -z "$GLOW_PROXY_SECRET" ]; then
@@ -89,10 +116,20 @@ if [ -z "$GLOW_PROXY_SECRET" ]; then
 	exit 1
 fi
 
-if [ -f "$CERT_DIR/client.pem" ] && [ -f "$CERT_DIR/client.key" ]; then
+if [ "$MTLS_MODE" = true ]; then
 	setup_mtls_upstream
+elif [ -z "$API_UPSTREAM" ]; then
+	setup_http_upstream
+elif printf '%s' "$API_UPSTREAM" | grep -q '^https://'; then
+	echo "caddy: API_UPSTREAM e HTTPS mas certificados cliente mTLS nao foram carregados." >&2
+	echo "caddy: configure MTLS_CLIENT_CERT, MTLS_CLIENT_KEY e MTLS_CA_CERT no servico App." >&2
+	exit 1
+else
+	echo "caddy: usando API_UPSTREAM=${API_UPSTREAM}" >&2
+fi
 
-	cat > /tmp/Caddyfile.generated <<EOF
+if [ "$MTLS_MODE" = true ]; then
+	cat > "$CADDY_CONFIG" <<EOF
 {
 	admin off
 	persist_config off
@@ -136,7 +173,46 @@ if [ -f "$CERT_DIR/client.pem" ] && [ -f "$CERT_DIR/client.key" ]; then
 	}
 }
 EOF
-	exec caddy run --config /tmp/Caddyfile.generated --adapter caddyfile
+else
+	cat > "$CADDY_CONFIG" <<EOF
+{
+	admin off
+	persist_config off
+	auto_https off
+	log { format json }
+	servers { trusted_proxies static private_ranges 100.0.0.0/8 }
+}
+
+:{\$PORT:3000} {
+	log { format json }
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' https://sdk.mercadopago.com https://www.google.com https://www.gstatic.com; connect-src 'self' https://api.mercadopago.com https://*.mercadopago.com https://www.google.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; frame-src https://www.google.com; frame-ancestors 'none'"
+	}
+
+	respond /health 200
+
+	route {
+		handle /api* {
+			reverse_proxy ${API_UPSTREAM} {
+				header_up X-Glow-Proxy-Secret ${GLOW_PROXY_SECRET}
+			}
+		}
+
+		handle {
+			root * dist
+			encode gzip
+			try_files {path} /index.html
+			file_server
+		}
+	}
+}
+EOF
 fi
 
-exec caddy run --config Caddyfile --adapter caddyfile
+echo "caddy: config ${CADDY_CONFIG}" >&2
+exec caddy run --config "$CADDY_CONFIG" --adapter caddyfile
