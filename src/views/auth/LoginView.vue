@@ -14,6 +14,7 @@ import {
   readRedirectParam,
   redirectQuery,
 } from '@/utils/authRedirect'
+import { useCaptcha } from '@/composables/useCaptcha'
 import {
   GLOW_BUTTON_PRIMARY_CLASS,
   GLOW_INPUT_CLASS,
@@ -31,6 +32,7 @@ const { login, loading } = useAuth()
 const { setStoredEmail } = useConfirmEmail()
 const { resolveError, resolveErrorCode } = useApiError()
 const notificationsStore = useNotificationsStore()
+const { execute: executeCaptcha } = useCaptcha()
 
 const email = ref('')
 const senha = ref('')
@@ -63,7 +65,11 @@ async function handleSubmit() {
   }
 
   try {
-    await login({ email: email.value, senha: senha.value }, checkoutRedirect.value)
+    const captchaToken = await executeCaptcha('login')
+    await login(
+      { email: email.value, senha: senha.value, captchaToken },
+      checkoutRedirect.value,
+    )
     notificationsStore.push('success', 'Login realizado com sucesso!')
   } catch (err) {
     if (resolveErrorCode(err) === 'EMAIL_NAO_CONFIRMADO') {

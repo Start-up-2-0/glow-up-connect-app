@@ -9,6 +9,7 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { useApiError } from '@/composables/useApiError'
+import { useCaptcha } from '@/composables/useCaptcha'
 import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
 import type { PagamentoAssinaturaPayload } from '@/types/assinatura.types'
 import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
@@ -83,6 +84,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
   const notifications = useNotificationsStore()
   const { setStoredEmail, confirmByCode } = useConfirmEmail()
   const { resolveError, resolveErrorCode, resolveFieldErrors } = useApiError()
+  const { execute: executeCaptcha } = useCaptcha()
   const {
     pixQrCode,
     pixCheckoutUrl,
@@ -196,6 +198,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     loading.value = true
     try {
       const telefoneApi = telefoneToApi(payload.telefone)
+      const captchaToken = await executeCaptcha('register')
       const { data } = await userService.cadastrar({
         nome: payload.nome.trim(),
         email: payload.email.trim(),
@@ -203,6 +206,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
         senha: payload.senha,
         avatarBase64: payload.avatarBase64,
         avatarContentType: payload.avatarContentType,
+        captchaToken,
       })
 
       draft.value.usuario = {
@@ -215,9 +219,11 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
       setStoredEmail(payload.email.trim())
       notifications.push('success', data.mensagem)
 
+      const loginCaptcha = await executeCaptcha('login')
       const loginData = await authStore.login({
         email: payload.email.trim(),
         senha: payload.senha,
+        captchaToken: loginCaptcha,
       })
 
       if (!draft.value.estabelecimento.email) {

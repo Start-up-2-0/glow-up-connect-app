@@ -58,6 +58,7 @@ export interface CadastroPayload {
   senha: string
   avatarBase64?: string
   avatarContentType?: string
+  captchaToken?: string
 }
 
 export interface CadastroResponse {

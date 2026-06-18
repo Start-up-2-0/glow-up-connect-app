@@ -12,6 +12,7 @@ interface ImportMetaEnv {
   readonly VITE_TOKEN_HEADER: string
   readonly VITE_MP_PUBLIC_KEY?: string
   readonly VITE_WHATSAPP_NUMBER?: string
+  readonly VITE_CAPTCHA_SITE_KEY?: string
 }
 
 interface ImportMeta {

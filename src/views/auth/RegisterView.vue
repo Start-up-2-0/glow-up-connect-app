@@ -32,6 +32,7 @@ import {
   GLOW_LOGIN_PAGE_CLASS,
 } from '@/constants/designTokens'
 import { useConsent } from '@/composables/useConsent'
+import { useCaptcha } from '@/composables/useCaptcha'
 
 const route = useRoute()
 const router = useRouter()
@@ -44,6 +45,7 @@ const { setStoredEmail } = useConfirmEmail()
 const { resolveError, resolveErrorCode, resolveFieldErrors } = useApiError()
 const notificationsStore = useNotificationsStore()
 const { acceptTerms } = useConsent()
+const { execute: executeCaptcha } = useCaptcha()
 
 const aceitoTermos = ref(false)
 
@@ -131,24 +133,27 @@ async function handleSubmit() {
 
   loading.value = true
   try {
-    const payload = {
-      nome: nome.value.trim(),
-      email: email.value.trim(),
-      telefone: telefoneToApi(telefone.value),
-      senha: senha.value,
-    } as {
+    const payload: {
       nome: string
       email: string
       telefone: string
       senha: string
       avatarBase64?: string
       avatarContentType?: string
+      captchaToken?: string
+    } = {
+      nome: nome.value.trim(),
+      email: email.value.trim(),
+      telefone: telefoneToApi(telefone.value),
+      senha: senha.value,
     }
 
     if (avatarFile.value) {
       payload.avatarBase64 = await readFileAsDataUrl(avatarFile.value)
       payload.avatarContentType = avatarFile.value.type
     }
+
+    payload.captchaToken = await executeCaptcha('register')
 
     const { data } = await userService.cadastrar(payload)
     acceptTerms()
