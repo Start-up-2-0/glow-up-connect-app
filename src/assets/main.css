@@ -1169,15 +1169,7 @@
   }
 
   .cliente-estab-card__rating {
-    @apply mt-[6px] flex items-center gap-1.5 font-urbanist text-xs leading-none text-glow-text-subtle;
-  }
-
-  .cliente-estab-card__rating-value {
-    @apply font-bold text-glow-text;
-  }
-
-  .cliente-estab-card__rating-count {
-    @apply text-glow-text-subtle;
+    @apply mt-[6px];
   }
 
   .cliente-estab-card__address {
@@ -1206,18 +1198,6 @@
 
   .cliente-loja-badge__dot {
     @apply size-2 shrink-0 rounded-full bg-[#54804e];
-  }
-
-  .cliente-loja-rating {
-    @apply text-right;
-  }
-
-  .cliente-loja-rating__score {
-    @apply inline-flex h-[22px] items-center justify-center gap-1.5 rounded bg-glow-hover-surface px-3 font-urbanist text-base font-bold text-glow-text;
-  }
-
-  .cliente-loja-rating__count {
-    @apply mt-1 font-urbanist text-xs text-glow-text;
   }
 
   .cliente-loja-stats-row {

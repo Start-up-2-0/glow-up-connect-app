@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import AvaliacaoNotaResumo from '@/components/avaliacao/AvaliacaoNotaResumo.vue'
 import { CLIENTE_BTN_CTA_CLASS } from '@/constants/designTokens'
 import { lojaAgendarPath } from '@/constants/routes'
 import type { EstabelecimentoPublico } from '@/types/estabelecimento.types'
@@ -19,20 +20,12 @@ defineProps<{
       </div>
       <div v-else aria-hidden="true" />
 
-      <div v-if="loja.notaMedia != null" class="cliente-loja-rating">
-        <div class="cliente-loja-rating__score">
-          <svg class="size-4 shrink-0 text-glow-gold-cta" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path
-              d="M8 1.5l1.76 3.57 3.94.57-2.85 2.78.67 3.92L8 10.67l-3.52 1.85.67-3.92-2.85-2.78 3.94-.57L8 1.5Z"
-              fill="currentColor"
-            />
-          </svg>
-          <span>{{ loja.notaMedia.toFixed(1) }}</span>
-        </div>
-        <p v-if="loja.totalAvaliacoes != null" class="cliente-loja-rating__count">
-          {{ loja.totalAvaliacoes }} avaliações
-        </p>
-      </div>
+      <AvaliacaoNotaResumo
+        v-if="loja.notaMedia != null && loja.totalAvaliacoes != null"
+        :nota-media="loja.notaMedia"
+        :total-avaliacoes="loja.totalAvaliacoes"
+        variant="stacked"
+      />
     </div>
 
     <h2 class="cliente-loja-panel__nome">{{ loja.nome }}</h2>

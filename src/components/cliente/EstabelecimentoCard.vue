@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import AvaliacaoNotaResumo from '@/components/avaliacao/AvaliacaoNotaResumo.vue'
 import type { EstabelecimentoProximo } from '@/types/estabelecimento.types'
 import { lojaDetalhePath } from '@/constants/routes'
 import { formatDistanciaKm, formatEnderecoCard } from '@/utils/formatters'
@@ -51,21 +52,13 @@ defineProps<{
         {{ formatDistanciaKm(item.distanciaKm) }}
       </p>
 
-      <p
+      <AvaliacaoNotaResumo
         v-if="item.notaMedia != null && item.totalAvaliacoes != null"
         class="cliente-estab-card__rating"
-      >
-        <svg class="size-4 shrink-0 text-glow-gold-cta" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path
-            d="M8 1.5l1.76 3.57 3.94.57-2.85 2.78.67 3.92L8 10.67l-3.52 1.85.67-3.92-2.85-2.78 3.94-.57L8 1.5Z"
-            fill="currentColor"
-          />
-        </svg>
-        <span class="cliente-estab-card__rating-value">{{ item.notaMedia.toFixed(1) }}</span>
-        <span class="cliente-estab-card__rating-count">
-          ({{ item.totalAvaliacoes }} avaliações)
-        </span>
-      </p>
+        :nota-media="item.notaMedia"
+        :total-avaliacoes="item.totalAvaliacoes"
+        variant="inline"
+      />
 
       <p class="cliente-estab-card__address">
         <svg class="size-3.5 shrink-0" viewBox="0 0 14 14" fill="none" aria-hidden="true">
