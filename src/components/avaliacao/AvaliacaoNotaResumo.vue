@@ -4,21 +4,23 @@ import { formatNotaMediaDisplay } from '@/utils/formatNotaMediaIfood'
 
 const props = withDefaults(
   defineProps<{
-    notaMedia: number
-    totalAvaliacoes: number
+    notaMedia?: number | null
+    totalAvaliacoes?: number | null
     variant?: 'inline' | 'stacked'
   }>(),
   {
+    notaMedia: 0,
+    totalAvaliacoes: 0,
     variant: 'inline',
   },
 )
 
-const visivel = computed(() => props.notaMedia > 0 && props.totalAvaliacoes > 0)
-
 const notaFormatada = computed(() => formatNotaMediaDisplay(props.notaMedia))
 
+const totalAvaliacoesExibicao = computed(() => Math.max(0, props.totalAvaliacoes ?? 0))
+
 const contagemLabel = computed(() => {
-  const n = props.totalAvaliacoes
+  const n = totalAvaliacoesExibicao.value
   const texto = n === 1 ? 'avaliação' : 'avaliações'
   return props.variant === 'inline' ? `(${n} ${texto})` : `${n} ${texto}`
 })
@@ -26,10 +28,9 @@ const contagemLabel = computed(() => {
 
 <template>
   <div
-    v-if="visivel"
     class="avaliacao-nota-resumo"
     :class="`avaliacao-nota-resumo--${variant}`"
-    :aria-label="`Nota média ${notaFormatada} com ${totalAvaliacoes} avaliações`"
+    :aria-label="`Nota média ${notaFormatada} com ${totalAvaliacoesExibicao} avaliações`"
   >
     <div class="avaliacao-nota-resumo__score">
       <svg class="avaliacao-nota-resumo__star" viewBox="0 0 16 16" fill="none" aria-hidden="true">

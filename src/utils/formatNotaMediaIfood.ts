@@ -9,6 +9,6 @@ export function formatNotaMediaIfood(mediaBruta: number): number {
 }
 
 export function formatNotaMediaDisplay(nota: number | null | undefined): string {
-  if (nota == null || nota <= 0) return '—'
+  if (nota == null || nota <= 0) return '0,0'
   return formatNotaMediaIfood(nota).toFixed(1).replace('.', ',')
 }

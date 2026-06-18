@@ -21,9 +21,8 @@ defineProps<{
       <div v-else aria-hidden="true" />
 
       <AvaliacaoNotaResumo
-        v-if="loja.notaMedia != null && loja.totalAvaliacoes != null"
-        :nota-media="loja.notaMedia"
-        :total-avaliacoes="loja.totalAvaliacoes"
+        :nota-media="loja.notaMedia ?? 0"
+        :total-avaliacoes="loja.totalAvaliacoes ?? 0"
         variant="stacked"
       />
     </div>

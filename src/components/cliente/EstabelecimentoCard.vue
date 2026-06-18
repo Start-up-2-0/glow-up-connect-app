@@ -53,10 +53,9 @@ defineProps<{
       </p>
 
       <AvaliacaoNotaResumo
-        v-if="item.notaMedia != null && item.totalAvaliacoes != null"
         class="cliente-estab-card__rating"
-        :nota-media="item.notaMedia"
-        :total-avaliacoes="item.totalAvaliacoes"
+        :nota-media="item.notaMedia ?? 0"
+        :total-avaliacoes="item.totalAvaliacoes ?? 0"
         variant="inline"
       />
 
