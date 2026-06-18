@@ -1093,7 +1093,15 @@
 
   /* Área cliente — Explorar lojas / Detalhe (Figma) */
   .cliente-explorar-page {
-    @apply space-y-6;
+    @apply space-y-0;
+  }
+
+  .cliente-explorar-page .cliente-page-header-block {
+    @apply space-y-0;
+  }
+
+  .cliente-explorar-page .cliente-page-divider {
+    @apply mt-10;
   }
 
   .cliente-loja-detalhe-page {
@@ -1121,11 +1129,16 @@
   }
 
   .cliente-explorar-toolbar {
-    @apply flex justify-end;
+    @apply flex justify-end py-[38px];
   }
 
   .cliente-explorar-grid {
-    @apply grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4;
+    @apply grid gap-2.5;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 388px), 1fr));
+  }
+
+  .cliente-btn-outline {
+    @apply inline-flex h-[34px] shrink-0 items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 font-urbanist text-sm font-normal text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .cliente-empty-panel {
@@ -1137,11 +1150,11 @@
   }
 
   .cliente-estab-card {
-    @apply cliente-card relative flex h-[126px] overflow-hidden;
+    @apply cliente-card flex h-[126px] min-w-0 items-start gap-[15px] overflow-hidden p-5;
   }
 
   .cliente-estab-card__logo {
-    @apply absolute left-5 top-5 size-14 shrink-0 overflow-hidden rounded bg-glow-canvas;
+    @apply size-14 shrink-0 overflow-hidden rounded bg-glow-canvas;
   }
 
   .cliente-estab-card__logo-fallback {
@@ -1149,7 +1162,7 @@
   }
 
   .cliente-estab-card__body {
-    @apply absolute left-[91px] right-5 top-5 flex min-w-0 flex-col;
+    @apply flex min-w-0 flex-1 flex-col;
   }
 
   .cliente-estab-card__title-row {
@@ -1169,11 +1182,11 @@
   }
 
   .cliente-estab-card__rating {
-    @apply mt-[6px];
+    @apply mt-1.5;
   }
 
   .cliente-estab-card__address {
-    @apply mt-[6px] flex items-center gap-2.5 font-urbanist text-sm leading-none text-glow-text;
+    @apply mt-1.5 flex items-center gap-2.5 font-urbanist text-sm leading-none text-glow-text;
   }
 
   .cliente-loja-detalhe-layout {

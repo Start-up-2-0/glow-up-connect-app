@@ -96,7 +96,7 @@ onMounted(async () => {
         @click="handleRetryLocation"
       >
         <svg
-          class="size-5 shrink-0"
+          class="size-5 shrink-0 text-glow-text"
           :class="{ 'animate-spin': geoLoading }"
           viewBox="0 0 20 20"
           fill="none"
@@ -113,20 +113,20 @@ onMounted(async () => {
       </button>
     </div>
 
-    <BaseAlert v-if="errorMessage && !loading" variant="warning">
+    <BaseAlert v-if="errorMessage && !loading" variant="warning" class="mt-6">
       {{ errorMessage }}
       <button type="button" :class="[CLIENTE_BTN_OUTLINE_CLASS, 'mt-3']" @click="handleRetryLocation">
         Tentar novamente
       </button>
     </BaseAlert>
 
-    <BaseAlert v-if="error" variant="error">{{ error }}</BaseAlert>
+    <BaseAlert v-if="error" variant="error" class="mt-6">{{ error }}</BaseAlert>
 
-    <LoadingSpinner v-if="loading || (geoLoading && itens.length === 0)" />
+    <LoadingSpinner v-if="loading || (geoLoading && itens.length === 0)" class="mt-6" />
 
     <div
       v-else-if="itens.length === 0 && !errorMessage"
-      class="cliente-empty-panel"
+      class="cliente-empty-panel mt-6"
     >
       <EmptyState
         title="Nenhuma loja encontrada"

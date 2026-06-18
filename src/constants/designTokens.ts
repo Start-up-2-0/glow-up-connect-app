@@ -144,7 +144,7 @@ export const CLIENTE_PAGE_SUBTITLE_CLASS =
 export const CLIENTE_PAGE_DIVIDER_CLASS = 'cliente-page-divider'
 
 export const CLIENTE_BTN_OUTLINE_CLASS =
-  'cliente-btn-outline inline-flex h-[34px] items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-4 font-urbanist text-sm text-glow-text transition hover:bg-glow-surface disabled:cursor-not-allowed disabled:opacity-60'
+  'cliente-btn-outline inline-flex h-[34px] shrink-0 items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 font-urbanist text-sm font-normal text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60'
 
 export const CLIENTE_CARD_CLASS =
   'cliente-card rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface'

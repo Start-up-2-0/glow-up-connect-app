@@ -38,7 +38,7 @@ defineProps<{
         <h1 :class="CLIENTE_PAGE_TITLE_CLASS">
           {{ title ?? 'Explorar lojas' }}
         </h1>
-        <p v-if="subtitle" :class="[CLIENTE_PAGE_SUBTITLE_CLASS, 'mt-3']">
+        <p v-if="subtitle" :class="[CLIENTE_PAGE_SUBTITLE_CLASS, 'mt-3.5']">
           {{ subtitle }}
         </p>
       </div>
