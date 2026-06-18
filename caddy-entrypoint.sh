@@ -166,8 +166,8 @@ if [ "$MTLS_MODE" = true ]; then
 				transport http {
 					tls
 					tls_server_name ${MTLS_SERVER_NAME}
-					tls_client_cert ${CERT_DIR}/client.pem ${CERT_DIR}/client.key
-					tls_trusted_ca_certs ${CERT_DIR}/ca.pem
+					tls_client_auth ${CERT_DIR}/client.pem ${CERT_DIR}/client.key
+					tls_trust_pool file ${CERT_DIR}/ca.pem
 				}
 			}
 		}
