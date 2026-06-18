@@ -5,19 +5,7 @@
     <link rel="icon" type="image/png" href="/src/assets/logo/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Glow Up Connect</title>
-    <script>
-      ;(function () {
-        var key = 'guc_theme'
-        var saved = localStorage.getItem(key)
-        var theme =
-          saved === 'dark' || saved === 'light'
-            ? saved
-            : window.matchMedia('(prefers-color-scheme: dark)').matches
-              ? 'dark'
-              : 'light'
-        if (theme === 'dark') document.documentElement.classList.add('dark')
-      })()
-    </script>
+    <script type="module" src="/src/boot/theme.ts"></script>
   </head>
   <body>
     <div id="app"></div>

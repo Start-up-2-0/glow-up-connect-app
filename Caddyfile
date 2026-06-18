@@ -19,6 +19,14 @@
 		format json
 	}
 
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' https://sdk.mercadopago.com; connect-src 'self' https://api.mercadopago.com https://*.mercadopago.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'"
+	}
+
 	respond /health 200
 
 	root * dist

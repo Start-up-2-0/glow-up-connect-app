@@ -55,6 +55,7 @@ export const ROUTE_NAMES = {
   FINANCEIRO_RELATORIOS: 'financeiro-relatorios',
   FINANCEIRO_REDE: 'financeiro-rede',
   CONFIG_AUDITORIA: 'config-auditoria',
+  CONFIG_PRIVACIDADE: 'config-privacidade',
 } as const
 
 export const ROUTE_PATHS = {
@@ -114,6 +115,7 @@ export const ROUTE_PATHS = {
   FINANCEIRO_RELATORIOS: '/financeiro/relatorios',
   FINANCEIRO_REDE: '/financeiro/rede',
   CONFIG_AUDITORIA: '/configuracoes/auditoria',
+  CONFIG_PRIVACIDADE: '/configuracoes/privacidade',
 } as const
 
 export function agendaDetalhePath(id: number): string {

@@ -69,4 +69,15 @@ export const configuracoesRoutes: RouteRecordRaw[] = [
       title: 'Auditoria',
     },
   },
+  {
+    path: ROUTE_PATHS.CONFIG_PRIVACIDADE,
+    name: ROUTE_NAMES.CONFIG_PRIVACIDADE,
+    component: () => import('@/views/configuracoes/PrivacidadeView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      skipNegocioGuard: true,
+      title: 'Privacidade',
+    },
+  },
 ]

@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: apiProxyTarget,
           changeOrigin: true,
+          cookieDomainRewrite: 'localhost',
         },
         '/health': {
           target: apiProxyTarget,

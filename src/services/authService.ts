@@ -5,7 +5,6 @@ import type {
   ConfirmarEmailPayload,
   LoginData,
   LoginPayload,
-  RefreshPayload,
   ReenviarConfirmacaoPayload,
 } from '@/types/auth.types'
 
@@ -18,8 +17,8 @@ export const authService = {
     return api.post<ApiSuccessResponseVoid>('/auth/logout')
   },
 
-  refresh(payload: RefreshPayload) {
-    return api.post<ApiSuccessResponse<AuthTokens>>('/auth/refresh', payload)
+  refresh() {
+    return api.post<ApiSuccessResponse<AuthTokens>>('/auth/refresh', {}, { withCredentials: true })
   },
 
   confirmarEmail(payload: ConfirmarEmailPayload) {

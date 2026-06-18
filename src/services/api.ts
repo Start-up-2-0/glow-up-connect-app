@@ -10,7 +10,6 @@ import type { AuthTokens } from '@/types/auth.types'
 import {
   clearSessionStorage,
   getAccessToken,
-  readStoredSession,
   setAccessToken,
 } from '@/utils/storage'
 import { syncSession } from '@/utils/sessionSync'
@@ -60,24 +59,28 @@ function redirectToLogin() {
 }
 
 async function refreshAccessToken(client: AxiosInstance): Promise<string> {
-  const { refreshToken } = readStoredSession()
-  if (!refreshToken) {
-    throw new Error('Refresh token ausente')
-  }
-
   const { data } = await client.post<{ success: boolean; data: AuthTokens }>(
     '/auth/refresh',
-    { refreshToken },
-    { headers: { [TOKEN_HEADER]: undefined } },
+    {},
+    {
+      headers: { [TOKEN_HEADER]: undefined },
+      withCredentials: true,
+    },
   )
 
   const tokens = data.data
-  syncSession(tokens)
+  syncSession({
+    token: tokens.token,
+    refreshToken: '',
+    expiresAt: tokens.expiresAt,
+    refreshExpiresAt: tokens.refreshExpiresAt,
+  })
   return tokens.token
 }
 
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
