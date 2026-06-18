@@ -1184,12 +1184,16 @@
     @apply cliente-card min-h-[382px] p-10;
   }
 
-  .cliente-loja-panel__top {
-    @apply mb-6 flex items-start justify-between gap-4;
+  .cliente-loja-panel__header {
+    @apply mb-6;
   }
 
-  .cliente-loja-panel__top-start {
-    @apply min-h-[22px];
+  .cliente-loja-panel__header-row {
+    @apply mb-2 flex min-h-[22px] items-start justify-between gap-4;
+  }
+
+  .cliente-loja-panel__header-row-start {
+    @apply min-h-[22px] min-w-0 flex-1;
   }
 
   .cliente-loja-panel__avaliacao {
@@ -1197,7 +1201,7 @@
   }
 
   .cliente-loja-panel__nome {
-    @apply mb-6 font-urbanist text-2xl font-bold text-glow-text;
+    @apply font-urbanist text-2xl font-bold text-glow-text;
   }
 
   .cliente-loja-badge {

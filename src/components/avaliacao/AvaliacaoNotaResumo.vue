@@ -49,7 +49,7 @@ const variantClass = computed(() => {
       </svg>
       <span class="avaliacao-nota-resumo__value">{{ notaFormatada }}</span>
     </div>
-    <span class="avaliacao-nota-resumo__count">{{ contagemLabel }}</span>
+    <p class="avaliacao-nota-resumo__count">{{ contagemLabel }}</p>
   </div>
 </template>
 
@@ -81,7 +81,7 @@ const variantClass = computed(() => {
 .avaliacao-nota-resumo--panel {
   display: inline-flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 6px;
   flex-shrink: 0;
 }
@@ -89,14 +89,15 @@ const variantClass = computed(() => {
 .avaliacao-nota-resumo--panel .avaliacao-nota-resumo__score {
   display: inline-flex;
   height: 22px;
+  min-width: 71px;
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  margin-left: 4px;
   border-radius: 4px;
   background: var(--glow-hover-surface, rgba(40, 40, 40, 0.04));
-  border: 0.5px solid var(--glow-border-soft, rgba(40, 40, 40, 0.25));
-  padding: 0 10px;
+  padding: 0 8px;
   font-family: var(--font-urbanist, sans-serif);
   line-height: normal;
   color: var(--glow-text, #282828);
@@ -109,7 +110,7 @@ const variantClass = computed(() => {
 }
 
 .avaliacao-nota-resumo--panel .avaliacao-nota-resumo__count {
-  margin-top: 0;
+  margin: 0;
   font-family: var(--font-urbanist, sans-serif);
   font-size: 12px;
   font-weight: 400;

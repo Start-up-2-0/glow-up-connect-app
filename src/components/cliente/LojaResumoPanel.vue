@@ -13,23 +13,25 @@ defineProps<{
 
 <template>
   <section class="cliente-loja-panel">
-    <div class="cliente-loja-panel__top">
-      <div class="cliente-loja-panel__top-start">
-        <div v-if="loja.abertoAgora" class="cliente-loja-badge">
-          <span class="cliente-loja-badge__dot" aria-hidden="true" />
-          ABERTO AGORA
+    <header class="cliente-loja-panel__header">
+      <div class="cliente-loja-panel__header-row">
+        <div class="cliente-loja-panel__header-row-start">
+          <div v-if="loja.abertoAgora" class="cliente-loja-badge">
+            <span class="cliente-loja-badge__dot" aria-hidden="true" />
+            ABERTO AGORA
+          </div>
         </div>
+
+        <AvaliacaoNotaResumo
+          class="cliente-loja-panel__avaliacao"
+          :nota-media="loja.notaMedia ?? 0"
+          :total-avaliacoes="loja.totalAvaliacoes ?? 0"
+          variant="panel"
+        />
       </div>
 
-      <AvaliacaoNotaResumo
-        class="cliente-loja-panel__avaliacao"
-        :nota-media="loja.notaMedia ?? 0"
-        :total-avaliacoes="loja.totalAvaliacoes ?? 0"
-        variant="panel"
-      />
-    </div>
-
-    <h2 class="cliente-loja-panel__nome">{{ loja.nome }}</h2>
+      <h2 class="cliente-loja-panel__nome">{{ loja.nome }}</h2>
+    </header>
 
     <div class="cliente-loja-stats-row">
       <div v-if="loja.distanciaKm != null" class="cliente-loja-stat-box">
