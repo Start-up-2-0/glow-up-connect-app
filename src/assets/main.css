@@ -515,6 +515,42 @@
     display: none;
   }
 
+  .sidebar-nav-section {
+    @apply flex w-full flex-col gap-1;
+  }
+
+  .sidebar-nav-section + .sidebar-nav-section {
+    @apply mt-1 border-t border-glow-border-soft pt-3;
+  }
+
+  .sidebar-nav-section__label {
+    @apply mb-1 px-2 font-urbanist text-xs font-semibold uppercase tracking-wide text-glow-text-subtle;
+  }
+
+  .sidebar-nav-section__trigger {
+    @apply flex h-10 w-full items-center justify-between rounded-lg px-2 transition-colors hover:bg-black/[0.03];
+  }
+
+  .sidebar-nav-section__trigger--active .sidebar-nav-section__trigger-label {
+    @apply text-glow-text;
+  }
+
+  .sidebar-nav-section__trigger-label {
+    @apply truncate font-urbanist text-sm font-semibold leading-none text-glow-text-soft;
+  }
+
+  .sidebar-nav-section__items {
+    @apply flex flex-col;
+  }
+
+  .sidebar-nav-section__items--expanded {
+    @apply mt-1 gap-0.5 border-l border-glow-border-soft pl-2;
+  }
+
+  .sidebar-nav-group--nested {
+    @apply min-h-11;
+  }
+
   .dashboard-main {
     @apply bg-glow-canvas;
   }
