@@ -5,6 +5,9 @@ CERT_DIR="/tmp/mtls"
 CADDY_CONFIG="/tmp/Caddyfile.generated"
 mkdir -p "$CERT_DIR"
 
+MTLS_SERVER_NAME="${MTLS_SERVER_NAME:-glowapi.internal}"
+MTLS_UPSTREAM_PORT="${MTLS_UPSTREAM_PORT:-${MTLS_MUTUAL_TLS_PORT:-8443}}"
+
 write_pem_if_set() {
 	var_name="$1"
 	dest="$2"
@@ -15,7 +18,7 @@ write_pem_if_set() {
 
 	printf '%b' "$content" > "$dest"
 	if ! grep -q 'BEGIN' "$dest"; then
-		echo "PEM invalido em ${var_name} (esperado -----BEGIN ...-----)." >&2
+		echo "caddy: PEM invalido em ${var_name} (esperado -----BEGIN ...-----)." >&2
 		return 1
 	fi
 	chmod 600 "$dest"
@@ -30,57 +33,68 @@ extract_port_from_url() {
 	printf '%s' "$1" | sed -n 's|^[a-zA-Z]*://[^:]*:\([0-9][0-9]*\).*|\1|p'
 }
 
-resolve_host_ip() {
-	host="$1"
-	ip=$(getent ahostsv4 "$host" 2>/dev/null | awk 'NR==1 { print $1 }')
-	if [ -z "$ip" ]; then
-		ip=$(getent hosts "$host" 2>/dev/null | awk '{ print $1 }')
+resolve_internal_host() {
+	host="${API_INTERNAL_HOST:-}"
+
+	if [ -z "$host" ] && [ -n "${API_INTERNAL_URL:-}" ]; then
+		host=$(extract_host_from_url "$API_INTERNAL_URL")
 	fi
-	printf '%s' "$ip"
+
+	if [ -z "$host" ] && [ -n "${API_UPSTREAM:-}" ]; then
+		host=$(extract_host_from_url "$API_UPSTREAM")
+	fi
+
+	printf '%s' "$host"
+}
+
+resolve_mtls_upstream_port() {
+	if [ -n "${MTLS_UPSTREAM_PORT:-}" ]; then
+		printf '%s' "$MTLS_UPSTREAM_PORT"
+		return
+	fi
+
+	if [ -n "${API_INTERNAL_URL:-}" ]; then
+		port_from_url=$(extract_port_from_url "$API_INTERNAL_URL")
+		if [ -n "$port_from_url" ]; then
+			printf '%s' "$port_from_url"
+			return
+		fi
+	fi
+
+	if [ -n "${API_UPSTREAM:-}" ]; then
+		port_from_url=$(extract_port_from_url "$API_UPSTREAM")
+		if [ -n "$port_from_url" ]; then
+			printf '%s' "$port_from_url"
+			return
+		fi
+	fi
+
+	printf '%s' "8443"
 }
 
 setup_mtls_upstream() {
-	internal_host="${API_INTERNAL_HOST:-}"
-	internal_port="${MTLS_UPSTREAM_PORT:-8443}"
+	internal_host=$(resolve_internal_host)
+	internal_port=$(resolve_mtls_upstream_port)
 
-	if [ -z "$internal_host" ] && [ -n "$API_INTERNAL_URL" ]; then
-		internal_host=$(extract_host_from_url "$API_INTERNAL_URL")
+	if [ -z "$internal_host" ]; then
+		echo "caddy: API_INTERNAL_HOST ou API_INTERNAL_URL obrigatorio para mTLS." >&2
+		exit 1
+	fi
+
+	export API_UPSTREAM="https://${internal_host}:${internal_port}"
+	echo "caddy: mTLS upstream ${API_UPSTREAM} (SNI=${MTLS_SERVER_NAME}, porta=${internal_port})" >&2
+}
+
+setup_http_upstream() {
+	internal_host=$(resolve_internal_host)
+	internal_port="${API_INTERNAL_PORT:-8080}"
+
+	if [ -n "${API_INTERNAL_URL:-}" ]; then
 		port_from_url=$(extract_port_from_url "$API_INTERNAL_URL")
 		[ -n "$port_from_url" ] && internal_port="$port_from_url"
 	fi
 
-	if [ -z "$internal_host" ] && [ -n "$API_UPSTREAM" ]; then
-		internal_host=$(extract_host_from_url "$API_UPSTREAM")
-		port_from_url=$(extract_port_from_url "$API_UPSTREAM")
-		[ -n "$port_from_url" ] && internal_port="$port_from_url"
-	fi
-
-	if [ -z "$internal_host" ]; then
-		echo "API_INTERNAL_HOST ou API_INTERNAL_URL obrigatorio para mTLS." >&2
-		exit 1
-	fi
-
-	ip=$(resolve_host_ip "$internal_host")
-	if [ -z "$ip" ]; then
-		echo "Nao foi possivel resolver ${internal_host} para mTLS." >&2
-		exit 1
-	fi
-
-	echo "${ip} ${MTLS_SERVER_NAME}" >> /etc/hosts
-	export API_UPSTREAM="https://${MTLS_SERVER_NAME}:${internal_port}"
-	echo "caddy: mTLS upstream ${API_UPSTREAM} (${internal_host} -> ${ip})" >&2
-}
-
-setup_http_upstream() {
-	internal_host="${API_INTERNAL_HOST:-}"
-	internal_port="${API_INTERNAL_PORT:-8080}"
-
-	if [ -z "$internal_host" ] && [ -n "$API_INTERNAL_URL" ]; then
-		internal_host=$(extract_host_from_url "$API_INTERNAL_URL")
-	fi
-
-	if [ -z "$internal_host" ] && [ -n "$API_UPSTREAM" ]; then
-		internal_host=$(extract_host_from_url "$API_UPSTREAM")
+	if [ -n "${API_UPSTREAM:-}" ]; then
 		port_from_url=$(extract_port_from_url "$API_UPSTREAM")
 		if [ -n "$port_from_url" ] && printf '%s' "$API_UPSTREAM" | grep -q '^http://'; then
 			internal_port="$port_from_url"
@@ -88,15 +102,14 @@ setup_http_upstream() {
 	fi
 
 	if [ -z "$internal_host" ]; then
-		echo "API_INTERNAL_HOST obrigatorio para proxy HTTP interno." >&2
+		echo "caddy: API_INTERNAL_HOST ou API_INTERNAL_URL obrigatorio para proxy HTTP interno." >&2
 		exit 1
 	fi
 
 	export API_UPSTREAM="http://${internal_host}:${internal_port}"
-	echo "caddy: HTTP upstream ${API_UPSTREAM}" >&2
+	echo "caddy: HTTP upstream ${API_UPSTREAM} (sem mTLS)" >&2
 }
 
-MTLS_SERVER_NAME="${MTLS_SERVER_NAME:-glowapi.internal}"
 MTLS_MODE=false
 
 if write_pem_if_set MTLS_CLIENT_CERT "$CERT_DIR/client.pem" \
@@ -107,8 +120,6 @@ if write_pem_if_set MTLS_CLIENT_CERT "$CERT_DIR/client.pem" \
 elif [ -n "${MTLS_CLIENT_CERT:-}" ] || [ -n "${MTLS_CLIENT_KEY:-}" ]; then
 	echo "caddy: MTLS_CLIENT_CERT/KEY definidos mas PEM invalido. Revise as variaveis no Railway." >&2
 	exit 1
-else
-	echo "caddy: MTLS_CLIENT_CERT/KEY ausentes — modo HTTP interno (Fase A)." >&2
 fi
 
 if [ -z "$GLOW_PROXY_SECRET" ]; then
@@ -116,9 +127,20 @@ if [ -z "$GLOW_PROXY_SECRET" ]; then
 	exit 1
 fi
 
-if [ "$MTLS_MODE" = true ]; then
+if [ "$MTLS_REQUIRED" = "true" ] || [ "$MTLS_REQUIRED" = "1" ]; then
+	if [ "$MTLS_MODE" != "true" ]; then
+		echo "caddy: MTLS_REQUIRED=true mas certificados cliente nao foram carregados." >&2
+		exit 1
+	fi
+fi
+
+if [ "$MTLS_MODE" = "true" ]; then
 	setup_mtls_upstream
 elif [ -z "$API_UPSTREAM" ]; then
+	if [ "$MTLS_REQUIRED" = "true" ] || [ "$MTLS_REQUIRED" = "1" ]; then
+		echo "caddy: MTLS_REQUIRED=true — proxy HTTP interno nao permitido." >&2
+		exit 1
+	fi
 	setup_http_upstream
 elif printf '%s' "$API_UPSTREAM" | grep -q '^https://'; then
 	echo "caddy: API_UPSTREAM e HTTPS mas certificados cliente mTLS nao foram carregados." >&2
@@ -128,7 +150,7 @@ else
 	echo "caddy: usando API_UPSTREAM=${API_UPSTREAM}" >&2
 fi
 
-if [ "$MTLS_MODE" = true ]; then
+if [ "$MTLS_MODE" = "true" ]; then
 	cat > "$CADDY_CONFIG" <<EOF
 {
 	admin off
@@ -235,5 +257,5 @@ if ! caddy validate --config "$CADDY_CONFIG" --adapter caddyfile 2>&1; then
 	exit 1
 fi
 
-echo "caddy: config ${CADDY_CONFIG}" >&2
+echo "caddy: modo=$([ "$MTLS_MODE" = true ] && printf mTLS || printf HTTP) config=${CADDY_CONFIG}" >&2
 exec caddy run --config "$CADDY_CONFIG" --adapter caddyfile
