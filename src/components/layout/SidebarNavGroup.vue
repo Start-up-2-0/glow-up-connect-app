@@ -13,7 +13,6 @@ const props = defineProps<{
   icon?: NavIconName
   children: NavChildItem[]
   collapsed?: boolean
-  nested?: boolean
 }>()
 
 const iconName = computed(() => resolveNavIcon(props.id, props.icon))
@@ -25,13 +24,13 @@ const emit = defineEmits<{
 const route = useRoute()
 const expanded = ref(false)
 
-function matchesPath(to: string, path: string) {
-  if (to === '/dashboard') return path === to
-  return path === to || path.startsWith(`${to}/`)
+function isChildRouteActive(to?: string) {
+  if (!to) return false
+  return route.path === to || route.path.startsWith(`${to}/`)
 }
 
 const hasActiveChild = computed(() =>
-  props.children.some((child) => child.to && matchesPath(child.to, route.path)),
+  props.children.some((child) => isChildRouteActive(child.to)),
 )
 
 watch(
@@ -48,7 +47,7 @@ function toggleExpanded() {
 }
 
 function isChildActive(child: NavChildItem) {
-  return child.to ? matchesPath(child.to, route.path) : false
+  return isChildRouteActive(child.to)
 }
 
 function onNavigate() {
@@ -60,15 +59,12 @@ function onNavigate() {
   <div class="w-full">
     <button
       type="button"
-      class="group flex h-11 w-full items-center gap-3 rounded-lg py-2 transition-colors"
+      class="group flex h-11 w-full items-center gap-3 rounded-lg py-2 pl-2 pr-2 transition-colors"
       :class="[
-        collapsed ? 'w-[60px] justify-center px-2' : nested ? 'pl-3 pr-2' : 'pl-2 pr-2',
+        collapsed ? 'w-[60px] justify-center px-2' : '',
         expanded && !collapsed
-          ? 'bg-glow-gold-selected'
-          : hasActiveChild && !collapsed
-            ? 'bg-black/[0.02]'
-            : 'hover:bg-black/[0.03]',
-        nested && !collapsed ? 'sidebar-nav-group--nested' : '',
+          ? 'bg-glow-gold-selected pl-4'
+          : 'hover:bg-black/[0.03]',
       ]"
       :aria-expanded="collapsed ? undefined : expanded"
       @click="toggleExpanded"
@@ -81,7 +77,7 @@ function onNavigate() {
       <span
         v-if="!collapsed"
         class="flex-1 truncate text-left font-urbanist text-sm leading-none text-glow-text transition-colors group-hover:text-glow-text-hover"
-        :class="expanded || hasActiveChild ? 'font-medium' : 'font-normal'"
+        :class="expanded ? 'font-medium' : 'font-normal'"
       >
         {{ label }}
       </span>
@@ -89,29 +85,24 @@ function onNavigate() {
         v-if="!collapsed"
         :expanded="expanded"
         :size="16"
-        class="shrink-0 text-glow-text-subtle"
+        class="shrink-0 text-glow-text"
       />
     </button>
 
-    <div
-      v-if="expanded && !collapsed"
-      class="flex flex-col border-l border-glow-border-soft"
-      :class="nested ? 'ml-5' : 'ml-3'"
-    >
+    <div v-if="expanded && !collapsed" class="flex flex-col">
       <component
         :is="child.to ? RouterLink : 'button'"
         v-for="child in children"
         :key="child.id"
         :to="child.to"
         type="button"
-        class="group flex h-11 items-center rounded-lg py-2 pl-4 pr-3 transition-colors hover:bg-black/[0.03]"
-        :class="isChildActive(child) ? 'bg-glow-gold-selected/60' : ''"
-        :aria-current="isChildActive(child) ? 'page' : undefined"
+        class="group flex h-11 items-center rounded-lg py-2 transition-colors hover:bg-black/[0.03]"
+        :class="isChildActive(child) ? 'gap-2.5 px-6' : 'px-5'"
         @click="onNavigate"
       >
         <span
           v-if="isChildActive(child)"
-          class="mr-2.5 size-1.5 shrink-0 rounded-full bg-glow-gold"
+          class="size-1.5 shrink-0 rounded-full bg-glow-gold"
           aria-hidden="true"
         />
         <span

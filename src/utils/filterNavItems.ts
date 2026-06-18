@@ -1,4 +1,4 @@
-import type { NavChildItem, NavItem, NavSection } from '@/constants/navigation'
+import type { NavChildItem, NavItem } from '@/constants/navigation'
 
 export interface NavFilterContext {
   assinaturaAtiva: boolean
@@ -68,31 +68,4 @@ export function filterNavItems(navItems: NavItem[], context: NavFilterContext): 
       return itemPermitido(item, context) ? item : null
     })
     .filter((item): item is NavItem => item !== null)
-}
-
-export function filterNavSections(sections: NavSection[], context: NavFilterContext): NavSection[] {
-  return sections
-    .map((section) => {
-      const items = filterNavItems(section.items, context)
-      if (items.length === 0) return null
-      return { ...section, items }
-    })
-    .filter((section): section is NavSection => section !== null)
-}
-
-export function navItemMatchesPath(item: Pick<NavItem, 'to' | 'children'>, path: string): boolean {
-  if (item.to) {
-    if (item.to === '/dashboard') return path === item.to
-    if (path === item.to || path.startsWith(`${item.to}/`)) return true
-  }
-
-  if (item.children?.length) {
-    return item.children.some((child) => child.to && navItemMatchesPath(child, path))
-  }
-
-  return false
-}
-
-export function navSectionHasActiveItem(section: NavSection, path: string): boolean {
-  return section.items.some((item) => navItemMatchesPath(item, path))
 }

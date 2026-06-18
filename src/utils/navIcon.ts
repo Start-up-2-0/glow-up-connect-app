@@ -17,11 +17,15 @@ const NAV_ICON_BY_ID: Record<string, NavIconName> = {
   equipe: 'team',
   whatsapp: 'whatsapp',
   financeiro: 'finance',
-  clientes: 'team',
   'perfil-estabelecimento': 'building',
   assinatura: 'subscription',
+  'cliente-agenda': 'explore',
+  'cliente-conta': 'user',
+  'minha-loja': 'building',
+  historico: 'user',
+  'meu-trabalho': 'calendar',
+  clientes: 'team',
   auditoria: 'finance',
-  privacidade: 'user',
 }
 
 export function resolveNavIcon(id: string, explicit?: NavIconName): NavIconName {

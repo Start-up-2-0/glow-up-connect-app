@@ -6,7 +6,7 @@ import { useDashboardNav } from '@/composables/useDashboardNav'
 import { useAppStore } from '@/stores/app.store'
 import SidebarHeader from './SidebarHeader.vue'
 import SidebarNavItem from './SidebarNavItem.vue'
-import SidebarNavSection from './SidebarNavSection.vue'
+import SidebarNavGroup from './SidebarNavGroup.vue'
 import SidebarFooter from './SidebarFooter.vue'
 
 const props = withDefaults(
@@ -18,7 +18,7 @@ const props = withDefaults(
 
 const route = useRoute()
 const appStore = useAppStore()
-const { navSections, collapsedNavItems } = useDashboardNav()
+const { navItems } = useDashboardNav()
 
 const collapsed = computed(() => !props.mobile && appStore.sidebarCollapsed)
 
@@ -56,7 +56,6 @@ function onToggleCollapsed() {
   <aside
     class="flex h-full min-h-0 shrink-0 flex-col overflow-hidden border-r border-glow-border-sidebar bg-glow-surface transition-[width] duration-300 ease-in-out"
     :class="sidebarWidthClass"
-    aria-label="Menu principal"
   >
     <div
       class="flex min-h-0 flex-1 flex-col"
@@ -70,28 +69,27 @@ function onToggleCollapsed() {
       />
 
       <nav
-        class="sidebar-nav-scroll flex min-h-0 w-full flex-1 flex-col overflow-y-auto overscroll-y-contain"
-        :class="collapsed ? 'gap-1.5 pb-4' : 'gap-3 pb-4'"
+        class="sidebar-nav-scroll flex min-h-0 w-full flex-1 flex-col gap-1.5 overflow-y-auto overscroll-y-contain"
+        :class="collapsed ? 'pb-4' : 'pb-4'"
       >
-        <template v-if="collapsed">
+        <template v-for="item in navItems" :key="item.id">
+          <SidebarNavGroup
+            v-if="item.children?.length"
+            :id="item.id"
+            :label="item.label"
+            :icon="item.icon"
+            :children="item.children"
+            :collapsed="collapsed"
+            @navigate="onNavigate"
+          />
           <SidebarNavItem
-            v-for="item in collapsedNavItems"
-            :key="item.id"
+            v-else
             :id="item.id"
             :label="item.label"
             :icon="item.icon"
             :to="item.to"
-            collapsed
+            :collapsed="collapsed"
             :selected="isItemActive(item.to)"
-            @navigate="onNavigate"
-          />
-        </template>
-
-        <template v-else>
-          <SidebarNavSection
-            v-for="section in navSections"
-            :key="section.id"
-            :section="section"
             @navigate="onNavigate"
           />
         </template>

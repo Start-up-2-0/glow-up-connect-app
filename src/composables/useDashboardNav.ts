@@ -1,32 +1,19 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import {
-  businessNavSections,
-  clienteNavSections,
-  flattenNavSections,
+  businessNavItems,
+  clienteNavItems,
   NAV_SEARCH_PLACEHOLDER_BUSINESS,
   NAV_SEARCH_PLACEHOLDER_CLIENTE,
   NAV_SEARCH_PLACEHOLDER_PROFISSIONAL,
-  profissionalNavSections,
+  profissionalNavItems,
   type NavItem,
-  type NavSection,
 } from '@/constants/navigation'
-import { filterNavSections } from '@/utils/filterNavItems'
+import { filterNavItems } from '@/utils/filterNavItems'
 import { useUserStore } from '@/stores/user.store'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
 import { isClienteRole } from '@/types/user.types'
-
-function omitSectionItems(section: NavSection, itemIds: string[]): NavSection {
-  return {
-    ...section,
-    items: section.items.filter((item) => !itemIds.includes(item.id)),
-  }
-}
-
-function omitSectionsById(sections: NavSection[], sectionIds: string[]): NavSection[] {
-  return sections.filter((section) => !sectionIds.includes(section.id))
-}
 
 function dedupeNavById(items: NavItem[]): NavItem[] {
   const seen = new Set<string>()
@@ -37,29 +24,6 @@ function dedupeNavById(items: NavItem[]): NavItem[] {
   })
 }
 
-function flattenNavItemsForCollapsed(items: NavItem[]): NavItem[] {
-  const leaves: NavItem[] = []
-
-  for (const item of items) {
-    if (item.children?.length) {
-      for (const child of item.children) {
-        if (!child.to) continue
-        leaves.push({
-          id: child.id,
-          label: child.label,
-          to: child.to,
-          icon: item.icon,
-        })
-      }
-      continue
-    }
-
-    if (item.to) leaves.push(item)
-  }
-
-  return dedupeNavById(leaves)
-}
-
 export function useDashboardNav() {
   const userStore = useUserStore()
   const negocioStore = useNegocioStore()
@@ -67,45 +31,42 @@ export function useDashboardNav() {
   const { assinaturaAtiva } = storeToRefs(negocioStore)
   const { temVinculoNegocio, ehProfissionalOperacional } = useAcessoUsuario()
 
-  const filterCtx = computed(() => ({
-    assinaturaAtiva: assinaturaAtiva.value,
-    possuiModulo: negocioStore.possuiModulo,
-    possuiPermissao: negocioStore.possuiPermissao,
-    possuiAlgumModulo: negocioStore.possuiAlgumModulo,
-    possuiAlgumaPermissao: negocioStore.possuiAlgumaPermissao,
-  }))
-
-  const navSections = computed(() => {
-    const ctx = filterCtx.value
+  const navItems = computed(() => {
+    const filterCtx = {
+      assinaturaAtiva: assinaturaAtiva.value,
+      possuiModulo: negocioStore.possuiModulo,
+      possuiPermissao: negocioStore.possuiPermissao,
+      possuiAlgumModulo: negocioStore.possuiAlgumModulo,
+      possuiAlgumaPermissao: negocioStore.possuiAlgumaPermissao,
+    }
 
     if (ehProfissionalOperacional.value) {
-      const cliente = filterNavSections(
-        clienteNavSections.map((section) => omitSectionItems(section, ['abrir-loja'])),
-        ctx,
-      )
-      const operacao = filterNavSections(profissionalNavSections, ctx)
-      return [...cliente, ...operacao]
+      const cliente = clienteNavItems
+        .map((item) => {
+          if (item.id !== 'cliente-conta' || !item.children?.length) return item
+          const children = item.children.filter((child) => child.id !== 'abrir-loja')
+          if (children.length === 0) return null
+          return { ...item, children }
+        })
+        .filter((item): item is NavItem => item !== null)
+      const operacao = filterNavItems(profissionalNavItems, filterCtx)
+      return dedupeNavById([...cliente, ...operacao])
     }
 
     if (temVinculoNegocio.value) {
-      const cliente = filterNavSections(clienteNavSections, ctx)
-      const business = filterNavSections(
-        omitSectionsById(businessNavSections, ['dashboard']),
-        ctx,
+      const business = filterNavItems(
+        businessNavItems.filter((item) => item.id !== 'dashboard'),
+        filterCtx,
       )
-      return [...cliente, ...business]
+      return dedupeNavById([...clienteNavItems, ...business])
     }
 
     if (!isClienteRole(profile.value?.role)) {
-      return filterNavSections(businessNavSections, ctx)
+      return filterNavItems(businessNavItems, filterCtx)
     }
 
-    return filterNavSections(clienteNavSections, ctx)
+    return clienteNavItems
   })
-
-  const navItems = computed(() => dedupeNavById(flattenNavSections(navSections.value)))
-
-  const collapsedNavItems = computed(() => flattenNavItemsForCollapsed(navItems.value))
 
   const searchPlaceholder = computed(() => {
     if (ehProfissionalOperacional.value) {
@@ -119,5 +80,5 @@ export function useDashboardNav() {
       : NAV_SEARCH_PLACEHOLDER_BUSINESS
   })
 
-  return { navSections, navItems, collapsedNavItems, searchPlaceholder }
+  return { navItems, searchPlaceholder }
 }
