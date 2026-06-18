@@ -134,12 +134,20 @@ if [ "$MTLS_MODE" = true ]; then
 	admin off
 	persist_config off
 	auto_https off
-	log { format json }
-	servers { trusted_proxies static private_ranges 100.0.0.0/8 }
+
+	log {
+		format json
+	}
+
+	servers {
+		trusted_proxies static private_ranges 100.0.0.0/8
+	}
 }
 
 :{\$PORT:3000} {
-	log { format json }
+	log {
+		format json
+	}
 
 	header {
 		X-Content-Type-Options nosniff
@@ -179,12 +187,20 @@ else
 	admin off
 	persist_config off
 	auto_https off
-	log { format json }
-	servers { trusted_proxies static private_ranges 100.0.0.0/8 }
+
+	log {
+		format json
+	}
+
+	servers {
+		trusted_proxies static private_ranges 100.0.0.0/8
+	}
 }
 
 :{\$PORT:3000} {
-	log { format json }
+	log {
+		format json
+	}
 
 	header {
 		X-Content-Type-Options nosniff
@@ -212,6 +228,11 @@ else
 	}
 }
 EOF
+fi
+
+if ! caddy validate --config "$CADDY_CONFIG" --adapter caddyfile 2>&1; then
+	echo "caddy: Caddyfile gerado invalido em ${CADDY_CONFIG}" >&2
+	exit 1
 fi
 
 echo "caddy: config ${CADDY_CONFIG}" >&2
