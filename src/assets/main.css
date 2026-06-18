@@ -1177,19 +1177,19 @@
   }
 
   .cliente-loja-detalhe-layout {
-    @apply grid items-start gap-8 xl:grid-cols-[minmax(0,723px)_minmax(280px,1fr)] xl:gap-10;
+    @apply grid items-start gap-8 lg:grid-cols-[minmax(0,723px)_278px] lg:gap-[30px];
   }
 
   .cliente-loja-panel {
-    @apply cliente-card min-h-[382px] p-10;
+    @apply cliente-card flex min-h-[382px] w-full max-w-[723px] flex-col p-10;
   }
 
   .cliente-loja-panel__header {
-    @apply mb-6 grid gap-x-4 gap-y-2;
+    @apply mb-5 grid gap-x-4;
     grid-template-columns: 1fr auto;
     grid-template-areas:
       'status rating'
-      'title title';
+      'title rating';
   }
 
   .cliente-loja-panel__status {
@@ -1204,11 +1204,11 @@
 
   .cliente-loja-panel__nome {
     grid-area: title;
-    @apply font-urbanist text-2xl font-bold leading-none text-glow-text;
+    @apply mt-3.5 font-urbanist text-2xl font-bold leading-none text-glow-text;
   }
 
   .cliente-loja-rating-panel {
-    @apply inline-flex shrink-0 flex-col items-start gap-1.5;
+    @apply inline-flex shrink-0 flex-col items-start gap-2;
   }
 
   .cliente-loja-rating-panel__score {
@@ -1236,11 +1236,15 @@
   }
 
   .cliente-loja-stats-row {
-    @apply mb-6 grid gap-4 sm:grid-cols-2;
+    @apply mb-5 grid grid-cols-2 gap-[11px];
   }
 
   .cliente-loja-stat-box {
     @apply flex h-[84px] items-center gap-4 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface-tint px-5;
+  }
+
+  .cliente-loja-stat-box__content {
+    @apply flex min-w-0 flex-col gap-1;
   }
 
   .cliente-loja-stat-box__icon-wrap {
@@ -1248,39 +1252,55 @@
   }
 
   .cliente-loja-stat-box__label {
-    @apply font-urbanist text-sm text-glow-text;
+    @apply font-urbanist text-sm leading-none text-glow-text;
   }
 
   .cliente-loja-stat-box__value {
-    @apply font-urbanist text-base font-bold text-glow-text;
+    @apply font-urbanist text-base font-bold leading-none text-glow-text;
   }
 
   .cliente-loja-stat-box__horarios-grid {
-    @apply grid grid-cols-2 gap-6;
+    @apply grid min-w-0 flex-1 grid-cols-2 gap-6;
   }
 
   .cliente-loja-address-bar {
-    @apply mb-6 flex h-[47px] items-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface-tint px-5;
+    @apply mb-5 flex h-[47px] items-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface-tint px-5;
   }
 
   .cliente-loja-address-bar__text {
     @apply truncate font-urbanist text-sm font-medium text-glow-text;
   }
 
+  .cliente-loja-panel__cta {
+    @apply mt-auto block;
+  }
+
+  .cliente-loja-panel__cta-icon {
+    @apply flex size-10 shrink-0 items-center justify-center;
+  }
+
+  .cliente-loja-panel__cta-icon svg {
+    @apply size-7 rotate-[138deg];
+  }
+
+  .cliente-btn-cta {
+    @apply inline-flex h-10 w-full items-center justify-center gap-2.5 rounded-xl bg-glow-gold-cta px-2.5 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
   .cliente-loja-servicos {
-    @apply space-y-4;
+    @apply w-full max-w-[278px] space-y-4;
   }
 
   .cliente-loja-servicos-grid {
-    @apply grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-2;
+    @apply grid grid-cols-1 gap-2.5;
   }
 
   .cliente-servico-card {
-    @apply cliente-card relative flex h-20 items-center px-5;
+    @apply cliente-card relative flex h-20 w-full items-center px-5;
   }
 
   .cliente-servico-card__icon {
-    @apply flex size-[50px] shrink-0 items-center justify-center rounded border-[0.5px] border-glow-border-soft bg-glow-hover-surface text-glow-text;
+    @apply flex size-[50px] shrink-0 items-center justify-center rounded border-[0.5px] border-glow-border-soft bg-glow-surface-tint text-glow-text;
   }
 
   .cliente-servico-card__content {

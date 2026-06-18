@@ -62,15 +62,6 @@ onMounted(async () => {
       <div class="cliente-loja-detalhe-layout">
         <LojaResumoPanel :loja="loja" />
 
-        <section
-          v-if="avaliacoes && avaliacoes.resumo.totalAvaliacoes > 0"
-          class="cliente-loja-avaliacoes cliente-empty-panel"
-        >
-          <h3 class="cliente-section-label">AVALIAÇÕES</h3>
-          <AvaliacaoResumoCard :resumo="avaliacoes.resumo" />
-          <AvaliacaoComentariosLista :itens="avaliacoes.itens" />
-        </section>
-
         <aside class="cliente-loja-servicos">
           <h3 class="cliente-section-label">SERVIÇOS DISPONÍVEIS</h3>
 
@@ -90,6 +81,15 @@ onMounted(async () => {
           </div>
         </aside>
       </div>
+
+      <section
+        v-if="avaliacoes && avaliacoes.resumo.totalAvaliacoes > 0"
+        class="cliente-loja-avaliacoes cliente-empty-panel"
+      >
+        <h3 class="cliente-section-label">AVALIAÇÕES</h3>
+        <AvaliacaoResumoCard :resumo="avaliacoes.resumo" />
+        <AvaliacaoComentariosLista :itens="avaliacoes.itens" />
+      </section>
     </template>
 
     <BaseAlert v-else variant="error">{{ error ?? 'Loja não encontrada.' }}</BaseAlert>

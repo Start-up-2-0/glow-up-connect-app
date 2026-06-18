@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import AvaliacaoNotaResumo from '@/components/avaliacao/AvaliacaoNotaResumo.vue'
 import { CLIENTE_BTN_CTA_CLASS } from '@/constants/designTokens'
@@ -6,9 +7,21 @@ import { lojaAgendarPath } from '@/constants/routes'
 import type { EstabelecimentoPublico } from '@/types/estabelecimento.types'
 import { formatDistanciaKm, formatEnderecoCard, formatHorarioFigma } from '@/utils/formatters'
 
-defineProps<{
+const props = defineProps<{
   loja: EstabelecimentoPublico
 }>()
+
+const distanciaLabel = computed(() =>
+  props.loja.distanciaKm != null ? formatDistanciaKm(props.loja.distanciaKm) : '—',
+)
+
+const horarioAberturaLabel = computed(() =>
+  props.loja.horarioAbertura ? formatHorarioFigma(props.loja.horarioAbertura) : '—',
+)
+
+const horarioFechamentoLabel = computed(() =>
+  props.loja.horarioFechamento ? formatHorarioFigma(props.loja.horarioFechamento) : '—',
+)
 </script>
 
 <template>
@@ -32,7 +45,7 @@ defineProps<{
     </header>
 
     <div class="cliente-loja-stats-row">
-      <div v-if="loja.distanciaKm != null" class="cliente-loja-stat-box">
+      <div class="cliente-loja-stat-box">
         <div class="cliente-loja-stat-box__icon-wrap">
           <svg class="size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
@@ -43,16 +56,13 @@ defineProps<{
             <circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.2" />
           </svg>
         </div>
-        <div>
+        <div class="cliente-loja-stat-box__content">
           <p class="cliente-loja-stat-box__label">Distância</p>
-          <p class="cliente-loja-stat-box__value">{{ formatDistanciaKm(loja.distanciaKm) }}</p>
+          <p class="cliente-loja-stat-box__value">{{ distanciaLabel }}</p>
         </div>
       </div>
 
-      <div
-        v-if="loja.horarioAbertura || loja.horarioFechamento"
-        class="cliente-loja-stat-box cliente-loja-stat-box--horarios"
-      >
+      <div class="cliente-loja-stat-box cliente-loja-stat-box--horarios">
         <div class="cliente-loja-stat-box__icon-wrap">
           <svg class="size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.2" />
@@ -60,13 +70,13 @@ defineProps<{
           </svg>
         </div>
         <div class="cliente-loja-stat-box__horarios-grid">
-          <div v-if="loja.horarioAbertura">
+          <div class="cliente-loja-stat-box__content">
             <p class="cliente-loja-stat-box__label">Abre às</p>
-            <p class="cliente-loja-stat-box__value">{{ formatHorarioFigma(loja.horarioAbertura) }}</p>
+            <p class="cliente-loja-stat-box__value">{{ horarioAberturaLabel }}</p>
           </div>
-          <div v-if="loja.horarioFechamento">
+          <div class="cliente-loja-stat-box__content">
             <p class="cliente-loja-stat-box__label">Fecha às</p>
-            <p class="cliente-loja-stat-box__value">{{ formatHorarioFigma(loja.horarioFechamento) }}</p>
+            <p class="cliente-loja-stat-box__value">{{ horarioFechamentoLabel }}</p>
           </div>
         </div>
       </div>
@@ -86,18 +96,20 @@ defineProps<{
       </p>
     </div>
 
-    <RouterLink :to="lojaAgendarPath(loja.publicGuid)" class="block">
+    <RouterLink :to="lojaAgendarPath(loja.publicGuid)" class="cliente-loja-panel__cta">
       <span :class="CLIENTE_BTN_CTA_CLASS">
         Continuar agendamento
-        <svg class="size-4 rotate-[138deg]" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path
-            d="M3 8h10M9 4l4 4-4 4"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        <span class="cliente-loja-panel__cta-icon" aria-hidden="true">
+          <svg viewBox="0 0 28 28" fill="none">
+            <path
+              d="M7 14h14M16 9l5 5-5 5"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
       </span>
     </RouterLink>
   </section>
