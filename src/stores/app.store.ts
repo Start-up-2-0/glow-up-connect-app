@@ -7,10 +7,7 @@ function isTheme(value: string | null): value is Theme {
   return value === 'light' || value === 'dark'
 }
 
-function getSystemTheme(): Theme {
-  if (typeof window === 'undefined') return 'light'
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-}
+const DEFAULT_THEME: Theme = 'light'
 
 function applyThemeToDocument(theme: Theme) {
   if (typeof document === 'undefined') return
@@ -64,7 +61,7 @@ export const useAppStore = defineStore('app', () => {
 
   function hydrateTheme() {
     const saved = localStorage.getItem(STORAGE_KEYS.THEME)
-    applyTheme(isTheme(saved) ? saved : getSystemTheme())
+    applyTheme(isTheme(saved) ? saved : DEFAULT_THEME)
   }
 
   function openUpgradeModal(payload?: Omit<UpgradeModalState, 'open'>) {
@@ -93,4 +90,4 @@ export const useAppStore = defineStore('app', () => {
   }
 })
 
-export { applyThemeToDocument, getSystemTheme, isTheme }
+export { applyThemeToDocument, isTheme }

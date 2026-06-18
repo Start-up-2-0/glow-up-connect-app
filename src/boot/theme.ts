@@ -1,17 +1,14 @@
 const THEME_STORAGE_KEY = 'guc_theme'
+const DEFAULT_THEME = 'light'
 
 function applyTheme(): void {
   const saved = localStorage.getItem(THEME_STORAGE_KEY)
   const theme =
     saved === 'dark' || saved === 'light'
       ? saved
-      : window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
+      : DEFAULT_THEME
 
-  if (theme === 'dark') {
-    document.documentElement.classList.add('dark')
-  }
+  document.documentElement.classList.toggle('dark', theme === 'dark')
 }
 
 applyTheme()
