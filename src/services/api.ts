@@ -13,6 +13,13 @@ import {
   setAccessToken,
 } from '@/utils/storage'
 import { syncSession } from '@/utils/sessionSync'
+import {
+  acquireRequestProof,
+  invalidateRequestProofPool,
+  isExemptRequestProofPath,
+  isRequestProofError,
+  REQUEST_PROOF_HEADER,
+} from '@/composables/useRequestProof'
 import { getUpgradeInfo } from '@/constants/upgradeMessages'
 import { useAppStore } from '@/stores/app.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
@@ -88,11 +95,19 @@ const api: AxiosInstance = axios.create({
   timeout: 30_000,
 })
 
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const token = getAccessToken()
   if (token && config.headers) {
     config.headers[TOKEN_HEADER] = token
   }
+
+  if (!isExemptRequestProofPath(config.url)) {
+    const proof = await acquireRequestProof(config.method, config.url)
+    if (proof && config.headers) {
+      config.headers[REQUEST_PROOF_HEADER] = proof
+    }
+  }
+
   return config
 })
 
@@ -130,8 +145,26 @@ function handleSubscriptionError(error: AxiosError<ApiErrorResponse>) {
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ApiErrorResponse>) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean
+      _proofRetry?: boolean
+    }
     const requestUrl = originalRequest?.url
+
+    if (
+      originalRequest &&
+      error.response?.status === 403 &&
+      isRequestProofError(error.response.data?.code) &&
+      !originalRequest._proofRetry
+    ) {
+      originalRequest._proofRetry = true
+      invalidateRequestProofPool()
+      const proof = await acquireRequestProof(originalRequest.method, requestUrl)
+      if (proof && originalRequest.headers) {
+        originalRequest.headers[REQUEST_PROOF_HEADER] = proof
+        return api(originalRequest)
+      }
+    }
 
     if (handleSubscriptionError(error)) {
       return Promise.reject(error)
