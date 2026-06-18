@@ -13,9 +13,60 @@ write_pem_if_set() {
 	fi
 }
 
+extract_host_from_url() {
+	printf '%s' "$1" | sed -e 's|^[a-zA-Z]*://||' -e 's|/.*||' -e 's|:.*||'
+}
+
+extract_port_from_url() {
+	printf '%s' "$1" | sed -n 's|^[a-zA-Z]*://[^:]*:\([0-9][0-9]*\).*|\1|p'
+}
+
+resolve_host_ip() {
+	host="$1"
+	ip=$(getent ahostsv4 "$host" 2>/dev/null | awk 'NR==1 { print $1 }')
+	if [ -z "$ip" ]; then
+		ip=$(getent hosts "$host" 2>/dev/null | awk '{ print $1 }')
+	fi
+	printf '%s' "$ip"
+}
+
+setup_mtls_upstream() {
+	internal_host="${API_INTERNAL_HOST:-}"
+	internal_port="${MTLS_UPSTREAM_PORT:-8443}"
+
+	if [ -z "$internal_host" ] && [ -n "$API_INTERNAL_URL" ]; then
+		internal_host=$(extract_host_from_url "$API_INTERNAL_URL")
+		port_from_url=$(extract_port_from_url "$API_INTERNAL_URL")
+		[ -n "$port_from_url" ] && internal_port="$port_from_url"
+	fi
+
+	if [ -z "$internal_host" ] && [ -n "$API_UPSTREAM" ]; then
+		internal_host=$(extract_host_from_url "$API_UPSTREAM")
+		port_from_url=$(extract_port_from_url "$API_UPSTREAM")
+		[ -n "$port_from_url" ] && internal_port="$port_from_url"
+	fi
+
+	if [ -z "$internal_host" ]; then
+		echo "API_INTERNAL_HOST ou API_INTERNAL_URL obrigatorio para mTLS." >&2
+		exit 1
+	fi
+
+	ip=$(resolve_host_ip "$internal_host")
+	if [ -z "$ip" ]; then
+		echo "Nao foi possivel resolver ${internal_host} para mTLS." >&2
+		exit 1
+	fi
+
+	echo "${ip} ${MTLS_SERVER_NAME}" >> /etc/hosts
+	export API_UPSTREAM="https://${MTLS_SERVER_NAME}:${internal_port}"
+	echo "mTLS upstream ${API_UPSTREAM} (${internal_host} -> ${ip})" >&2
+}
+
 write_pem_if_set MTLS_CLIENT_CERT "$CERT_DIR/client.pem"
 write_pem_if_set MTLS_CLIENT_KEY "$CERT_DIR/client.key"
 write_pem_if_set MTLS_CA_CERT "$CERT_DIR/ca.pem"
+
+MTLS_SERVER_NAME="${MTLS_SERVER_NAME:-glowapi.internal}"
 
 if [ -z "$API_UPSTREAM" ]; then
 	if [ -n "$API_INTERNAL_URL" ]; then
@@ -38,9 +89,9 @@ if [ -z "$GLOW_PROXY_SECRET" ]; then
 	exit 1
 fi
 
-MTLS_SERVER_NAME="${MTLS_SERVER_NAME:-glowapi.internal}"
-
 if [ -f "$CERT_DIR/client.pem" ] && [ -f "$CERT_DIR/client.key" ]; then
+	setup_mtls_upstream
+
 	cat > /tmp/Caddyfile.generated <<EOF
 {
 	admin off
@@ -67,9 +118,6 @@ if [ -f "$CERT_DIR/client.pem" ] && [ -f "$CERT_DIR/client.key" ]; then
 		handle /api* {
 			reverse_proxy ${API_UPSTREAM} {
 				header_up X-Glow-Proxy-Secret ${GLOW_PROXY_SECRET}
-				header_up X-Forwarded-For {remote_host}
-				header_up X-Forwarded-Proto {scheme}
-				header_up Host {upstream_hostport}
 				transport http {
 					tls
 					tls_server_name ${MTLS_SERVER_NAME}
