@@ -61,7 +61,7 @@ if [ -f "$CERT_DIR/client.pem" ] && [ -f "$CERT_DIR/client.key" ]; then
 
 	respond /health 200
 
-	@api path /api/*
+	@api path /api*
 	handle @api {
 		reverse_proxy ${API_UPSTREAM} {
 			header_up X-Glow-Proxy-Secret ${GLOW_PROXY_SECRET}
