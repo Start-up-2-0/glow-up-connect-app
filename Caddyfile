@@ -29,18 +29,22 @@
 
 	respond /health 200
 
-	@api path /api*
-	handle @api {
-		reverse_proxy {$API_UPSTREAM} {
-			header_up X-Glow-Proxy-Secret {$GLOW_PROXY_SECRET}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-			header_up Host {upstream_hostport}
+	route {
+		# /api* cobre rotas aninhadas (/api/auth/login); /api/* so cobre um segmento.
+		handle /api* {
+			reverse_proxy {$API_UPSTREAM} {
+				header_up X-Glow-Proxy-Secret {$GLOW_PROXY_SECRET}
+				header_up X-Forwarded-For {remote_host}
+				header_up X-Forwarded-Proto {scheme}
+				header_up Host {upstream_hostport}
+			}
+		}
+
+		handle {
+			root * dist
+			encode gzip
+			try_files {path} /index.html
+			file_server
 		}
 	}
-
-	root * dist
-	encode gzip
-	file_server
-	try_files {path} /index.html
 }

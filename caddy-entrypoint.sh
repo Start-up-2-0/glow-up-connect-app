@@ -61,25 +61,28 @@ if [ -f "$CERT_DIR/client.pem" ] && [ -f "$CERT_DIR/client.key" ]; then
 
 	respond /health 200
 
-	@api path /api*
-	handle @api {
-		reverse_proxy ${API_UPSTREAM} {
-			header_up X-Glow-Proxy-Secret ${GLOW_PROXY_SECRET}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-			header_up Host {upstream_hostport}
-			transport http {
-				tls
-				tls_client_cert ${CERT_DIR}/client.pem ${CERT_DIR}/client.key
-				tls_trusted_ca_certs ${CERT_DIR}/ca.pem
+	route {
+		handle /api* {
+			reverse_proxy ${API_UPSTREAM} {
+				header_up X-Glow-Proxy-Secret ${GLOW_PROXY_SECRET}
+				header_up X-Forwarded-For {remote_host}
+				header_up X-Forwarded-Proto {scheme}
+				header_up Host {upstream_hostport}
+				transport http {
+					tls
+					tls_client_cert ${CERT_DIR}/client.pem ${CERT_DIR}/client.key
+					tls_trusted_ca_certs ${CERT_DIR}/ca.pem
+				}
 			}
 		}
-	}
 
-	root * dist
-	encode gzip
-	file_server
-	try_files {path} /index.html
+		handle {
+			root * dist
+			encode gzip
+			try_files {path} /index.html
+			file_server
+		}
+	}
 }
 EOF
 	exec caddy run --config /tmp/Caddyfile.generated --adapter caddyfile
