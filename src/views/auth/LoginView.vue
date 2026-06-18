@@ -15,6 +15,7 @@ import {
   redirectQuery,
 } from '@/utils/authRedirect'
 import { useCaptcha } from '@/composables/useCaptcha'
+import AuthRecaptcha from '@/components/auth/AuthRecaptcha.vue'
 import {
   GLOW_BUTTON_PRIMARY_CLASS,
   GLOW_INPUT_CLASS,
@@ -32,7 +33,9 @@ const { login, loading } = useAuth()
 const { setStoredEmail } = useConfirmEmail()
 const { resolveError, resolveErrorCode } = useApiError()
 const notificationsStore = useNotificationsStore()
-const { execute: executeCaptcha } = useCaptcha()
+const captchaRef = ref<InstanceType<typeof AuthRecaptcha> | null>(null)
+const captchaResetNonce = ref(0)
+const { enabled: captchaEnabled } = useCaptcha()
 
 const email = ref('')
 const senha = ref('')
@@ -65,13 +68,19 @@ async function handleSubmit() {
   }
 
   try {
-    const captchaToken = await executeCaptcha('login')
+    const captchaToken = captchaRef.value?.getToken()
+    if (captchaEnabled && !captchaToken) {
+      errorMessage.value = 'Marque o reCAPTCHA antes de continuar.'
+      return
+    }
+
     await login(
       { email: email.value, senha: senha.value, captchaToken },
       checkoutRedirect.value,
     )
     notificationsStore.push('success', 'Login realizado com sucesso!')
   } catch (err) {
+    captchaResetNonce.value += 1
     if (resolveErrorCode(err) === 'EMAIL_NAO_CONFIRMADO') {
       notificationsStore.push('info', 'Confirme seu e-mail antes de entrar.')
       setStoredEmail(email.value.trim())
@@ -172,6 +181,8 @@ async function handleSubmit() {
               Esqueceu a senha?
             </RouterLink>
           </div>
+
+          <AuthRecaptcha ref="captchaRef" :reset-nonce="captchaResetNonce" />
 
           <button
             type="submit"

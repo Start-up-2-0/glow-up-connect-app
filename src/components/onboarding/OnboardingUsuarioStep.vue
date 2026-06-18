@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
+import AuthRecaptcha from '@/components/auth/AuthRecaptcha.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import {
   AGENDAR_BTN_CONTINUE_CLASS,
@@ -11,12 +12,15 @@ import {
 } from '@/constants/designTokens'
 import type { OnboardingUsuarioDraft } from '@/types/onboardingAssinatura.types'
 import { telefoneLocalFromApi } from '@/utils/formatters'
+import { useCaptcha } from '@/composables/useCaptcha'
 
 const props = defineProps<{
   initial: OnboardingUsuarioDraft
   loading?: boolean
   errorMessage?: string | null
   fieldErrors?: Record<string, string[]>
+  captchaResetNonce?: number
+  continueLabel?: string
 }>()
 
 const emit = defineEmits<{
@@ -30,9 +34,13 @@ const emit = defineEmits<{
       confirmarSenha: string
       avatarBase64?: string
       avatarContentType?: string
+      captchaToken?: string
     },
   ]
 }>()
+
+const captchaRef = ref<InstanceType<typeof AuthRecaptcha> | null>(null)
+const { enabled: captchaEnabled } = useCaptcha()
 
 const nome = ref(props.initial.nome)
 const telefone = ref(telefoneLocalFromApi(props.initial.telefone))
@@ -43,6 +51,7 @@ const confirmarSenha = ref('')
 const mostrarSenha = ref(false)
 const mostrarConfirmarSenha = ref(false)
 const avatarFile = ref<File | null>(null)
+const captchaError = ref('')
 
 const FIELD_KEYS = {
   nome: ['Nome', 'nome'],
@@ -69,6 +78,13 @@ function readFileAsDataUrl(file: File): Promise<string> {
 }
 
 async function handleSubmit() {
+  const captchaToken = captchaRef.value?.getToken()
+  if (captchaEnabled && !captchaToken) {
+    captchaError.value = 'Marque o reCAPTCHA antes de continuar.'
+    return
+  }
+  captchaError.value = ''
+
   const payload = {
     nome: nome.value,
     telefone: telefone.value,
@@ -85,12 +101,15 @@ async function handleSubmit() {
     confirmarSenha: string
     avatarBase64?: string
     avatarContentType?: string
+    captchaToken?: string
   }
 
   if (avatarFile.value) {
     payload.avatarBase64 = await readFileAsDataUrl(avatarFile.value)
     payload.avatarContentType = avatarFile.value.type
   }
+
+  payload.captchaToken = captchaToken
 
   emit('submit', payload)
 }
@@ -210,12 +229,17 @@ async function handleSubmit() {
         </div>
       </div>
 
+      <AuthRecaptcha ref="captchaRef" :reset-nonce="captchaResetNonce ?? 0" />
+      <p v-if="captchaError" class="text-center text-sm text-red-600" role="alert">
+        {{ captchaError }}
+      </p>
+
       <button type="submit" :disabled="loading" :class="AGENDAR_BTN_CONTINUE_CLASS">
         <span
           v-if="loading"
           class="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-glow-text border-t-transparent"
         />
-        Continuar para confirmação
+        {{ continueLabel ?? 'Continuar para confirmação' }}
       </button>
     </form>
   </div>

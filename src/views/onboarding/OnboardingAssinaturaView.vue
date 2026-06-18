@@ -27,6 +27,8 @@ const {
   pixCheckoutUrl,
   erro,
   fieldErrors,
+  captchaResetNonce,
+  pendingAutoLogin,
   init,
   cadastrarConta,
   confirmarEmailCodigo,
@@ -82,6 +84,8 @@ function handlePublicBack() {
         :loading="loading"
         :error-message="erro"
         :field-errors="fieldErrors"
+        :captcha-reset-nonce="captchaResetNonce"
+        :continue-label="pendingAutoLogin ? 'Entrar e continuar' : 'Continuar para confirmação'"
         @submit="cadastrarConta"
       />
 

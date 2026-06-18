@@ -1,65 +1,136 @@
-const RECAPTCHA_SCRIPT_ID = 'glow-recaptcha-v3'
+const RECAPTCHA_SCRIPT_ID = 'glow-recaptcha-v2'
 const RECAPTCHA_SCRIPT_SRC = 'https://www.google.com/recaptcha/api.js'
+
+type GrecaptchaV2 = {
+  ready: (callback: () => void) => void
+  render: (
+    container: HTMLElement,
+    parameters: {
+      sitekey: string
+      callback?: () => void
+      'expired-callback'?: () => void
+      'error-callback'?: () => void
+    },
+  ) => number
+  getResponse: (optWidgetId?: number) => string
+  reset: (optWidgetId?: number) => void
+}
+
+function getGrecaptcha(): GrecaptchaV2 | undefined {
+  return (window as Window & { grecaptcha?: GrecaptchaV2 }).grecaptcha
+}
 
 function getSiteKey(): string {
   return import.meta.env.VITE_CAPTCHA_SITE_KEY?.trim() ?? ''
 }
 
-function loadRecaptchaScript(siteKey: string): Promise<void> {
+let scriptLoadPromise: Promise<void> | null = null
+
+function loadRecaptchaScript(): Promise<void> {
   if (typeof window === 'undefined') {
     return Promise.resolve()
   }
 
-  const grecaptcha = (window as Window & { grecaptcha?: { ready: (cb: () => void) => void; execute: (key: string, opts: { action: string }) => Promise<string> } }).grecaptcha
-  if (grecaptcha) {
+  if (getGrecaptcha()) {
     return Promise.resolve()
+  }
+
+  if (scriptLoadPromise) {
+    return scriptLoadPromise
   }
 
   const existing = document.getElementById(RECAPTCHA_SCRIPT_ID)
   if (existing) {
-    return new Promise((resolve, reject) => {
+    scriptLoadPromise = new Promise((resolve, reject) => {
       existing.addEventListener('load', () => resolve(), { once: true })
-      existing.addEventListener('error', () => reject(new Error('Falha ao carregar reCAPTCHA.')), { once: true })
+      existing.addEventListener('error', () => reject(new Error('Falha ao carregar reCAPTCHA.')), {
+        once: true,
+      })
     })
+    return scriptLoadPromise
   }
 
-  return new Promise((resolve, reject) => {
+  scriptLoadPromise = new Promise((resolve, reject) => {
     const script = document.createElement('script')
     script.id = RECAPTCHA_SCRIPT_ID
-    script.src = `${RECAPTCHA_SCRIPT_SRC}?render=${encodeURIComponent(siteKey)}`
+    script.src = `${RECAPTCHA_SCRIPT_SRC}?render=explicit`
     script.async = true
     script.defer = true
-    script.onload = () => resolve()
+    script.onload = () => {
+      const grecaptcha = getGrecaptcha()
+      if (!grecaptcha) {
+        reject(new Error('reCAPTCHA indisponível.'))
+        return
+      }
+      grecaptcha.ready(() => resolve())
+    }
     script.onerror = () => reject(new Error('Falha ao carregar reCAPTCHA.'))
     document.head.appendChild(script)
   })
+
+  return scriptLoadPromise
 }
 
 export function useCaptcha() {
   const siteKey = getSiteKey()
   const enabled = siteKey.length > 0
+  let widgetId: number | null = null
 
-  async function execute(action: 'login' | 'register'): Promise<string | undefined> {
+  async function mountWidget(container: HTMLElement): Promise<void> {
     if (!enabled) {
-      return undefined
+      return
     }
 
-    await loadRecaptchaScript(siteKey)
+    await loadRecaptchaScript()
 
-    const grecaptcha = (window as Window & { grecaptcha?: { ready: (cb: () => void) => void; execute: (key: string, opts: { action: string }) => Promise<string> } }).grecaptcha
+    const grecaptcha = getGrecaptcha()
     if (!grecaptcha) {
       throw new Error('reCAPTCHA indisponível.')
     }
 
-    return new Promise((resolve, reject) => {
-      grecaptcha.ready(() => {
-        grecaptcha
-          .execute(siteKey, { action })
-          .then(resolve)
-          .catch(reject)
-      })
-    })
+    if (widgetId !== null) {
+      grecaptcha.reset(widgetId)
+      return
+    }
+
+    widgetId = grecaptcha.render(container, { sitekey: siteKey })
   }
 
-  return { enabled, execute }
+  function getToken(): string | undefined {
+    if (!enabled) {
+      return undefined
+    }
+
+    const grecaptcha = getGrecaptcha()
+    if (!grecaptcha || widgetId === null) {
+      return undefined
+    }
+
+    const response = grecaptcha.getResponse(widgetId).trim()
+    return response.length > 0 ? response : undefined
+  }
+
+  function reset(): void {
+    if (!enabled) {
+      return
+    }
+
+    const grecaptcha = getGrecaptcha()
+    if (!grecaptcha || widgetId === null) {
+      return
+    }
+
+    grecaptcha.reset(widgetId)
+  }
+
+  /** @deprecated Use mountWidget + getToken (reCAPTCHA v2 checkbox). */
+  async function execute(_action: 'login' | 'register'): Promise<string | undefined> {
+    const token = getToken()
+    if (enabled && !token) {
+      throw new Error('Marque o reCAPTCHA antes de continuar.')
+    }
+    return token
+  }
+
+  return { enabled, mountWidget, getToken, reset, execute }
 }

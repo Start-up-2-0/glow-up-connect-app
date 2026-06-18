@@ -33,6 +33,7 @@ import {
 } from '@/constants/designTokens'
 import { useConsent } from '@/composables/useConsent'
 import { useCaptcha } from '@/composables/useCaptcha'
+import AuthRecaptcha from '@/components/auth/AuthRecaptcha.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -45,7 +46,9 @@ const { setStoredEmail } = useConfirmEmail()
 const { resolveError, resolveErrorCode, resolveFieldErrors } = useApiError()
 const notificationsStore = useNotificationsStore()
 const { acceptTerms } = useConsent()
-const { execute: executeCaptcha } = useCaptcha()
+const captchaRef = ref<InstanceType<typeof AuthRecaptcha> | null>(null)
+const captchaResetNonce = ref(0)
+const { enabled: captchaEnabled } = useCaptcha()
 
 const aceitoTermos = ref(false)
 
@@ -153,7 +156,11 @@ async function handleSubmit() {
       payload.avatarContentType = avatarFile.value.type
     }
 
-    payload.captchaToken = await executeCaptcha('register')
+    payload.captchaToken = captchaRef.value?.getToken()
+    if (captchaEnabled && !payload.captchaToken) {
+      errorMessage.value = 'Marque o reCAPTCHA antes de continuar.'
+      return
+    }
 
     const { data } = await userService.cadastrar(payload)
     acceptTerms()
@@ -164,6 +171,7 @@ async function handleSubmit() {
       query: redirectQuery(checkoutRedirect.value),
     })
   } catch (err) {
+    captchaResetNonce.value += 1
     if (resolveErrorCode(err) === 'EMAIL_JA_CADASTRADO') {
       emailJaCadastrado.value = true
     }
@@ -348,6 +356,8 @@ function onAvatarError(message: string) {
             </RouterLink>.
           </span>
         </label>
+
+        <AuthRecaptcha ref="captchaRef" :reset-nonce="captchaResetNonce" />
 
         <button
           type="submit"
