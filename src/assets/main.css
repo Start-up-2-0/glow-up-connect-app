@@ -1188,6 +1188,14 @@
     @apply mb-6 flex items-start justify-between gap-4;
   }
 
+  .cliente-loja-panel__top-start {
+    @apply min-h-[22px];
+  }
+
+  .cliente-loja-panel__avaliacao {
+    @apply shrink-0;
+  }
+
   .cliente-loja-panel__nome {
     @apply mb-6 font-urbanist text-2xl font-bold text-glow-text;
   }

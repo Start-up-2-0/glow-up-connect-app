@@ -14,16 +14,18 @@ defineProps<{
 <template>
   <section class="cliente-loja-panel">
     <div class="cliente-loja-panel__top">
-      <div v-if="loja.abertoAgora" class="cliente-loja-badge">
-        <span class="cliente-loja-badge__dot" aria-hidden="true" />
-        ABERTO AGORA
+      <div class="cliente-loja-panel__top-start">
+        <div v-if="loja.abertoAgora" class="cliente-loja-badge">
+          <span class="cliente-loja-badge__dot" aria-hidden="true" />
+          ABERTO AGORA
+        </div>
       </div>
-      <div v-else aria-hidden="true" />
 
       <AvaliacaoNotaResumo
+        class="cliente-loja-panel__avaliacao"
         :nota-media="loja.notaMedia ?? 0"
         :total-avaliacoes="loja.totalAvaliacoes ?? 0"
-        variant="stacked"
+        variant="panel"
       />
     </div>
 

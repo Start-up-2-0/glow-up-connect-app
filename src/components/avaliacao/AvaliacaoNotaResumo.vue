@@ -6,7 +6,7 @@ const props = withDefaults(
   defineProps<{
     notaMedia?: number | null
     totalAvaliacoes?: number | null
-    variant?: 'inline' | 'stacked'
+    variant?: 'inline' | 'stacked' | 'panel'
   }>(),
   {
     notaMedia: 0,
@@ -22,14 +22,22 @@ const totalAvaliacoesExibicao = computed(() => Math.max(0, props.totalAvaliacoes
 const contagemLabel = computed(() => {
   const n = totalAvaliacoesExibicao.value
   const texto = n === 1 ? 'avaliação' : 'avaliações'
-  return props.variant === 'inline' ? `(${n} ${texto})` : `${n} ${texto}`
+  if (props.variant === 'inline') return `(${n} ${texto})`
+  return `${n} ${texto}`
+})
+
+const variantClass = computed(() => {
+  if (props.variant === 'panel' || props.variant === 'stacked') {
+    return 'avaliacao-nota-resumo--panel'
+  }
+  return 'avaliacao-nota-resumo--inline'
 })
 </script>
 
 <template>
   <div
     class="avaliacao-nota-resumo"
-    :class="`avaliacao-nota-resumo--${variant}`"
+    :class="variantClass"
     :aria-label="`Nota média ${notaFormatada} com ${totalAvaliacoesExibicao} avaliações`"
   >
     <div class="avaliacao-nota-resumo__score">
@@ -70,35 +78,44 @@ const contagemLabel = computed(() => {
   color: inherit;
 }
 
-.avaliacao-nota-resumo--stacked {
-  display: flex;
+.avaliacao-nota-resumo--panel {
+  display: inline-flex;
   flex-direction: column;
   align-items: flex-end;
-  text-align: right;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
-.avaliacao-nota-resumo--stacked .avaliacao-nota-resumo__score {
+.avaliacao-nota-resumo--panel .avaliacao-nota-resumo__score {
   display: inline-flex;
-  height: 1.375rem;
+  height: 22px;
+  box-sizing: border-box;
   align-items: center;
   justify-content: center;
-  gap: 0.375rem;
-  border-radius: 0.25rem;
+  gap: 6px;
+  border-radius: 4px;
   background: var(--glow-hover-surface, rgba(40, 40, 40, 0.04));
-  padding: 0 0.75rem;
+  border: 0.5px solid var(--glow-border-soft, rgba(40, 40, 40, 0.25));
+  padding: 0 10px;
   font-family: var(--font-urbanist, sans-serif);
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1;
+  line-height: normal;
   color: var(--glow-text, #282828);
 }
 
-.avaliacao-nota-resumo--stacked .avaliacao-nota-resumo__count {
-  margin-top: 0.25rem;
+.avaliacao-nota-resumo--panel .avaliacao-nota-resumo__value {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.avaliacao-nota-resumo--panel .avaliacao-nota-resumo__count {
+  margin-top: 0;
   font-family: var(--font-urbanist, sans-serif);
-  font-size: 0.75rem;
-  line-height: 1;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: normal;
   color: var(--glow-text, #282828);
+  white-space: nowrap;
 }
 
 .avaliacao-nota-resumo__star {
