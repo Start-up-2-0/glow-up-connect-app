@@ -139,7 +139,7 @@ export const CLIENTE_PAGE_TITLE_CLASS =
   'font-satoshi text-2xl font-bold leading-tight text-glow-text'
 
 export const CLIENTE_PAGE_SUBTITLE_CLASS =
-  'font-satoshi text-base text-glow-text-muted'
+  'font-satoshi text-base text-glow-text-subtle'
 
 export const CLIENTE_PAGE_DIVIDER_CLASS = 'cliente-page-divider'
 

@@ -4,12 +4,14 @@ import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import EstabelecimentoCard from '@/components/cliente/EstabelecimentoCard.vue'
-import ClientePageHeader from '@/components/cliente/ClientePageHeader.vue'
 import { publicoService } from '@/services/publicoService'
 import { useGeolocation } from '@/composables/useGeolocation'
 import { useApiError } from '@/composables/useApiError'
 import {
   CLIENTE_BTN_OUTLINE_CLASS,
+  CLIENTE_PAGE_DIVIDER_CLASS,
+  CLIENTE_PAGE_SUBTITLE_CLASS,
+  CLIENTE_PAGE_TITLE_CLASS,
 } from '@/constants/designTokens'
 import type { EstabelecimentoProximo } from '@/types/estabelecimento.types'
 
@@ -86,7 +88,12 @@ onMounted(async () => {
 
 <template>
   <div class="cliente-explorar-page">
-    <ClientePageHeader :subtitle="subtituloLocal" />
+    <header class="cliente-explorar-intro">
+      <h1 :class="CLIENTE_PAGE_TITLE_CLASS">Explorar lojas</h1>
+      <p :class="CLIENTE_PAGE_SUBTITLE_CLASS">{{ subtituloLocal }}</p>
+    </header>
+
+    <div :class="CLIENTE_PAGE_DIVIDER_CLASS" class="cliente-explorar-intro__divider" />
 
     <div class="cliente-explorar-toolbar">
       <button
@@ -139,7 +146,7 @@ onMounted(async () => {
         <EstabelecimentoCard v-for="item in itens" :key="item.publicGuid" :item="item" />
       </div>
 
-      <div v-if="hasMore()" class="flex justify-center pt-6">
+      <div v-if="hasMore()" class="cliente-explorar-load-more">
         <button
           type="button"
           :class="CLIENTE_BTN_OUTLINE_CLASS"
