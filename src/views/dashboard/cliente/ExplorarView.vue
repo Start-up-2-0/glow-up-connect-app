@@ -10,8 +10,6 @@ import { useApiError } from '@/composables/useApiError'
 import {
   CLIENTE_BTN_OUTLINE_CLASS,
   CLIENTE_PAGE_DIVIDER_CLASS,
-  CLIENTE_PAGE_SUBTITLE_CLASS,
-  CLIENTE_PAGE_TITLE_CLASS,
 } from '@/constants/designTokens'
 import type { EstabelecimentoProximo } from '@/types/estabelecimento.types'
 
@@ -89,31 +87,43 @@ onMounted(async () => {
 <template>
   <div class="cliente-explorar-page">
     <header class="cliente-explorar-intro">
-      <h1 :class="CLIENTE_PAGE_TITLE_CLASS">Explorar lojas</h1>
-      <p :class="CLIENTE_PAGE_SUBTITLE_CLASS">{{ subtituloLocal }}</p>
+      <h1 class="cliente-explorar-intro__title">Explorar lojas</h1>
+      <p class="cliente-explorar-intro__subtitle">{{ subtituloLocal }}</p>
     </header>
 
-    <div :class="CLIENTE_PAGE_DIVIDER_CLASS" class="cliente-explorar-intro__divider" />
+    <div
+      :class="CLIENTE_PAGE_DIVIDER_CLASS"
+      class="cliente-explorar-intro__divider"
+      role="separator"
+      aria-hidden="true"
+    />
 
     <div class="cliente-explorar-toolbar">
       <button
         type="button"
-        :class="CLIENTE_BTN_OUTLINE_CLASS"
+        class="cliente-explorar-btn-localizacao"
         :disabled="geoLoading || loading"
         @click="handleRetryLocation"
       >
         <svg
-          class="size-5 shrink-0 text-glow-text"
+          class="cliente-explorar-btn-localizacao__icon"
           :class="{ 'animate-spin': geoLoading }"
           viewBox="0 0 20 20"
           fill="none"
           aria-hidden="true"
         >
           <path
-            d="M10 3v2M10 15v2M3 10H5M15 10h2M5.05 5.05l1.42 1.42M13.53 13.53l1.42 1.42M5.05 14.95l1.42-1.42M13.53 6.47l1.42-1.42"
+            d="M17.5 10a7.5 7.5 0 1 1-2.2-5.3"
             stroke="currentColor"
             stroke-width="1.2"
             stroke-linecap="round"
+          />
+          <path
+            d="M17.5 3.5V10h-6.5"
+            stroke="currentColor"
+            stroke-width="1.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
           />
         </svg>
         Atualizar localização
@@ -142,8 +152,13 @@ onMounted(async () => {
     </div>
 
     <template v-else-if="itens.length > 0">
-      <div class="cliente-explorar-grid">
-        <EstabelecimentoCard v-for="item in itens" :key="item.publicGuid" :item="item" />
+      <div class="cliente-explorar-grid" role="list">
+        <EstabelecimentoCard
+          v-for="item in itens"
+          :key="item.publicGuid"
+          role="listitem"
+          :item="item"
+        />
       </div>
 
       <div v-if="hasMore()" class="cliente-explorar-load-more">

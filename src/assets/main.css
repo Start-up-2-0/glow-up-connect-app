@@ -1091,17 +1091,27 @@
     @apply min-w-[132px] border border-glow-border-soft bg-glow-hover-surface text-glow-text hover:bg-glow-surface;
   }
 
-  /* Área cliente — Explorar lojas / Detalhe (Figma) */
+  /* Área cliente — Explorar lojas (Figma MCP 637:1555) */
   .cliente-explorar-page {
     @apply w-full;
   }
 
   .cliente-explorar-intro {
-    @apply space-y-3.5;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .cliente-explorar-intro__title {
+    @apply font-satoshi text-2xl font-bold leading-8 text-glow-text;
+  }
+
+  .cliente-explorar-intro__subtitle {
+    @apply font-satoshi text-base font-normal leading-[22px] text-glow-text-subtle;
   }
 
   .cliente-explorar-intro__divider {
-    @apply mt-10;
+    margin-top: 34px;
   }
 
   .cliente-explorar-page .cliente-page-header-block {
@@ -1109,7 +1119,7 @@
   }
 
   .cliente-explorar-page .cliente-page-divider {
-    @apply mt-10;
+    margin-top: 34px;
   }
 
   .cliente-loja-detalhe-page {
@@ -1137,13 +1147,35 @@
   }
 
   .cliente-explorar-toolbar {
-    @apply flex justify-end pt-[38px] pb-[38px];
+    @apply flex justify-end;
+    padding-top: 38px;
+    padding-bottom: 38px;
+  }
+
+  .cliente-explorar-btn-localizacao {
+    @apply inline-flex h-[34px] w-[195px] shrink-0 items-center justify-center gap-[10px] rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface font-urbanist text-sm font-normal text-glow-text transition;
+  }
+
+  .cliente-explorar-btn-localizacao:hover:not(:disabled) {
+    @apply bg-glow-hover-surface;
+  }
+
+  .cliente-explorar-btn-localizacao:focus-visible {
+    @apply outline-none ring-2 ring-glow-gold-cta ring-offset-2 ring-offset-glow-canvas;
+  }
+
+  .cliente-explorar-btn-localizacao:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  .cliente-explorar-btn-localizacao__icon {
+    @apply size-5 shrink-0 text-glow-text;
   }
 
   .cliente-explorar-grid {
     display: grid;
     gap: 10px;
-    grid-template-columns: repeat(auto-fill, 388px);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 388px), 388px));
     justify-content: start;
   }
 
@@ -1154,6 +1186,10 @@
   @media (max-width: 427px) {
     .cliente-explorar-grid {
       grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cliente-estab-card {
+      max-width: none;
     }
   }
 
@@ -1170,11 +1206,21 @@
   }
 
   .cliente-estab-card {
-    @apply cliente-card flex h-[126px] w-full max-w-[388px] min-w-0 items-start gap-[15px] overflow-hidden p-5;
+    @apply cliente-card flex h-[126px] w-full max-w-[388px] min-w-0 items-start overflow-hidden transition-colors;
+    padding: 20px;
+    gap: 15px;
+  }
+
+  .cliente-estab-card:focus-visible {
+    @apply outline-none ring-2 ring-glow-gold-cta ring-offset-2 ring-offset-glow-canvas;
+  }
+
+  .cliente-estab-card:hover {
+    @apply border-glow-gold-dark;
   }
 
   .cliente-estab-card__logo {
-    @apply size-14 shrink-0 overflow-hidden rounded bg-glow-canvas;
+    @apply size-14 shrink-0 overflow-hidden rounded bg-[#d9d9d9];
   }
 
   .cliente-estab-card__logo-fallback {
@@ -1183,30 +1229,31 @@
 
   .cliente-estab-card__body {
     @apply flex min-w-0 flex-1 flex-col;
-  }
-
-  .cliente-estab-card__title-row {
-    @apply flex items-start justify-between gap-2;
+    gap: 6px;
   }
 
   .cliente-estab-card__name {
-    @apply truncate font-urbanist text-base font-bold leading-none text-glow-text;
-  }
-
-  .cliente-estab-card__destaque {
-    @apply shrink-0 rounded-full bg-glow-gold-soft px-2 py-0.5 font-urbanist text-[10px] font-medium text-glow-gold-dark;
+    @apply truncate font-urbanist text-base font-bold leading-normal text-glow-text;
   }
 
   .cliente-estab-card__meta {
-    @apply mt-[9px] flex items-center gap-1 font-urbanist text-xs leading-none text-glow-text-subtle;
+    @apply flex items-center gap-1 font-urbanist text-xs font-normal leading-normal text-glow-text-hover;
+  }
+
+  .cliente-estab-card__meta-icon {
+    @apply size-4 shrink-0;
   }
 
   .cliente-estab-card__rating {
-    @apply mt-1.5;
+    @apply m-0;
   }
 
   .cliente-estab-card__address {
-    @apply mt-1.5 flex items-center gap-2.5 font-urbanist text-sm leading-none text-glow-text;
+    @apply flex items-center gap-2.5 font-urbanist text-sm font-normal leading-normal text-glow-text;
+  }
+
+  .cliente-estab-card__address-icon {
+    @apply size-3.5 shrink-0;
   }
 
   .cliente-loja-detalhe-layout {

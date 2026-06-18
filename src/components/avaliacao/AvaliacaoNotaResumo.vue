@@ -22,7 +22,7 @@ const totalAvaliacoesExibicao = computed(() => Math.max(0, props.totalAvaliacoes
 const contagemLabel = computed(() => {
   const n = totalAvaliacoesExibicao.value
   const texto = n === 1 ? 'avaliação' : 'avaliações'
-  if (props.variant === 'inline') return `(${n} ${texto})`
+  if (props.variant === 'inline') return `  (${n} ${texto})`
   return `${n} ${texto}`
 })
 </script>
@@ -39,8 +39,10 @@ const contagemLabel = computed(() => {
         fill="currentColor"
       />
     </svg>
-    <span class="avaliacao-nota-resumo__value">{{ notaFormatada }}</span>
-    <span class="avaliacao-nota-resumo__count">{{ contagemLabel }}</span>
+    <span class="avaliacao-nota-resumo__text">
+      <span class="avaliacao-nota-resumo__value">{{ notaFormatada }}</span>
+      <span class="avaliacao-nota-resumo__count">{{ contagemLabel }}</span>
+    </span>
   </div>
 
   <div
@@ -69,22 +71,27 @@ const contagemLabel = computed(() => {
 .avaliacao-nota-resumo--inline {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
+  gap: 6px;
   font-family: var(--font-urbanist, sans-serif);
-  font-size: 0.75rem;
-  line-height: 1;
+  font-size: 12px;
+  line-height: normal;
+}
+
+.avaliacao-nota-resumo--inline .avaliacao-nota-resumo__text {
+  display: inline;
+  white-space: nowrap;
 }
 
 .avaliacao-nota-resumo--inline .avaliacao-nota-resumo__count {
-  color: var(--glow-text-subtle, rgba(40, 40, 40, 0.6));
+  color: rgba(40, 40, 40, 0.6);
   font-weight: 400;
 }
 
 .avaliacao-nota-resumo__star {
-  width: var(--avaliacao-nota-star-size);
-  height: var(--avaliacao-nota-star-size);
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
-  color: var(--glow-gold-cta, #d4a017);
+  color: var(--glow-gold-cta, #e6ad01);
 }
 
 .avaliacao-nota-resumo__value {
