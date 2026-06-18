@@ -137,6 +137,18 @@ api.interceptors.response.use(
       return Promise.reject(error)
     }
 
+    if (error.response?.status === 429) {
+      const code = error.response.data?.code
+      const message =
+        error.response.data?.message ??
+        'Muitas requisições. Aguarde alguns segundos e tente novamente.'
+      useNotificationsStore().push(
+        code === 'IP_BLOCKED_24H' ? 'error' : 'warning',
+        message,
+      )
+      return Promise.reject(error)
+    }
+
     if (!originalRequest || !shouldAttemptRefresh(error, requestUrl)) {
       if (error.response?.status === 401 && !isPublicApiPath(requestUrl)) {
         redirectToLogin()
