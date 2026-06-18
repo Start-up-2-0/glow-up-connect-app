@@ -1,5 +1,6 @@
 import { ref, watch } from 'vue'
 import { viaCepService } from '@/services/viaCepService'
+import { useConsent } from '@/composables/useConsent'
 import type { EnderecoFormFields } from '@/types/endereco.types'
 import { cepFromInput, CEP_LENGTH, isValidCep, maskCep } from '@/utils/cep'
 
@@ -12,11 +13,21 @@ export function useCepLookup(
   const loading = ref(false)
   const error = ref<string | null>(null)
   const lastFetchedCep = ref('')
+  const consentBlocked = ref(false)
+  const { hasThirdPartyConsent } = useConsent()
 
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
   let requestId = 0
 
   async function lookupCep(cepDigits: string) {
+    if (!hasThirdPartyConsent.value) {
+      consentBlocked.value = true
+      error.value = 'Ative os cookies de serviços de terceiros para buscar o CEP automaticamente.'
+      return
+    }
+
+    consentBlocked.value = false
+
     if (!isValidCep(cepDigits)) {
       error.value = null
       return
@@ -93,6 +104,7 @@ export function useCepLookup(
   return {
     loading,
     error,
+    consentBlocked,
     lastFetchedCep,
     onCepInput,
     lookupCep,

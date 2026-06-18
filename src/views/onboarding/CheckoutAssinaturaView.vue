@@ -20,6 +20,7 @@ import { useApiError } from '@/composables/useApiError'
 import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
 import { formatBRL, telefoneToApi } from '@/utils/formatters'
 import { USER_ROLE } from '@/types/user.types'
+import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
 const route = useRoute()
 const router = useRouter()
 const planosStore = usePlanosStore()
@@ -177,7 +178,7 @@ async function finalizarCheckout() {
 
     if (result.status === 'PendentePagamento') {
       if (result.pagamentoInicial?.checkoutUrl) {
-        window.location.href = result.pagamentoInicial.checkoutUrl
+        redirectToThirdPartyUrl(result.pagamentoInicial.checkoutUrl)
         return
       }
       await aguardarAtivacao()

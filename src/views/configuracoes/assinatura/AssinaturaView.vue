@@ -18,6 +18,7 @@ import { assinaturaService } from '@/services/assinaturaService'
 import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
 import type { AssinaturaOnboardingContexto } from '@/types/assinaturaOnboarding.types'
 import type { EstabelecimentoOnboarding } from '@/types/assinatura.types'
+import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
 
 const router = useRouter()
 const { assinaturaId, planoNome, estabelecimentoAtivo, ensureContext } = useNegocioContext()
@@ -83,6 +84,13 @@ async function adicionarUnidade(estabelecimento: EstabelecimentoOnboarding) {
     adicionandoUnidade.value = false
   }
 }
+
+function concluirPagamento() {
+  const url = assinatura.value?.pagamentoInicial?.checkoutUrl
+  if (url) {
+    redirectToThirdPartyUrl(url)
+  }
+}
 </script>
 
 <template>
@@ -107,13 +115,13 @@ async function adicionarUnidade(estabelecimento: EstabelecimentoOnboarding) {
       <p class="mb-4 text-sm text-glow-text-subtle">
         Conclua o pagamento para liberar os módulos operacionais.
       </p>
-      <a
+      <BaseButton
         v-if="assinatura.pagamentoInicial?.checkoutUrl"
-        :href="assinatura.pagamentoInicial.checkoutUrl"
-        class="inline-block"
+        variant="primary"
+        @click="concluirPagamento"
       >
-        <BaseButton variant="primary">Concluir pagamento</BaseButton>
-      </a>
+        Concluir pagamento
+      </BaseButton>
     </BaseCard>
 
     <BaseCard

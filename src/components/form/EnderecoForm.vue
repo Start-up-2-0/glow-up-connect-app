@@ -10,6 +10,7 @@ import {
   ONBOARDING_CONTRATAR_LABEL_CLASS,
 } from '@/constants/designTokens'
 import { useCepLookup } from '@/composables/useCepLookup'
+import ThirdPartyConsentNotice from '@/components/legal/ThirdPartyConsentNotice.vue'
 import type { EnderecoFormFields } from '@/types/endereco.types'
 import { normalizeUf } from '@/utils/cep'
 
@@ -62,7 +63,7 @@ function patchFields(patch: Partial<EnderecoFormFields>) {
   emit('update:modelValue', { ...props.modelValue, ...patch })
 }
 
-const { loading: cepLoading, error: cepError, onCepInput } = useCepLookup(
+const { loading: cepLoading, error: cepError, consentBlocked, onCepInput } = useCepLookup(
   () => props.modelValue,
   patchFields,
 )
@@ -111,7 +112,8 @@ function onEstadoInput(event: Event) {
           aria-hidden="true"
         />
       </div>
-      <FieldMessage v-if="cepError" variant="error">{{ cepError }}</FieldMessage>
+      <FieldMessage v-if="cepError && !consentBlocked" variant="error">{{ cepError }}</FieldMessage>
+      <ThirdPartyConsentNotice v-if="consentBlocked" compact class="mt-2" />
     </div>
 
     <div :class="[fieldClass, isAuth ? 'sm:col-span-2' : '']">

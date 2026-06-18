@@ -8,10 +8,14 @@ import PublicLayout from '@/layouts/PublicLayout.vue'
 import AgendarPublicoLayout from '@/layouts/AgendarPublicoLayout.vue'
 import LandingLayout from '@/layouts/LandingLayout.vue'
 import ToastContainer from '@/components/feedback/ToastContainer.vue'
+import CookieConsentBanner from '@/components/legal/CookieConsentBanner.vue'
+import CookiePreferencesModal from '@/components/legal/CookiePreferencesModal.vue'
+import { useConsent } from '@/composables/useConsent'
 import { ROUTE_NAMES } from '@/constants/routes'
 
 const route = useRoute()
 const authStore = useAuthStore()
+const { showBanner } = useConsent()
 
 const layout = computed(() => {
   if (
@@ -33,4 +37,6 @@ const layout = computed(() => {
     <router-view />
   </component>
   <ToastContainer />
+  <CookieConsentBanner v-if="showBanner" />
+  <CookiePreferencesModal />
 </template>

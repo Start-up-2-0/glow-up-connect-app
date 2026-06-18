@@ -31,6 +31,7 @@ import {
   GLOW_LOGIN_CONTENT_CLASS,
   GLOW_LOGIN_PAGE_CLASS,
 } from '@/constants/designTokens'
+import { useConsent } from '@/composables/useConsent'
 
 const route = useRoute()
 const router = useRouter()
@@ -42,6 +43,9 @@ const loginLink = computed(() => authRouteWithRedirect(ROUTE_PATHS.LOGIN, checko
 const { setStoredEmail } = useConfirmEmail()
 const { resolveError, resolveErrorCode, resolveFieldErrors } = useApiError()
 const notificationsStore = useNotificationsStore()
+const { acceptTerms } = useConsent()
+
+const aceitoTermos = ref(false)
 
 const nome = ref('')
 const telefone = ref('')
@@ -104,6 +108,10 @@ function readFileAsDataUrl(file: File): Promise<string> {
 }
 
 function validateForm(): boolean {
+  if (!aceitoTermos.value) {
+    errorMessage.value = 'Você precisa aceitar os termos de uso para criar a conta.'
+    return false
+  }
   if (email.value.trim() !== confirmarEmail.value.trim()) {
     errorMessage.value = 'Os e-mails informados não coincidem.'
     return false
@@ -143,6 +151,7 @@ async function handleSubmit() {
     }
 
     const { data } = await userService.cadastrar(payload)
+    acceptTerms()
     notificationsStore.push('success', data.mensagem)
     setStoredEmail(email.value.trim())
     await router.push({
@@ -309,6 +318,32 @@ function onAvatarError(message: string) {
           </div>
         </div>
 
+        <label class="flex items-start gap-3">
+          <input
+            v-model="aceitoTermos"
+            type="checkbox"
+            class="mt-1 h-4 w-4 rounded border-glow-text/40 text-glow-gold focus:ring-glow-gold"
+          />
+          <span :class="GLOW_BODY_TEXT_CLASS">
+            Li e aceito os
+            <RouterLink
+              :to="ROUTE_PATHS.TERMOS_DE_USO"
+              target="_blank"
+              :class="GLOW_LINK_CLASS"
+            >
+              termos de uso
+            </RouterLink>
+            e a
+            <RouterLink
+              :to="ROUTE_PATHS.POLITICA_COOKIES"
+              target="_blank"
+              :class="GLOW_LINK_CLASS"
+            >
+              política de cookies
+            </RouterLink>.
+          </span>
+        </label>
+
         <button
           type="submit"
           :disabled="loading"
@@ -320,17 +355,6 @@ function onAvatarError(message: string) {
           />
           Criar conta
         </button>
-
-        <p :class="[GLOW_BODY_TEXT_CLASS, 'text-center']">
-          Ao clicar em “Criar conta” você concorda com os nossos
-          <button
-            type="button"
-            :class="GLOW_LINK_CLASS"
-            @click="notificationsStore.push('info', 'Termos de uso em breve.')"
-          >
-            termos de uso
-          </button>
-        </p>
 
         <p :class="[GLOW_BODY_TEXT_CLASS, 'text-center']">
           Já possui conta?

@@ -56,6 +56,8 @@ export const ROUTE_NAMES = {
   FINANCEIRO_REDE: 'financeiro-rede',
   CONFIG_AUDITORIA: 'config-auditoria',
   CONFIG_PRIVACIDADE: 'config-privacidade',
+  TERMOS_DE_USO: 'termos-de-uso',
+  POLITICA_COOKIES: 'politica-cookies',
 } as const
 
 export const ROUTE_PATHS = {
@@ -116,6 +118,8 @@ export const ROUTE_PATHS = {
   FINANCEIRO_REDE: '/financeiro/rede',
   CONFIG_AUDITORIA: '/configuracoes/auditoria',
   CONFIG_PRIVACIDADE: '/configuracoes/privacidade',
+  TERMOS_DE_USO: '/termos-de-uso',
+  POLITICA_COOKIES: '/politica-de-cookies',
 } as const
 
 export function agendaDetalhePath(id: number): string {

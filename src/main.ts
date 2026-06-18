@@ -4,6 +4,7 @@ import App from './App.vue'
 import router from './router'
 import { useAuthStore } from './stores/auth.store'
 import { useAppStore } from './stores/app.store'
+import { useConsentStore } from './stores/consent.store'
 import { registerSessionSyncCallback } from './utils/sessionSync'
 import { startSessionRefreshScheduler } from './composables/useSessionRefresh'
 import './assets/main.css'
@@ -17,6 +18,9 @@ app.use(router)
 
 const appStore = useAppStore(pinia)
 appStore.hydrateTheme()
+
+const consentStore = useConsentStore(pinia)
+consentStore.hydrate()
 
 const authStore = useAuthStore(pinia)
 authStore.hydrateFromStorage()

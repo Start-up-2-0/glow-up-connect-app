@@ -1,12 +1,21 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
+import { useConsent } from '@/composables/useConsent'
 import { privacidadeService } from '@/services/privacidadeService'
+import { ROUTE_PATHS } from '@/constants/routes'
 
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
+const {
+  hasThirdPartyConsent,
+  hasTermsAccepted,
+  openPreferences,
+  revokeThirdPartyConsent,
+} = useConsent()
 const exportando = ref(false)
 
 async function exportarDados() {
@@ -45,6 +54,11 @@ async function revogarConsentimento() {
     notifications.push('error', resolveError(err))
   }
 }
+
+function revogarCookiesTerceiros() {
+  revokeThirdPartyConsent()
+  notifications.push('info', 'Cookies de terceiros desativados. Pagamentos e busca de CEP automática ficam indisponíveis.')
+}
 </script>
 
 <template>
@@ -52,11 +66,48 @@ async function revogarConsentimento() {
     <div>
       <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Privacidade</h1>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Exercite seus direitos previstos na LGPD.
+        Exercite seus direitos previstos na LGPD e gerencie cookies.
       </p>
     </div>
 
     <BaseCard class="space-y-4">
+      <div>
+        <h2 class="font-medium text-gray-900 dark:text-white">Cookies e terceiros</h2>
+        <p class="text-sm text-gray-500">
+          Status:
+          <strong>{{ hasThirdPartyConsent ? 'serviços de terceiros autorizados' : 'apenas cookies essenciais' }}</strong>
+        </p>
+        <p v-if="hasTermsAccepted" class="mt-1 text-xs text-gray-400">
+          Termos de uso aceitos no cadastro.
+        </p>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            class="rounded-lg bg-primary-600 px-4 py-2 text-sm text-white"
+            @click="openPreferences"
+          >
+            Gerenciar cookies
+          </button>
+          <button
+            v-if="hasThirdPartyConsent"
+            type="button"
+            class="rounded-lg border border-gray-300 px-4 py-2 text-sm dark:border-gray-600"
+            @click="revogarCookiesTerceiros"
+          >
+            Revogar cookies de terceiros
+          </button>
+        </div>
+        <p class="mt-3 text-xs text-gray-400">
+          <RouterLink :to="ROUTE_PATHS.TERMOS_DE_USO" class="text-primary-600 hover:underline">
+            Termos de uso
+          </RouterLink>
+          ·
+          <RouterLink :to="ROUTE_PATHS.POLITICA_COOKIES" class="text-primary-600 hover:underline">
+            Política de cookies
+          </RouterLink>
+        </p>
+      </div>
+
       <div>
         <h2 class="font-medium text-gray-900 dark:text-white">Portabilidade</h2>
         <p class="text-sm text-gray-500">Baixe uma cópia dos seus dados cadastrais.</p>
@@ -83,8 +134,8 @@ async function revogarConsentimento() {
       </div>
 
       <div>
-        <h2 class="font-medium text-gray-900 dark:text-white">Consentimento</h2>
-        <p class="text-sm text-gray-500">Revogue comunicações opcionais.</p>
+        <h2 class="font-medium text-gray-900 dark:text-white">Comunicações opcionais</h2>
+        <p class="text-sm text-gray-500">Revogue consentimento para mensagens não essenciais.</p>
         <button
           type="button"
           class="mt-2 rounded-lg border border-gray-300 px-4 py-2 text-sm dark:border-gray-600"
@@ -93,10 +144,6 @@ async function revogarConsentimento() {
           Revogar consentimento
         </button>
       </div>
-
-      <p class="text-xs text-gray-400">
-        Política de Privacidade completa: consulte o site institucional da Glow Up Connect.
-      </p>
     </BaseCard>
   </div>
 </template>
