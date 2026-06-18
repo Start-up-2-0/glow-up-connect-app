@@ -13,7 +13,7 @@ import { useAssinaturaStore } from '@/stores/assinatura.store'
 import { getUserRoleLabel } from '@/utils/userRoleLabel'
 import { labelModulos } from '@/utils/moduloLabels'
 import { useFetchOnce } from '@/composables/useFetchOnce'
-import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
+import { LANDING_PLANOS_URL, ROUTE_PATHS } from '@/constants/routes'
 
 const userStore = useUserStore()
 const negocioStore = useNegocioStore()
@@ -77,9 +77,9 @@ onMounted(async () => {
       <p class="mb-4 text-sm text-glow-text-subtle">
         Contrate um plano para liberar agenda, serviços e demais módulos operacionais.
       </p>
-      <RouterLink :to="{ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH }">
+      <a :href="LANDING_PLANOS_URL">
         <BaseButton variant="primary">Ver planos</BaseButton>
-      </RouterLink>
+      </a>
     </BaseCard>
 
     <BaseCard

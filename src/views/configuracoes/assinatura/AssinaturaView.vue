@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
@@ -15,12 +15,12 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { assinaturaService } from '@/services/assinaturaService'
-import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
+import { ROUTE_PATHS } from '@/constants/routes'
+import { redirectToLandingPlanos } from '@/utils/landingUrl'
 import type { AssinaturaOnboardingContexto } from '@/types/assinaturaOnboarding.types'
 import type { EstabelecimentoOnboarding } from '@/types/assinatura.types'
 import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
 
-const router = useRouter()
 const { assinaturaId, planoNome, estabelecimentoAtivo, ensureContext } = useNegocioContext()
 const assinaturaStore = useAssinaturaStore()
 const negocioStore = useNegocioStore()
@@ -38,7 +38,7 @@ const erroUnidade = ref<string | null>(null)
 onMounted(async () => {
   await ensureContext()
   if (!estabelecimentoAtivo.value) {
-    await router.replace({ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH })
+    redirectToLandingPlanos()
     return
   }
   if (assinaturaId.value) {
@@ -58,7 +58,7 @@ async function confirmarCancelamento() {
     await assinaturaStore.cancelar(assinaturaId.value)
     notifications.push('success', 'Assinatura cancelada.')
     dialogAberto.value = false
-    await router.push({ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH })
+    redirectToLandingPlanos()
   } catch (err) {
     notifications.push('error', resolveError(err))
   } finally {

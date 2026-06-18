@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
 import { useConsent } from '@/composables/useConsent'
-import { ROUTE_PATHS } from '@/constants/routes'
+import { legalUrl } from '@/utils/landingUrl'
 
 const { acceptAll, rejectNonEssential, openPreferences } = useConsent()
 </script>
@@ -22,9 +21,9 @@ const { acceptAll, rejectNonEssential, openPreferences } = useConsent()
           Usamos cookies essenciais para login e preferências. Com sua autorização, também
           compartilhamos dados com parceiros como Mercado Pago e APIs de CEP para pagamentos e
           cadastro de endereço.
-          <RouterLink :to="ROUTE_PATHS.POLITICA_COOKIES" class="font-medium text-glow-gold-dark hover:underline">
+          <a :href="legalUrl('politica-de-cookies')" class="font-medium text-glow-gold-dark hover:underline" target="_blank" rel="noopener">
             Saiba mais
-          </RouterLink>
+          </a>
         </p>
       </div>
 

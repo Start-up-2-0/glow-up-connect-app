@@ -3,7 +3,8 @@ import { useAuthStore } from '@/stores/auth.store'
 import { useUserStore } from '@/stores/user.store'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
-import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
+import { ROUTE_PATHS } from '@/constants/routes'
+import { redirectToLandingPlanos } from '@/utils/landingUrl'
 import { isClienteRole } from '@/types/user.types'
 
 function rotaRequerNegocio(to: Parameters<NavigationGuard>[0]): boolean {
@@ -77,7 +78,8 @@ export const negocioGuard: NavigationGuard = async (to) => {
     negocioStore.estabelecimentos.length === 0 &&
     !isOnboarding
   ) {
-    return { path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH }
+    redirectToLandingPlanos()
+    return false
   }
 
   if (

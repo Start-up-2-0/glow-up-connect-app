@@ -21,7 +21,7 @@ export const ROUTE_NAMES = {
   AGENDAMENTO_AVALIAR: 'agendamento-avaliar',
   AGENDAMENTO_DETALHE: 'agendamento-detalhe',
   NOT_FOUND: 'not-found',
-  LANDING: 'landing',
+  HOME_REDIRECT: 'home-redirect',
   CONFIRM_WHATSAPP: 'confirm-whatsapp',
   ONBOARDING_PLANOS: 'onboarding-planos',
   ONBOARDING_CONTRATAR: 'onboarding-contratar',
@@ -161,9 +161,13 @@ export function servicoProfissionaisPath(id: number): string {
   return `${ROUTE_PATHS.SERVICOS}/${id}/profissionais`
 }
 
-export const LANDING_PLANOS_HASH = '#planos'
+export const LANDING_URL = (import.meta.env.VITE_LANDING_URL?.trim() || 'https://glowupconnect.com.br').replace(
+  /\/+$/,
+  '',
+)
+export const LANDING_PLANOS_URL = `${LANDING_URL}#planos`
 
-export type AppLayout = 'auth' | 'dashboard' | 'public' | 'landing' | 'agendar-publico'
+export type AppLayout = 'auth' | 'dashboard' | 'public' | 'agendar-publico'
 
 declare module 'vue-router' {
   interface RouteMeta {

@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { useConsent } from '@/composables/useConsent'
 import { privacidadeService } from '@/services/privacidadeService'
-import { ROUTE_PATHS } from '@/constants/routes'
+import { legalUrl } from '@/utils/landingUrl'
 
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
@@ -98,13 +97,13 @@ function revogarCookiesTerceiros() {
           </button>
         </div>
         <p class="mt-3 text-xs text-gray-400">
-          <RouterLink :to="ROUTE_PATHS.TERMOS_DE_USO" class="text-primary-600 hover:underline">
+          <a :href="legalUrl('termos-de-uso')" class="text-primary-600 hover:underline" target="_blank" rel="noopener">
             Termos de uso
-          </RouterLink>
+          </a>
           ·
-          <RouterLink :to="ROUTE_PATHS.POLITICA_COOKIES" class="text-primary-600 hover:underline">
+          <a :href="legalUrl('politica-de-cookies')" class="text-primary-600 hover:underline" target="_blank" rel="noopener">
             Política de cookies
-          </RouterLink>
+          </a>
         </p>
       </div>
 

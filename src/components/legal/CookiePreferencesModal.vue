@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { RouterLink } from 'vue-router'
 import { useConsent } from '@/composables/useConsent'
 import { THIRD_PARTY_PROVIDERS } from '@/constants/consent'
-import { ROUTE_PATHS } from '@/constants/routes'
+import { legalUrl } from '@/utils/landingUrl'
 
 const {
   preferencesModalOpen,
@@ -103,13 +102,13 @@ function onAcceptAll() {
 
         <p class="mt-4 text-xs text-glow-text-subtle">
           Consulte a
-          <RouterLink :to="ROUTE_PATHS.POLITICA_COOKIES" class="text-glow-gold-dark hover:underline">
+          <a :href="legalUrl('politica-de-cookies')" class="text-glow-gold-dark hover:underline" target="_blank" rel="noopener">
             política de cookies
-          </RouterLink>
+          </a>
           e os
-          <RouterLink :to="ROUTE_PATHS.TERMOS_DE_USO" class="text-glow-gold-dark hover:underline">
+          <a :href="legalUrl('termos-de-uso')" class="text-glow-gold-dark hover:underline" target="_blank" rel="noopener">
             termos de uso
-          </RouterLink>.
+          </a>.
         </p>
 
         <div class="mt-6 flex flex-wrap justify-end gap-2">

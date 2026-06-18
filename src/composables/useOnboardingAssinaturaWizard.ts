@@ -11,7 +11,8 @@ import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { useApiError } from '@/composables/useApiError'
 import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
 import type { PagamentoAssinaturaPayload } from '@/types/assinatura.types'
-import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
+import { ROUTE_PATHS } from '@/constants/routes'
+import { redirectToLandingPlanos } from '@/utils/landingUrl'
 import type {
   OnboardingAssinaturaDraft,
   OnboardingEstabelecimentoDraft,
@@ -131,13 +132,13 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     loading.value = true
     try {
       if (!planoId || Number.isNaN(planoId)) {
-        await router.replace({ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH })
+        redirectToLandingPlanos()
         return
       }
 
       await planosStore.fetchPlanos()
       if (!plano.value) {
-        await router.replace({ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH })
+        redirectToLandingPlanos()
         return
       }
 

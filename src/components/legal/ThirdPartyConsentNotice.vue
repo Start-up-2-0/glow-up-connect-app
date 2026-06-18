@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useConsent } from '@/composables/useConsent'
-import { ROUTE_PATHS } from '@/constants/routes'
-import { RouterLink } from 'vue-router'
+import { legalUrl } from '@/utils/landingUrl'
 
 withDefaults(
   defineProps<{
@@ -33,12 +32,14 @@ const { openPreferences } = useConsent()
       >
         Gerenciar cookies
       </button>
-      <RouterLink
-        :to="ROUTE_PATHS.POLITICA_COOKIES"
+      <a
+        :href="legalUrl('politica-de-cookies')"
         class="rounded-lg border border-amber-400 px-3 py-1.5 text-xs font-medium hover:bg-amber-100 dark:border-amber-600 dark:hover:bg-amber-950/50"
+        target="_blank"
+        rel="noopener"
       >
         Política de cookies
-      </RouterLink>
+      </a>
     </div>
   </div>
 </template>

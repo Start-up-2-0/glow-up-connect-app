@@ -6,7 +6,6 @@ import AuthLayout from '@/layouts/AuthLayout.vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import PublicLayout from '@/layouts/PublicLayout.vue'
 import AgendarPublicoLayout from '@/layouts/AgendarPublicoLayout.vue'
-import LandingLayout from '@/layouts/LandingLayout.vue'
 import ToastContainer from '@/components/feedback/ToastContainer.vue'
 import CookieConsentBanner from '@/components/legal/CookieConsentBanner.vue'
 import CookiePreferencesModal from '@/components/legal/CookiePreferencesModal.vue'
@@ -25,7 +24,6 @@ const layout = computed(() => {
     return DashboardLayout
   }
   if (route.meta.layout === 'dashboard') return DashboardLayout
-  if (route.meta.layout === 'landing') return LandingLayout
   if (route.meta.layout === 'agendar-publico') return AgendarPublicoLayout
   if (route.meta.layout === 'public') return PublicLayout
   return AuthLayout

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { ROUTE_PATHS } from '@/constants/routes'
 import { APP_NAME } from '@/constants/storageKeys'
 import { authRouteWithRedirect } from '@/utils/authRedirect'
+import { legalUrl } from '@/utils/landingUrl'
+import { ROUTE_PATHS } from '@/constants/routes'
 
 const route = useRoute()
 const loginLink = computed(() => authRouteWithRedirect(ROUTE_PATHS.LOGIN, route.fullPath))
@@ -38,8 +39,8 @@ const registerLink = computed(() => authRouteWithRedirect(ROUTE_PATHS.REGISTER, 
     </main>
     <footer class="border-t border-glow-border-soft bg-glow-surface py-6">
       <div class="mx-auto flex max-w-7xl flex-wrap justify-center gap-4 px-4 text-sm text-glow-text-subtle lg:px-6">
-        <RouterLink :to="ROUTE_PATHS.TERMOS_DE_USO" class="hover:text-glow-text">Termos de uso</RouterLink>
-        <RouterLink :to="ROUTE_PATHS.POLITICA_COOKIES" class="hover:text-glow-text">Política de cookies</RouterLink>
+        <a :href="legalUrl('termos-de-uso')" class="hover:text-glow-text" target="_blank" rel="noopener">Termos de uso</a>
+        <a :href="legalUrl('politica-de-cookies')" class="hover:text-glow-text" target="_blank" rel="noopener">Política de cookies</a>
       </div>
     </footer>
   </div>

@@ -10,6 +10,7 @@ import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { ROUTE_PATHS } from '@/constants/routes'
+import { legalUrl } from '@/utils/landingUrl'
 import { telefoneToApi } from '@/utils/formatters'
 import {
   authRouteWithRedirect,
@@ -339,21 +340,23 @@ function onAvatarError(message: string) {
           />
           <span :class="GLOW_BODY_TEXT_CLASS">
             Li e aceito os
-            <RouterLink
-              :to="ROUTE_PATHS.TERMOS_DE_USO"
+            <a
+              :href="legalUrl('termos-de-uso')"
               target="_blank"
+              rel="noopener"
               :class="GLOW_LINK_CLASS"
             >
               termos de uso
-            </RouterLink>
+            </a>
             e a
-            <RouterLink
-              :to="ROUTE_PATHS.POLITICA_COOKIES"
+            <a
+              :href="legalUrl('politica-de-cookies')"
               target="_blank"
+              rel="noopener"
               :class="GLOW_LINK_CLASS"
             >
               política de cookies
-            </RouterLink>.
+            </a>.
           </span>
         </label>
 

@@ -17,7 +17,8 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useUserStore } from '@/stores/user.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
-import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
+import { ROUTE_PATHS } from '@/constants/routes'
+import { redirectToLandingPlanos } from '@/utils/landingUrl'
 import { formatBRL, telefoneToApi } from '@/utils/formatters'
 import { USER_ROLE } from '@/types/user.types'
 import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
@@ -74,7 +75,7 @@ onMounted(async () => {
   }
 
   if (!plano.value) {
-    await router.replace({ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH })
+    redirectToLandingPlanos()
     return
   }
 
