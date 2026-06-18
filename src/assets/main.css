@@ -1014,6 +1014,10 @@
     @apply min-w-[132px] border-[#cf3f3f] bg-glow-surface text-[#cf3f3f] hover:bg-red-50 dark:hover:bg-red-950/20;
   }
 
+  .agendamento-detail-avaliado-badge {
+    @apply inline-flex items-center rounded-xl border border-glow-border-soft bg-glow-hover-surface px-3 py-2 font-urbanist text-sm text-glow-text-subtle;
+  }
+
   .remarcar-agendamento {
     @apply mt-8 space-y-3;
   }

@@ -6,12 +6,16 @@ import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ClientePageHeader from '@/components/cliente/ClientePageHeader.vue'
 import LojaResumoPanel from '@/components/cliente/LojaResumoPanel.vue'
 import LojaServicoCard from '@/components/cliente/LojaServicoCard.vue'
+import AvaliacaoResumoCard from '@/components/avaliacao/AvaliacaoResumoCard.vue'
+import AvaliacaoComentariosLista from '@/components/avaliacao/AvaliacaoComentariosLista.vue'
 import { publicoService } from '@/services/publicoService'
+import { avaliacaoService } from '@/services/avaliacaoService'
 import { useGeolocation } from '@/composables/useGeolocation'
 import { useApiError } from '@/composables/useApiError'
 import { ROUTE_PATHS } from '@/constants/routes'
 import type { EstabelecimentoPublico } from '@/types/estabelecimento.types'
 import type { ServicoPublico } from '@/types/agendamento.types'
+import type { AvaliacoesPaginadas } from '@/types/avaliacao.types'
 
 const route = useRoute()
 const publicGuid = computed(() => String(route.params.publicGuid))
@@ -20,6 +24,7 @@ const { resolveError } = useApiError()
 
 const loja = ref<EstabelecimentoPublico | null>(null)
 const servicos = ref<ServicoPublico[]>([])
+const avaliacoes = ref<AvaliacoesPaginadas | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
 
@@ -28,15 +33,17 @@ onMounted(async () => {
   error.value = null
   try {
     await request()
-    const [detalhe, listaServicos] = await Promise.all([
+    const [detalhe, listaServicos, listaAvaliacoes] = await Promise.all([
       publicoService.obterEstabelecimento(publicGuid.value, {
         latitude: coords.value?.latitude,
         longitude: coords.value?.longitude,
       }),
       publicoService.listarServicosLoja(publicGuid.value).catch(() => []),
+      avaliacaoService.listarEstabelecimento(publicGuid.value).catch(() => null),
     ])
     loja.value = detalhe
     servicos.value = listaServicos
+    avaliacoes.value = listaAvaliacoes
   } catch (err) {
     error.value = resolveError(err, 'Não foi possível carregar a loja.')
   } finally {
@@ -54,6 +61,15 @@ onMounted(async () => {
 
       <div class="cliente-loja-detalhe-layout">
         <LojaResumoPanel :loja="loja" />
+
+        <section
+          v-if="avaliacoes && avaliacoes.resumo.totalAvaliacoes > 0"
+          class="cliente-loja-avaliacoes cliente-empty-panel"
+        >
+          <h3 class="cliente-section-label">AVALIAÇÕES</h3>
+          <AvaliacaoResumoCard :resumo="avaliacoes.resumo" />
+          <AvaliacaoComentariosLista :itens="avaliacoes.itens" />
+        </section>
 
         <aside class="cliente-loja-servicos">
           <h3 class="cliente-section-label">SERVIÇOS DISPONÍVEIS</h3>

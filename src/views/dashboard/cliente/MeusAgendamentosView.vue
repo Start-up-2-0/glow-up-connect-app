@@ -15,6 +15,7 @@ import { AGENDA_DEFAULT_ORDENACAO, AGENDA_PAGE_SIZE } from '@/constants/agendaFi
 import { useAgendamentosStore } from '@/stores/agendamentos.store'
 import { useMeusAgendamentosFilters } from '@/composables/useAgendaPageFilters'
 import { agendamentoDetalhePath } from '@/constants/routes'
+import type { AgendamentoCliente } from '@/types/agendamento.types'
 
 const store = useAgendamentosStore()
 const { itens, total, loading } = storeToRefs(store)
@@ -39,6 +40,14 @@ const {
 } = useMeusAgendamentosFilters()
 
 const totalPaginas = computed(() => Math.max(1, Math.ceil(total.value / AGENDA_PAGE_SIZE)))
+
+function avaliacaoSubtitle(item: AgendamentoCliente): string | undefined {
+  if (item.avaliacaoStatus === 'Pendente') return 'Avaliação pendente'
+  if (item.avaliacaoStatus === 'Realizada' && item.avaliacaoResumo) {
+    return `Avaliado · Loja ${item.avaliacaoResumo.notaEstabelecimento}/5`
+  }
+  return undefined
+}
 
 async function load() {
   const data = await store.fetchLista({ ...apiFiltro.value }, false)
@@ -129,6 +138,7 @@ watch([statusFilter, periodFilter, customDateRange, sortFilter], () => {
           v-for="item in itens"
           :key="item.id"
           :title="item.estabelecimentoNome"
+          :subtitle="avaliacaoSubtitle(item)"
           :inicio="item.inicio"
           :valor-total="item.valorTotal"
           :status="item.status"

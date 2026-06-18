@@ -14,7 +14,8 @@ import { useAgendamentosStore } from '@/stores/agendamentos.store'
 import { useRemarcarAgendamentoSlots } from '@/composables/useRemarcarAgendamentoSlots'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
-import { ROUTE_PATHS } from '@/constants/routes'
+import { ROUTE_PATHS, agendamentoAvaliarPath } from '@/constants/routes'
+import { useRouter } from 'vue-router'
 import type { AgendamentoCliente } from '@/types/agendamento.types'
 import {
   AGENDAMENTO_STATUS_CANCELAVEL,
@@ -29,6 +30,7 @@ import {
 } from '@/utils/formatters'
 
 const route = useRoute()
+const router = useRouter()
 const store = useAgendamentosStore()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
@@ -88,6 +90,14 @@ const podeCancelar = computed(() =>
 const podeRemarcar = computed(() =>
   agendamento.value ? AGENDAMENTO_STATUS_REMARCAVEL.includes(agendamento.value.status) : false,
 )
+
+const podeAvaliar = computed(() => agendamento.value?.avaliacaoStatus === 'Pendente')
+const avaliacaoRealizada = computed(() => agendamento.value?.avaliacaoStatus === 'Realizada')
+
+function irAvaliar() {
+  if (!agendamento.value) return
+  router.push(agendamentoAvaliarPath(agendamento.value.id))
+}
 
 async function load() {
   loading.value = true
@@ -221,9 +231,24 @@ onMounted(load)
           </AgendamentoDetailSection>
 
           <div
-            v-if="podeCancelar || podeRemarcar"
+            v-if="podeCancelar || podeRemarcar || podeAvaliar || avaliacaoRealizada"
             class="agendamento-detail-actions"
           >
+            <button
+              v-if="podeAvaliar"
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--confirm min-w-[132px]"
+              @click="irAvaliar"
+            >
+              Avaliar atendimento
+            </button>
+            <span
+              v-else-if="avaliacaoRealizada && agendamento?.avaliacaoResumo"
+              class="agendamento-detail-avaliado-badge"
+            >
+              Avaliado · Loja {{ agendamento.avaliacaoResumo.notaEstabelecimento }}/5 · Prof.
+              {{ agendamento.avaliacaoResumo.notaProfissional }}/5
+            </span>
             <button
               v-if="podeRemarcar"
               type="button"

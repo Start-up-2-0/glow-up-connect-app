@@ -17,6 +17,8 @@ export const ROUTE_NAMES = {
   LOJA_DETALHE: 'loja-detalhe',
   LOJA_AGENDAR: 'loja-agendar',
   AGENDAMENTO_REMARCACAO: 'agendamento-remarcacao',
+  AVALIAR_ATENDIMENTO: 'avaliar-atendimento',
+  AGENDAMENTO_AVALIAR: 'agendamento-avaliar',
   AGENDAMENTO_DETALHE: 'agendamento-detalhe',
   NOT_FOUND: 'not-found',
   LANDING: 'landing',
@@ -83,6 +85,7 @@ export const ROUTE_PATHS = {
   PERFIL: '/perfil',
   LOJA: '/loja',
   AGENDAMENTO_REMARCACAO: '/agendamento/remarcacao',
+  AVALIAR_ATENDIMENTO: '/avaliar',
   MEUS_AGENDAMENTOS_DETALHE: '/meus-agendamentos',
   ONBOARDING_PLANOS: '/onboarding/planos',
   ONBOARDING_CONTRATAR: '/onboarding/contratar',
@@ -136,6 +139,14 @@ export function lojaAgendarPath(publicGuid: string): string {
 
 export function agendamentoDetalhePath(id: number): string {
   return `${ROUTE_PATHS.MEUS_AGENDAMENTOS_DETALHE}/${id}`
+}
+
+export function agendamentoAvaliarPath(id: number): string {
+  return `${ROUTE_PATHS.MEUS_AGENDAMENTOS_DETALHE}/${id}/avaliar`
+}
+
+export function avaliarAtendimentoPath(token: string): string {
+  return `${ROUTE_PATHS.AVALIAR_ATENDIMENTO}/${encodeURIComponent(token)}`
 }
 
 export function conviteResponderPath(token: string): string {

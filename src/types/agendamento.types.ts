@@ -48,6 +48,12 @@ export interface AgendamentoCliente {
   createAd: string
   canceladoEm: string | null
   itens: AgendamentoClienteItem[]
+  avaliacaoStatus?: string
+  avaliacaoResumo?: {
+    notaEstabelecimento: number
+    notaProfissional: number
+    avaliadoEm: string
+  } | null
 }
 
 export interface AgendamentosPaginados {

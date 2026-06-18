@@ -45,6 +45,17 @@ export const clienteRoutes: RouteRecordRaw[] = [
     },
   },
   {
+    path: `${ROUTE_PATHS.AVALIAR_ATENDIMENTO}/:token`,
+    name: ROUTE_NAMES.AVALIAR_ATENDIMENTO,
+    component: () => import('@/views/dashboard/cliente/AvaliarAtendimentoView.vue'),
+    props: { mode: 'token' },
+    meta: {
+      layout: 'public',
+      skipNegocioGuard: true,
+      title: 'Avaliar atendimento',
+    },
+  },
+  {
     path: ROUTE_PATHS.MEUS_AGENDAMENTOS,
     name: ROUTE_NAMES.MEUS_AGENDAMENTOS,
     component: () => import('@/views/dashboard/cliente/MeusAgendamentosView.vue'),
@@ -64,6 +75,18 @@ export const clienteRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       clienteOnly: true,
       title: 'Detalhe do agendamento',
+    },
+  },
+  {
+    path: `${ROUTE_PATHS.MEUS_AGENDAMENTOS_DETALHE}/:id/avaliar`,
+    name: ROUTE_NAMES.AGENDAMENTO_AVALIAR,
+    component: () => import('@/views/dashboard/cliente/AvaliarAtendimentoView.vue'),
+    props: { mode: 'agendamento' },
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      clienteOnly: true,
+      title: 'Avaliar atendimento',
     },
   },
   {
