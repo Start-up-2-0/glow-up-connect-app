@@ -38,6 +38,8 @@ if [ -z "$GLOW_PROXY_SECRET" ]; then
 	exit 1
 fi
 
+MTLS_SERVER_NAME="${MTLS_SERVER_NAME:-glowapi.internal}"
+
 if [ -f "$CERT_DIR/client.pem" ] && [ -f "$CERT_DIR/client.key" ]; then
 	cat > /tmp/Caddyfile.generated <<EOF
 {
@@ -70,6 +72,7 @@ if [ -f "$CERT_DIR/client.pem" ] && [ -f "$CERT_DIR/client.key" ]; then
 				header_up Host {upstream_hostport}
 				transport http {
 					tls
+					tls_server_name ${MTLS_SERVER_NAME}
 					tls_client_cert ${CERT_DIR}/client.pem ${CERT_DIR}/client.key
 					tls_trusted_ca_certs ${CERT_DIR}/ca.pem
 				}
