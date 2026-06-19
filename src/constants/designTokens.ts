@@ -154,3 +154,12 @@ export const CLIENTE_BTN_CTA_CLASS =
 
 /** Wizard agendamento interno (dashboard) */
 export const AGENDAR_INTERNO_CONTENT_CLASS = 'mx-auto w-full max-w-[926px]'
+
+/** Módulo Serviços (dashboard — Figma node 696:3155) */
+export const SERVICOS_PAGE_CLASS = 'servicos-page'
+
+export const SERVICOS_FORM_INPUT_CLASS =
+  'servicos-form-input'
+
+export const SERVICOS_FORM_LABEL_CLASS =
+  'servicos-form-label'

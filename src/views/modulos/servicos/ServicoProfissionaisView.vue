@@ -1,34 +1,22 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import BaseCard from '@/components/ui/BaseCard.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
-import BaseInput from '@/components/ui/BaseInput.vue'
-import CurrencyInput from '@/components/ui/CurrencyInput.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
-import EmptyState from '@/components/feedback/EmptyState.vue'
+import ServicoIcons from '@/components/servicos/ServicoIcons.vue'
+import ServicoPageHeader from '@/components/servicos/ServicoPageHeader.vue'
+import ServicoProfissionalSelectModal from '@/components/servicos/ServicoProfissionalSelectModal.vue'
+import ServicoProfissionalVinculoCard from '@/components/servicos/ServicoProfissionalVinculoCard.vue'
+import { SERVICOS_PAGE_CLASS } from '@/constants/designTokens'
+import { ROUTE_PATHS, servicoEditarPath } from '@/constants/routes'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
-import { servicoService } from '@/services/servicoService'
 import { equipeService } from '@/services/equipeService'
-import {
-  ROUTE_PATHS,
-  servicoEditarPath,
-} from '@/constants/routes'
-import type { Servico, ServicoProfissionalResumo } from '@/types/negocio/servico.types'
+import { servicoService } from '@/services/servicoService'
+import type { Servico } from '@/types/negocio/servico.types'
 import type { ProfissionalEquipe } from '@/types/negocio/equipe.types'
-import { formatCurrency, isValidCurrencyValue } from '@/utils/formatters'
-
-interface ProfissionalVinculoState {
-  profissionalId: number
-  nomePublico: string
-  vinculado: boolean
-  preco: number
-  duracaoMinutos: number
-  vinculoExistente: ServicoProfissionalResumo | null
-  dirty: boolean
-}
+import { formatCurrency } from '@/utils/formatters'
+import { formatDuracaoMinutos } from '@/utils/servicoFormatters'
 
 const route = useRoute()
 const router = useRouter()
@@ -43,49 +31,40 @@ const servicoId = computed(() => {
 })
 
 const servico = ref<Servico | null>(null)
-const profissionais = ref<ProfissionalVinculoState[]>([])
+const equipe = ref<ProfissionalEquipe[]>([])
+const vinculadosIds = ref<number[]>([])
+const vinculadosIniciais = ref<number[]>([])
+const selecionadosBulk = ref<number[]>([])
 const loading = ref(false)
 const saving = ref(false)
 const notFound = ref(false)
+const modalAberto = ref(false)
+const modoSelecao = ref(false)
 
-const temAlteracoes = computed(() => profissionais.value.some((p) => p.dirty))
+const temAlteracoes = computed(() => {
+  const atuais = [...vinculadosIds.value].sort((a, b) => a - b)
+  const iniciais = [...vinculadosIniciais.value].sort((a, b) => a - b)
+  return JSON.stringify(atuais) !== JSON.stringify(iniciais)
+})
 
-function buildState(equipe: ProfissionalEquipe[], serv: Servico): ProfissionalVinculoState[] {
-  return equipe
-    .filter((p) => p.ativo)
-    .map((p) => {
-      const vinculo =
-        serv.profissionais.find((v) => v.profissionalId === p.profissionalId && v.ativo) ?? null
-      return {
-        profissionalId: p.profissionalId,
-        nomePublico: p.nomePublico,
-        vinculado: vinculo !== null,
-        preco: vinculo?.preco ?? serv.precoBase,
-        duracaoMinutos: vinculo?.duracaoMinutos ?? serv.duracaoMinutos,
-        vinculoExistente: vinculo,
-        dirty: false,
-      }
-    })
-}
+const profissionaisDisponiveis = computed(() => equipe.value.filter((p) => p.ativo))
 
-function marcarDirty(item: ProfissionalVinculoState) {
-  item.dirty = true
-}
+const profissionaisVinculados = computed(() =>
+  profissionaisDisponiveis.value.filter((p) => vinculadosIds.value.includes(p.profissionalId)),
+)
 
-function onToggleVinculo(item: ProfissionalVinculoState) {
-  if (item.vinculado && !item.vinculoExistente) {
-    item.preco = servico.value?.precoBase ?? 0
-    item.duracaoMinutos = servico.value?.duracaoMinutos ?? 30
-  }
-  marcarDirty(item)
-}
+const todosSelecionadosBulk = computed(
+  () =>
+    profissionaisVinculados.value.length > 0 &&
+    selecionadosBulk.value.length === profissionaisVinculados.value.length,
+)
 
 async function load() {
   if (!estabelecimentoId.value || !servicoId.value) return
   loading.value = true
   notFound.value = false
   try {
-    const [servicos, equipe] = await Promise.all([
+    const [servicos, equipeData] = await Promise.all([
       servicoService.listar(estabelecimentoId.value),
       equipeService.listarProfissionais(estabelecimentoId.value),
     ])
@@ -95,7 +74,12 @@ async function load() {
       return
     }
     servico.value = serv
-    profissionais.value = buildState(equipe, serv)
+    equipe.value = equipeData
+    const ids = serv.profissionais.filter((p) => p.ativo).map((p) => p.profissionalId)
+    vinculadosIds.value = [...ids]
+    vinculadosIniciais.value = [...ids]
+    selecionadosBulk.value = []
+    modoSelecao.value = false
   } catch (err) {
     notifications.push('error', resolveError(err, 'Não foi possível carregar os vínculos.'))
   } finally {
@@ -103,68 +87,35 @@ async function load() {
   }
 }
 
-function validarItem(item: ProfissionalVinculoState): string | null {
-  if (!item.vinculado) return null
-  if (!isValidCurrencyValue(item.preco)) return 'Preço inválido.'
-  if (!Number.isFinite(item.duracaoMinutos) || item.duracaoMinutos < 1) {
-    return 'Duração inválida.'
-  }
-  return null
-}
-
-async function salvarItem(item: ProfissionalVinculoState): Promise<void> {
-  if (!estabelecimentoId.value || !servicoId.value) return
-  const erro = validarItem(item)
-  if (erro) throw new Error(erro)
-
-  const estId = estabelecimentoId.value
-  const svcId = servicoId.value
-  const profId = item.profissionalId
-
-  if (item.vinculado) {
-    if (item.vinculoExistente) {
-      await servicoService.atualizarVinculoProfissional(estId, svcId, profId, {
-        preco: item.preco,
-        duracaoMinutos: item.duracaoMinutos,
-      })
-    } else {
-      await servicoService.vincularProfissional(estId, svcId, profId, {
-        preco: item.preco,
-        duracaoMinutos: item.duracaoMinutos,
-      })
-    }
-  } else if (item.vinculoExistente) {
-    await servicoService.desvincularProfissional(estId, svcId, profId)
-  }
-}
-
-async function handleSalvar() {
-  if (!estabelecimentoId.value || !servicoId.value) return
-  const dirtyItems = profissionais.value.filter((p) => p.dirty)
-  if (dirtyItems.length === 0) return
-
-  for (const item of dirtyItems) {
-    const erro = item.vinculado ? validarItem(item) : null
-    if (erro) {
-      notifications.push('error', `${item.nomePublico}: ${erro}`)
-      return
-    }
+async function salvarVinculos() {
+  if (!estabelecimentoId.value || !servicoId.value || !servico.value || !temAlteracoes.value) {
+    return
   }
 
   saving.value = true
   try {
-    const results = await Promise.allSettled(dirtyItems.map((item) => salvarItem(item)))
-    const falhas = results.filter((r) => r.status === 'rejected')
-    if (falhas.length > 0) {
-      const msg =
-        falhas[0].status === 'rejected'
-          ? resolveError(falhas[0].reason, 'Não foi possível salvar alguns vínculos.')
-          : 'Não foi possível salvar alguns vínculos.'
-      notifications.push('error', msg)
+    const estId = estabelecimentoId.value
+    const svcId = servicoId.value
+    const atuais = new Set(vinculadosIds.value)
+    const iniciais = new Set(vinculadosIniciais.value)
+    const payload = {
+      preco: servico.value.precoBase,
+      duracaoMinutos: servico.value.duracaoMinutos,
     }
-    if (falhas.length < results.length) {
-      notifications.push('success', 'Vínculos atualizados.')
-    }
+
+    const paraVincular = [...atuais].filter((id) => !iniciais.has(id))
+    const paraDesvincular = [...iniciais].filter((id) => !atuais.has(id))
+
+    await Promise.all([
+      ...paraVincular.map((profId) =>
+        servicoService.vincularProfissional(estId, svcId, profId, payload),
+      ),
+      ...paraDesvincular.map((profId) =>
+        servicoService.desvincularProfissional(estId, svcId, profId),
+      ),
+    ])
+
+    notifications.push('success', 'Vínculos atualizados.')
     await load()
   } catch (err) {
     notifications.push('error', resolveError(err, 'Não foi possível salvar os vínculos.'))
@@ -182,6 +133,48 @@ function editarServico() {
   void router.push(servicoEditarPath(servicoId.value))
 }
 
+function abrirModalAdicionar() {
+  modalAberto.value = true
+}
+
+function aplicarProfissionais(ids: number[]) {
+  vinculadosIds.value = ids
+}
+
+function removerProfissional(id: number) {
+  vinculadosIds.value = vinculadosIds.value.filter((item) => item !== id)
+}
+
+function toggleModoSelecao() {
+  modoSelecao.value = !modoSelecao.value
+  if (!modoSelecao.value) {
+    selecionadosBulk.value = []
+  }
+}
+
+function toggleSelecionarTodosBulk() {
+  if (todosSelecionadosBulk.value) {
+    selecionadosBulk.value = []
+    return
+  }
+  selecionadosBulk.value = profissionaisVinculados.value.map((p) => p.profissionalId)
+}
+
+function toggleSelecionadoBulk(id: number) {
+  if (selecionadosBulk.value.includes(id)) {
+    selecionadosBulk.value = selecionadosBulk.value.filter((item) => item !== id)
+    return
+  }
+  selecionadosBulk.value = [...selecionadosBulk.value, id]
+}
+
+function excluirSelecionados() {
+  if (selecionadosBulk.value.length === 0) return
+  const remover = new Set(selecionadosBulk.value)
+  vinculadosIds.value = vinculadosIds.value.filter((id) => !remover.has(id))
+  selecionadosBulk.value = []
+}
+
 watch(
   ready,
   (isReady) => {
@@ -192,109 +185,142 @@ watch(
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-          Profissionais do serviço
-        </h1>
-        <p v-if="servico" class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-          {{ servico.nome }} · {{ formatCurrency(servico.precoBase) }} ·
-          {{ servico.duracaoMinutos }} min
-        </p>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <BaseButton variant="secondary" size="sm" @click="voltar">Voltar</BaseButton>
-        <BaseButton v-if="servico" variant="secondary" size="sm" @click="editarServico">
+  <div :class="SERVICOS_PAGE_CLASS">
+    <ServicoPageHeader
+      v-if="servico"
+      :title="servico.nome"
+      :meta-preco="formatCurrency(servico.precoBase)"
+      :meta-duracao="formatDuracaoMinutos(servico.duracaoMinutos)"
+    >
+      <template #actions>
+        <button type="button" class="servicos-btn-outline servicos-btn-outline--md" @click="editarServico">
+          <ServicoIcons name="edit" />
           Editar serviço
-        </BaseButton>
-        <BaseButton
-          variant="primary"
-          size="sm"
-          :loading="saving"
-          :disabled="!temAlteracoes"
-          @click="handleSalvar"
+        </button>
+        <button
+          type="button"
+          class="servicos-btn-outline servicos-btn-outline--md"
+          @click="abrirModalAdicionar"
         >
-          Salvar alterações
-        </BaseButton>
-      </div>
-    </div>
+          <ServicoIcons name="profissionais" />
+          Adicionar profissionais
+        </button>
+        <button
+          type="button"
+          class="servicos-btn-primary"
+          :disabled="!temAlteracoes || saving"
+          @click="salvarVinculos"
+        >
+          {{ saving ? 'Salvando…' : 'Salvar alteração' }}
+        </button>
+      </template>
+    </ServicoPageHeader>
+
+    <ServicoPageHeader
+      v-else-if="!loading && !contextLoading"
+      title="Profissionais do serviço"
+      subtitle="Gerencie os profissionais vinculados ao serviço."
+    />
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
 
     <LoadingSpinner v-if="contextLoading || loading" />
 
-    <BaseCard v-else-if="notFound" title="Serviço não encontrado">
-      <p class="font-urbanist text-sm text-glow-text-subtle">
+    <div v-else-if="notFound" class="servicos-form-panel">
+      <h2 class="servicos-page__title">Serviço não encontrado</h2>
+      <p class="servicos-page__subtitle">
         O serviço solicitado não existe ou foi removido.
       </p>
-      <div class="mt-4">
-        <BaseButton variant="secondary" @click="voltar">Voltar à listagem</BaseButton>
-      </div>
-    </BaseCard>
-
-    <BaseCard v-else-if="profissionais.length === 0">
-      <EmptyState
-        title="Nenhum profissional na equipe"
-        description="Convide profissionais em Equipe antes de vincular serviços."
-      />
-    </BaseCard>
-
-    <div v-else class="space-y-3">
-      <div
-        v-for="item in profissionais"
-        :key="item.profissionalId"
-        class="rounded-lg border border-glow-border-soft bg-glow-surface p-4"
-      >
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <label class="flex cursor-pointer items-center gap-2">
-            <input
-              v-model="item.vinculado"
-              type="checkbox"
-              class="h-4 w-4 rounded border-glow-border-soft text-glow-gold focus:ring-glow-gold"
-              @change="onToggleVinculo(item)"
-            />
-            <span class="font-urbanist text-base font-semibold text-glow-text">
-              {{ item.nomePublico }}
-            </span>
-          </label>
-          <span
-            v-if="item.vinculoExistente && item.vinculado"
-            class="font-urbanist text-xs text-glow-text-subtle"
-          >
-            Vinculado
-          </span>
-        </div>
-
-        <div
-          v-if="item.vinculado"
-          class="mt-4 grid gap-4 border-t border-glow-border-soft pt-4 sm:grid-cols-2"
-        >
-          <CurrencyInput
-            :model-value="item.preco"
-            label="Preço neste profissional"
-            hint="Deixe o valor do serviço ou personalize."
-            @update:model-value="
-              (v) => {
-                item.preco = v
-                marcarDirty(item)
-              }
-            "
-          />
-          <BaseInput
-            :model-value="String(item.duracaoMinutos)"
-            label="Duração (minutos)"
-            type="number"
-            min="1"
-            @update:model-value="
-              (v) => {
-                item.duracaoMinutos = Number(v)
-                marcarDirty(item)
-              }
-            "
-          />
-        </div>
+      <div class="servicos-form-actions">
+        <button type="button" class="servicos-btn-form-secondary" @click="voltar">
+          Voltar à listagem
+        </button>
       </div>
     </div>
+
+    <template v-else-if="servico">
+      <div class="servicos-prof-toolbar">
+        <button type="button" class="servicos-prof-select-all" @click="toggleModoSelecao">
+          <input
+            type="checkbox"
+            class="servico-prof-vinculo-card__checkbox"
+            :checked="modoSelecao"
+            tabindex="-1"
+            aria-hidden="true"
+            @click.prevent
+          />
+          Selecionar itens
+        </button>
+
+        <button
+          v-if="modoSelecao"
+          type="button"
+          class="servicos-btn-danger"
+          :disabled="selecionadosBulk.length === 0"
+          @click="excluirSelecionados"
+        >
+          <ServicoIcons name="delete" />
+          Excluir
+        </button>
+
+        <button
+          v-if="modoSelecao && profissionaisVinculados.length > 0"
+          type="button"
+          class="servicos-prof-select-all"
+          @click="toggleSelecionarTodosBulk"
+        >
+          <input
+            type="checkbox"
+            class="servico-prof-vinculo-card__checkbox"
+            :checked="todosSelecionadosBulk"
+            tabindex="-1"
+            aria-hidden="true"
+            @click.prevent
+          />
+          Selecionar todos
+        </button>
+      </div>
+
+      <div class="servicos-prof-grid">
+        <ServicoProfissionalVinculoCard
+          v-for="prof in profissionaisVinculados"
+          :key="prof.profissionalId"
+          :nome="prof.nomePublico"
+          :nota-media="prof.notaMedia"
+          :total-avaliacoes="prof.totalAvaliacoes"
+          :selectable="modoSelecao"
+          :selected="selecionadosBulk.includes(prof.profissionalId)"
+          :show-remove="!modoSelecao"
+          @toggle="toggleSelecionadoBulk(prof.profissionalId)"
+          @remove="removerProfissional(prof.profissionalId)"
+        />
+
+        <button
+          v-if="!modoSelecao"
+          type="button"
+          class="servico-prof-add-btn"
+          aria-label="Adicionar profissional"
+          @click="abrirModalAdicionar"
+        >
+          <ServicoIcons name="plus" />
+        </button>
+      </div>
+
+      <p
+        v-if="profissionaisVinculados.length === 0"
+        class="font-urbanist text-sm text-glow-text-subtle"
+      >
+        Nenhum profissional vinculado. Use o botão + ou "Adicionar profissionais" para começar.
+      </p>
+    </template>
+
+    <ServicoProfissionalSelectModal
+      v-model="modalAberto"
+      :profissionais="profissionaisDisponiveis"
+      :selected-ids="vinculadosIds"
+      title="Adicionar profissionais"
+      subtitle="Escolha quem poderá executar este serviço."
+      @confirm="aplicarProfissionais"
+    />
   </div>
 </template>

@@ -1422,4 +1422,425 @@
   .agendar-prof-pick-card--selected {
     @apply ring-1 ring-glow-gold-cta;
   }
+
+  /* Serviços — Figma node 696:3155 */
+  .servicos-page {
+    @apply space-y-6;
+  }
+
+  .servicos-page__header {
+    @apply flex flex-col gap-4 border-b border-glow-border-soft pb-6 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .servicos-page__header-main {
+    @apply min-w-0;
+  }
+
+  .servicos-page__header-row {
+    @apply flex items-start gap-3;
+  }
+
+  .servicos-page__back {
+    @apply mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border border-glow-border-soft bg-glow-surface text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .servicos-page__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .servicos-page__subtitle {
+    @apply mt-1 font-satoshi text-base text-glow-text-subtle;
+  }
+
+  .servicos-page__meta {
+    @apply mt-1 flex flex-wrap items-center gap-2 font-satoshi text-base text-glow-text-subtle;
+  }
+
+  .servicos-page__meta-dot {
+    @apply size-1 rounded-full bg-glow-text-subtle;
+  }
+
+  .servicos-page__actions {
+    @apply flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto sm:justify-end;
+  }
+
+  .servicos-btn-primary {
+    @apply inline-flex h-[34px] w-full items-center justify-center gap-2 rounded-xl bg-glow-gold-cta px-4 font-urbanist text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto;
+  }
+
+  .servicos-btn-primary--lg {
+    @apply h-12 w-full max-w-[580px] text-base;
+  }
+
+  .servicos-btn-outline {
+    @apply inline-flex h-9 items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-xs font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .servicos-btn-danger {
+    @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-red-200 bg-red-50 px-3.5 font-urbanist text-sm font-medium text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50;
+  }
+
+  .servicos-btn-outline--md {
+    @apply h-[37px] px-3.5 text-sm;
+  }
+
+  .servicos-btn-form-primary {
+    @apply flex h-10 flex-1 items-center justify-center rounded-xl bg-glow-gold-cta px-2.5 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .servicos-btn-form-secondary {
+    @apply flex h-10 flex-1 items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .servicos-cards-grid {
+    @apply grid gap-3 lg:grid-cols-2;
+  }
+
+  .servico-card {
+    @apply relative min-h-[141px] rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)];
+  }
+
+  .servico-card__body {
+    @apply flex h-full flex-col gap-4 lg:flex-row lg:items-center lg:justify-between;
+  }
+
+  .servico-card__info {
+    @apply min-w-0 flex-1;
+  }
+
+  .servico-card__title-row {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .servico-card__title {
+    @apply font-urbanist text-base font-bold text-glow-text;
+  }
+
+  .servico-card__description {
+    @apply mt-1 line-clamp-2 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .servico-card__meta {
+    @apply mt-3 flex flex-col gap-1;
+  }
+
+  .servico-card__meta-item {
+    @apply inline-flex items-center gap-2 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .servico-card__meta-item--price {
+    @apply font-bold;
+  }
+
+  .servico-card__meta-icon {
+    @apply size-4 shrink-0 text-glow-text-subtle;
+  }
+
+  .servico-card__actions {
+    @apply flex shrink-0 flex-wrap items-center gap-2.5 lg:justify-end;
+  }
+
+  .servico-status-badge {
+    @apply inline-flex items-center justify-center rounded-full px-4 py-0.5 font-urbanist text-xs font-normal;
+  }
+
+  .servico-status-badge--ativo {
+    @apply bg-[#c4f2cc] text-[#0d5428] dark:bg-emerald-900/30 dark:text-emerald-300;
+  }
+
+  .servico-status-badge--inativo {
+    @apply bg-[rgba(207,63,63,0.2)] text-[#cf3f3f] dark:bg-red-900/30 dark:text-red-300;
+  }
+
+  .servicos-empty {
+    @apply flex flex-col items-center gap-8 py-16;
+  }
+
+  .servicos-empty__content {
+    @apply flex w-full max-w-3xl flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:gap-8 sm:text-left;
+  }
+
+  .servicos-empty__text {
+    @apply min-w-0 flex-1;
+  }
+
+  .servicos-empty__icon {
+    @apply flex size-[120px] shrink-0 items-center justify-center rounded-2xl border border-dashed border-glow-border-soft bg-glow-hover-surface text-glow-text-subtle;
+  }
+
+  .servicos-empty__title {
+    @apply font-satoshi text-[32px] font-black leading-tight text-glow-text;
+  }
+
+  .servicos-empty__description {
+    @apply mt-3 font-satoshi text-xl text-glow-text-subtle;
+  }
+
+  .servicos-empty__action {
+    @apply mt-8 w-full max-w-[580px];
+  }
+
+  .servicos-pagination {
+    @apply flex flex-col items-center justify-center gap-4 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 py-4 sm:flex-row sm:gap-20;
+  }
+
+  .servicos-pagination__summary {
+    @apply flex items-center gap-2 font-satoshi text-sm font-medium text-glow-text-subtle;
+  }
+
+  .servicos-pagination__current-box {
+    @apply inline-flex h-[29px] min-w-[25px] items-center justify-center rounded border-[0.4px] border-glow-text-subtle px-1.5 font-satoshi text-sm font-medium text-glow-text-subtle;
+  }
+
+  .servicos-pagination__controls {
+    @apply flex items-center gap-2;
+  }
+
+  .servicos-pagination__page {
+    @apply inline-flex h-[29px] min-w-[25px] items-center justify-center rounded border-[0.4px] border-glow-text-subtle px-1.5 font-satoshi text-sm font-medium text-glow-text-subtle transition hover:bg-glow-hover-surface disabled:cursor-default disabled:opacity-50;
+  }
+
+  .servicos-pagination__page--active {
+    @apply border-glow-gold-cta bg-glow-gold-cta text-white hover:bg-glow-gold-cta;
+  }
+
+  .servicos-form-panel {
+    @apply mx-auto w-full max-w-[721px] rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-4 shadow-sm sm:p-10;
+  }
+
+  .servicos-form-panel__fields {
+    @apply space-y-6;
+  }
+
+  .servicos-form-panel__row {
+    @apply grid gap-6 sm:grid-cols-2;
+  }
+
+  .servicos-form-label {
+    @apply font-satoshi text-sm font-normal text-glow-text;
+  }
+
+  .servicos-form-input {
+    @apply h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-canvas px-[18px] font-inter text-sm text-glow-text outline-none transition placeholder:font-inter placeholder:text-sm placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .servicos-form-input--error {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-500;
+  }
+
+  .servicos-form-field {
+    @apply space-y-2;
+  }
+
+  .servicos-form-field__error {
+    @apply font-urbanist text-xs text-red-600;
+  }
+
+  .servicos-form-profissionais-header {
+    @apply flex flex-wrap items-center justify-between gap-3;
+  }
+
+  .servicos-form-profissionais-box {
+    @apply min-h-[49px] rounded-lg border border-dashed border-glow-border-soft bg-glow-hover-surface px-[18px] py-3;
+  }
+
+  .servicos-form-profissionais-box--filled {
+    @apply flex min-h-[78px] flex-wrap gap-2 border-solid bg-glow-canvas;
+  }
+
+  .servicos-form-profissionais-placeholder {
+    @apply font-inter text-sm text-glow-placeholder;
+  }
+
+  .servicos-form-actions {
+    @apply mt-8 flex flex-col gap-3 sm:flex-row;
+  }
+
+  .servico-prof-chip {
+    @apply inline-flex h-11 max-w-full items-center gap-2 rounded-lg border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-2;
+  }
+
+  .servico-prof-chip__avatar {
+    @apply flex size-7 shrink-0 items-center justify-center rounded-full border-[0.5px] border-glow-border-soft bg-glow-hover-surface font-urbanist text-xs font-extrabold text-glow-text;
+  }
+
+  .servico-prof-chip__name {
+    @apply min-w-0 flex-1 truncate font-urbanist text-sm text-glow-text;
+  }
+
+  .servico-prof-chip__remove {
+    @apply flex size-3 shrink-0 items-center justify-center text-glow-text-subtle transition hover:text-glow-text;
+  }
+
+  .servicos-prof-toolbar {
+    @apply flex flex-wrap items-center gap-4;
+  }
+
+  .servicos-prof-select-all {
+    @apply inline-flex items-center gap-2.5 font-urbanist text-sm font-normal text-glow-text;
+  }
+
+  .servicos-prof-grid {
+    @apply grid grid-cols-[repeat(auto-fill,minmax(244px,1fr))] gap-3;
+  }
+
+  .servico-prof-vinculo-card {
+    @apply relative flex min-h-[89px] items-start gap-3 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.02)];
+  }
+
+  .servico-prof-vinculo-card__body {
+    @apply min-w-0 flex-1;
+  }
+
+  .servico-prof-vinculo-card--selectable {
+    @apply cursor-pointer transition hover:border-glow-gold-dark;
+  }
+
+  .servico-prof-vinculo-card--selected {
+    @apply ring-1 ring-glow-gold-cta;
+  }
+
+  .servico-prof-vinculo-card__checkbox {
+    @apply size-3.5 shrink-0 rounded border border-glow-border-soft text-glow-gold focus:ring-glow-gold;
+  }
+
+  .servico-prof-vinculo-card__avatar {
+    @apply flex size-8 shrink-0 items-center justify-center rounded-full border-[0.5px] border-glow-border-soft bg-glow-hover-surface font-urbanist text-xs font-extrabold text-glow-text;
+  }
+
+  .servico-prof-vinculo-card__name {
+    @apply font-urbanist text-sm font-bold text-glow-text;
+  }
+
+  .servico-prof-vinculo-card__body .servico-prof-rating {
+    @apply mt-1.5;
+  }
+
+  .servico-prof-vinculo-card__remove {
+    @apply absolute right-3 top-3 flex size-4 items-center justify-center text-glow-text-subtle transition hover:text-glow-text;
+  }
+
+  .servico-prof-add-btn {
+    @apply flex size-[76px] items-center justify-center rounded-full border border-dashed border-glow-border-soft bg-glow-hover-surface text-glow-text-subtle transition hover:border-glow-gold hover:text-glow-gold;
+  }
+
+  .servicos-modal-overlay {
+    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4;
+  }
+
+  .servicos-modal {
+    @apply flex max-h-[92dvh] w-full max-w-[441px] flex-col overflow-hidden rounded-t-2xl border-[0.5px] border-glow-border-soft bg-glow-surface shadow-xl sm:max-h-[90dvh] sm:rounded-xl;
+  }
+
+  .servicos-modal-enter-active,
+  .servicos-modal-leave-active {
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .servicos-modal-enter-from,
+  .servicos-modal-leave-to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  @media (min-width: 640px) {
+    .servicos-modal-enter-from,
+    .servicos-modal-leave-to {
+      transform: translateY(8px) scale(0.96);
+    }
+  }
+
+  .servicos-modal__header {
+    @apply space-y-2 border-b border-glow-border-soft px-6 pb-4 pt-6;
+  }
+
+  .servicos-modal__header-top {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  .servicos-modal__close-icon {
+    @apply flex size-8 shrink-0 items-center justify-center rounded-lg text-glow-text-subtle transition hover:bg-glow-hover-surface hover:text-glow-text;
+  }
+
+  .servicos-modal__title {
+    @apply font-urbanist text-base font-semibold text-glow-text;
+  }
+
+  .servicos-modal__subtitle {
+    @apply font-urbanist text-sm font-normal text-glow-text-subtle;
+  }
+
+  .servicos-modal__toolbar {
+    @apply flex items-center justify-between border-b border-glow-border-soft px-6 py-4;
+  }
+
+  .servicos-modal__count {
+    @apply font-urbanist text-sm text-glow-text;
+  }
+
+  .servicos-modal__list {
+    @apply flex-1 space-y-0 overflow-y-auto px-6 py-2;
+  }
+
+  .servicos-modal__option {
+    @apply flex w-full items-center gap-3 rounded-lg px-1 py-3 text-left transition hover:bg-glow-hover-surface;
+  }
+
+  .servicos-modal__option .servico-prof-vinculo-card__avatar {
+    @apply size-[41px] text-base;
+  }
+
+  .servicos-modal__option-info .servico-prof-vinculo-card__name {
+    @apply font-normal;
+  }
+
+  .servicos-modal__footer {
+    @apply flex items-center justify-center gap-3 border-t border-glow-border-soft p-6;
+  }
+
+  .servicos-modal__dismiss {
+    @apply flex h-[37px] min-w-[138px] flex-1 items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98];
+  }
+
+  .servicos-modal__confirm {
+    @apply flex h-[37px] min-w-[200px] flex-[1.8] items-center justify-center rounded-xl bg-glow-gold-cta font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .servico-form-currency .field-group label {
+    @apply servicos-form-label;
+  }
+
+  .servico-form-currency .flex > span {
+    @apply h-[49px] rounded-l-lg border-[0.3px] border-r-0 border-glow-border-soft;
+  }
+
+  .servico-form-currency .flex > input {
+    @apply servicos-form-input h-[49px] rounded-r-lg;
+  }
+
+  .servico-prof-rating {
+    @apply inline-flex h-[22px] items-center gap-1.5 rounded-full bg-[rgba(255,191,0,0.15)] px-3.5 font-urbanist text-sm font-bold text-glow-text;
+  }
+
+  .servico-prof-rating--compact {
+    @apply h-5 px-2.5 text-xs;
+  }
+
+  .servico-prof-rating__star {
+    @apply size-4 shrink-0 text-glow-gold-cta;
+  }
+
+  .servico-prof-rating--compact .servico-prof-rating__star {
+    @apply size-3.5;
+  }
+
+  .servico-prof-rating__value {
+    @apply leading-none;
+  }
+
+  .servicos-modal__option-info {
+    @apply min-w-0 flex-1 text-left;
+  }
 }

@@ -26,6 +26,8 @@ export interface ProfissionalEquipe {
   telefone: string
   podeReceberAgendamento: boolean
   ativo: boolean
+  notaMedia?: number | null
+  totalAvaliacoes?: number
 }
 
 export interface CadastrarUsuarioEquipePayload {
