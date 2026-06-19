@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 import AuthLayout from '@/layouts/AuthLayout.vue'
+import DevPreviewLayout from '@/layouts/DevPreviewLayout.vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import PublicLayout from '@/layouts/PublicLayout.vue'
 import AgendarPublicoLayout from '@/layouts/AgendarPublicoLayout.vue'
@@ -23,6 +24,7 @@ const layout = computed(() => {
   ) {
     return DashboardLayout
   }
+  if (route.meta.layout === 'dev-preview') return DevPreviewLayout
   if (route.meta.layout === 'dashboard') return DashboardLayout
   if (route.meta.layout === 'agendar-publico') return AgendarPublicoLayout
   if (route.meta.layout === 'public') return PublicLayout

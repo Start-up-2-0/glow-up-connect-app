@@ -7,7 +7,7 @@ import ServicoPageHeader from '@/components/servicos/ServicoPageHeader.vue'
 import ServicoProfissionalSelectModal from '@/components/servicos/ServicoProfissionalSelectModal.vue'
 import ServicoProfissionalVinculoCard from '@/components/servicos/ServicoProfissionalVinculoCard.vue'
 import { SERVICOS_PAGE_CLASS } from '@/constants/designTokens'
-import { ROUTE_PATHS, servicoEditarPath } from '@/constants/routes'
+import { ROUTE_PATHS } from '@/constants/routes'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
@@ -128,11 +128,6 @@ function voltar() {
   void router.push(ROUTE_PATHS.SERVICOS)
 }
 
-function editarServico() {
-  if (!servicoId.value) return
-  void router.push(servicoEditarPath(servicoId.value))
-}
-
 function abrirModalAdicionar() {
   modalAberto.value = true
 }
@@ -193,10 +188,6 @@ watch(
       :meta-duracao="formatDuracaoMinutos(servico.duracaoMinutos)"
     >
       <template #actions>
-        <button type="button" class="servicos-btn-outline servicos-btn-outline--md" @click="editarServico">
-          <ServicoIcons name="edit" />
-          Editar serviço
-        </button>
         <button
           type="button"
           class="servicos-btn-outline servicos-btn-outline--md"
@@ -207,7 +198,7 @@ watch(
         </button>
         <button
           type="button"
-          class="servicos-btn-primary"
+          class="servicos-btn-primary servicos-btn-primary--header"
           :disabled="!temAlteracoes || saving"
           @click="salvarVinculos"
         >
@@ -240,7 +231,11 @@ watch(
 
     <template v-else-if="servico">
       <div class="servicos-prof-toolbar">
-        <button type="button" class="servicos-prof-select-all" @click="toggleModoSelecao">
+        <button
+          type="button"
+          class="servicos-prof-select-all servicos-prof-select-all--toolbar"
+          @click="toggleModoSelecao"
+        >
           <input
             type="checkbox"
             class="servico-prof-vinculo-card__checkbox"
@@ -255,7 +250,7 @@ watch(
         <button
           v-if="modoSelecao"
           type="button"
-          class="servicos-btn-danger"
+          class="servicos-btn-delete"
           :disabled="selecionadosBulk.length === 0"
           @click="excluirSelecionados"
         >

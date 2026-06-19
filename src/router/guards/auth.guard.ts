@@ -6,6 +6,10 @@ import { ROUTE_PATHS } from '@/constants/routes'
 import { isOnboardingCheckoutPath } from '@/utils/authRedirect'
 
 export const authGuard: NavigationGuard = async (to) => {
+  if (import.meta.env.DEV && to.matched.some((record) => record.meta.devPreview)) {
+    return true
+  }
+
   const authStore = useAuthStore()
   const userStore = useUserStore()
 

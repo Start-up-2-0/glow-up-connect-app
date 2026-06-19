@@ -170,7 +170,7 @@ watch(
         </span>
         <button
           type="button"
-          class="servicos-btn-primary"
+          class="servicos-btn-primary servicos-btn-primary--header"
           :disabled="limiteAtingido"
           :title="limiteTooltip"
           @click="irNovo"

@@ -9,12 +9,14 @@ import { onboardingRoutes } from './routes/onboarding.routes'
 import { configuracoesRoutes } from './routes/configuracoes.routes'
 import { modulosRoutes } from './routes/modulos.routes'
 import { publicRoutes } from './routes/public.routes'
+import { devRoutes } from './routes/dev.routes'
 import { notFoundRoutes } from './routes/notFound.routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     ...publicRoutes,
+    ...devRoutes,
     ...authRoutes,
     ...dashboardRoutes,
     ...onboardingRoutes,

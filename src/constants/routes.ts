@@ -60,6 +60,7 @@ export const ROUTE_NAMES = {
   CONFIG_PRIVACIDADE: 'config-privacidade',
   TERMOS_DE_USO: 'termos-de-uso',
   POLITICA_COOKIES: 'politica-cookies',
+  DEV_SERVICOS_FIGMA: 'dev-servicos-figma',
 } as const
 
 export const ROUTE_PATHS = {
@@ -123,6 +124,7 @@ export const ROUTE_PATHS = {
   CONFIG_PRIVACIDADE: '/configuracoes/privacidade',
   TERMOS_DE_USO: '/termos-de-uso',
   POLITICA_COOKIES: '/politica-de-cookies',
+  DEV_SERVICOS_FIGMA: '/__dev/servicos-figma',
 } as const
 
 export function agendaDetalhePath(id: number): string {
@@ -167,7 +169,7 @@ export const LANDING_URL = (import.meta.env.VITE_LANDING_URL?.trim() || 'https:/
 )
 export const LANDING_PLANOS_URL = `${LANDING_URL}#planos`
 
-export type AppLayout = 'auth' | 'dashboard' | 'public' | 'agendar-publico'
+export type AppLayout = 'auth' | 'dashboard' | 'public' | 'agendar-publico' | 'dev-preview'
 
 declare module 'vue-router' {
   interface RouteMeta {
