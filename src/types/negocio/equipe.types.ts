@@ -69,6 +69,26 @@ export interface AtualizarStatusUsuarioEquipePayload {
 export interface AtualizarStatusProfissionalEquipePayload {
   ativo: boolean
   podeReceberAgendamento: boolean
+  cancelarAgendamentosFuturos?: boolean
+  motivoCancelamento?: string
+}
+
+export interface AgendamentoFuturoEquipe {
+  agendamentoId: number
+  agendamentoItemId: number
+  clienteNome: string
+  servicoNome: string
+  inicio: string
+  fim: string
+  status: string
+}
+
+export interface CancelarAgendamentosFuturosProfissionalEquipePayload {
+  motivo: string
+}
+
+export interface CancelarAgendamentosFuturosProfissionalEquipeResult {
+  quantidadeCancelada: number
 }
 
 export type MembroEquipeTipo = 'usuario' | 'profissional'

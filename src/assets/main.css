@@ -2209,4 +2209,89 @@
   .equipe-convites-table__td--muted {
     @apply text-glow-text-subtle;
   }
+
+  .equipe-membro-detalhe__danger {
+    @apply space-y-3 rounded-xl border border-red-200 bg-red-50/60 p-4 dark:border-red-900/40 dark:bg-red-950/20;
+  }
+
+  .equipe-membro-detalhe__danger-title {
+    @apply font-urbanist text-sm font-semibold text-red-800 dark:text-red-300;
+  }
+
+  .equipe-membro-detalhe__danger-text {
+    @apply font-urbanist text-sm leading-relaxed text-red-900/80 dark:text-red-200/80;
+  }
+
+  .equipe-btn-danger {
+    @apply inline-flex h-[37px] items-center justify-center rounded-xl border border-red-300 bg-white px-4 font-urbanist text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60;
+  }
+
+  .equipe-remover-confirm {
+    @apply space-y-4 rounded-xl border-[0.5px] border-glow-border-soft bg-[rgba(40,40,40,0.02)] p-4;
+  }
+
+  .equipe-remover-confirm__title {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .equipe-remover-confirm__list {
+    @apply list-disc space-y-2 pl-5 font-urbanist text-sm leading-relaxed text-glow-text-subtle;
+  }
+
+  .equipe-remover-confirm__actions {
+    @apply flex flex-col-reverse gap-3 sm:flex-row sm:justify-end;
+  }
+
+  .equipe-remover-confirm__loading {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .equipe-remover-agendamentos {
+    @apply space-y-3 rounded-xl border border-amber-200 bg-amber-50/80 p-4 dark:border-amber-900/60 dark:bg-amber-950/20;
+  }
+
+  .equipe-remover-agendamentos__title {
+    @apply font-urbanist text-sm font-semibold text-amber-900 dark:text-amber-200;
+  }
+
+  .equipe-remover-agendamentos__text {
+    @apply font-urbanist text-sm leading-relaxed text-amber-900/80 dark:text-amber-100/80;
+  }
+
+  .equipe-remover-agendamentos__list {
+    @apply max-h-48 space-y-2 overflow-y-auto;
+  }
+
+  .equipe-remover-agendamentos__item {
+    @apply flex items-start justify-between gap-3 rounded-lg border border-amber-200/80 bg-white/70 px-3 py-2 dark:border-amber-900/40 dark:bg-black/20;
+  }
+
+  .equipe-remover-agendamentos__item-main {
+    @apply min-w-0 space-y-0.5;
+  }
+
+  .equipe-remover-agendamentos__cliente {
+    @apply block font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .equipe-remover-agendamentos__servico,
+  .equipe-remover-agendamentos__horario {
+    @apply block font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .equipe-remover-agendamentos__link {
+    @apply shrink-0 font-urbanist text-xs font-semibold text-glow-gold-cta underline-offset-2 hover:underline;
+  }
+
+  .equipe-remover-agendamentos__actions {
+    @apply flex flex-col-reverse gap-2 sm:flex-row sm:justify-end;
+  }
+
+  .equipe-btn-danger--outline {
+    @apply border-red-200 bg-red-50 text-red-800 hover:bg-red-100 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200;
+  }
+
+  .equipe-form-textarea {
+    @apply w-full rounded-xl border-[0.5px] border-glow-border-soft bg-glow-canvas px-3 py-2 font-urbanist text-sm text-glow-text outline-none transition focus:border-glow-gold disabled:cursor-not-allowed disabled:opacity-60;
+  }
 }
