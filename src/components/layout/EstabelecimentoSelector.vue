@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
+import { useTrocarEstabelecimento } from '@/composables/useTrocarEstabelecimento'
 
 withDefaults(
   defineProps<{
@@ -12,6 +13,7 @@ withDefaults(
 )
 
 const negocioStore = useNegocioStore()
+const { trocarEstabelecimento, trocandoEstabelecimento } = useTrocarEstabelecimento()
 const { temVinculoNegocio } = useAcessoUsuario()
 const { estabelecimentos, estabelecimentoIdSelecionado, loading } = storeToRefs(negocioStore)
 
@@ -19,11 +21,10 @@ onMounted(async () => {
   await negocioStore.fetchEstabelecimentos()
 })
 
-function onChange(event: Event) {
+async function onChange(event: Event) {
   const value = Number((event.target as HTMLSelectElement).value)
-  if (Number.isFinite(value)) {
-    negocioStore.selecionarEstabelecimento(value)
-  }
+  if (!Number.isFinite(value)) return
+  await trocarEstabelecimento(value)
 }
 </script>
 
@@ -36,7 +37,7 @@ function onChange(event: Event) {
     <select
       id="estabelecimento-select"
       :value="estabelecimentoIdSelecionado ?? ''"
-      :disabled="loading"
+      :disabled="loading || trocandoEstabelecimento"
       class="truncate rounded-lg border border-glow-border-soft bg-glow-surface px-3 font-urbanist text-sm text-glow-text focus:border-glow-gold focus:outline-none focus:ring-1 focus:ring-glow-gold/40"
       :class="block ? 'h-10 w-full' : 'h-[46px] max-w-[220px]'"
       @change="onChange"

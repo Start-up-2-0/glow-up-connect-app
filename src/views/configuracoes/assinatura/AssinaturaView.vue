@@ -10,8 +10,8 @@ import CancelarAssinaturaDialog from '@/components/assinatura/CancelarAssinatura
 import TrialStatusBanner from '@/components/assinatura/TrialStatusBanner.vue'
 import AdicionarUnidadePanel from '@/components/assinatura/AdicionarUnidadePanel.vue'
 import { useNegocioContext } from '@/composables/useNegocioContext'
+import { useTrocarEstabelecimento } from '@/composables/useTrocarEstabelecimento'
 import { useAssinaturaStore } from '@/stores/assinatura.store'
-import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { assinaturaService } from '@/services/assinaturaService'
@@ -22,8 +22,8 @@ import type { EstabelecimentoOnboarding } from '@/types/assinatura.types'
 import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
 
 const { assinaturaId, planoNome, estabelecimentoAtivo, ensureContext } = useNegocioContext()
+const { trocarEstabelecimento } = useTrocarEstabelecimento()
 const assinaturaStore = useAssinaturaStore()
-const negocioStore = useNegocioStore()
 const { assinatura, loading } = storeToRefs(assinaturaStore)
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
@@ -73,8 +73,7 @@ async function adicionarUnidade(estabelecimento: EstabelecimentoOnboarding) {
   erroUnidade.value = null
   try {
     const resultado = await assinaturaStore.adicionarEstabelecimento(id, { estabelecimento })
-    await negocioStore.fetchEstabelecimentos(true)
-    negocioStore.selecionarEstabelecimento(resultado.estabelecimentoId)
+    await trocarEstabelecimento(resultado.estabelecimentoId)
     notifications.push('success', `Unidade "${resultado.nome}" adicionada com sucesso.`)
     exibirFormUnidade.value = false
     contextoOnboarding.value = await assinaturaService.obterContextoOnboarding()

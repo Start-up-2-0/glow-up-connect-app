@@ -6,6 +6,7 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useAppStore } from '@/stores/app.store'
 import { useAuth } from '@/composables/useAuth'
 import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
+import { useTrocarEstabelecimento } from '@/composables/useTrocarEstabelecimento'
 import IconArrowDown from './icons/IconArrowDown.vue'
 import IconMoon from './icons/IconMoon.vue'
 import IconSearch from './icons/IconSearch.vue'
@@ -33,6 +34,7 @@ const appStore = useAppStore()
 const { isDark } = storeToRefs(appStore)
 const { logout } = useAuth()
 const { roleExibicao, temVinculoNegocio } = useAcessoUsuario()
+const { trocarEstabelecimento, trocandoEstabelecimento } = useTrocarEstabelecimento()
 const { estabelecimentos, estabelecimentoIdSelecionado, loading } = storeToRefs(negocioStore)
 
 const open = ref(false)
@@ -65,11 +67,10 @@ function onDocumentClick(event: MouseEvent) {
   }
 }
 
-function onEstabelecimentoChange(event: Event) {
+async function onEstabelecimentoChange(event: Event) {
   const value = Number((event.target as HTMLSelectElement).value)
-  if (Number.isFinite(value)) {
-    negocioStore.selecionarEstabelecimento(value)
-  }
+  if (!Number.isFinite(value)) return
+  await trocarEstabelecimento(value)
 }
 
 function openSearch() {
@@ -191,7 +192,7 @@ onUnmounted(() => {
         <select
           id="sidebar-estabelecimento-select"
           :value="estabelecimentoIdSelecionado ?? ''"
-          :disabled="loading"
+          :disabled="loading || trocandoEstabelecimento"
           class="w-full truncate rounded-lg border border-glow-border-soft bg-glow-surface px-2.5 py-1.5 font-urbanist text-sm text-glow-text focus:border-glow-gold focus:outline-none focus:ring-1 focus:ring-glow-gold/40"
           @change="onEstabelecimentoChange"
         >

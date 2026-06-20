@@ -9,6 +9,7 @@ import { conviteService } from '@/services/conviteService'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUserStore } from '@/stores/user.store'
 import { useNegocioStore } from '@/stores/negocio.store'
+import { useTrocarEstabelecimento } from '@/composables/useTrocarEstabelecimento'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { ROUTE_PATHS, conviteResponderPath } from '@/constants/routes'
@@ -22,6 +23,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
+const { trocarEstabelecimento } = useTrocarEstabelecimento()
 
 const token = computed(() => String(route.params.token))
 const redirectPath = computed(() => conviteResponderPath(token.value))
@@ -71,10 +73,10 @@ async function responder(acao: 'aceitar' | 'rejeitar') {
       notifications.push('success', 'Convite aceito!')
 
       await userStore.fetchMe(true)
-      const negocioStore = useNegocioStore()
-      await negocioStore.fetchEstabelecimentos(true)
       if (preview.value?.estabelecimentoId) {
-        negocioStore.selecionarEstabelecimento(preview.value.estabelecimentoId)
+        await trocarEstabelecimento(preview.value.estabelecimentoId)
+      } else {
+        await useNegocioStore().fetchEstabelecimentos(true)
       }
     } else {
       await conviteService.rejeitar(token.value)

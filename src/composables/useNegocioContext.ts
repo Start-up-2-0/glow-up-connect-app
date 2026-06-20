@@ -20,6 +20,8 @@ export function useNegocioContext() {
     proximaDataVencimento,
     prioridadeMarketplace,
     loading,
+    trocandoEstabelecimento,
+    contextoVersao,
   } = storeToRefs(negocioStore)
 
   return {
@@ -40,12 +42,15 @@ export function useNegocioContext() {
     proximaDataVencimento,
     prioridadeMarketplace,
     loading,
+    trocandoEstabelecimento,
+    contextoVersao,
     possuiModulo: negocioStore.possuiModulo,
     possuiPermissao: negocioStore.possuiPermissao,
     possuiAlgumaPermissao: negocioStore.possuiAlgumaPermissao,
     possuiAlgumModulo: negocioStore.possuiAlgumModulo,
     podeAcessar: negocioStore.podeAcessar,
     selecionarEstabelecimento: negocioStore.selecionarEstabelecimento,
+    trocarEstabelecimento: negocioStore.trocarEstabelecimento,
     fetchEstabelecimentos: negocioStore.fetchEstabelecimentos,
     ensureContext: negocioStore.ensureContext,
   }

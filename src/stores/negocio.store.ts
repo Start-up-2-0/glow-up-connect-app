@@ -24,6 +24,8 @@ export const useNegocioStore = defineStore('negocio', () => {
   const estabelecimentos = ref<EstabelecimentoAcesso[]>([])
   const estabelecimentoIdSelecionado = ref<number | null>(readEstabelecimentoId())
   const loading = ref(false)
+  const trocandoEstabelecimento = ref(false)
+  const contextoVersao = ref(0)
 
   const estabelecimentoAtivo = computed(() => {
     if (estabelecimentoIdSelecionado.value === null) return null
@@ -129,6 +131,30 @@ export const useNegocioStore = defineStore('negocio', () => {
     }
   }
 
+  async function trocarEstabelecimento(id: number) {
+    const idAnterior = estabelecimentoIdSelecionado.value
+    trocandoEstabelecimento.value = true
+
+    try {
+      await fetchEstabelecimentos(true)
+
+      const destino = estabelecimentos.value.find((e) => e.estabelecimentoId === id)
+      if (!destino) {
+        throw new Error('Estabelecimento indisponível para este usuário.')
+      }
+
+      selecionarEstabelecimento(id)
+
+      if (idAnterior !== id) {
+        contextoVersao.value += 1
+      }
+
+      return destino
+    } finally {
+      trocandoEstabelecimento.value = false
+    }
+  }
+
   async function ensureContext() {
     if (estabelecimentos.value.length === 0) {
       await fetchEstabelecimentos(true)
@@ -141,6 +167,7 @@ export const useNegocioStore = defineStore('negocio', () => {
   function clear() {
     estabelecimentos.value = []
     estabelecimentoIdSelecionado.value = null
+    contextoVersao.value = 0
     persistEstabelecimentoId(null)
   }
 
@@ -148,6 +175,8 @@ export const useNegocioStore = defineStore('negocio', () => {
     estabelecimentos,
     estabelecimentoIdSelecionado,
     loading,
+    trocandoEstabelecimento,
+    contextoVersao,
     estabelecimentoAtivo,
     modulos,
     permissoes,
@@ -167,6 +196,7 @@ export const useNegocioStore = defineStore('negocio', () => {
     possuiAlgumModulo,
     podeAcessar,
     selecionarEstabelecimento,
+    trocarEstabelecimento,
     fetchEstabelecimentos,
     ensureContext,
     clear,
