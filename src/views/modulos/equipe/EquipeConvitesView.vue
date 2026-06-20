@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import BaseCard from '@/components/ui/BaseCard.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
-import EmptyState from '@/components/feedback/EmptyState.vue'
+import ContentAlert from '@/components/feedback/ContentAlert.vue'
+import EquipePageHeader from '@/components/equipe/EquipePageHeader.vue'
+import { EQUIPE_PAGE_CLASS } from '@/constants/designTokens'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
@@ -65,79 +65,80 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-          Links enviados
-        </h1>
-        <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-          Pessoas que ainda não entraram na equipe. Aguardando aceitar o link.
-        </p>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <RouterLink :to="{ path: ROUTE_PATHS.CONFIG_EQUIPE, query: { acao: 'convite' } }">
-          <BaseButton variant="primary" size="sm">Chamar pessoa</BaseButton>
+  <div :class="EQUIPE_PAGE_CLASS">
+    <EquipePageHeader
+      title="Links enviados"
+      subtitle="Pessoas que ainda não entraram na equipe. Aguardando aceitar o link."
+    >
+      <template #actions>
+        <RouterLink
+          :to="{ path: ROUTE_PATHS.CONFIG_EQUIPE, query: { acao: 'convite' } }"
+          class="equipe-btn-primary equipe-btn-primary--add"
+        >
+          Gerar convite
         </RouterLink>
-        <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE">
-          <BaseButton variant="secondary" size="sm">Voltar à equipe</BaseButton>
+        <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE" class="equipe-btn-outline equipe-btn-outline--links">
+          Voltar à equipe
         </RouterLink>
-      </div>
-    </div>
+      </template>
+    </EquipePageHeader>
 
-    <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
+    <ContentAlert v-if="contextError" variant="error" title="Não foi possível continuar">
+      {{ contextError }}
+    </ContentAlert>
 
     <LoadingSpinner v-if="loading" />
 
-    <EmptyState
-      v-else-if="ready && convites.length === 0"
-      title="Nenhum convite pendente"
-      description="Envie um convite pela equipe para ver a listagem aqui."
-    />
+    <div v-else-if="ready && convites.length === 0" class="equipe-empty-state">
+      <h2 class="equipe-empty-state__title">Nenhum convite pendente</h2>
+      <p class="equipe-empty-state__description">
+        Envie um convite pela equipe para ver a listagem aqui.
+      </p>
+    </div>
 
-    <BaseCard v-else-if="ready && convites.length > 0">
-      <div class="overflow-x-auto">
-        <table class="w-full min-w-[640px] text-left font-urbanist text-sm">
-          <thead>
-            <tr class="border-b border-glow-border-soft text-glow-text-subtle">
-              <th class="pb-2 pr-4 font-medium">E-mail</th>
-              <th class="pb-2 pr-4 font-medium">Função</th>
-              <th class="pb-2 pr-4 font-medium">Tipo</th>
-              <th class="pb-2 pr-4 font-medium">Expira em</th>
-              <th class="pb-2 font-medium">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="convite in convites"
-              :key="convite.id"
-              class="border-b border-glow-border-soft last:border-0"
-            >
-              <td class="py-3 pr-4 text-glow-text">{{ convite.email }}</td>
-              <td class="py-3 pr-4 text-glow-text">
-                {{ establishmentRoleLabel(convite.roleSugerida) }}
-              </td>
-              <td class="py-3 pr-4 text-glow-text-subtle">
-                {{ tipoConviteLabel(convite.tipoConvite) }}
-              </td>
-              <td class="py-3 pr-4 text-glow-text-subtle">
-                {{ formatarData(convite.expiraEm) }}
-              </td>
-              <td class="py-3">
-                <BaseButton
-                  variant="secondary"
-                  size="sm"
-                  :loading="cancelandoId === convite.id"
-                  @click="cancelar(convite)"
-                >
-                  Cancelar
-                </BaseButton>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </BaseCard>
+    <div
+      v-else-if="ready && convites.length > 0"
+      class="equipe-convites-table-wrap"
+    >
+      <table class="equipe-convites-table">
+        <thead>
+          <tr class="equipe-convites-table__head-row">
+            <th class="equipe-convites-table__th">E-mail</th>
+            <th class="equipe-convites-table__th">Função</th>
+            <th class="equipe-convites-table__th">Tipo</th>
+            <th class="equipe-convites-table__th">Expira em</th>
+            <th class="equipe-convites-table__th">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="convite in convites"
+            :key="convite.id"
+            class="equipe-convites-table__row"
+          >
+            <td class="equipe-convites-table__td">{{ convite.email }}</td>
+            <td class="equipe-convites-table__td">
+              {{ establishmentRoleLabel(convite.roleSugerida) }}
+            </td>
+            <td class="equipe-convites-table__td equipe-convites-table__td--muted">
+              {{ tipoConviteLabel(convite.tipoConvite) }}
+            </td>
+            <td class="equipe-convites-table__td equipe-convites-table__td--muted">
+              {{ formatarData(convite.expiraEm) }}
+            </td>
+            <td class="equipe-convites-table__td">
+              <button
+                type="button"
+                class="equipe-btn-outline h-9 px-3 text-xs"
+                :disabled="cancelandoId === convite.id"
+                @click="cancelar(convite)"
+              >
+                {{ cancelandoId === convite.id ? 'Cancelando…' : 'Cancelar' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
-

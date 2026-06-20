@@ -163,3 +163,6 @@ export const SERVICOS_FORM_INPUT_CLASS =
 
 export const SERVICOS_FORM_LABEL_CLASS =
   'servicos-form-label'
+
+/** Módulo Equipe (dashboard — Figma node 766:3783) */
+export const EQUIPE_PAGE_CLASS = 'equipe-page'

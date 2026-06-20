@@ -57,3 +57,33 @@ export interface CriarConviteUsuarioEquipePayload {
   email: string
   role: 'Admin' | 'Manager' | 'Receptionist'
 }
+
+export interface AtualizarRoleUsuarioEquipePayload {
+  role: EstablishmentUserRole
+}
+
+export interface AtualizarStatusUsuarioEquipePayload {
+  ativo: boolean
+}
+
+export interface AtualizarStatusProfissionalEquipePayload {
+  ativo: boolean
+  podeReceberAgendamento: boolean
+}
+
+export type MembroEquipeTipo = 'usuario' | 'profissional'
+
+/** Membro unificado exibido na listagem da equipe. */
+export interface MembroEquipeItem {
+  id: string
+  tipo: MembroEquipeTipo
+  nome: string
+  cargo: string
+  role: EstablishmentUserRole | 'Profissional'
+  email?: string
+  telefone?: string
+  ativo: boolean
+  usuarioId: number
+  profissionalId?: number
+  podeReceberAgendamento?: boolean
+}

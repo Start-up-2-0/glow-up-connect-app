@@ -61,6 +61,7 @@ export const ROUTE_NAMES = {
   TERMOS_DE_USO: 'termos-de-uso',
   POLITICA_COOKIES: 'politica-cookies',
   DEV_SERVICOS_FIGMA: 'dev-servicos-figma',
+  DEV_EQUIPE_FIGMA: 'dev-equipe-figma',
 } as const
 
 export const ROUTE_PATHS = {
@@ -125,6 +126,7 @@ export const ROUTE_PATHS = {
   TERMOS_DE_USO: '/termos-de-uso',
   POLITICA_COOKIES: '/politica-de-cookies',
   DEV_SERVICOS_FIGMA: '/__dev/servicos-figma',
+  DEV_EQUIPE_FIGMA: '/__dev/equipe-figma',
 } as const
 
 export function agendaDetalhePath(id: number): string {

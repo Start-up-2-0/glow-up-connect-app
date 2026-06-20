@@ -1872,4 +1872,341 @@
   .servicos-modal__option-info {
     @apply min-w-0 flex-1 text-left;
   }
+
+  /* Equipe — Figma node 766:3783 */
+  .equipe-page {
+    @apply space-y-6;
+  }
+
+  .equipe-page__header {
+    @apply flex flex-col gap-4 border-b border-glow-border-soft pb-6 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .equipe-page__header-main {
+    @apply min-w-0;
+  }
+
+  .equipe-page__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .equipe-page__subtitle {
+    @apply mt-1 font-satoshi text-base text-glow-text-subtle;
+  }
+
+  .equipe-page__actions {
+    @apply flex w-full shrink-0 flex-wrap items-center gap-[15px] sm:w-auto sm:justify-end;
+  }
+
+  .equipe-btn-primary {
+    @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl bg-glow-gold-cta px-3.5 font-urbanist text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .equipe-btn-primary--add {
+    @apply min-w-[192px];
+  }
+
+  .equipe-btn-outline {
+    @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98];
+  }
+
+  .equipe-btn-outline--links {
+    @apply min-w-[195px];
+  }
+
+  .equipe-add-menu {
+    @apply absolute right-0 z-20 mt-2 w-[min(100vw-2rem,18rem)] overflow-hidden rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface py-1 shadow-lg;
+  }
+
+  .equipe-add-menu__item {
+    @apply block w-full px-4 py-3 text-left transition hover:bg-glow-hover-surface;
+  }
+
+  .equipe-add-menu__title {
+    @apply block font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .equipe-add-menu__desc {
+    @apply mt-0.5 block font-urbanist text-xs leading-snug text-glow-text-subtle;
+  }
+
+  .equipe-members-grid {
+    @apply grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .equipe-member-card {
+    @apply flex min-h-[125px] items-start gap-5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-[22px] shadow-[0_1px_3px_rgba(0,0,0,0.02)];
+  }
+
+  .equipe-member-card__avatar {
+    @apply flex size-[50px] shrink-0 items-center justify-center rounded-full border-[0.5px] border-glow-border-soft bg-[rgba(40,40,40,0.04)] font-urbanist text-xl font-extrabold text-glow-text;
+  }
+
+  .equipe-member-card__body {
+    @apply min-w-0 flex-1;
+  }
+
+  .equipe-member-card__title-row {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .equipe-member-card__name {
+    @apply font-urbanist text-base font-bold text-glow-text;
+  }
+
+  .equipe-member-card__role {
+    @apply inline-flex h-[14px] items-center justify-center rounded-full bg-[rgba(40,40,40,0.1)] px-4 font-urbanist text-xs font-normal leading-none text-glow-text;
+  }
+
+  .equipe-member-card__meta {
+    @apply mt-3 space-y-2;
+  }
+
+  .equipe-member-card__meta-item {
+    @apply flex items-center gap-2.5 font-urbanist text-xs text-[rgba(40,40,40,0.6)];
+  }
+
+  .equipe-member-card__meta-icon {
+    @apply size-3.5 shrink-0 text-[rgba(40,40,40,0.6)];
+  }
+
+  .equipe-empty-slot {
+    @apply min-h-[125px] rounded-xl border border-dashed border-glow-border-soft bg-[rgba(40,40,40,0.02)];
+  }
+
+  .equipe-empty-state {
+    @apply flex flex-col items-center gap-6 py-16 text-center;
+  }
+
+  .equipe-empty-state__title {
+    @apply font-satoshi text-[32px] font-black leading-tight text-glow-text;
+  }
+
+  .equipe-empty-state__description {
+    @apply max-w-md font-satoshi text-xl text-glow-text-muted;
+  }
+
+  .equipe-modal-overlay {
+    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4;
+  }
+
+  .equipe-modal {
+    @apply flex max-h-[92dvh] w-full max-w-[490px] flex-col overflow-hidden rounded-t-2xl border-[0.5px] border-glow-border-soft bg-glow-surface shadow-xl sm:max-h-[90dvh] sm:rounded-xl;
+  }
+
+  .equipe-modal--tall {
+    @apply sm:max-h-[min(858px,90dvh)];
+  }
+
+  .equipe-modal-enter-active,
+  .equipe-modal-leave-active {
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .equipe-modal-enter-from,
+  .equipe-modal-leave-to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  @media (min-width: 640px) {
+    .equipe-modal-enter-from,
+    .equipe-modal-leave-to {
+      transform: translateY(8px) scale(0.96);
+    }
+  }
+
+  .equipe-modal__header {
+    @apply space-y-2 border-b border-glow-border-soft px-6 pb-4 pt-6;
+  }
+
+  .equipe-modal__header-top {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  .equipe-modal__close-icon {
+    @apply flex size-8 shrink-0 items-center justify-center rounded-lg text-glow-text-subtle transition hover:bg-glow-hover-surface hover:text-glow-text;
+  }
+
+  .equipe-modal__title {
+    @apply font-urbanist text-base font-semibold text-black;
+  }
+
+  .equipe-modal__subtitle {
+    @apply font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .equipe-modal__body {
+    @apply flex-1 overflow-y-auto px-6 py-6;
+  }
+
+  .equipe-modal__footer {
+    @apply flex items-center justify-center gap-2.5 border-t border-glow-border-soft px-6 py-6;
+  }
+
+  .equipe-modal__dismiss {
+    @apply flex h-[37px] w-[169px] shrink-0 items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .equipe-modal__confirm {
+    @apply flex h-[37px] min-w-[200px] flex-1 items-center justify-center rounded-xl bg-glow-gold-cta font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .equipe-modal__confirm--copy {
+    @apply w-[121px] flex-none;
+  }
+
+  @media (max-width: 639px) {
+    .equipe-modal__footer {
+      @apply flex-col gap-3;
+    }
+
+    .equipe-modal__dismiss,
+    .equipe-modal__confirm {
+      @apply w-full max-w-none;
+    }
+  }
+
+  .equipe-form-field {
+    @apply space-y-2;
+  }
+
+  .equipe-form-label {
+    @apply font-satoshi text-sm font-normal text-glow-text;
+  }
+
+  .equipe-form-input {
+    @apply h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-canvas px-[18px] font-inter text-sm text-glow-text outline-none transition placeholder:font-inter placeholder:text-sm placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .equipe-form-select {
+    @apply equipe-form-input appearance-none bg-[length:11px_7px] bg-[right_18px_center] bg-no-repeat pr-10;
+    background-image: url("data:image/svg+xml,%3Csvg width='11' height='7' viewBox='0 0 11 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5.5 5.5L10 1' stroke='%23282828' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+
+  .equipe-form-field__hint {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .equipe-form-field__error {
+    @apply font-urbanist text-xs text-red-600;
+  }
+
+  .equipe-form-section-title {
+    @apply font-urbanist text-xs font-normal uppercase tracking-wide text-glow-text-subtle;
+  }
+
+  .equipe-form-panel__row {
+    @apply grid gap-4 sm:grid-cols-2;
+  }
+
+  .equipe-form-actions-inline {
+    @apply flex flex-col-reverse gap-3 sm:flex-row sm:justify-end;
+  }
+
+  .equipe-link-success {
+    @apply space-y-4 rounded-xl border-[0.5px] border-glow-border-soft bg-[rgba(40,40,40,0.04)] p-5;
+  }
+
+  .equipe-link-success__title {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .equipe-link-success__text {
+    @apply font-urbanist text-sm leading-relaxed text-glow-text-subtle;
+  }
+
+  .equipe-link-success__url-box {
+    @apply flex flex-col gap-3 rounded-lg border-[0.5px] border-glow-border-soft bg-glow-surface p-4 sm:flex-row sm:items-center;
+  }
+
+  .equipe-link-success__url {
+    @apply min-w-0 flex-1 break-all font-inter text-xs leading-relaxed text-glow-text sm:text-sm;
+  }
+
+  .equipe-member-card--inactive {
+    @apply opacity-70;
+  }
+
+  .equipe-member-card--interactive {
+    @apply cursor-pointer transition hover:brightness-[0.99] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-gold-cta;
+  }
+
+  .equipe-member-card__inactive-badge {
+    @apply inline-flex h-[14px] items-center justify-center rounded-full bg-red-100 px-3 font-urbanist text-[10px] font-medium leading-none text-red-700;
+  }
+
+  .equipe-modal--detalhe {
+    @apply sm:max-h-[min(720px,90dvh)];
+  }
+
+  .equipe-membro-detalhe {
+    @apply space-y-5;
+  }
+
+  .equipe-membro-detalhe__profile {
+    @apply flex items-center gap-4;
+  }
+
+  .equipe-membro-detalhe__nome {
+    @apply font-urbanist text-base font-bold text-glow-text;
+  }
+
+  .equipe-membro-detalhe__badges {
+    @apply mt-1 flex flex-wrap items-center gap-2;
+  }
+
+  .equipe-membro-detalhe__status-badge {
+    @apply inline-flex h-[14px] items-center justify-center rounded-full px-3 font-urbanist text-[10px] font-medium leading-none;
+  }
+
+  .equipe-membro-detalhe__status-badge--inactive {
+    @apply bg-red-100 text-red-700;
+  }
+
+  .equipe-membro-detalhe__meta {
+    @apply grid gap-3 rounded-xl border-[0.5px] border-glow-border-soft bg-[rgba(40,40,40,0.02)] p-4 sm:grid-cols-2;
+  }
+
+  .equipe-membro-detalhe__meta dt {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .equipe-membro-detalhe__meta dd {
+    @apply mt-0.5 font-urbanist text-sm text-glow-text;
+  }
+
+  .equipe-membro-detalhe__readonly {
+    @apply font-urbanist text-sm text-glow-text;
+  }
+
+  .equipe-convites-table-wrap {
+    @apply overflow-x-auto rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface shadow-sm;
+  }
+
+  .equipe-convites-table {
+    @apply w-full min-w-[640px] text-left font-urbanist text-sm;
+  }
+
+  .equipe-convites-table__head-row {
+    @apply border-b border-glow-border-soft text-glow-text-subtle;
+  }
+
+  .equipe-convites-table__th {
+    @apply px-5 py-3 font-medium;
+  }
+
+  .equipe-convites-table__row {
+    @apply border-b border-glow-border-soft last:border-0;
+  }
+
+  .equipe-convites-table__td {
+    @apply px-5 py-3 text-glow-text;
+  }
+
+  .equipe-convites-table__td--muted {
+    @apply text-glow-text-subtle;
+  }
 }

@@ -39,3 +39,6 @@ export const ROLES_CADASTRO_EQUIPE: {
 export function establishmentRoleLabel(role: EstablishmentUserRole | string): string {
   return ESTABLISHMENT_ROLE_LABELS[role as EstablishmentUserRole] ?? role
 }
+
+/** Funções atribuíveis na edição de um membro (exclui Dono). */
+export const ROLES_EDITAVEIS_EQUIPE = ROLES_CADASTRO_EQUIPE

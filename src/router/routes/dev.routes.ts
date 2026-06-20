@@ -14,5 +14,16 @@ export const devRoutes: RouteRecordRaw[] = import.meta.env.DEV
           title: 'Dev — Serviços Figma',
         },
       },
+      {
+        path: ROUTE_PATHS.DEV_EQUIPE_FIGMA,
+        name: ROUTE_NAMES.DEV_EQUIPE_FIGMA,
+        component: () => import('@/views/dev/EquipeFigmaPreviewView.vue'),
+        meta: {
+          layout: 'dev-preview',
+          devPreview: true,
+          skipNegocioGuard: true,
+          title: 'Dev — Equipe Figma',
+        },
+      },
     ]
   : []

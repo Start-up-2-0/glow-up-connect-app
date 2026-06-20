@@ -1,13 +1,8 @@
 <script setup lang="ts">
 import { computed, toRef } from 'vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
-import BaseInput from '@/components/ui/BaseInput.vue'
-import BaseSelect from '@/components/ui/BaseSelect.vue'
-import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import AuthPasswordRules from '@/components/auth/recovery/AuthPasswordRules.vue'
-import { equipeAdicionarAcao } from '@/constants/equipeAdicionarAcoes'
 import { ROLES_CADASTRO_EQUIPE } from '@/constants/establishmentRoles'
 import {
   useEquipeAdicionarForm,
@@ -20,10 +15,11 @@ const props = withDefaults(
     modo: ModoCadastro
     initialRole?: EstablishmentUserRole
     navigateOnVinculo?: boolean
-    showCancel?: boolean
+    embedded?: boolean
   }>(),
   {
-    showCancel: true,
+    navigateOnVinculo: false,
+    embedded: false,
   },
 )
 
@@ -62,193 +58,231 @@ const {
   onVinculado: () => emit('vinculado'),
 })
 
-const roleOptions = ROLES_CADASTRO_EQUIPE.map((r) => ({
-  value: r.value,
-  label: r.label,
-}))
-
 const roleHint = computed(
   () => ROLES_CADASTRO_EQUIPE.find((r) => r.value === role.value)?.description,
 )
-
-const modoHint = computed(() => {
-  const acao = equipeAdicionarAcao(props.modo)
-  return {
-    title: acao.titulo,
-    text: acao.instrucao,
-  }
-})
 
 defineExpose({ resetForm })
 </script>
 
 <template>
-  <div class="space-y-4">
-    <BaseAlert
-      v-if="linkConvite && sucessoDetalhe"
-      variant="success"
-      title="Link pronto!"
-    >
-      {{ sucessoDetalhe }}
-    </BaseAlert>
-    <BaseAlert
-      v-else-if="sucessoDetalhe && !linkConvite"
-      variant="success"
-    >
-      {{ sucessoDetalhe }}
-    </BaseAlert>
-    <BaseAlert
-      v-else
-      variant="info"
-      :title="modoHint.title"
-    >
-      {{ modoHint.text }}
-    </BaseAlert>
-
-    <div
-      v-if="linkConvite"
-      class="form-section space-y-3"
-    >
-      <p class="font-urbanist text-sm text-glow-text-subtle">
-        Copie o link e mande para a pessoa por WhatsApp ou e-mail.
-      </p>
-      <div
-        class="flex flex-col gap-2 rounded-lg border border-glow-border-soft bg-glow-surface p-3 sm:flex-row sm:items-center"
-      >
-        <p class="min-w-0 flex-1 break-all font-mono text-xs text-glow-text sm:text-sm">
-          {{ linkConvite }}
+  <div :class="embedded ? 'flex min-h-0 flex-1 flex-col' : 'space-y-4'">
+    <div v-if="linkConvite" class="equipe-modal__body">
+      <div class="equipe-link-success">
+        <p class="equipe-link-success__title">Link pronto!</p>
+        <p class="equipe-link-success__text">
+          Envie o link abaixo para o usuário para que ele possa aceitar. Lembre-se de colar o link
+          em outra aba do navegador.
         </p>
-        <BaseButton variant="primary" size="sm" class="shrink-0" @click="copiarLink">
-          Copiar link
-        </BaseButton>
-      </div>
-      <div v-if="showCancel" class="flex justify-end">
-        <BaseButton variant="secondary" size="sm" @click="emit('cancel')">
-          Fechar
-        </BaseButton>
+        <p class="equipe-link-success__text">
+          Também há a possibilidade do usuário aceitar o convite pelo e-mail; o destino é o mesmo.
+        </p>
+        <div class="equipe-link-success__url-box">
+          <p class="equipe-link-success__url">{{ linkConvite }}</p>
+          <button type="button" class="equipe-modal__confirm equipe-modal__confirm--copy" @click="copiarLink">
+            Copiar link
+          </button>
+        </div>
+        <p v-if="sucessoDetalhe" class="equipe-form-field__hint">{{ sucessoDetalhe }}</p>
       </div>
     </div>
 
     <form
       v-else
-      class="space-y-4"
+      :class="embedded ? 'flex min-h-0 flex-1 flex-col' : ''"
       @submit.prevent="handleSubmit"
     >
-      <ContentAlert v-if="formError" variant="error" compact>
-        {{ formError }}
-      </ContentAlert>
+      <div :class="embedded ? 'equipe-modal__body space-y-6' : 'space-y-6'">
+        <ContentAlert v-if="formError" variant="error" compact>
+          {{ formError }}
+        </ContentAlert>
 
-      <section class="form-section">
-        <h3 class="form-section__title">Dados da pessoa</h3>
-        <div
-          class="form-section__grid"
-          :class="modo === 'convite' ? 'form-section__grid--single' : ''"
-        >
-          <BaseInput
-            v-if="modo === 'criar'"
-            v-model="nome"
-            label="Nome completo"
-            required
-            placeholder="Maria Silva"
-            :error="nomeError"
-          />
-
-          <BaseInput
-            v-model="email"
-            label="E-mail"
-            type="email"
-            placeholder="usuario@exemplo.com"
-            required
-            :error="emailError"
-          />
-
-          <TelefoneInput
-            v-if="modo === 'criar'"
-            v-model="telefone"
-            label="Telefone"
-            required
-            :error="telefoneError"
-          />
-        </div>
-      </section>
-
-      <section v-if="modo === 'criar'" class="form-section">
-        <h3 class="form-section__title">Senha de entrada</h3>
-        <div class="form-section__grid">
-          <BaseInput
-            v-model="senha"
-            label="Senha inicial"
-            type="password"
-            required
-            autocomplete="new-password"
-            :error="senhaError"
-          />
-          <BaseInput
-            v-model="confirmarSenha"
-            label="Confirmar senha"
-            type="password"
-            required
-            autocomplete="new-password"
-            :error="confirmarSenhaError"
-          />
-        </div>
-        <AuthPasswordRules :password="senha" class="mt-3" />
-      </section>
-
-      <section class="form-section">
-        <h3 class="form-section__title">O que essa pessoa faz aqui?</h3>
-        <div class="form-section__grid form-section__grid--single">
-          <BaseSelect
-            v-model="role"
-            label="Cargo da pessoa"
-            :options="roleOptions"
-            required
-            :hint="roleHint"
-          />
-        </div>
-
-        <div
-          v-if="ehProfissional"
-          class="form-section__grid mt-3"
-        >
-          <BaseInput
-            v-model="nomePublico"
-            label="Nome público"
-            :placeholder="
-              modo === 'convite' || modo === 'criar'
-                ? 'Opcional — usa o nome no cadastro'
-                : 'Como aparecerá para os clientes'
-            "
-          />
-          <label
-            class="flex cursor-pointer items-center gap-3 rounded-lg border border-glow-border-soft bg-glow-surface px-3 py-2.5 font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface"
-          >
+        <template v-if="modo === 'convite'">
+          <div class="equipe-form-field">
+            <label class="equipe-form-label" for="equipe-convite-email">E-mail</label>
             <input
-              v-model="podeReceberAgendamento"
-              type="checkbox"
-              class="size-4 shrink-0 rounded border-glow-border-soft bg-glow-canvas text-glow-gold focus:ring-glow-gold/40"
+              id="equipe-convite-email"
+              v-model="email"
+              type="email"
+              class="equipe-form-input"
+              :class="{ 'border-red-500': !!emailError }"
+              placeholder="Ex: usuario@exemplo.com"
+              required
             />
-            Pode receber horários de clientes
-          </label>
-        </div>
-      </section>
+            <p v-if="emailError" class="equipe-form-field__error">{{ emailError }}</p>
+          </div>
 
-      <div
-        class="flex flex-col-reverse gap-2 border-t border-glow-border-soft pt-4 sm:flex-row sm:justify-end"
-      >
-        <BaseButton
-          v-if="showCancel"
-          type="button"
-          variant="secondary"
-          class="sm:w-auto"
-          @click="emit('cancel')"
-        >
+          <div class="equipe-form-field">
+            <label class="equipe-form-label" for="equipe-convite-role">Cargo do usuário</label>
+            <select
+              id="equipe-convite-role"
+              v-model="role"
+              class="equipe-form-select"
+              required
+            >
+              <option v-for="opt in ROLES_CADASTRO_EQUIPE" :key="opt.value" :value="opt.value">
+                {{ opt.label }}
+              </option>
+            </select>
+            <p v-if="roleHint" class="equipe-form-field__hint">{{ roleHint }}</p>
+          </div>
+
+          <template v-if="ehProfissional">
+            <div class="equipe-form-field">
+              <label class="equipe-form-label" for="equipe-convite-nome-publico">Nome público</label>
+              <input
+                id="equipe-convite-nome-publico"
+                v-model="nomePublico"
+                type="text"
+                class="equipe-form-input"
+                placeholder="Como aparecerá para os clientes"
+              />
+            </div>
+            <label class="flex cursor-pointer items-center gap-3 font-urbanist text-sm text-glow-text">
+              <input
+                v-model="podeReceberAgendamento"
+                type="checkbox"
+                class="size-3.5 rounded border border-glow-border-soft text-glow-gold focus:ring-glow-gold"
+              />
+              Pode receber horários de clientes
+            </label>
+          </template>
+        </template>
+
+        <template v-else>
+          <div class="space-y-4">
+            <p class="equipe-form-section-title">Dados</p>
+            <div class="equipe-form-panel__row">
+              <div class="equipe-form-field">
+                <label class="equipe-form-label" for="equipe-criar-nome">Nome completo</label>
+                <input
+                  id="equipe-criar-nome"
+                  v-model="nome"
+                  type="text"
+                  class="equipe-form-input"
+                  :class="{ 'border-red-500': !!nomeError }"
+                  placeholder="Ex: Maria Silva"
+                  required
+                />
+                <p v-if="nomeError" class="equipe-form-field__error">{{ nomeError }}</p>
+              </div>
+              <div class="equipe-form-field">
+                <label class="equipe-form-label" for="equipe-criar-email">E-mail</label>
+                <input
+                  id="equipe-criar-email"
+                  v-model="email"
+                  type="email"
+                  class="equipe-form-input"
+                  :class="{ 'border-red-500': !!emailError }"
+                  placeholder="Ex: usuario@exemplo.com"
+                  required
+                />
+                <p v-if="emailError" class="equipe-form-field__error">{{ emailError }}</p>
+              </div>
+            </div>
+            <div class="equipe-form-field w-full sm:max-w-[calc(50%-0.5rem)]">
+              <TelefoneInput
+                v-model="telefone"
+                label="Telefone"
+                required
+                :error="telefoneError"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-4 border-t border-glow-border-soft pt-6">
+            <p class="equipe-form-section-title">Senha de entrada</p>
+            <div class="equipe-form-panel__row">
+              <div class="equipe-form-field">
+                <label class="equipe-form-label" for="equipe-criar-senha">Senha</label>
+                <input
+                  id="equipe-criar-senha"
+                  v-model="senha"
+                  type="password"
+                  class="equipe-form-input"
+                  :class="{ 'border-red-500': !!senhaError }"
+                  autocomplete="new-password"
+                  required
+                />
+                <p v-if="senhaError" class="equipe-form-field__error">{{ senhaError }}</p>
+              </div>
+              <div class="equipe-form-field">
+                <label class="equipe-form-label" for="equipe-criar-confirmar">Confirmar senha</label>
+                <input
+                  id="equipe-criar-confirmar"
+                  v-model="confirmarSenha"
+                  type="password"
+                  class="equipe-form-input"
+                  :class="{ 'border-red-500': !!confirmarSenhaError }"
+                  autocomplete="new-password"
+                  required
+                />
+                <p v-if="confirmarSenhaError" class="equipe-form-field__error">
+                  {{ confirmarSenhaError }}
+                </p>
+              </div>
+            </div>
+            <AuthPasswordRules :password="senha" />
+          </div>
+
+          <div class="space-y-4 border-t border-glow-border-soft pt-6">
+            <div class="equipe-form-field">
+              <label class="equipe-form-label" for="equipe-criar-role">Cargo do usuário</label>
+              <select id="equipe-criar-role" v-model="role" class="equipe-form-select" required>
+                <option v-for="opt in ROLES_CADASTRO_EQUIPE" :key="opt.value" :value="opt.value">
+                  {{ opt.label }}
+                </option>
+              </select>
+              <p v-if="roleHint" class="equipe-form-field__hint">{{ roleHint }}</p>
+            </div>
+
+            <template v-if="ehProfissional">
+              <div class="equipe-form-field">
+                <label class="equipe-form-label" for="equipe-criar-nome-publico">Nome público</label>
+                <input
+                  id="equipe-criar-nome-publico"
+                  v-model="nomePublico"
+                  type="text"
+                  class="equipe-form-input"
+                  placeholder="Como aparecerá para os clientes"
+                />
+              </div>
+              <label class="flex cursor-pointer items-center gap-3 font-urbanist text-sm text-glow-text">
+                <input
+                  v-model="podeReceberAgendamento"
+                  type="checkbox"
+                  class="size-3.5 rounded border border-glow-border-soft text-glow-gold focus:ring-glow-gold"
+                />
+                Pode receber horários de clientes
+              </label>
+            </template>
+          </div>
+        </template>
+      </div>
+
+      <div v-if="embedded" class="equipe-modal__footer">
+        <button type="button" class="equipe-modal__dismiss" @click="emit('cancel')">
           Cancelar
-        </BaseButton>
-        <BaseButton type="submit" :loading="saving" class="sm:w-auto">
-          {{ submitLabel }}
-        </BaseButton>
+        </button>
+        <button type="submit" class="equipe-modal__confirm" :disabled="saving">
+          {{ saving ? 'Salvando…' : submitLabel }}
+        </button>
+      </div>
+
+      <div v-else class="equipe-form-actions-inline border-t border-glow-border-soft pt-4">
+        <button type="button" class="equipe-modal__dismiss" @click="emit('cancel')">
+          Cancelar
+        </button>
+        <button type="submit" class="equipe-modal__confirm" :disabled="saving">
+          {{ saving ? 'Salvando…' : submitLabel }}
+        </button>
       </div>
     </form>
+
+    <div v-if="linkConvite && embedded" class="equipe-modal__footer">
+      <button type="button" class="equipe-modal__dismiss w-full max-w-none" @click="emit('cancel')">
+        Fechar
+      </button>
+    </div>
   </div>
 </template>

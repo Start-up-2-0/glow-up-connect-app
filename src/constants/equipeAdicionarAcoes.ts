@@ -20,7 +20,7 @@ export const EQUIPE_ADICIONAR_ACOES: EquipeAdicionarAcaoCopy[] = [
     modo: 'convite',
     titulo: 'Gerar convite',
     descricao:
-      'A pessoa recebe um link. Com conta, faz login e aceita. Sem conta, se cadastra e aceita.',
+      'O usuário recebe um link de convite. Se já possui conta, faz login e aceita. Caso contrário, realiza o cadastro e, em seguida, aceita o convite.',
     tituloModal: 'Gerar convite',
     instrucao:
       'Informe o e-mail e o cargo. Envie o link gerado — a pessoa aceita o convite para entrar na equipe.',
@@ -31,7 +31,8 @@ export const EQUIPE_ADICIONAR_ACOES: EquipeAdicionarAcaoCopy[] = [
   {
     modo: 'criar',
     titulo: 'Cadastrar manualmente',
-    descricao: 'Você preenche os dados e cria a senha. Use só se a pessoa não conseguir sozinha.',
+    descricao:
+      'Você preenche os dados e cria a senha. Use apenas se o usuário não conseguir sozinho. O usuário pode trocar a senha depois.',
     tituloModal: 'Cadastrar manualmente',
     instrucao:
       'Preencha os dados da pessoa e defina uma senha para ela entrar. Ela pode trocar a senha depois.',
