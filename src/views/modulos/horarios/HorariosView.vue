@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
-import EmptyState from '@/components/feedback/EmptyState.vue'
-import BaseCard from '@/components/ui/BaseCard.vue'
 import HorarioDiaLojaCard from '@/components/horarios/HorarioDiaLojaCard.vue'
 import HorarioDiaProfissionaisModal from '@/components/horarios/HorarioDiaProfissionaisModal.vue'
 import HorariosPageHeader from '@/components/horarios/HorariosPageHeader.vue'
-import HorariosProfissionaisPanel from '@/components/horarios/HorariosProfissionaisPanel.vue'
-import HorariosTabs from '@/components/horarios/HorariosTabs.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useHorarios } from '@/composables/useHorarios'
+import type { HorarioFuncionamento } from '@/types/negocio/horario.types'
 import type { DiaSemanaValue } from '@/constants/diasSemana'
 
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
@@ -17,25 +14,13 @@ const { estabelecimentoId, ready, error: contextError, loading: contextLoading }
 
 const {
   DIAS_SEMANA,
-  aba,
   loading,
   savingDia,
-  savingProfissional,
-  togglingId,
+  savingDiaProprio,
   horariosPorDiaLoja,
-  horariosDoProfissional,
-  profissionalSelecionadoId,
-  listaProfissionaisHorario,
-  profissionaisFormIds,
-  formProfissional,
-  editandoProfissional,
-  todosProfissionaisSelecionados,
+  horariosPorDiaProprio,
   podeGerenciarLoja,
-  podeGerenciarProfissional,
   apenasHorarioProprio,
-  exibeAbaProfissional,
-  exibeAbas,
-  usaProfissionaisVitrine,
   modoDiaLoja,
   draftDiaLoja,
   setDraftDiaLoja,
@@ -43,27 +28,30 @@ const {
   cancelarEdicaoDiaLoja,
   salvarDiaLoja,
   alterarStatusDiaLoja,
-  salvarProfissional,
-  resetFormProfissional,
-  iniciarEdicaoProfissional,
-  alterarStatusProfissional,
-  toggleProfissionalForm,
-  toggleSelecionarTodosProfissionais,
+  modoDiaProprio,
+  draftDiaProprio,
+  setDraftDiaProprio,
+  iniciarEdicaoDiaProprio,
+  cancelarEdicaoDiaProprio,
+  salvarDiaProprio,
+  alterarStatusDiaProprio,
   modalProfissionaisAberta,
   modalProfissionaisDiaLabel,
   modalLojaHorario,
   modalLojaAtiva,
-  modalProfissionaisConfigs,
-  modalProfissionaisSaving,
+  modalProfissionaisVinculados,
+  modalProfissionaisDisponiveis,
+  modalProfissionaisActionId,
   modalProfissionaisErro,
   podeGerenciarProfissionaisPorDia,
   profissionaisVinculadosPorDia,
   abrirModalProfissionaisDia,
-  toggleModalProfissionalSelecionado,
-  toggleModalProfissionaisTodos,
+  fecharModalProfissionaisDia,
   setModalProfissionalModo,
   updateModalProfissionalHorario,
-  salvarModalProfissionaisDia,
+  salvarModalProfissional,
+  vincularModalProfissional,
+  removerModalProfissional,
 } = useHorarios(estabelecimentoId, ready)
 
 const pageTitle = computed(() =>
@@ -72,17 +60,30 @@ const pageTitle = computed(() =>
 
 const pageSubtitle = computed(() => {
   if (apenasHorarioProprio.value) {
-    return 'Configure os horários em que você atende nesta loja.'
+    return 'Configure os dias e horários em que você atende nesta loja.'
   }
-  return 'Os horários da loja são independentes; cada profissional pode ter horários iguais ou diferentes.'
+  return 'Configure os horários da loja e vincule profissionais diretamente em cada dia.'
 })
-
-const mostrarSelecaoProfissionais = computed(
-  () => podeGerenciarLoja.value && !apenasHorarioProprio.value,
-)
 
 function onDraftUpdate(dia: DiaSemanaValue, draft: { horaInicio: string; horaFim: string }) {
   setDraftDiaLoja(dia, draft)
+}
+
+function onDraftProprioUpdate(dia: DiaSemanaValue, draft: { horaInicio: string; horaFim: string }) {
+  setDraftDiaProprio(dia, draft)
+}
+
+function horarioProprioComoLoja(dia: DiaSemanaValue): HorarioFuncionamento | null {
+  const horario = horariosPorDiaProprio.value.get(dia)
+  if (!horario) return null
+  return {
+    id: horario.id,
+    estabelecimentoId: estabelecimentoId.value ?? 0,
+    diaSemana: horario.diaSemana,
+    horaInicio: horario.horaInicio,
+    horaFim: horario.horaFim,
+    ativo: horario.ativo,
+  }
 }
 </script>
 
@@ -92,16 +93,10 @@ function onDraftUpdate(dia: DiaSemanaValue, draft: { horaInicio: string; horaFim
 
     <p v-if="contextError" class="horarios-page__error">{{ contextError }}</p>
 
-    <HorariosTabs
-      v-if="exibeAbas"
-      v-model="aba"
-      :show-profissionais="exibeAbaProfissional"
-    />
-
     <LoadingSpinner v-if="contextLoading || loading" />
 
     <template v-else>
-      <section v-if="aba === 'loja' && podeGerenciarLoja" class="horarios-loja">
+      <section v-if="podeGerenciarLoja" class="horarios-loja">
         <h2 class="horarios-section-title">Horários da loja</h2>
         <div class="horarios-loja-grid">
           <HorarioDiaLojaCard
@@ -130,59 +125,39 @@ function onDraftUpdate(dia: DiaSemanaValue, draft: { horaInicio: string; horaFim
           :dia-label="modalProfissionaisDiaLabel"
           :loja-horario="modalLojaHorario"
           :loja-ativa="modalLojaAtiva"
-          :configs="modalProfissionaisConfigs"
-          :saving="modalProfissionaisSaving"
+          :vinculados="modalProfissionaisVinculados"
+          :disponiveis="modalProfissionaisDisponiveis"
+          :action-id="modalProfissionaisActionId"
           :erro="modalProfissionaisErro"
-          @toggle-selecionado="toggleModalProfissionalSelecionado"
-          @toggle-todos="toggleModalProfissionaisTodos"
+          @fechar="fecharModalProfissionaisDia"
           @update-modo="setModalProfissionalModo"
           @update-horario="updateModalProfissionalHorario"
-          @salvar="salvarModalProfissionaisDia"
+          @salvar="salvarModalProfissional"
+          @vincular="vincularModalProfissional"
+          @remover="removerModalProfissional"
         />
       </section>
 
-      <section
-        v-else-if="aba === 'profissional' && exibeAbaProfissional"
-        class="horarios-profissionais-wrap"
-      >
-        <BaseCard v-if="listaProfissionaisHorario.length === 0">
-          <EmptyState
-            :title="usaProfissionaisVitrine ? 'Nenhum profissional na vitrine' : 'Nenhum profissional na equipe'"
-            :description="
-              usaProfissionaisVitrine
-                ? 'Cadastre profissionais em Profissionais antes de definir horários.'
-                : 'Convide profissionais em Equipe antes de definir horários.'
-            "
+      <section v-else-if="apenasHorarioProprio" class="horarios-loja">
+        <h2 class="horarios-section-title">Meus dias de atendimento</h2>
+        <div class="horarios-loja-grid">
+          <HorarioDiaLojaCard
+            v-for="dia in DIAS_SEMANA"
+            :key="dia.value"
+            :dia="dia.value"
+            :label="dia.label"
+            :horario="horarioProprioComoLoja(dia.value)"
+            :modo="modoDiaProprio(dia.value)"
+            :draft="draftDiaProprio(dia.value)"
+            :saving="savingDiaProprio === dia.value"
+            @update:draft="onDraftProprioUpdate(dia.value, $event)"
+            @salvar="salvarDiaProprio(dia.value)"
+            @ativar="alterarStatusDiaProprio(dia.value, true)"
+            @desativar="alterarStatusDiaProprio(dia.value, false)"
+            @editar="iniciarEdicaoDiaProprio(dia.value)"
+            @cancelar="cancelarEdicaoDiaProprio(dia.value)"
           />
-        </BaseCard>
-
-        <HorariosProfissionaisPanel
-          v-else
-          :lista-profissionais="listaProfissionaisHorario"
-          :horarios="horariosDoProfissional"
-          :profissional-selecionado-id="profissionalSelecionadoId"
-          :profissionais-form-ids="profissionaisFormIds"
-          :form-dia-semana="formProfissional.diaSemana"
-          :form-hora-inicio="formProfissional.horaInicio"
-          :form-hora-fim="formProfissional.horaFim"
-          :editando="editandoProfissional"
-          :todos-selecionados="todosProfissionaisSelecionados"
-          :saving="savingProfissional"
-          :toggling-id="togglingId"
-          :pode-gerenciar="podeGerenciarProfissional"
-          :mostrar-selecao-profissionais="mostrarSelecaoProfissionais"
-          @update:profissional-selecionado-id="profissionalSelecionadoId = $event"
-          @update:form-dia-semana="formProfissional.diaSemana = $event"
-          @update:form-hora-inicio="formProfissional.horaInicio = $event"
-          @update:form-hora-fim="formProfissional.horaFim = $event"
-          @toggle-profissional="toggleProfissionalForm"
-          @toggle-selecionar-todos="toggleSelecionarTodosProfissionais"
-          @salvar="salvarProfissional"
-          @cancelar="resetFormProfissional"
-          @editar="iniciarEdicaoProfissional"
-          @ativar="alterarStatusProfissional($event, true)"
-          @desativar="alterarStatusProfissional($event, false)"
-        />
+        </div>
       </section>
     </template>
   </div>

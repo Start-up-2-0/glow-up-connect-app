@@ -2457,6 +2457,10 @@
     @apply w-full;
   }
 
+  .horarios-btn-primary--sm {
+    @apply h-[30px] min-w-[100px] px-3.5 text-sm;
+  }
+
   .horarios-btn-outline {
     @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
   }
@@ -2672,5 +2676,53 @@
 
   .horarios-modal-profissionais__heranca {
     @apply rounded-lg bg-glow-hover-surface px-3 py-2 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .horarios-modal-profissionais__section {
+    @apply space-y-3;
+  }
+
+  .horarios-modal-profissionais__section-title {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .horarios-modal-profissionais__prof-header {
+    @apply flex items-start gap-3;
+  }
+
+  .horarios-modal-profissionais__prof-info {
+    @apply min-w-0 flex-1 space-y-1;
+  }
+
+  .horarios-modal-profissionais__tipo-badge {
+    @apply inline-flex rounded-full px-2 py-0.5 font-urbanist text-xs;
+  }
+
+  .horarios-modal-profissionais__tipo-badge--loja {
+    @apply bg-glow-gold-soft text-glow-text;
+  }
+
+  .horarios-modal-profissionais__tipo-badge--personalizado {
+    @apply bg-glow-hover-surface text-glow-text-subtle;
+  }
+
+  .horarios-modal-profissionais__horario-resumo {
+    @apply block font-satoshi text-xs text-glow-text-subtle;
+  }
+
+  .horarios-modal-profissionais__row-actions {
+    @apply mt-4 flex flex-wrap gap-2 border-t border-glow-border-soft pt-4;
+  }
+
+  .horarios-modal-profissionais__remove-btn {
+    @apply text-[#cf3f3f];
+  }
+
+  .horarios-modal-profissionais__item--disponivel {
+    @apply bg-glow-hover-surface;
+  }
+
+  .horarios-modal-profissionais__empty {
+    @apply rounded-lg border border-dashed border-glow-border-soft px-4 py-6 text-center font-urbanist text-sm text-glow-text-subtle;
   }
 }

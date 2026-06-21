@@ -27,9 +27,11 @@ export type HorarioProfissionalModoConfig = 'loja' | 'personalizado'
 export interface ProfissionalDiaHorarioConfig {
   profissionalId: number
   nomePublico: string
+  avatarUrl: string | null
   selecionado: boolean
   modo: HorarioProfissionalModoConfig
   horaInicio: string
   horaFim: string
   horarioId: number | null
+  dirty: boolean
 }
