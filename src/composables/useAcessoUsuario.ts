@@ -35,6 +35,14 @@ export function useAcessoUsuario() {
     () => temContextoOperacional.value && roleLoja.value === 'Profissional',
   )
 
+  const possuiEstabelecimentoProprio = computed(() =>
+    estabelecimentos.value.some((e) => e.role === 'Owner'),
+  )
+
+  const possuiAssinaturaAtivaComoDono = computed(() =>
+    estabelecimentos.value.some((e) => e.role === 'Owner' && e.assinaturaAtiva),
+  )
+
   const linkAgendamentoPublico = computed(() => {
     const ativo = estabelecimentoAtivo.value
     if (!ativo?.publicGuid || !ativo.profissionalPublicGuid) return null
@@ -49,6 +57,8 @@ export function useAcessoUsuario() {
     roleExibicao,
     ehDonoOuAutonomo,
     ehProfissionalOperacional,
+    possuiEstabelecimentoProprio,
+    possuiAssinaturaAtivaComoDono,
     linkAgendamentoPublico,
   }
 }

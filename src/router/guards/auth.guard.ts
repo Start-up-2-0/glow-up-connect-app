@@ -92,6 +92,16 @@ export const authGuard: NavigationGuard = async (to) => {
     if (businessOnly && !allowClienteOnboarding && negocioStore.estabelecimentos.length === 0) {
       return { path: ROUTE_PATHS.DASHBOARD }
     }
+
+    if (assinaturaOnboardingLogado) {
+      const possuiAssinaturaAtivaComoDono = negocioStore.estabelecimentos.some(
+        (e) => e.role === 'Owner' && e.assinaturaAtiva,
+      )
+
+      if (possuiAssinaturaAtivaComoDono) {
+        return { path: ROUTE_PATHS.CONFIG_ASSINATURA }
+      }
+    }
   }
 
   return true

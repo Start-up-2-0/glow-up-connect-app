@@ -2294,4 +2294,247 @@
   .equipe-form-textarea {
     @apply w-full rounded-xl border-[0.5px] border-glow-border-soft bg-glow-canvas px-3 py-2 font-urbanist text-sm text-glow-text outline-none transition focus:border-glow-gold disabled:cursor-not-allowed disabled:opacity-60;
   }
+
+  /* Horários — Figma node 800:4293 */
+  .horarios-page {
+    @apply space-y-6;
+  }
+
+  .horarios-page__header {
+    @apply flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .horarios-page__header-main {
+    @apply min-w-0 max-w-xl;
+  }
+
+  .horarios-page__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .horarios-page__subtitle {
+    @apply mt-1 font-satoshi text-base leading-snug text-glow-text-subtle;
+  }
+
+  .horarios-page__actions {
+    @apply flex shrink-0 flex-wrap items-center gap-3;
+  }
+
+  .horarios-page__error {
+    @apply font-urbanist text-sm text-red-600;
+  }
+
+  .horarios-tabs {
+    @apply relative flex gap-8 border-b border-glow-border-soft pb-0;
+  }
+
+  .horarios-tabs__item {
+    @apply relative z-[1] border-b-2 border-transparent px-2 pb-3 font-urbanist text-sm font-medium text-glow-text-subtle transition hover:text-glow-text;
+  }
+
+  .horarios-tabs__item--active {
+    @apply text-glow-text;
+  }
+
+  .horarios-tabs__indicator {
+    @apply pointer-events-none absolute bottom-0 h-1 rounded-full bg-glow-gold transition-all duration-200;
+  }
+
+  .horarios-tabs__indicator--loja {
+    @apply left-2 w-[54px];
+  }
+
+  .horarios-tabs__indicator--profissionais {
+    @apply left-[84px] w-[113px];
+  }
+
+  .horarios-section-title {
+    @apply font-satoshi text-xl font-bold text-glow-text;
+  }
+
+  .horarios-loja {
+    @apply space-y-5;
+  }
+
+  .horarios-loja-grid {
+    @apply grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6;
+  }
+
+  .horario-dia-card {
+    @apply flex min-h-[360px] flex-col rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)];
+  }
+
+  .horario-dia-card__header {
+    @apply mb-5 flex items-start justify-between gap-2;
+  }
+
+  .horario-dia-card__title {
+    @apply font-urbanist text-base font-semibold text-glow-text;
+  }
+
+  .horario-dia-card__fields {
+    @apply flex flex-1 flex-col gap-5;
+  }
+
+  .horario-dia-card__actions {
+    @apply mt-auto flex flex-col gap-2 pt-5;
+  }
+
+  .horario-field {
+    @apply block space-y-2;
+  }
+
+  .horario-field__label {
+    @apply block font-satoshi text-sm text-glow-text;
+  }
+
+  .horario-field__input {
+    @apply h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-canvas px-[18px] font-inter text-sm text-glow-text outline-none transition placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:bg-glow-hover-surface disabled:text-glow-text-subtle;
+  }
+
+  .horario-field__select-wrap {
+    @apply relative;
+  }
+
+  .horario-field__input--select {
+    @apply appearance-none pr-10;
+  }
+
+  .horario-field__select-wrap::after {
+    content: '';
+    @apply pointer-events-none absolute right-[18px] top-1/2 size-0 -translate-y-1/2 border-x-[5px] border-t-[6px] border-x-transparent border-t-glow-text-subtle;
+  }
+
+  .horario-status-badge {
+    @apply inline-flex h-[14px] items-center justify-center rounded-full px-4 font-urbanist text-xs font-normal leading-none;
+  }
+
+  .horario-status-badge--ativo {
+    @apply bg-[#c4f2cc] text-[#0d5428] dark:bg-emerald-900/30 dark:text-emerald-300;
+  }
+
+  .horario-status-badge--inativo {
+    @apply bg-[rgba(207,63,63,0.2)] text-[#cf3f3f] dark:bg-red-900/30 dark:text-red-300;
+  }
+
+  .horarios-btn-primary {
+    @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl bg-glow-gold-cta px-3.5 font-urbanist text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .horarios-btn-primary--block {
+    @apply w-full;
+  }
+
+  .horarios-btn-outline {
+    @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .horarios-btn-outline--block {
+    @apply w-full;
+  }
+
+  .horarios-btn-outline--sm {
+    @apply h-[30px] min-w-[120px] px-3.5 text-sm;
+  }
+
+  .horarios-btn-ativar {
+    @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl bg-[#c4f2cc] px-3.5 font-urbanist text-sm font-medium text-[#0d5428] transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .horarios-btn-ativar--block {
+    @apply w-full;
+  }
+
+  .horarios-btn-ativar--sm {
+    @apply h-[30px] min-w-[120px] px-3.5 text-sm;
+  }
+
+  .horarios-profissionais,
+  .horarios-profissionais-wrap {
+    @apply space-y-6;
+  }
+
+  .horarios-prof-form-grid {
+    @apply grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,499px)_minmax(0,1fr)];
+  }
+
+  .horarios-panel {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)];
+  }
+
+  .horarios-panel__title {
+    @apply font-urbanist text-base font-semibold text-glow-text;
+  }
+
+  .horarios-panel__hint {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .horarios-checkbox-row {
+    @apply mt-4 flex cursor-pointer items-center gap-2 font-urbanist text-sm text-glow-text;
+  }
+
+  .horarios-checkbox {
+    @apply size-3.5 shrink-0 rounded border-glow-border-soft text-glow-gold focus:ring-glow-gold;
+  }
+
+  .horarios-prof-chips-scroll {
+    @apply mt-4 max-h-[131px] overflow-y-auto pr-1;
+  }
+
+  .horarios-prof-chips {
+    @apply flex flex-wrap gap-2.5;
+  }
+
+  .horarios-prof-chip {
+    @apply inline-flex h-[37px] cursor-pointer items-center gap-2 rounded-lg border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3 font-urbanist text-sm text-glow-text transition;
+  }
+
+  .horarios-prof-chip--selected {
+    @apply border-glow-gold bg-[rgba(255,191,0,0.12)];
+  }
+
+  .horarios-panel__fields {
+    @apply mt-5 grid grid-cols-1 gap-4 md:grid-cols-3;
+  }
+
+  .horarios-panel__actions {
+    @apply mt-6 flex flex-wrap gap-3;
+  }
+
+  .horarios-profissional-filter {
+    @apply max-w-[498px];
+  }
+
+  .horarios-empty-list {
+    @apply font-urbanist text-base text-glow-text-subtle;
+  }
+
+  .horarios-prof-list-grid {
+    @apply grid grid-cols-1 gap-2.5 lg:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .horario-prof-list-card {
+    @apply flex min-h-[86px] flex-col gap-3 rounded-lg border-[0.3px] border-glow-border-soft bg-glow-surface p-4 sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .horario-prof-list-card__main {
+    @apply min-w-0 flex-1;
+  }
+
+  .horario-prof-list-card__title-row {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .horario-prof-list-card__title {
+    @apply font-urbanist text-base text-glow-text;
+  }
+
+  .horario-prof-list-card__time {
+    @apply mt-1 inline-flex items-center gap-2 font-urbanist text-sm text-[rgba(40,40,40,0.6)];
+  }
+
+  .horario-prof-list-card__actions {
+    @apply flex shrink-0 flex-col gap-2 sm:items-end;
+  }
 }

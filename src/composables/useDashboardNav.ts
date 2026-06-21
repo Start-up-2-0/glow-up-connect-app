@@ -24,12 +24,27 @@ function dedupeNavById(items: NavItem[]): NavItem[] {
   })
 }
 
+function clienteNavSemAbrirLoja(items: NavItem[]): NavItem[] {
+  return items
+    .map((item) => {
+      if (item.id !== 'cliente-conta' || !item.children?.length) return item
+      const children = item.children.filter((child) => child.id !== 'abrir-loja')
+      if (children.length === 0) return null
+      return { ...item, children }
+    })
+    .filter((item): item is NavItem => item !== null)
+}
+
 export function useDashboardNav() {
   const userStore = useUserStore()
   const negocioStore = useNegocioStore()
   const { profile } = storeToRefs(userStore)
   const { assinaturaAtiva } = storeToRefs(negocioStore)
-  const { temVinculoNegocio, ehProfissionalOperacional } = useAcessoUsuario()
+  const {
+    temVinculoNegocio,
+    ehProfissionalOperacional,
+    possuiEstabelecimentoProprio,
+  } = useAcessoUsuario()
 
   const navItems = computed(() => {
     const filterCtx = {
@@ -40,17 +55,13 @@ export function useDashboardNav() {
       possuiAlgumaPermissao: negocioStore.possuiAlgumaPermissao,
     }
 
+    const ocultarAbrirLoja =
+      ehProfissionalOperacional.value || possuiEstabelecimentoProprio.value
+    const clienteNav = ocultarAbrirLoja ? clienteNavSemAbrirLoja(clienteNavItems) : clienteNavItems
+
     if (ehProfissionalOperacional.value) {
-      const cliente = clienteNavItems
-        .map((item) => {
-          if (item.id !== 'cliente-conta' || !item.children?.length) return item
-          const children = item.children.filter((child) => child.id !== 'abrir-loja')
-          if (children.length === 0) return null
-          return { ...item, children }
-        })
-        .filter((item): item is NavItem => item !== null)
       const operacao = filterNavItems(profissionalNavItems, filterCtx)
-      return dedupeNavById([...cliente, ...operacao])
+      return dedupeNavById([...clienteNav, ...operacao])
     }
 
     if (temVinculoNegocio.value) {
@@ -58,7 +69,7 @@ export function useDashboardNav() {
         businessNavItems.filter((item) => item.id !== 'dashboard'),
         filterCtx,
       )
-      return dedupeNavById([...clienteNavItems, ...business])
+      return dedupeNavById([...clienteNav, ...business])
     }
 
     if (!isClienteRole(profile.value?.role)) {
