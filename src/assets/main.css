@@ -2361,7 +2361,31 @@
   }
 
   .horario-dia-card {
-    @apply flex min-h-[360px] flex-col rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)];
+    @apply flex min-h-[360px] flex-col rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-colors;
+  }
+
+  .horario-dia-card--editavel {
+    @apply border-glow-gold-dark bg-glow-gold-soft;
+  }
+
+  .horario-dia-card--bloqueado {
+    @apply border-glow-border-soft;
+  }
+
+  .horario-dia-card__hint {
+    @apply mb-4 flex items-start gap-2 rounded-lg border border-glow-border-soft bg-glow-hover-surface px-3 py-2 font-urbanist text-xs leading-snug text-glow-text-subtle;
+  }
+
+  .horario-dia-card__hint--editavel {
+    @apply border-glow-gold-dark bg-glow-gold-soft text-glow-text;
+  }
+
+  .horario-dia-card__hint-icon {
+    @apply mt-0.5 size-3.5 shrink-0 text-glow-text-subtle;
+  }
+
+  .horario-dia-card__hint--editavel .horario-dia-card__hint-icon {
+    @apply text-glow-gold;
   }
 
   .horario-dia-card__header {
@@ -2390,6 +2414,14 @@
 
   .horario-field__input {
     @apply h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-canvas px-[18px] font-inter text-sm text-glow-text outline-none transition placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:bg-glow-hover-surface disabled:text-glow-text-subtle;
+  }
+
+  .horario-field__input--editable {
+    @apply cursor-pointer border-glow-gold-dark bg-white focus:border-glow-gold focus:ring-2 focus:ring-glow-gold-soft dark:bg-glow-canvas;
+  }
+
+  .horario-field__value {
+    @apply flex h-[49px] items-center rounded-lg border border-dashed border-glow-border-soft bg-glow-hover-surface px-[18px] font-inter text-sm text-glow-text-subtle;
   }
 
   .horario-field__select-wrap {

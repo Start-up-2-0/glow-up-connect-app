@@ -28,14 +28,14 @@ export interface ProfissionalHorarioOption {
   nomePublico: string
 }
 
-const HORA_PADRAO_INICIO = '00:00'
-const HORA_PADRAO_FIM = '00:00'
+const HORA_PADRAO_INICIO = '08:00'
+const HORA_PADRAO_FIM = '20:00'
 
 function emptyProfForm() {
   return {
     diaSemana: 'Monday' as DiaSemanaValue,
-    horaInicio: '09:00',
-    horaFim: '18:00',
+    horaInicio: HORA_PADRAO_INICIO,
+    horaFim: HORA_PADRAO_FIM,
   }
 }
 
