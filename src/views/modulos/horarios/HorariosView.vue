@@ -4,6 +4,7 @@ import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import HorarioDiaLojaCard from '@/components/horarios/HorarioDiaLojaCard.vue'
+import HorarioDiaProfissionaisModal from '@/components/horarios/HorarioDiaProfissionaisModal.vue'
 import HorariosPageHeader from '@/components/horarios/HorariosPageHeader.vue'
 import HorariosProfissionaisPanel from '@/components/horarios/HorariosProfissionaisPanel.vue'
 import HorariosTabs from '@/components/horarios/HorariosTabs.vue'
@@ -48,6 +49,21 @@ const {
   alterarStatusProfissional,
   toggleProfissionalForm,
   toggleSelecionarTodosProfissionais,
+  modalProfissionaisAberta,
+  modalProfissionaisDiaLabel,
+  modalLojaHorario,
+  modalLojaAtiva,
+  modalProfissionaisConfigs,
+  modalProfissionaisSaving,
+  modalProfissionaisErro,
+  podeGerenciarProfissionaisPorDia,
+  profissionaisVinculadosPorDia,
+  abrirModalProfissionaisDia,
+  toggleModalProfissionalSelecionado,
+  toggleModalProfissionaisTodos,
+  setModalProfissionalModo,
+  updateModalProfissionalHorario,
+  salvarModalProfissionaisDia,
 } = useHorarios(estabelecimentoId, ready)
 
 const pageTitle = computed(() =>
@@ -97,14 +113,32 @@ function onDraftUpdate(dia: DiaSemanaValue, draft: { horaInicio: string; horaFim
             :modo="modoDiaLoja(dia.value)"
             :draft="draftDiaLoja(dia.value)"
             :saving="savingDia === dia.value"
+            :exibe-profissionais="podeGerenciarProfissionaisPorDia"
+            :profissionais-vinculados="profissionaisVinculadosPorDia.get(dia.value) ?? 0"
             @update:draft="onDraftUpdate(dia.value, $event)"
             @salvar="salvarDiaLoja(dia.value)"
             @ativar="alterarStatusDiaLoja(dia.value, true)"
             @desativar="alterarStatusDiaLoja(dia.value, false)"
             @editar="iniciarEdicaoDiaLoja(dia.value)"
             @cancelar="cancelarEdicaoDiaLoja(dia.value)"
+            @profissionais="abrirModalProfissionaisDia(dia.value)"
           />
         </div>
+
+        <HorarioDiaProfissionaisModal
+          v-model="modalProfissionaisAberta"
+          :dia-label="modalProfissionaisDiaLabel"
+          :loja-horario="modalLojaHorario"
+          :loja-ativa="modalLojaAtiva"
+          :configs="modalProfissionaisConfigs"
+          :saving="modalProfissionaisSaving"
+          :erro="modalProfissionaisErro"
+          @toggle-selecionado="toggleModalProfissionalSelecionado"
+          @toggle-todos="toggleModalProfissionaisTodos"
+          @update-modo="setModalProfissionalModo"
+          @update-horario="updateModalProfissionalHorario"
+          @salvar="salvarModalProfissionaisDia"
+        />
       </section>
 
       <section

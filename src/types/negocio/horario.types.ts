@@ -21,3 +21,15 @@ export interface HorarioPayload {
   horaInicio: string
   horaFim: string
 }
+
+export type HorarioProfissionalModoConfig = 'loja' | 'personalizado'
+
+export interface ProfissionalDiaHorarioConfig {
+  profissionalId: number
+  nomePublico: string
+  selecionado: boolean
+  modo: HorarioProfissionalModoConfig
+  horaInicio: string
+  horaFim: string
+  horarioId: number | null
+}

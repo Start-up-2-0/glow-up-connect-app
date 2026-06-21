@@ -14,6 +14,8 @@ const props = defineProps<{
   draft: DiaLojaDraft
   saving?: boolean
   readonly?: boolean
+  profissionaisVinculados?: number
+  exibeProfissionais?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -23,6 +25,7 @@ const emit = defineEmits<{
   desativar: []
   editar: []
   cancelar: []
+  profissionais: []
 }>()
 
 const inputsEditable = computed(
@@ -120,6 +123,31 @@ function updateDraft(field: keyof DiaLojaDraft, value: string) {
         </div>
       </div>
     </div>
+
+    <button
+      v-if="exibeProfissionais"
+      type="button"
+      class="horario-dia-card__profissionais"
+      @click="emit('profissionais')"
+    >
+      <svg class="horario-dia-card__profissionais-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path
+          d="M8 8C9.65685 8 11 6.65685 11 5C11 3.34315 9.65685 2 8 2C6.34315 2 5 3.34315 5 5C5 6.65685 6.34315 8 8 8Z"
+          stroke="currentColor"
+          stroke-width="1.2"
+        />
+        <path
+          d="M2.66699 14C2.66699 11.4227 4.75656 9.33333 7.33366 9.33333H8.66699C11.2441 9.33333 13.3337 11.4227 13.3337 14"
+          stroke="currentColor"
+          stroke-width="1.2"
+          stroke-linecap="round"
+        />
+      </svg>
+      Profissionais
+      <span v-if="profissionaisVinculados" class="horario-dia-card__profissionais-count">
+        {{ profissionaisVinculados }}
+      </span>
+    </button>
 
     <div v-if="!readonly" class="horario-dia-card__actions">
       <template v-if="modo === 'visualizacao' && horario">

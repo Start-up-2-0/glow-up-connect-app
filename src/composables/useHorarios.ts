@@ -11,8 +11,13 @@ import {
   horaParaExibicao,
   type DiaSemanaValue,
 } from '@/constants/diasSemana'
-import type { HorarioFuncionamento, HorarioProfissional } from '@/types/negocio/horario.types'
+import type { HorarioFuncionamento, HorarioProfissional, ProfissionalDiaHorarioConfig, HorarioProfissionalModoConfig } from '@/types/negocio/horario.types'
 import type { ProfissionalEquipe } from '@/types/negocio/equipe.types'
+import {
+  resolverModoHorarioProfissional,
+  validarIntervaloHorario,
+  horarioDentroDoFuncionamentoLoja,
+} from '@/utils/horarioProfissionalHelpers'
 
 export type HorariosAba = 'loja' | 'profissional'
 
@@ -63,6 +68,11 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
   const editingProfissionalId = ref<number | null>(null)
   const profissionaisFormIds = ref<number[]>([])
   const formProfissional = ref(emptyProfForm())
+  const modalProfissionaisAberta = ref(false)
+  const modalProfissionaisDia = ref<DiaSemanaValue | null>(null)
+  const modalProfissionaisConfigs = ref<ProfissionalDiaHorarioConfig[]>([])
+  const modalProfissionaisSaving = ref(false)
+  const modalProfissionaisErro = ref<string | null>(null)
 
   const temModuloProfissionais = computed(() => possuiModulo('Profissionais'))
   const usaProfissionaisVitrine = computed(() => !temModuloProfissionais.value)
@@ -89,6 +99,36 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
       apenasHorarioProprio.value,
   )
   const exibeAbas = computed(() => podeGerenciarLoja.value && exibeAbaProfissional.value)
+
+  const podeGerenciarProfissionaisPorDia = computed(
+    () =>
+      podeGerenciarLoja.value &&
+      exibeAbaProfissional.value &&
+      listaProfissionaisHorario.value.length > 0,
+  )
+
+  const profissionaisVinculadosPorDia = computed(() => {
+    const map = new Map<DiaSemanaValue, number>()
+    for (const dia of DIAS_SEMANA) {
+      map.set(
+        dia.value,
+        horariosProfissionais.value.filter((h) => h.diaSemana === dia.value && h.ativo).length,
+      )
+    }
+    return map
+  })
+
+  const modalProfissionaisDiaLabel = computed(() => {
+    if (!modalProfissionaisDia.value) return ''
+    return DIAS_SEMANA.find((d) => d.value === modalProfissionaisDia.value)?.label ?? ''
+  })
+
+  const modalLojaHorario = computed(() => {
+    if (!modalProfissionaisDia.value) return null
+    return horariosPorDiaLoja.value.get(modalProfissionaisDia.value) ?? null
+  })
+
+  const modalLojaAtiva = computed(() => modalLojaHorario.value?.ativo === true)
 
   const horariosPorDiaLoja = computed(() => {
     const map = new Map<DiaSemanaValue, HorarioFuncionamento>()
@@ -187,6 +227,202 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
 
   function profissionalMarcadoNoForm(id: number): boolean {
     return profissionaisFormIds.value.includes(id)
+  }
+
+  function resolverHorariosModalConfig(config: ProfissionalDiaHorarioConfig): {
+    horaInicio: string
+    horaFim: string
+  } {
+    const loja = modalLojaHorario.value
+    if (config.modo === 'loja' && loja?.ativo) {
+      return {
+        horaInicio: horaParaExibicao(loja.horaInicio),
+        horaFim: horaParaExibicao(loja.horaFim),
+      }
+    }
+    return { horaInicio: config.horaInicio, horaFim: config.horaFim }
+  }
+
+  function abrirModalProfissionaisDia(dia: DiaSemanaValue) {
+    if (!podeGerenciarProfissionaisPorDia.value) return
+    modalProfissionaisDia.value = dia
+    modalProfissionaisErro.value = null
+    const loja = horariosPorDiaLoja.value.get(dia) ?? null
+    const lojaAtiva = loja?.ativo === true
+    const draft = draftDiaLoja(dia)
+
+    modalProfissionaisConfigs.value = listaProfissionaisHorario.value.map((p) => {
+      const existente =
+        horariosProfissionais.value.find(
+          (h) => h.profissionalId === p.profissionalId && h.diaSemana === dia,
+        ) ?? null
+
+      const lojaInicio = lojaAtiva ? horaParaExibicao(loja!.horaInicio) : draft.horaInicio
+      const lojaFim = lojaAtiva ? horaParaExibicao(loja!.horaFim) : draft.horaFim
+
+      return {
+        profissionalId: p.profissionalId,
+        nomePublico: p.nomePublico,
+        selecionado: existente?.ativo ?? false,
+        modo: existente
+          ? resolverModoHorarioProfissional(existente, lojaAtiva ? loja : null)
+          : lojaAtiva
+            ? 'loja'
+            : 'personalizado',
+        horaInicio: existente ? horaParaExibicao(existente.horaInicio) : lojaInicio,
+        horaFim: existente ? horaParaExibicao(existente.horaFim) : lojaFim,
+        horarioId: existente?.id ?? null,
+      }
+    })
+
+    modalProfissionaisAberta.value = true
+  }
+
+  function fecharModalProfissionaisDia() {
+    modalProfissionaisAberta.value = false
+    modalProfissionaisDia.value = null
+    modalProfissionaisConfigs.value = []
+    modalProfissionaisErro.value = null
+  }
+
+  function updateModalProfissionalConfig(
+    profissionalId: number,
+    patch: Partial<ProfissionalDiaHorarioConfig>,
+  ) {
+    modalProfissionaisConfigs.value = modalProfissionaisConfigs.value.map((c) =>
+      c.profissionalId === profissionalId ? { ...c, ...patch } : c,
+    )
+  }
+
+  function toggleModalProfissionalSelecionado(profissionalId: number) {
+    const config = modalProfissionaisConfigs.value.find((c) => c.profissionalId === profissionalId)
+    if (!config) return
+    updateModalProfissionalConfig(profissionalId, { selecionado: !config.selecionado })
+  }
+
+  function toggleModalProfissionaisTodos() {
+    const marcarTodos = !modalProfissionaisConfigs.value.every((c) => c.selecionado)
+    modalProfissionaisConfigs.value = modalProfissionaisConfigs.value.map((c) => ({
+      ...c,
+      selecionado: marcarTodos,
+    }))
+  }
+
+  function setModalProfissionalModo(profissionalId: number, modo: HorarioProfissionalModoConfig) {
+    const loja = modalLojaHorario.value
+    const patch: Partial<ProfissionalDiaHorarioConfig> = { modo }
+    if (modo === 'loja' && loja?.ativo) {
+      patch.horaInicio = horaParaExibicao(loja.horaInicio)
+      patch.horaFim = horaParaExibicao(loja.horaFim)
+    }
+    updateModalProfissionalConfig(profissionalId, patch)
+  }
+
+  function updateModalProfissionalHorario(
+    profissionalId: number,
+    field: 'horaInicio' | 'horaFim',
+    value: string,
+  ) {
+    updateModalProfissionalConfig(profissionalId, { [field]: value })
+  }
+
+  async function salvarModalProfissionaisDia() {
+    if (!estabelecimentoId.value || !modalProfissionaisDia.value || !podeGerenciarLoja.value) return
+
+    const dia = modalProfissionaisDia.value
+    const loja = modalLojaHorario.value
+    const lojaAtiva = loja?.ativo === true
+    const selecionados = modalProfissionaisConfigs.value.filter((c) => c.selecionado)
+
+    if (selecionados.some((c) => c.modo === 'loja') && !lojaAtiva) {
+      modalProfissionaisErro.value =
+        'Ative o horário da loja neste dia para vincular profissionais ao horário geral.'
+      return
+    }
+
+    for (const config of selecionados) {
+      const { horaInicio, horaFim } = resolverHorariosModalConfig(config)
+      const intervaloErro = validarIntervaloHorario(horaInicio, horaFim)
+      if (intervaloErro) {
+        modalProfissionaisErro.value = `${config.nomePublico}: ${intervaloErro}`
+        return
+      }
+      if (lojaAtiva && loja && !horarioDentroDoFuncionamentoLoja(horaInicio, horaFim, loja)) {
+        modalProfissionaisErro.value = `${config.nomePublico}: o horário deve estar dentro do funcionamento da loja (${horaParaExibicao(loja.horaInicio)}–${horaParaExibicao(loja.horaFim)}).`
+        return
+      }
+    }
+
+    modalProfissionaisSaving.value = true
+    modalProfissionaisErro.value = null
+
+    try {
+      const estId = estabelecimentoId.value
+      let next = [...horariosProfissionais.value]
+
+      for (const config of modalProfissionaisConfigs.value) {
+        const { horaInicio, horaFim } = resolverHorariosModalConfig(config)
+        const payload = {
+          diaSemana: dia,
+          horaInicio: horaParaApi(horaInicio),
+          horaFim: horaParaApi(horaFim),
+        }
+
+        if (config.selecionado) {
+          if (config.horarioId) {
+            const registro = next.find((h) => h.id === config.horarioId)
+            const timesChanged =
+              !registro ||
+              horaParaExibicao(registro.horaInicio) !== horaInicio ||
+              horaParaExibicao(registro.horaFim) !== horaFim
+
+            if (timesChanged) {
+              const atualizado = await horarioService.atualizarProfissional(
+                estId,
+                config.horarioId,
+                payload,
+              )
+              next = next.map((h) => (h.id === config.horarioId ? atualizado : h))
+            }
+
+            const registroAtual = next.find((h) => h.id === config.horarioId)
+            if (registroAtual && !registroAtual.ativo) {
+              const ativado = await horarioService.alterarStatusProfissional(
+                estId,
+                config.horarioId,
+                true,
+              )
+              next = next.map((h) => (h.id === config.horarioId ? ativado : h))
+            }
+          } else {
+            const criado = await horarioService.criarProfissional(
+              estId,
+              config.profissionalId,
+              payload,
+            )
+            next = [...next, criado]
+          }
+        } else if (config.horarioId) {
+          const registro = next.find((h) => h.id === config.horarioId)
+          if (registro?.ativo) {
+            const desativado = await horarioService.alterarStatusProfissional(
+              estId,
+              config.horarioId,
+              false,
+            )
+            next = next.map((h) => (h.id === config.horarioId ? desativado : h))
+          }
+        }
+      }
+
+      horariosProfissionais.value = next
+      notifications.push('success', 'Profissionais vinculados ao dia.')
+      fecharModalProfissionaisDia()
+    } catch (err) {
+      modalProfissionaisErro.value = resolveError(err, 'Não foi possível salvar os vínculos.')
+    } finally {
+      modalProfissionaisSaving.value = false
+    }
   }
 
   async function load() {
@@ -484,6 +720,22 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
     toggleProfissionalForm,
     toggleSelecionarTodosProfissionais,
     profissionalMarcadoNoForm,
+    modalProfissionaisAberta,
+    modalProfissionaisDiaLabel,
+    modalLojaHorario,
+    modalLojaAtiva,
+    modalProfissionaisConfigs,
+    modalProfissionaisSaving,
+    modalProfissionaisErro,
+    podeGerenciarProfissionaisPorDia,
+    profissionaisVinculadosPorDia,
+    abrirModalProfissionaisDia,
+    fecharModalProfissionaisDia,
+    toggleModalProfissionalSelecionado,
+    toggleModalProfissionaisTodos,
+    setModalProfissionalModo,
+    updateModalProfissionalHorario,
+    salvarModalProfissionaisDia,
     load,
   }
 }
