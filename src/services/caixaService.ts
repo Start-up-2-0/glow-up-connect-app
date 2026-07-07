@@ -4,15 +4,20 @@ import { negocioPath } from '@/utils/negocioApi'
 import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
   AtualizarComissaoPayload,
+  BaixarContaPayload,
   CaixaResumo,
   ComissaoExtrato,
   ComissaoProfissional,
+  ConciliacaoItem,
   ContaPagar,
   ContaReceber,
   CriarComissaoPayload,
+  ExportFormato,
+  FinanceiroBuscaResultado,
   FluxoCaixa,
   LancamentoCaixa,
   LancamentoCaixaFiltro,
+  LancamentoCaixaPaginado,
   FinanceiroResumo,
   ReceberAgendamentoPayload,
   ReceberAgendamentoResultado,
@@ -30,7 +35,7 @@ export const caixaService = {
 
   listarLancamentos(estabelecimentoId: number, filtro?: LancamentoCaixaFiltro) {
     return api
-      .get<ApiSuccessResponse<LancamentoCaixa[]>>(
+      .get<ApiSuccessResponse<LancamentoCaixaPaginado>>(
         negocioPath(estabelecimentoId, '/caixa/lancamentos'),
         { params: filtro },
       )
@@ -130,11 +135,55 @@ export const caixaService = {
       .then(unwrapApi)
   },
 
-  exportarRelatorioCsv(estabelecimentoId: number, filtro?: LancamentoCaixaFiltro) {
+  exportarRelatorio(
+    estabelecimentoId: number,
+    formato: ExportFormato = 'csv',
+    filtro?: LancamentoCaixaFiltro,
+  ) {
     return api.get(negocioPath(estabelecimentoId, '/financeiro/relatorios/export'), {
-      params: filtro,
+      params: { ...filtro, formato },
       responseType: 'blob',
     })
+  },
+
+  exportarRelatorioCsv(estabelecimentoId: number, filtro?: LancamentoCaixaFiltro) {
+    return caixaService.exportarRelatorio(estabelecimentoId, 'csv', filtro)
+  },
+
+  buscarFinanceiro(estabelecimentoId: number, params: { q: string; tipo?: string }) {
+    return api
+      .get<ApiSuccessResponse<FinanceiroBuscaResultado>>(
+        negocioPath(estabelecimentoId, '/financeiro/busca'),
+        { params },
+      )
+      .then(unwrapApi)
+  },
+
+  listarConciliacao(estabelecimentoId: number) {
+    return api
+      .get<ApiSuccessResponse<ConciliacaoItem[]>>(
+        negocioPath(estabelecimentoId, '/financeiro/conciliacao'),
+      )
+      .then(unwrapApi)
+  },
+
+  importarConciliacao(
+    estabelecimentoId: number,
+    linhas: { data: string; descricao: string; valor: number }[],
+  ) {
+    return api
+      .post<ApiSuccessResponse<ConciliacaoItem[]>>(
+        negocioPath(estabelecimentoId, '/financeiro/conciliacao/importar'),
+        {
+          linhas: linhas.map((l) => ({
+            descricao: l.descricao,
+            valor: l.valor,
+            data: l.data,
+            referencia: '',
+          })),
+        },
+      )
+      .then(unwrapApi)
   },
 
   listarComissoes(estabelecimentoId: number) {
@@ -203,11 +252,19 @@ export const caixaService = {
       .then(unwrapApi)
   },
 
-  baixarContaReceber(estabelecimentoId: number, contaId: number) {
+  baixarContaReceber(estabelecimentoId: number, contaId: number, payload?: BaixarContaPayload) {
     return api
       .post<ApiSuccessResponse<ContaReceber>>(
         negocioPath(estabelecimentoId, `/financeiro/contas-receber/${contaId}/baixar`),
-        {},
+        payload ?? {},
+      )
+      .then(unwrapApi)
+  },
+
+  cancelarContaReceber(estabelecimentoId: number, contaId: number) {
+    return api
+      .patch<ApiSuccessResponse<ContaReceber>>(
+        negocioPath(estabelecimentoId, `/financeiro/contas-receber/${contaId}/cancelar`),
       )
       .then(unwrapApi)
   },
@@ -240,11 +297,19 @@ export const caixaService = {
       .then(unwrapApi)
   },
 
-  baixarContaPagar(estabelecimentoId: number, contaId: number) {
+  baixarContaPagar(estabelecimentoId: number, contaId: number, payload?: BaixarContaPayload) {
     return api
       .post<ApiSuccessResponse<ContaPagar>>(
         negocioPath(estabelecimentoId, `/financeiro/contas-pagar/${contaId}/baixar`),
-        {},
+        payload ?? {},
+      )
+      .then(unwrapApi)
+  },
+
+  cancelarContaPagar(estabelecimentoId: number, contaId: number) {
+    return api
+      .patch<ApiSuccessResponse<ContaPagar>>(
+        negocioPath(estabelecimentoId, `/financeiro/contas-pagar/${contaId}/cancelar`),
       )
       .then(unwrapApi)
   },

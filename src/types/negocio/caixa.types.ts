@@ -21,6 +21,18 @@ export interface LancamentoCaixa {
 export interface LancamentoCaixaFiltro {
   inicio?: string
   fim?: string
+  q?: string
+  tipo?: string
+  status?: string
+  pagina?: number
+  tamanhoPagina?: number
+}
+
+export interface LancamentoCaixaPaginado {
+  total: number
+  pagina: number
+  tamanhoPagina: number
+  itens: LancamentoCaixa[]
 }
 
 export interface FinanceiroResumo {
@@ -158,4 +170,41 @@ export interface ContaPagar {
   vencimento: string
   recorrente: boolean
   status: string
+}
+
+export interface ConciliacaoItem {
+  id: number
+  lancamentoCaixaId: number | null
+  descricaoExtrato: string
+  valorExtrato: number
+  dataExtrato: string
+  conciliado: boolean
+}
+
+export interface FinanceiroBuscaResultado {
+  lancamentos: LancamentoCaixa[]
+  contasReceber: ContaReceber[]
+  contasPagar: ContaPagar[]
+}
+
+export type ExportFormato = 'csv' | 'xlsx' | 'pdf'
+
+export interface BaixarContaPayload {
+  formaBaixa?: string
+  observacao?: string
+}
+
+export interface AtualizarContaReceberPayload {
+  descricao: string
+  valor: number
+  vencimento: string
+}
+
+export interface AtualizarContaPagarPayload {
+  fornecedor: string
+  categoria: string
+  descricao: string
+  valor: number
+  vencimento: string
+  recorrente: boolean
 }

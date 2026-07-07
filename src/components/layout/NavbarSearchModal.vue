@@ -14,6 +14,12 @@ const props = withDefaults(
 const query = ref('')
 const inputRef = ref<HTMLInputElement | null>(null)
 
+const emit = defineEmits<{ search: [query: string] }>()
+
+watch(query, (value) => {
+  emit('search', value)
+})
+
 watch(open, async (isOpen) => {
   if (!isOpen) {
     query.value = ''
@@ -82,10 +88,12 @@ function onKeydown(event: KeyboardEvent) {
               </button>
             </div>
 
-            <div class="px-4 py-6">
-              <p class="text-center font-urbanist text-sm text-glow-text-subtle">
-                Digite para buscar nas páginas disponíveis no seu menu.
-              </p>
+            <div class="max-h-80 overflow-y-auto px-4 py-4">
+              <slot>
+                <p class="text-center font-urbanist text-sm text-glow-text-subtle">
+                  Digite para buscar nas páginas disponíveis no seu menu.
+                </p>
+              </slot>
             </div>
           </div>
         </Transition>
