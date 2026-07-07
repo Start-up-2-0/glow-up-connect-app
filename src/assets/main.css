@@ -2725,4 +2725,219 @@
   .horarios-modal-profissionais__empty {
     @apply rounded-lg border border-dashed border-glow-border-soft px-4 py-6 text-center font-urbanist text-sm text-glow-text-subtle;
   }
+
+  /* Financeiro */
+  .financeiro-page {
+    @apply space-y-6;
+  }
+
+  .financeiro-page__header {
+    @apply flex flex-col gap-4 border-b border-glow-border-soft pb-6 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .financeiro-page__header-main {
+    @apply min-w-0;
+  }
+
+  .financeiro-page__header-row {
+    @apply flex items-start gap-3;
+  }
+
+  .financeiro-page__back {
+    @apply mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-lg border-[0.5px] border-glow-border-soft text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .financeiro-page__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .financeiro-page__subtitle {
+    @apply mt-1 font-satoshi text-base text-glow-text-subtle;
+  }
+
+  .financeiro-page__actions {
+    @apply flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto sm:justify-end;
+  }
+
+  .financeiro-page__filters {
+    @apply flex flex-wrap items-end gap-3;
+  }
+
+  .financeiro-btn-primary {
+    @apply inline-flex h-[37px] items-center justify-center gap-2 rounded-xl bg-glow-gold-cta px-3.5 font-urbanist text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .financeiro-btn-outline {
+    @apply inline-flex h-[37px] items-center justify-center gap-2 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .financeiro-quick-filters {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .financeiro-quick-filters__btn {
+    @apply inline-flex h-9 items-center justify-center rounded-lg border-[0.5px] border-glow-border-soft bg-glow-surface px-3 font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .financeiro-quick-filters__btn--active {
+    @apply border-glow-gold bg-glow-gold-soft font-semibold text-glow-text;
+  }
+
+  .financeiro-kpi-grid {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .financeiro-kpi-card {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)];
+  }
+
+  .financeiro-kpi-card__label {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .financeiro-kpi-card__value {
+    @apply mt-1 font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .financeiro-kpi-card__value--positive {
+    @apply text-green-700;
+  }
+
+  .financeiro-kpi-card__value--negative {
+    @apply text-[#cf3f3f];
+  }
+
+  .financeiro-table-wrap {
+    @apply overflow-x-auto rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface;
+  }
+
+  .financeiro-table {
+    @apply w-full min-w-[40rem] font-urbanist text-sm;
+  }
+
+  .financeiro-table thead tr {
+    @apply border-b border-glow-border-soft text-left text-glow-text-subtle;
+  }
+
+  .financeiro-table th {
+    @apply px-5 py-3 font-medium;
+  }
+
+  .financeiro-table td {
+    @apply border-b border-glow-border-soft px-5 py-3 text-glow-text;
+  }
+
+  .financeiro-table__row-card {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-4 md:hidden;
+  }
+
+  .financeiro-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 font-urbanist text-xs font-medium;
+  }
+
+  .financeiro-badge--aberta {
+    @apply bg-blue-50 text-blue-700;
+  }
+
+  .financeiro-badge--baixada {
+    @apply bg-glow-hover-surface text-glow-text-subtle;
+  }
+
+  .financeiro-badge--vencida {
+    @apply bg-red-50 text-[#cf3f3f];
+  }
+
+  .financeiro-badge--estornada {
+    @apply bg-amber-50 text-amber-800;
+  }
+
+  .financeiro-empty {
+    @apply flex flex-col items-center gap-4 rounded-xl border border-dashed border-glow-border-soft px-6 py-12 text-center;
+  }
+
+  .financeiro-empty__title {
+    @apply font-satoshi text-lg font-bold text-glow-text;
+  }
+
+  .financeiro-empty__desc {
+    @apply max-w-sm font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .financeiro-atalhos-grid {
+    @apply grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4;
+  }
+
+  .financeiro-atalho-card {
+    @apply flex flex-col gap-1 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-4 text-left transition hover:border-glow-gold hover:bg-glow-hover-surface;
+  }
+
+  .financeiro-atalho-card__label {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .financeiro-atalho-card__desc {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-alert-banner {
+    @apply rounded-xl border px-4 py-3 font-urbanist text-sm;
+  }
+
+  .financeiro-alert-banner--warning {
+    @apply border-amber-200 bg-amber-50 text-amber-900;
+  }
+
+  .financeiro-alert-banner--info {
+    @apply border-green-200 bg-green-50 text-green-800;
+  }
+
+  .financeiro-modal-overlay {
+    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4;
+  }
+
+  .financeiro-modal {
+    @apply flex max-h-[92dvh] w-full max-w-[490px] flex-col overflow-hidden rounded-t-2xl border-[0.5px] border-glow-border-soft bg-glow-surface shadow-xl sm:max-h-[90dvh] sm:rounded-xl;
+  }
+
+  .financeiro-modal__header {
+    @apply space-y-1 border-b border-glow-border-soft px-6 pb-4 pt-6;
+  }
+
+  .financeiro-modal__title {
+    @apply font-satoshi text-lg font-bold text-glow-text;
+  }
+
+  .financeiro-modal__body {
+    @apply flex-1 overflow-y-auto px-6 py-4;
+  }
+
+  .financeiro-modal__footer {
+    @apply flex flex-wrap justify-end gap-2 border-t border-glow-border-soft px-6 py-4;
+  }
+
+  .financeiro-drawer-overlay {
+    @apply fixed inset-0 z-[90] bg-black/30;
+  }
+
+  .financeiro-drawer {
+    @apply fixed inset-y-0 right-0 z-[95] flex w-full max-w-md flex-col border-l border-glow-border-soft bg-glow-surface shadow-xl;
+  }
+
+  .financeiro-search {
+    @apply flex h-10 w-full max-w-md items-center gap-2 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3;
+  }
+
+  .financeiro-search__input {
+    @apply min-w-0 flex-1 bg-transparent font-urbanist text-sm text-glow-text outline-none placeholder:text-glow-placeholder;
+  }
+
+  @media print {
+    .financeiro-no-print {
+      display: none !important;
+    }
+
+    .financeiro-page {
+      @apply space-y-4;
+    }
+  }
 }

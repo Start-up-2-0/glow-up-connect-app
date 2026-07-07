@@ -166,3 +166,6 @@ export const SERVICOS_FORM_LABEL_CLASS =
 
 /** Módulo Equipe (dashboard — Figma node 766:3783) */
 export const EQUIPE_PAGE_CLASS = 'equipe-page'
+
+/** Módulo Financeiro (dashboard) */
+export const FINANCEIRO_PAGE_CLASS = 'financeiro-page'
