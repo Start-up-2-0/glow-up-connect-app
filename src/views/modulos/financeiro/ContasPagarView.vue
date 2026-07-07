@@ -5,6 +5,7 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
+import CriarContaPagarModal from '@/components/financeiro/CriarContaPagarModal.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useNotificationsStore } from '@/stores/notifications.store'
@@ -21,6 +22,8 @@ const { resolveError } = useApiError()
 
 const contas = ref<ContaPagar[]>([])
 const loading = ref(false)
+const actionLoading = ref(false)
+const modalOpen = ref(false)
 const podeGerenciar = () => possuiPermissao('CaixaGerenciar')
 
 async function load() {
@@ -35,38 +38,39 @@ async function load() {
   }
 }
 
-async function criar() {
+async function handleCriar(payload: {
+  fornecedor: string
+  categoria: string
+  descricao: string
+  valor: number
+  vencimento: string
+  recorrente: boolean
+}) {
   if (!estabelecimentoId.value) return
-  const fornecedor = window.prompt('Fornecedor:')
-  const categoria = window.prompt('Categoria:') ?? ''
-  const descricao = window.prompt('Descrição:') ?? ''
-  const valor = Number(window.prompt('Valor:'))
-  const vencimento = window.prompt('Vencimento (AAAA-MM-DD):')
-  if (!fornecedor || !vencimento || !Number.isFinite(valor)) return
+  actionLoading.value = true
   try {
-    await caixaService.criarContaPagar(estabelecimentoId.value, {
-      fornecedor,
-      categoria,
-      descricao,
-      valor,
-      vencimento,
-      recorrente: false,
-    })
+    await caixaService.criarContaPagar(estabelecimentoId.value, payload)
     notifications.push('success', 'Conta criada.')
+    modalOpen.value = false
     await load()
   } catch (err) {
     notifications.push('error', resolveError(err))
+  } finally {
+    actionLoading.value = false
   }
 }
 
 async function baixar(contaId: number) {
   if (!estabelecimentoId.value) return
+  actionLoading.value = true
   try {
     await caixaService.baixarContaPagar(estabelecimentoId.value, contaId)
     notifications.push('success', 'Conta baixada.')
     await load()
   } catch (err) {
     notifications.push('error', resolveError(err))
+  } finally {
+    actionLoading.value = false
   }
 }
 
@@ -78,8 +82,10 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
     <div class="flex items-center justify-between gap-3">
       <h1 class="font-satoshi text-xl font-bold text-glow-text">Contas a pagar</h1>
       <div class="flex gap-2">
-        <BaseButton v-if="podeGerenciar()" size="sm" @click="criar">Nova conta</BaseButton>
-        <RouterLink :to="ROUTE_PATHS.FINANCEIRO"><BaseButton variant="secondary" size="sm">Voltar</BaseButton></RouterLink>
+        <BaseButton v-if="podeGerenciar()" size="sm" @click="modalOpen = true">Nova conta</BaseButton>
+        <RouterLink :to="ROUTE_PATHS.FINANCEIRO">
+          <BaseButton variant="secondary" size="sm">Voltar</BaseButton>
+        </RouterLink>
       </div>
     </div>
     <LoadingSpinner v-if="contextLoading || loading" />
@@ -101,6 +107,7 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
               v-if="podeGerenciar() && conta.status === 'Aberta'"
               size="sm"
               variant="secondary"
+              :disabled="actionLoading"
               @click="baixar(conta.id)"
             >
               Baixar
@@ -109,5 +116,11 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
         </div>
       </div>
     </BaseCard>
+
+    <CriarContaPagarModal
+      v-model="modalOpen"
+      :loading="actionLoading"
+      @confirm="handleCriar"
+    />
   </div>
 </template>
