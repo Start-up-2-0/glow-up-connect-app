@@ -11,13 +11,16 @@ import AgendamentoDetailSection from '@/components/agenda/detail/AgendamentoDeta
 import AgendamentoDetailServices from '@/components/agenda/detail/AgendamentoDetailServices.vue'
 import AgendamentoDetailHistorico from '@/components/agenda/detail/AgendamentoDetailHistorico.vue'
 import RemarcarAgendamentoPanel from '@/components/agenda/detail/RemarcarAgendamentoPanel.vue'
+import ReceberAgendamentoModal from '@/components/financeiro/ReceberAgendamentoModal.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useRemarcarAgendamentoSlots } from '@/composables/useRemarcarAgendamentoSlots'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { agendaNegocioService } from '@/services/agendaNegocioService'
+import { caixaService } from '@/services/caixaService'
 import { ROUTE_PATHS } from '@/constants/routes'
+import type { FormaRecebimentoPresencial } from '@/types/negocio/caixa.types'
 import type {
   AgendaGeral,
   AgendaProfissional,
@@ -53,6 +56,7 @@ const actionLoading = ref(false)
 const atendimentoItemLoadingId = ref<number | null>(null)
 const cancelModalOpen = ref(false)
 const sugerirModalOpen = ref(false)
+const receberModalOpen = ref(false)
 
 const {
   date: sugerirDate,
@@ -83,6 +87,21 @@ const podeFinalizarAtendimento = computed(() => possuiPermissaoFinalizarAtendime
 const podeGerenciarAgenda = computed(
   () => possuiPermissao('AgendaCancelar') || possuiPermissao('AgendaReagendar'),
 )
+const podeReceberPresencial = computed(() => possuiPermissao('CaixaGerenciar'))
+
+const statusElegiveisRecebimento = new Set([
+  'PendentePagamento',
+  'Confirmado',
+  'PendenteConfirmacao',
+  'Remarcado',
+  'EmAtendimento',
+  'Concluido',
+])
+
+const showReceber = computed(() => {
+  const status = agendamento.value?.status
+  return !!status && statusElegiveisRecebimento.has(status) && podeReceberPresencial.value
+})
 
 const subtitle = computed(() =>
   agendamento.value?.inicio ? formatAgendaDetailSubtitle(agendamento.value.inicio) : undefined,
@@ -279,6 +298,24 @@ async function handleConcluirPrimeiroDisponivel() {
   if (itemParaConcluir.value) await handleFinalizarAtendimento(itemParaConcluir.value.id)
 }
 
+async function handleReceber(payload: {
+  formaRecebimento: FormaRecebimentoPresencial
+  valor?: number
+}) {
+  if (!estabelecimentoId.value || !agendamento.value) return
+  actionLoading.value = true
+  try {
+    await caixaService.receberAgendamento(estabelecimentoId.value, agendamento.value.id, payload)
+    notifications.push('success', 'Recebimento registrado no caixa.')
+    receberModalOpen.value = false
+    await load()
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    actionLoading.value = false
+  }
+}
+
 async function handleSugerirRemarcacao() {
   if (!estabelecimentoId.value || !agendamento.value) return
   const slot = getSugerirSlot()
@@ -414,6 +451,7 @@ watch(
           <div
             v-if="
               showConfirmar ||
+              showReceber ||
               podeSugerirRemarcacao ||
               showCancelar ||
               showIniciarAtendimentoGeral ||
@@ -421,6 +459,15 @@ watch(
             "
             class="agendamento-detail-actions"
           >
+            <button
+              v-if="showReceber"
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--confirm min-w-[185px]"
+              :disabled="actionLoading"
+              @click="receberModalOpen = true"
+            >
+              Receber pagamento
+            </button>
             <button
               v-if="showConfirmar && podeGerenciarAgenda"
               type="button"
@@ -510,6 +557,13 @@ watch(
       :confirm-loading="actionLoading"
       @confirm="handleSugerirRemarcacao"
       @cancel="closeSugerirRemarcacao"
+    />
+
+    <ReceberAgendamentoModal
+      v-model="receberModalOpen"
+      :valor-total="agendamento?.valorTotal ?? 0"
+      :loading="actionLoading"
+      @confirm="handleReceber"
     />
   </div>
 </template>

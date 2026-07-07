@@ -9,6 +9,7 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { redeService } from '@/services/redeService'
 import type { RedeResumo } from '@/services/redeService'
+import { formatCurrency } from '@/utils/formatters'
 
 const { ready, error: contextError, loading: contextLoading } = useEstabelecimentoView()
 const { assinaturaId } = useNegocioContext()
@@ -57,7 +58,7 @@ watch(ready, (isReady) => {
     <LoadingSpinner v-else-if="contextLoading || (loading && !resumo)" />
 
     <template v-else-if="resumo">
-      <div class="grid gap-4 sm:grid-cols-2">
+      <div class="grid gap-4 sm:grid-cols-3">
         <BaseCard title="Unidades">
           <p class="font-satoshi text-2xl font-bold text-glow-text">
             {{ resumo.totalUnidades }}
@@ -69,6 +70,11 @@ watch(ready, (isReady) => {
         <BaseCard title="Agendamentos (30 dias)">
           <p class="font-satoshi text-2xl font-bold text-glow-text">
             {{ resumo.totalAgendamentosNoPeriodo }}
+          </p>
+        </BaseCard>
+        <BaseCard title="Faturamento (30 dias)">
+          <p class="font-satoshi text-2xl font-bold text-glow-text">
+            {{ formatCurrency(resumo.totalFaturamentoPeriodo) }}
           </p>
         </BaseCard>
       </div>
@@ -90,8 +96,9 @@ watch(ready, (isReady) => {
               <p class="font-urbanist text-sm font-semibold text-glow-text">{{ unidade.nome }}</p>
               <p v-if="unidade.ehMatriz" class="text-xs text-glow-gold">Matriz</p>
             </div>
-            <span class="text-sm text-glow-text-subtle">
-              {{ unidade.agendamentosNoPeriodo }} agendamentos
+            <span class="text-right text-sm text-glow-text-subtle">
+              <span class="block">{{ unidade.agendamentosNoPeriodo }} agendamentos</span>
+              <span class="font-medium text-glow-text">{{ formatCurrency(unidade.faturamentoPeriodo) }}</span>
             </span>
           </div>
         </div>

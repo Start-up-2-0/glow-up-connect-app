@@ -46,3 +46,116 @@ export interface ComissaoProfissional {
   inicioVigencia: string
   fimVigencia: string | null
 }
+
+export type FormaRecebimentoPresencial =
+  | 'Dinheiro'
+  | 'Pix'
+  | 'CartaoDebito'
+  | 'CartaoCredito'
+  | 'Outro'
+
+export type SubtipoAjusteManual = 'Reforco' | 'Sangria'
+
+export interface RegistrarAjusteCaixaPayload {
+  subtipo: SubtipoAjusteManual
+  valor: number
+  descricao: string
+}
+
+export interface ReceberAgendamentoPayload {
+  formaRecebimento: FormaRecebimentoPresencial
+  valor?: number
+}
+
+export interface ReceberAgendamentoResultado {
+  agendamentoId: number
+  status: string
+  pagamentoId: number
+  lancamentoCaixaId: number
+  valorRecebido: number
+  formaRecebimento: string
+  lancamentosComissaoIds: number[]
+}
+
+export interface SessaoCaixa {
+  id: number
+  caixaId: number
+  usuarioId: number
+  abertoEm: string
+  fechadoEm: string | null
+  saldoInicial: number
+  saldoInformadoFechamento: number | null
+  diferenca: number | null
+  status: string
+}
+
+export interface CriarComissaoPayload {
+  profissionalEstabelecimentoId: number
+  tipoComissao: string
+  percentual?: number | null
+  valorFixo?: number | null
+  inicioVigencia: string
+  fimVigencia?: string | null
+}
+
+export interface AtualizarComissaoPayload {
+  tipoComissao: string
+  percentual?: number | null
+  valorFixo?: number | null
+  inicioVigencia: string
+  fimVigencia?: string | null
+  ativo: boolean
+}
+
+export interface ComissaoExtrato {
+  lancamentoId: number
+  agendamentoId: number | null
+  valor: number
+  descricao: string
+  criadoEm: string
+}
+
+export interface RelatorioAnalitico {
+  faturamentoTotal: number
+  atendimentosPagos: number
+  ticketMedio: number
+  porProfissional: { profissionalId: number; nomePublico: string; faturamento: number; quantidade: number }[]
+  porFormaPagamento: { formaPagamento: string; total: number; quantidade: number }[]
+}
+
+export interface FluxoCaixaDia {
+  data: string
+  saldoInicialDia: number
+  entradas: number
+  saidas: number
+  saldoFinalDia: number
+}
+
+export interface FluxoCaixa {
+  saldoInicial: number
+  dias: FluxoCaixaDia[]
+  saldoFinal: number
+  projecaoReceitaFutura: number | null
+}
+
+export interface ContaReceber {
+  id: number
+  estabelecimentoId: number
+  agendamentoId: number | null
+  descricao: string
+  valor: number
+  vencimento: string
+  status: string
+}
+
+export interface ContaPagar {
+  id: number
+  estabelecimentoId: number
+  fornecedor: string
+  categoria: string
+  descricao: string
+  valor: number
+  vencimento: string
+  recorrente: boolean
+  status: string
+}

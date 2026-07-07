@@ -6,6 +6,7 @@ export interface RedeUnidadeResumo {
   nome: string
   ehMatriz: boolean
   agendamentosNoPeriodo: number
+  faturamentoPeriodo: number
 }
 
 export interface RedeResumo {
@@ -13,6 +14,7 @@ export interface RedeResumo {
   totalUnidades: number
   limiteUnidades: number | null
   totalAgendamentosNoPeriodo: number
+  totalFaturamentoPeriodo: number
   unidades: RedeUnidadeResumo[]
 }
 
