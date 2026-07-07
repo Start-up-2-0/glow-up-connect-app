@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import CurrencyInput from '@/components/ui/CurrencyInput.vue'
 
 const open = defineModel<boolean>({ default: false })
 
@@ -13,14 +14,14 @@ const emit = defineEmits<{
 }>()
 
 const descricao = ref('')
-const valor = ref('')
+const valor = ref(0)
 const vencimento = ref('')
 const agendamentoId = ref('')
 
 watch(open, (isOpen) => {
   if (isOpen) {
     descricao.value = ''
-    valor.value = ''
+    valor.value = 0
     vencimento.value = ''
     agendamentoId.value = ''
   }
@@ -31,18 +32,11 @@ function close() {
 }
 
 function handleConfirm() {
-  const valorNum = Number(valor.value)
-  if (!descricao.value.trim() || !vencimento.value || !Number.isFinite(valorNum) || valorNum <= 0) {
-    return
-  }
-
-  const agendamentoNum = agendamentoId.value.trim()
-    ? Number(agendamentoId.value)
-    : undefined
-
+  if (!descricao.value.trim() || !vencimento.value || valor.value <= 0) return
+  const agendamentoNum = agendamentoId.value.trim() ? Number(agendamentoId.value) : undefined
   emit('confirm', {
     descricao: descricao.value.trim(),
-    valor: valorNum,
+    valor: valor.value,
     vencimento: vencimento.value,
     agendamentoId:
       agendamentoNum !== undefined && Number.isFinite(agendamentoNum) ? agendamentoNum : undefined,
@@ -58,73 +52,43 @@ function handleConfirm() {
       enter-from-class="opacity-0"
       leave-to-class="opacity-0"
     >
-      <div
-        v-if="open"
-        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
-        @click.self="close"
-      >
-        <div
-          class="w-full max-w-md rounded-xl border border-glow-border-soft bg-glow-surface p-5 shadow-xl"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="criar-conta-receber-title"
-        >
-          <h2 id="criar-conta-receber-title" class="font-satoshi text-lg font-bold text-glow-text">
-            Nova conta a receber
-          </h2>
-          <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-            Cadastre um título a receber do estabelecimento.
-          </p>
-
-          <label class="mt-4 block font-urbanist text-sm text-glow-text-subtle">
-            Descrição
-            <input
-              v-model="descricao"
-              type="text"
-              class="mt-1 w-full rounded border border-glow-border-soft bg-glow-canvas px-3 py-2 text-glow-text"
-              placeholder="Ex.: Pacote de serviços"
-            />
-          </label>
-
-          <label class="mt-3 block font-urbanist text-sm text-glow-text-subtle">
-            Valor
-            <input
-              v-model="valor"
-              type="number"
-              min="0"
-              step="0.01"
-              class="mt-1 w-full rounded border border-glow-border-soft bg-glow-canvas px-3 py-2 text-glow-text"
-              placeholder="0,00"
-            />
-          </label>
-
-          <label class="mt-3 block font-urbanist text-sm text-glow-text-subtle">
-            Vencimento
-            <input
-              v-model="vencimento"
-              type="date"
-              class="mt-1 w-full rounded border border-glow-border-soft bg-glow-canvas px-3 py-2 text-glow-text"
-            />
-          </label>
-
-          <label class="mt-3 block font-urbanist text-sm text-glow-text-subtle">
-            Agendamento (opcional)
-            <input
-              v-model="agendamentoId"
-              type="number"
-              min="1"
-              class="mt-1 w-full rounded border border-glow-border-soft bg-glow-canvas px-3 py-2 text-glow-text"
-              placeholder="ID do agendamento"
-            />
-          </label>
-
-          <div class="mt-5 flex justify-end gap-2">
-            <BaseButton variant="secondary" size="sm" :disabled="loading" @click="close">
-              Cancelar
-            </BaseButton>
-            <BaseButton size="sm" :loading="loading" @click="handleConfirm">
-              Salvar
-            </BaseButton>
+      <div v-if="open" class="financeiro-modal-overlay" role="dialog" aria-modal="true" @click.self="close">
+        <div class="financeiro-modal">
+          <div class="financeiro-modal__header">
+            <h2 class="financeiro-modal__title">Nova conta a receber</h2>
+            <p class="font-urbanist text-sm text-glow-text-subtle">Cadastre um título a receber.</p>
+          </div>
+          <div class="financeiro-modal__body space-y-4">
+            <div>
+              <label class="font-urbanist text-sm font-medium text-glow-text">Descrição</label>
+              <input
+                v-model="descricao"
+                type="text"
+                class="mt-1 h-11 w-full rounded-lg border border-glow-border-soft bg-glow-canvas px-3.5 font-urbanist text-sm outline-none focus:border-glow-gold focus:ring-1 focus:ring-glow-gold"
+              />
+            </div>
+            <CurrencyInput v-model="valor" label="Valor" />
+            <div>
+              <label class="font-urbanist text-sm font-medium text-glow-text">Vencimento</label>
+              <input
+                v-model="vencimento"
+                type="date"
+                class="mt-1 h-11 w-full rounded-lg border border-glow-border-soft bg-glow-canvas px-3.5 font-urbanist text-sm outline-none focus:border-glow-gold focus:ring-1 focus:ring-glow-gold"
+              />
+            </div>
+            <div>
+              <label class="font-urbanist text-sm font-medium text-glow-text">Agendamento (opcional)</label>
+              <input
+                v-model="agendamentoId"
+                type="number"
+                min="1"
+                class="mt-1 h-11 w-full rounded-lg border border-glow-border-soft bg-glow-canvas px-3.5 font-urbanist text-sm outline-none focus:border-glow-gold focus:ring-1 focus:ring-glow-gold"
+              />
+            </div>
+          </div>
+          <div class="financeiro-modal__footer">
+            <BaseButton variant="secondary" size="sm" :disabled="loading" @click="close">Cancelar</BaseButton>
+            <BaseButton size="sm" :loading="loading" @click="handleConfirm">Salvar</BaseButton>
           </div>
         </div>
       </div>

@@ -1,19 +1,26 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
-import BaseCard from '@/components/ui/BaseCard.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
+import { useRouter } from 'vue-router'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
-import EmptyState from '@/components/feedback/EmptyState.vue'
+import ContentAlert from '@/components/feedback/ContentAlert.vue'
+import FinanceiroPageHeader from '@/components/financeiro/FinanceiroPageHeader.vue'
+import FinanceiroQuickFilters from '@/components/financeiro/FinanceiroQuickFilters.vue'
 import FinanceiroPeriodoFiltro from '@/components/financeiro/FinanceiroPeriodoFiltro.vue'
+import FinanceiroKpiCard from '@/components/financeiro/FinanceiroKpiCard.vue'
+import FinanceiroEmptyState from '@/components/financeiro/FinanceiroEmptyState.vue'
+import CaixaSessaoBanner from '@/components/financeiro/CaixaSessaoBanner.vue'
 import AjusteCaixaModal from '@/components/financeiro/AjusteCaixaModal.vue'
+import SessaoCaixaModal from '@/components/financeiro/SessaoCaixaModal.vue'
+import EstornarLancamentoModal from '@/components/financeiro/EstornarLancamentoModal.vue'
+import { FINANCEIRO_PAGE_CLASS } from '@/constants/designTokens'
+import { ROUTE_PATHS } from '@/constants/routes'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
+import { useFinanceiroFiltros } from '@/composables/useFinanceiroFiltros'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { caixaService } from '@/services/caixaService'
 import type { CaixaResumo, LancamentoCaixa, SessaoCaixa, SubtipoAjusteManual } from '@/types/negocio/caixa.types'
-import { ROUTE_PATHS } from '@/constants/routes'
 import { formatCurrency, formatDateTime } from '@/utils/formatters'
 
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
@@ -23,36 +30,31 @@ const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 const router = useRouter()
 
+const { periodPreset, inicioCustom, fimCustom, apiFiltro, resetPagina } = useFinanceiroFiltros('hoje')
+
 const resumo = ref<CaixaResumo | null>(null)
 const lancamentos = ref<LancamentoCaixa[]>([])
 const sessao = ref<SessaoCaixa | null>(null)
 const loading = ref(false)
 const actionLoading = ref(false)
-const filtroInicio = ref('')
-const filtroFim = ref('')
 const ajusteModalOpen = ref(false)
+const sessaoModalOpen = ref(false)
+const estornoModalOpen = ref(false)
 const ajusteSubtipo = ref<SubtipoAjusteManual>('Reforco')
+const lancamentoEstorno = ref<LancamentoCaixa | null>(null)
 
 const podeGerenciar = computed(() => possuiPermissao('CaixaGerenciar'))
-
-function filtroAtual() {
-  const filtro: { inicio?: string; fim?: string } = {}
-  if (filtroInicio.value) filtro.inicio = new Date(filtroInicio.value).toISOString()
-  if (filtroFim.value) filtro.fim = new Date(filtroFim.value + 'T23:59:59').toISOString()
-  return filtro
-}
 
 async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
   try {
-    const filtro = filtroAtual()
     const [r, l] = await Promise.all([
       caixaService.obterResumo(estabelecimentoId.value),
-      caixaService.listarLancamentos(estabelecimentoId.value, filtro),
+      caixaService.listarLancamentos(estabelecimentoId.value, apiFiltro.value),
     ])
     resumo.value = r
-    lancamentos.value = l
+    lancamentos.value = l.itens
     try {
       sessao.value = await caixaService.obterSessaoAtual(estabelecimentoId.value)
     } catch {
@@ -63,6 +65,11 @@ async function load() {
   } finally {
     loading.value = false
   }
+}
+
+function onPresetChange() {
+  resetPagina()
+  if (periodPreset.value !== 'custom') void load()
 }
 
 function abrirAjuste(subtipo: SubtipoAjusteManual) {
@@ -89,14 +96,57 @@ async function confirmarAjuste(payload: { valor: number; descricao: string }) {
   }
 }
 
-async function estornar(lancamentoId: number) {
-  if (!estabelecimentoId.value) return
-  const motivo = window.prompt('Motivo do estorno:')
-  if (!motivo?.trim()) return
+function abrirEstorno(l: LancamentoCaixa) {
+  lancamentoEstorno.value = l
+  estornoModalOpen.value = true
+}
+
+async function confirmarEstorno(motivo: string) {
+  if (!estabelecimentoId.value || !lancamentoEstorno.value) return
   actionLoading.value = true
   try {
-    await caixaService.estornarLancamento(estabelecimentoId.value, lancamentoId, motivo.trim())
+    await caixaService.estornarLancamento(
+      estabelecimentoId.value,
+      lancamentoEstorno.value.id,
+      motivo,
+    )
     notifications.push('success', 'Estorno registrado.')
+    estornoModalOpen.value = false
+    await load()
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+function abrirSessaoModal() {
+  sessaoModalOpen.value = true
+}
+
+async function confirmarAbrirSessao(saldoInicial: number) {
+  if (!estabelecimentoId.value) return
+  actionLoading.value = true
+  try {
+    sessao.value = await caixaService.abrirSessao(estabelecimentoId.value, saldoInicial)
+    notifications.push('success', 'Caixa aberto.')
+    sessaoModalOpen.value = false
+    await load()
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+async function confirmarFecharSessao(saldoInformado: number) {
+  if (!estabelecimentoId.value || !sessao.value) return
+  actionLoading.value = true
+  try {
+    await caixaService.fecharSessao(estabelecimentoId.value, sessao.value.id, saldoInformado)
+    notifications.push('success', 'Caixa fechado.')
+    sessao.value = null
+    sessaoModalOpen.value = false
     await load()
   } catch (err) {
     notifications.push('error', resolveError(err))
@@ -114,120 +164,135 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">Caixa</h1>
-        <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">Saldo e movimentações do caixa.</p>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <BaseButton
+  <div :class="FINANCEIRO_PAGE_CLASS">
+    <FinanceiroPageHeader
+      title="Caixa"
+      subtitle="Saldo e movimentações do caixa."
+      :back-to="ROUTE_PATHS.FINANCEIRO"
+    >
+      <template #filters>
+        <FinanceiroQuickFilters
+          v-model="periodPreset"
+          @aplicar="onPresetChange"
+        />
+        <FinanceiroPeriodoFiltro
+          v-if="periodPreset === 'custom'"
+          v-model:inicio="inicioCustom"
+          v-model:fim="fimCustom"
+          @aplicar="load"
+        />
+      </template>
+      <template #actions>
+        <button
           v-if="podeGerenciar"
-          variant="secondary"
-          size="sm"
+          type="button"
+          class="financeiro-btn-outline"
           @click="abrirAjuste('Reforco')"
         >
           Reforço
-        </BaseButton>
-        <BaseButton
+        </button>
+        <button
           v-if="podeGerenciar"
-          variant="secondary"
-          size="sm"
+          type="button"
+          class="financeiro-btn-outline"
           @click="abrirAjuste('Sangria')"
         >
           Sangria
-        </BaseButton>
-        <RouterLink :to="ROUTE_PATHS.FINANCEIRO">
-          <BaseButton variant="secondary" size="sm">Visão geral</BaseButton>
-        </RouterLink>
-      </div>
-    </div>
+        </button>
+      </template>
+    </FinanceiroPageHeader>
 
-    <div
-      v-if="sessao"
-      class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 font-urbanist text-sm text-green-800"
-    >
-      Caixa aberto desde {{ formatDateTime(sessao.abertoEm) }} · saldo inicial
-      {{ formatCurrency(sessao.saldoInicial) }}
-    </div>
-
-    <FinanceiroPeriodoFiltro
-      v-model:inicio="filtroInicio"
-      v-model:fim="filtroFim"
-      @aplicar="load"
+    <CaixaSessaoBanner
+      :sessao="sessao"
+      :pode-gerenciar="podeGerenciar"
+      :loading="actionLoading"
+      @abrir="abrirSessaoModal"
+      @fechar="abrirSessaoModal"
     />
 
-    <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
-    <LoadingSpinner v-if="contextLoading || loading" />
+    <ContentAlert v-if="contextError" variant="error">{{ contextError }}</ContentAlert>
+    <LoadingSpinner v-if="contextLoading || (loading && !resumo)" />
 
     <template v-else>
-      <div v-if="resumo" class="grid gap-4 sm:grid-cols-3">
-        <BaseCard title="Saldo total">
-          <p class="font-satoshi text-xl font-bold text-glow-text">{{ formatCurrency(resumo.saldoTotal) }}</p>
-        </BaseCard>
-        <BaseCard title="Disponível">
-          <p class="font-satoshi text-xl font-bold text-green-700">{{ formatCurrency(resumo.saldoDisponivel) }}</p>
-        </BaseCard>
-        <BaseCard title="Retido">
-          <p class="font-satoshi text-xl font-bold text-glow-text-subtle">{{ formatCurrency(resumo.saldoRetido) }}</p>
-        </BaseCard>
+      <div v-if="resumo" class="financeiro-kpi-grid">
+        <FinanceiroKpiCard label="Saldo total" :value="formatCurrency(resumo.saldoTotal)" />
+        <FinanceiroKpiCard
+          label="Disponível"
+          :value="formatCurrency(resumo.saldoDisponivel)"
+          variant="positive"
+        />
+        <FinanceiroKpiCard label="Retido" :value="formatCurrency(resumo.saldoRetido)" />
       </div>
 
-      <BaseCard title="Lançamentos">
-        <EmptyState
+      <div class="financeiro-table-wrap">
+        <FinanceiroEmptyState
           v-if="lancamentos.length === 0"
           title="Nenhum lançamento"
           description="As movimentações do caixa aparecerão aqui."
         />
-        <div v-else class="overflow-x-auto">
-          <table class="w-full min-w-[40rem] font-urbanist text-sm">
-            <thead>
-              <tr class="border-b border-glow-border-soft text-left text-glow-text-subtle">
-                <th class="pb-2 pr-4 font-medium">Data</th>
-                <th class="pb-2 pr-4 font-medium">Tipo</th>
-                <th class="pb-2 pr-4 font-medium">Descrição</th>
-                <th class="pb-2 pr-4 font-medium">Agendamento</th>
-                <th class="pb-2 text-right font-medium">Valor</th>
-                <th v-if="podeGerenciar" class="pb-2 pl-2 font-medium" />
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="l in lancamentos"
-                :key="l.id"
-                class="border-b border-glow-border-soft/60"
-              >
-                <td class="py-2 pr-4 text-glow-text-subtle">{{ formatDateTime(l.criadoEm) }}</td>
-                <td class="py-2 pr-4 text-glow-text">{{ l.tipo }}</td>
-                <td class="py-2 pr-4 text-glow-text">{{ l.descricao }}</td>
-                <td class="py-2 pr-4">
-                  <button
-                    v-if="l.agendamentoId"
-                    type="button"
-                    class="text-glow-gold underline"
-                    @click="irParaAgendamento(l.agendamentoId)"
-                  >
-                    #{{ l.agendamentoId }}
-                  </button>
-                  <span v-else class="text-glow-text-subtle">—</span>
-                </td>
-                <td class="py-2 text-right font-medium text-glow-text">{{ formatCurrency(l.valor) }}</td>
-                <td v-if="podeGerenciar" class="py-2 pl-2 text-right">
-                  <BaseButton
-                    v-if="l.tipo !== 'Estorno'"
-                    variant="secondary"
-                    size="sm"
-                    :disabled="actionLoading"
-                    @click="estornar(l.id)"
-                  >
-                    Estornar
-                  </BaseButton>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <table v-else class="financeiro-table hidden md:table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Descrição</th>
+              <th>Agendamento</th>
+              <th class="text-right">Valor</th>
+              <th v-if="podeGerenciar" />
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="l in lancamentos" :key="l.id">
+              <td class="text-glow-text-subtle">{{ formatDateTime(l.criadoEm) }}</td>
+              <td>{{ l.tipo }}</td>
+              <td>{{ l.descricao }}</td>
+              <td>
+                <button
+                  v-if="l.agendamentoId"
+                  type="button"
+                  class="text-glow-gold underline"
+                  @click="irParaAgendamento(l.agendamentoId)"
+                >
+                  #{{ l.agendamentoId }}
+                </button>
+                <span v-else class="text-glow-text-subtle">—</span>
+              </td>
+              <td class="text-right font-medium">{{ formatCurrency(l.valor) }}</td>
+              <td v-if="podeGerenciar" class="text-right">
+                <button
+                  v-if="l.tipo !== 'Estorno'"
+                  type="button"
+                  class="financeiro-btn-outline"
+                  :disabled="actionLoading"
+                  @click="abrirEstorno(l)"
+                >
+                  Estornar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="space-y-3 p-3 md:hidden">
+          <div
+            v-for="l in lancamentos"
+            :key="l.id"
+            class="financeiro-table__row-card"
+          >
+            <p class="text-xs text-glow-text-subtle">{{ formatDateTime(l.criadoEm) }}</p>
+            <p class="font-medium text-glow-text">{{ l.descricao }}</p>
+            <p class="text-sm text-glow-text-subtle">{{ l.tipo }}</p>
+            <p class="mt-1 font-bold">{{ formatCurrency(l.valor) }}</p>
+            <button
+              v-if="podeGerenciar && l.tipo !== 'Estorno'"
+              type="button"
+              class="financeiro-btn-outline mt-2"
+              @click="abrirEstorno(l)"
+            >
+              Estornar
+            </button>
+          </div>
         </div>
-      </BaseCard>
+      </div>
     </template>
 
     <AjusteCaixaModal
@@ -235,6 +300,19 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
       :subtipo="ajusteSubtipo"
       :loading="actionLoading"
       @confirm="confirmarAjuste"
+    />
+    <SessaoCaixaModal
+      v-model="sessaoModalOpen"
+      :sessao="sessao"
+      :loading="actionLoading"
+      @abrir="confirmarAbrirSessao"
+      @fechar="confirmarFecharSessao"
+    />
+    <EstornarLancamentoModal
+      v-model="estornoModalOpen"
+      :lancamento="lancamentoEstorno"
+      :loading="actionLoading"
+      @confirm="confirmarEstorno"
     />
   </div>
 </template>
