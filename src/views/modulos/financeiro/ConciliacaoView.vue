@@ -22,11 +22,14 @@ const { possuiPermissao } = useNegocioContext()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 
+const props = defineProps<{
+  embedded?: boolean
+}>()
+
 const itens = ref<ConciliacaoItem[]>([])
 const loading = ref(false)
 const actionLoading = ref(false)
 const importModalOpen = ref(false)
-
 const podeGerenciar = () => possuiPermissao('CaixaGerenciar')
 
 async function load() {
@@ -60,8 +63,9 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
 </script>
 
 <template>
-  <div :class="FINANCEIRO_PAGE_CLASS">
+  <div :class="embedded ? '' : FINANCEIRO_PAGE_CLASS">
     <FinanceiroPageHeader
+      v-if="!embedded"
       title="Conciliação"
       subtitle="Importe extratos e concilie com lançamentos do caixa."
       :back-to="ROUTE_PATHS.FINANCEIRO"
@@ -72,6 +76,12 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
         </button>
       </template>
     </FinanceiroPageHeader>
+
+    <div v-else-if="podeGerenciar()" class="mb-4 flex justify-end">
+      <button type="button" class="financeiro-btn-primary" @click="importModalOpen = true">
+        Importar extrato
+      </button>
+    </div>
 
     <ContentAlert v-if="contextError" variant="error">{{ contextError }}</ContentAlert>
     <LoadingSpinner v-if="contextLoading || loading" />

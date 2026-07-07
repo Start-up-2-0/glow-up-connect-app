@@ -2,7 +2,6 @@
 import { useAppStore } from '@/stores/app.store'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import UpgradeModal from '@/components/access/UpgradeModal.vue'
-import FinanceiroGlobalSearch from '@/components/financeiro/FinanceiroGlobalSearch.vue'
 
 const appStore = useAppStore()
 </script>
@@ -63,6 +62,5 @@ const appStore = useAppStore()
     </div>
 
     <UpgradeModal />
-    <FinanceiroGlobalSearch />
   </div>
 </template>

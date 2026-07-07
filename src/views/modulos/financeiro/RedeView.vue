@@ -18,6 +18,10 @@ import { redeService } from '@/services/redeService'
 import type { RedeResumo } from '@/services/redeService'
 import { formatCurrency } from '@/utils/formatters'
 
+const props = defineProps<{
+  embedded?: boolean
+}>()
+
 const { ready, error: contextError, loading: contextLoading } = useEstabelecimentoView()
 const { assinaturaId } = useNegocioContext()
 const notifications = useNotificationsStore()
@@ -56,8 +60,9 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
 </script>
 
 <template>
-  <div :class="FINANCEIRO_PAGE_CLASS">
+  <div :class="embedded ? '' : FINANCEIRO_PAGE_CLASS">
     <FinanceiroPageHeader
+      v-if="!embedded"
       title="Painel da rede"
       subtitle="Visão consolidada das unidades do plano Premium."
       :back-to="ROUTE_PATHS.FINANCEIRO"
@@ -72,6 +77,16 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
         />
       </template>
     </FinanceiroPageHeader>
+
+    <div v-else class="mb-4 flex flex-wrap gap-3">
+      <FinanceiroQuickFilters v-model="periodPreset" @aplicar="onPresetChange" />
+      <FinanceiroPeriodoFiltro
+        v-if="periodPreset === 'custom'"
+        v-model:inicio="inicioCustom"
+        v-model:fim="fimCustom"
+        @aplicar="load"
+      />
+    </div>
 
     <ContentAlert v-if="contextError" variant="error">{{ contextError }}</ContentAlert>
     <FinanceiroEmptyState

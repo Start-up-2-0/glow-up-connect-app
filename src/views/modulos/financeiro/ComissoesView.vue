@@ -21,6 +21,7 @@ import type {
   ComissaoExtrato,
   ComissaoProfissional,
   CriarComissaoPayload,
+  LancamentoCaixa,
 } from '@/types/negocio/caixa.types'
 import type { ProfissionalEquipe } from '@/types/negocio/equipe.types'
 import { formatCurrency, formatDateTime } from '@/utils/formatters'
@@ -32,10 +33,16 @@ const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 const route = useRoute()
 
-const abaInicial = (route.query.aba as string) === 'extrato' ? 'extrato' : 'regras'
+const abaInicial = (() => {
+  const q = route.query.aba as string
+  if (q === 'extrato') return 'extrato'
+  if (q === 'historico') return 'historico'
+  return 'regras'
+})()
 const aba = ref(abaInicial)
 const comissoes = ref<ComissaoProfissional[]>([])
 const extrato = ref<ComissaoExtrato[]>([])
+const historico = ref<LancamentoCaixa[]>([])
 const profissionais = ref<ProfissionalEquipe[]>([])
 const loading = ref(false)
 const actionLoading = ref(false)
@@ -53,10 +60,21 @@ const podeVerExtrato = computed(
 
 const abaOptions = computed(() => {
   const opts = []
-  if (podeGerenciar.value) opts.push({ value: 'regras', label: 'Regras' })
+  if (podeGerenciar.value) {
+    opts.push({ value: 'regras', label: 'Regras' })
+    opts.push({ value: 'historico', label: 'Histórico' })
+  }
   if (podeVerExtrato.value) opts.push({ value: 'extrato', label: 'Meu extrato' })
   return opts
 })
+
+async function loadHistorico() {
+  if (!estabelecimentoId.value || !podeGerenciar.value) return
+  const filtro: { inicio?: string; fim?: string; tipo?: string } = { tipo: 'ComissaoProfissional' }
+  if (filtroInicio.value) filtro.inicio = new Date(filtroInicio.value).toISOString()
+  if (filtroFim.value) filtro.fim = new Date(filtroFim.value + 'T23:59:59').toISOString()
+  historico.value = await caixaService.listarRelatorioFinanceiro(estabelecimentoId.value, filtro)
+}
 
 async function loadRegras() {
   if (!estabelecimentoId.value || !podeGerenciar.value) return
@@ -84,7 +102,10 @@ async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
   try {
-    await Promise.all([loadRegras(), loadExtrato(), loadProfissionais()])
+    if (aba.value === 'regras') await loadRegras()
+    else if (aba.value === 'extrato') await loadExtrato()
+    else if (aba.value === 'historico') await loadHistorico()
+    if (aba.value === 'regras' || aba.value === 'extrato') await loadProfissionais()
   } catch (err) {
     notifications.push('error', resolveError(err))
   } finally {
@@ -108,7 +129,7 @@ function abrirEditar(c: ComissaoProfissional) {
   formModalOpen.value = true
 }
 
-function abrirDesativar(id: number) {
+function abrirPausar(id: number) {
   comissaoDesativarId.value = id
   confirmDesativarOpen.value = true
 }
@@ -140,12 +161,12 @@ async function salvarComissao(payload: CriarComissaoPayload) {
   }
 }
 
-async function confirmarDesativar() {
+async function confirmarPausar() {
   if (!estabelecimentoId.value || !comissaoDesativarId.value) return
   actionLoading.value = true
   try {
     await caixaService.desativarComissao(estabelecimentoId.value, comissaoDesativarId.value)
-    notifications.push('success', 'Comissão desativada.')
+    notifications.push('success', 'Regra pausada.')
     confirmDesativarOpen.value = false
     await loadRegras()
   } catch (err) {
@@ -180,10 +201,10 @@ watch(aba, () => void load())
           aria-label="Visão de comissões"
         />
         <FinanceiroPeriodoFiltro
-          v-if="aba === 'extrato'"
+          v-if="aba === 'extrato' || aba === 'historico'"
           v-model:inicio="filtroInicio"
           v-model:fim="filtroFim"
-          @aplicar="loadExtrato"
+          @aplicar="aba === 'extrato' ? loadExtrato() : loadHistorico()"
         />
       </template>
       <template v-if="podeGerenciar && aba === 'regras'" #actions>
@@ -225,7 +246,7 @@ watch(aba, () => void load())
               class="inline-flex rounded-full px-2 py-0.5 font-urbanist text-xs"
               :class="c.ativo ? 'bg-green-100 text-green-800' : 'bg-glow-canvas text-glow-text-subtle'"
             >
-              {{ c.ativo ? 'Ativa' : 'Inativa' }}
+              {{ c.ativo ? 'Ativa' : 'Pausada' }}
             </span>
             <button
               v-if="podeGerenciar && c.ativo"
@@ -239,16 +260,42 @@ watch(aba, () => void load())
               v-if="podeGerenciar && c.ativo"
               type="button"
               class="financeiro-btn-outline"
-              @click="abrirDesativar(c.id)"
+              @click="abrirPausar(c.id)"
             >
-              Desativar
+              Pausar regra
             </button>
           </div>
         </div>
       </div>
     </template>
 
-    <template v-else>
+    <template v-else-if="aba === 'historico'">
+      <FinanceiroEmptyState
+        v-if="historico.length === 0"
+        title="Nenhuma comissão paga"
+        description="Pagamentos de comissão aparecerão aqui."
+      />
+      <div v-else class="financeiro-table-wrap">
+        <table class="financeiro-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Descrição</th>
+              <th class="text-right">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in historico" :key="item.id">
+              <td class="text-glow-text-subtle">{{ formatDateTime(item.criadoEm) }}</td>
+              <td>{{ item.descricao }}</td>
+              <td class="text-right font-medium">{{ formatCurrency(item.valor) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </template>
+
+    <template v-else-if="aba === 'extrato'">
       <FinanceiroEmptyState
         v-if="extrato.length === 0"
         title="Nenhuma comissão no período"
@@ -285,12 +332,12 @@ watch(aba, () => void load())
     />
     <FinanceiroConfirmDialog
       v-model="confirmDesativarOpen"
-      title="Desativar comissão"
+      title="Pausar regra?"
       message="Esta regra deixará de ser aplicada em novos recebimentos."
-      confirm-label="Desativar"
+      confirm-label="Pausar regra"
       variant="danger"
       :loading="actionLoading"
-      @confirm="confirmarDesativar"
+      @confirm="confirmarPausar"
     />
   </div>
 </template>

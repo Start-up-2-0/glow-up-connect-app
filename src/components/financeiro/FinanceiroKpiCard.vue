@@ -2,6 +2,7 @@
 defineProps<{
   label: string
   value: string
+  hint?: string
   variant?: 'default' | 'positive' | 'negative'
 }>()
 </script>
@@ -18,5 +19,6 @@ defineProps<{
     >
       {{ value }}
     </p>
+    <p v-if="hint" class="mt-1 font-urbanist text-xs text-glow-text-subtle">{{ hint }}</p>
   </div>
 </template>

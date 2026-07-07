@@ -125,42 +125,46 @@ export const modulosRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: ROUTE_PATHS.FINANCEIRO_CAIXA,
-    name: ROUTE_NAMES.FINANCEIRO_CAIXA,
-    component: () => import('@/views/modulos/financeiro/CaixaView.vue'),
+    path: ROUTE_PATHS.FINANCEIRO_ENTRADAS,
+    name: ROUTE_NAMES.FINANCEIRO_ENTRADAS,
+    component: () => import('@/views/modulos/financeiro/EntradasView.vue'),
     meta: {
       layout: 'dashboard',
       requiresAuth: true,
       businessOnly: true,
-      requerModulo: 'Caixa',
+      requerModulos: ['Caixa', 'Financeiro'],
       requerPermissao: 'CaixaVisualizar',
-      title: 'Caixa',
+      title: 'Entradas',
     },
+  },
+  {
+    path: ROUTE_PATHS.FINANCEIRO_SAIDAS,
+    name: ROUTE_NAMES.FINANCEIRO_SAIDAS,
+    component: () => import('@/views/modulos/financeiro/SaidasView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulos: ['Caixa', 'Financeiro'],
+      requerPermissao: 'CaixaVisualizar',
+      title: 'Saídas',
+    },
+  },
+  {
+    path: ROUTE_PATHS.FINANCEIRO_CAIXA,
+    redirect: ROUTE_PATHS.FINANCEIRO_ENTRADAS,
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_MOVIMENTACOES,
-    name: ROUTE_NAMES.FINANCEIRO_MOVIMENTACOES,
-    component: () => import('@/views/modulos/financeiro/MovimentacoesView.vue'),
-    meta: {
-      layout: 'dashboard',
-      requiresAuth: true,
-      businessOnly: true,
-      requerModulo: 'Financeiro',
-      requerPermissao: 'CaixaVisualizar',
-      title: 'Movimentações',
-    },
+    redirect: ROUTE_PATHS.FINANCEIRO_ENTRADAS,
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_CONTAS,
-    name: ROUTE_NAMES.FINANCEIRO_CONTAS,
-    component: () => import('@/views/modulos/financeiro/ContasView.vue'),
-    meta: {
-      layout: 'dashboard',
-      requiresAuth: true,
-      businessOnly: true,
-      requerModulo: 'Financeiro',
-      requerPermissao: 'CaixaVisualizar',
-      title: 'Contas',
+    redirect: (to) => {
+      if (to.query.aba === 'pagar') {
+        return { path: ROUTE_PATHS.FINANCEIRO_SAIDAS, query: { status: 'pendente' } }
+      }
+      return { path: ROUTE_PATHS.FINANCEIRO_ENTRADAS, query: { status: 'pendente' } }
     },
   },
   {
@@ -191,29 +195,11 @@ export const modulosRoutes: RouteRecordRaw[] = [
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_CONCILIACAO,
-    name: ROUTE_NAMES.FINANCEIRO_CONCILIACAO,
-    component: () => import('@/views/modulos/financeiro/ConciliacaoView.vue'),
-    meta: {
-      layout: 'dashboard',
-      requiresAuth: true,
-      businessOnly: true,
-      requerModulo: 'Financeiro',
-      requerPermissao: 'CaixaVisualizar',
-      title: 'Conciliação',
-    },
+    redirect: { path: ROUTE_PATHS.FINANCEIRO_RELATORIOS, query: { secao: 'conciliacao' } },
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_REDE,
-    name: ROUTE_NAMES.FINANCEIRO_REDE,
-    component: () => import('@/views/modulos/financeiro/RedeView.vue'),
-    meta: {
-      layout: 'dashboard',
-      requiresAuth: true,
-      businessOnly: true,
-      requerModulo: 'Financeiro',
-      requerPermissao: 'CaixaVisualizar',
-      title: 'Painel da rede',
-    },
+    redirect: { path: ROUTE_PATHS.FINANCEIRO_RELATORIOS, query: { secao: 'rede' } },
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_MINHAS_COMISSOES,
@@ -221,11 +207,11 @@ export const modulosRoutes: RouteRecordRaw[] = [
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_CONTAS_RECEBER,
-    redirect: { path: ROUTE_PATHS.FINANCEIRO_CONTAS, query: { aba: 'receber' } },
+    redirect: { path: ROUTE_PATHS.FINANCEIRO_ENTRADAS, query: { status: 'pendente' } },
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_CONTAS_PAGAR,
-    redirect: { path: ROUTE_PATHS.FINANCEIRO_CONTAS, query: { aba: 'pagar' } },
+    redirect: { path: ROUTE_PATHS.FINANCEIRO_SAIDAS, query: { status: 'pendente' } },
   },
   {
     path: ROUTE_PATHS.CONFIG_EQUIPE,
