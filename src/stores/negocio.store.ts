@@ -164,6 +164,17 @@ export const useNegocioStore = defineStore('negocio', () => {
     return estabelecimentoAtivo.value
   }
 
+  function patchEstabelecimentoAtivo(patch: Partial<Pick<EstabelecimentoAcesso, 'nome' | 'logo'>>) {
+    const id = estabelecimentoIdSelecionado.value
+    if (id === null) return
+    const index = estabelecimentos.value.findIndex((e) => e.estabelecimentoId === id)
+    if (index === -1) return
+    estabelecimentos.value[index] = {
+      ...estabelecimentos.value[index],
+      ...patch,
+    }
+  }
+
   function clear() {
     estabelecimentos.value = []
     estabelecimentoIdSelecionado.value = null
@@ -199,6 +210,7 @@ export const useNegocioStore = defineStore('negocio', () => {
     trocarEstabelecimento,
     fetchEstabelecimentos,
     ensureContext,
+    patchEstabelecimentoAtivo,
     clear,
   }
 })
