@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import BaseCard from '@/components/ui/BaseCard.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
-import EmptyState from '@/components/feedback/EmptyState.vue'
+import ContentAlert from '@/components/feedback/ContentAlert.vue'
+import FinanceiroPageHeader from '@/components/financeiro/FinanceiroPageHeader.vue'
+import FinanceiroQuickFilters from '@/components/financeiro/FinanceiroQuickFilters.vue'
+import FinanceiroPeriodoFiltro from '@/components/financeiro/FinanceiroPeriodoFiltro.vue'
+import FinanceiroKpiCard from '@/components/financeiro/FinanceiroKpiCard.vue'
+import FinanceiroEmptyState from '@/components/financeiro/FinanceiroEmptyState.vue'
+import { FINANCEIRO_PAGE_CLASS } from '@/constants/designTokens'
+import { ROUTE_PATHS } from '@/constants/routes'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
+import { useFinanceiroFiltros } from '@/composables/useFinanceiroFiltros'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { redeService } from '@/services/redeService'
@@ -16,6 +23,8 @@ const { assinaturaId } = useNegocioContext()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 
+const { periodPreset, inicioCustom, fimCustom, dateRange, resetPagina } = useFinanceiroFiltros('mes')
+
 const resumo = ref<RedeResumo | null>(null)
 const loading = ref(false)
 
@@ -25,7 +34,12 @@ async function load() {
   if (!assinaturaId.value) return
   loading.value = true
   try {
-    resumo.value = await redeService.obterResumo(assinaturaId.value)
+    const range = dateRange.value
+    resumo.value = await redeService.obterResumo(
+      assinaturaId.value,
+      range?.inicio,
+      range?.fim,
+    )
   } catch (err) {
     notifications.push('error', resolveError(err))
   } finally {
@@ -33,24 +47,34 @@ async function load() {
   }
 }
 
-watch(ready, (isReady) => {
-  if (isReady) void load()
-}, { immediate: true })
+function onPresetChange() {
+  resetPagina()
+  if (periodPreset.value !== 'custom') void load()
+}
+
+watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div>
-      <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-        Painel da rede
-      </h1>
-      <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-        Visão consolidada das unidades vinculadas ao seu plano Premium.
-      </p>
-    </div>
+  <div :class="FINANCEIRO_PAGE_CLASS">
+    <FinanceiroPageHeader
+      title="Painel da rede"
+      subtitle="Visão consolidada das unidades do plano Premium."
+      :back-to="ROUTE_PATHS.FINANCEIRO"
+    >
+      <template #filters>
+        <FinanceiroQuickFilters v-model="periodPreset" @aplicar="onPresetChange" />
+        <FinanceiroPeriodoFiltro
+          v-if="periodPreset === 'custom'"
+          v-model:inicio="inicioCustom"
+          v-model:fim="fimCustom"
+          @aplicar="load"
+        />
+      </template>
+    </FinanceiroPageHeader>
 
-    <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
-    <EmptyState
+    <ContentAlert v-if="contextError" variant="error">{{ contextError }}</ContentAlert>
+    <FinanceiroEmptyState
       v-else-if="!podeExibir"
       title="Assinatura não encontrada"
       description="Selecione a unidade matriz com assinatura Premium ativa."
@@ -58,51 +82,42 @@ watch(ready, (isReady) => {
     <LoadingSpinner v-else-if="contextLoading || (loading && !resumo)" />
 
     <template v-else-if="resumo">
-      <div class="grid gap-4 sm:grid-cols-3">
-        <BaseCard title="Unidades">
-          <p class="font-satoshi text-2xl font-bold text-glow-text">
-            {{ resumo.totalUnidades }}
-            <span v-if="resumo.limiteUnidades" class="text-base font-medium text-glow-text-subtle">
-              / {{ resumo.limiteUnidades }}
-            </span>
-          </p>
-        </BaseCard>
-        <BaseCard title="Agendamentos (30 dias)">
-          <p class="font-satoshi text-2xl font-bold text-glow-text">
-            {{ resumo.totalAgendamentosNoPeriodo }}
-          </p>
-        </BaseCard>
-        <BaseCard title="Faturamento (30 dias)">
-          <p class="font-satoshi text-2xl font-bold text-glow-text">
-            {{ formatCurrency(resumo.totalFaturamentoPeriodo) }}
-          </p>
-        </BaseCard>
+      <div class="financeiro-kpi-grid">
+        <FinanceiroKpiCard
+          :label="`Unidades${resumo.limiteUnidades ? ` / ${resumo.limiteUnidades}` : ''}`"
+          :value="String(resumo.totalUnidades)"
+        />
+        <FinanceiroKpiCard
+          label="Agendamentos no período"
+          :value="String(resumo.totalAgendamentosNoPeriodo)"
+        />
+        <FinanceiroKpiCard
+          label="Faturamento no período"
+          :value="formatCurrency(resumo.totalFaturamentoPeriodo)"
+        />
       </div>
 
-      <BaseCard title="Unidades">
-        <div v-if="resumo.unidades.length === 0">
-          <EmptyState
-            title="Nenhuma unidade"
-            description="Adicione unidades na página de assinatura."
-          />
-        </div>
-        <div v-else class="space-y-2">
-          <div
-            v-for="unidade in resumo.unidades"
-            :key="unidade.estabelecimentoId"
-            class="flex items-center justify-between rounded-lg border border-glow-border-soft px-4 py-3"
-          >
-            <div>
-              <p class="font-urbanist text-sm font-semibold text-glow-text">{{ unidade.nome }}</p>
-              <p v-if="unidade.ehMatriz" class="text-xs text-glow-gold">Matriz</p>
-            </div>
-            <span class="text-right text-sm text-glow-text-subtle">
-              <span class="block">{{ unidade.agendamentosNoPeriodo }} agendamentos</span>
-              <span class="font-medium text-glow-text">{{ formatCurrency(unidade.faturamentoPeriodo) }}</span>
-            </span>
+      <div class="space-y-2">
+        <div
+          v-for="unidade in resumo.unidades"
+          :key="unidade.estabelecimentoId"
+          class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-glow-border-soft bg-glow-surface px-4 py-3"
+        >
+          <div>
+            <p class="font-urbanist text-sm font-semibold text-glow-text">{{ unidade.nome }}</p>
+            <p v-if="unidade.ehMatriz" class="text-xs text-glow-gold">Matriz</p>
+          </div>
+          <div class="text-right font-urbanist text-sm">
+            <p class="text-glow-text-subtle">{{ unidade.agendamentosNoPeriodo }} agendamentos</p>
+            <p class="font-medium text-glow-text">{{ formatCurrency(unidade.faturamentoPeriodo) }}</p>
           </div>
         </div>
-      </BaseCard>
+        <FinanceiroEmptyState
+          v-if="resumo.unidades.length === 0"
+          title="Nenhuma unidade"
+          description="Adicione unidades na página de assinatura."
+        />
+      </div>
     </template>
   </div>
 </template>
