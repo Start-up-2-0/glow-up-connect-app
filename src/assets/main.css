@@ -591,6 +591,16 @@
     @apply max-h-dvh;
   }
 
+  .dark .dashboard-shell {
+    background:
+      radial-gradient(ellipse 100% 55% at 50% -8%, rgba(255, 191, 0, 0.08), transparent 52%),
+      var(--glow-bg-base);
+  }
+
+  .dark .dashboard-main {
+    background: transparent;
+  }
+
   /* Sidebar nav — rolagem funcional sem barra visível */
   .sidebar-nav-scroll {
     scrollbar-width: none;

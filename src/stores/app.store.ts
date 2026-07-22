@@ -1,18 +1,11 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { STORAGE_KEYS } from '@/constants/storageKeys'
 import type { Theme } from '@/types/theme.types'
-
-function isTheme(value: string | null): value is Theme {
-  return value === 'light' || value === 'dark'
-}
-
-const DEFAULT_THEME: Theme = 'dark'
-
-function applyThemeToDocument(theme: Theme) {
-  if (typeof document === 'undefined') return
-  document.documentElement.classList.toggle('dark', theme === 'dark')
-}
+import {
+  applyThemeToDocument,
+  persistTheme,
+  resolveStoredTheme,
+} from '@/utils/themeStorage'
 
 export interface UpgradeModalState {
   open: boolean
@@ -52,7 +45,7 @@ export const useAppStore = defineStore('app', () => {
   function applyTheme(value: Theme) {
     theme.value = value
     applyThemeToDocument(value)
-    localStorage.setItem(STORAGE_KEYS.THEME, value)
+    persistTheme(value)
   }
 
   function toggleTheme() {
@@ -60,8 +53,7 @@ export const useAppStore = defineStore('app', () => {
   }
 
   function hydrateTheme() {
-    const saved = localStorage.getItem(STORAGE_KEYS.THEME)
-    applyTheme(isTheme(saved) ? saved : DEFAULT_THEME)
+    applyTheme(resolveStoredTheme())
   }
 
   function openUpgradeModal(payload?: Omit<UpgradeModalState, 'open'>) {
@@ -90,4 +82,5 @@ export const useAppStore = defineStore('app', () => {
   }
 })
 
-export { applyThemeToDocument, isTheme }
+export { applyThemeToDocument } from '@/utils/themeStorage'
+export type { Theme } from '@/types/theme.types'
