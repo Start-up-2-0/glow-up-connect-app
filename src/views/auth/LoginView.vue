@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import AuthSplashPanel from '@/components/auth/AuthSplashPanel.vue'
-import AuthMobileBrand from '@/components/auth/AuthMobileBrand.vue'
+import loginCrest from '@/assets/logo/logo.png'
 import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
 import { useAuth } from '@/composables/useAuth'
 import { useApiError } from '@/composables/useApiError'
@@ -15,7 +14,16 @@ import {
   readRedirectParam,
   redirectQuery,
 } from '@/utils/authRedirect'
-import { GLOW_AUTH_PANEL_CLASS, GLOW_BUTTON_PRIMARY_CLASS, GLOW_INPUT_CLASS } from '@/constants/designTokens'
+import { useCaptcha } from '@/composables/useCaptcha'
+import AuthRecaptcha from '@/components/auth/AuthRecaptcha.vue'
+import {
+  GLOW_BUTTON_PRIMARY_CLASS,
+  GLOW_INPUT_CLASS,
+  GLOW_LABEL_CLASS,
+  GLOW_LINK_CLASS,
+  GLOW_LOGIN_CONTENT_CLASS,
+  GLOW_LOGIN_PAGE_CLASS,
+} from '@/constants/designTokens'
 
 const REMEMBER_EMAIL_KEY = 'guc_remember_email'
 
@@ -25,6 +33,9 @@ const { login, loading } = useAuth()
 const { setStoredEmail } = useConfirmEmail()
 const { resolveError, resolveErrorCode } = useApiError()
 const notificationsStore = useNotificationsStore()
+const captchaRef = ref<InstanceType<typeof AuthRecaptcha> | null>(null)
+const captchaResetNonce = ref(0)
+const { enabled: captchaEnabled } = useCaptcha()
 
 const email = ref('')
 const senha = ref('')
@@ -57,9 +68,19 @@ async function handleSubmit() {
   }
 
   try {
-    await login({ email: email.value, senha: senha.value }, checkoutRedirect.value)
+    const captchaToken = captchaRef.value?.getToken()
+    if (captchaEnabled && !captchaToken) {
+      errorMessage.value = 'Marque o reCAPTCHA antes de continuar.'
+      return
+    }
+
+    await login(
+      { email: email.value, senha: senha.value, captchaToken },
+      checkoutRedirect.value,
+    )
     notificationsStore.push('success', 'Login realizado com sucesso!')
   } catch (err) {
+    captchaResetNonce.value += 1
     if (resolveErrorCode(err) === 'EMAIL_NAO_CONFIRMADO') {
       notificationsStore.push('info', 'Confirme seu e-mail antes de entrar.')
       setStoredEmail(email.value.trim())
@@ -75,115 +96,112 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="relative flex min-h-screen bg-white">
-    <AuthSplashPanel />
+  <div :class="GLOW_LOGIN_PAGE_CLASS">
+    <div :class="GLOW_LOGIN_CONTENT_CLASS">
+      <img
+        :src="loginCrest"
+        alt="Glow Up Connect"
+        class="mb-[22px] h-[145px] w-[145px] shrink-0 object-contain"
+        width="145"
+        height="145"
+      />
 
-    <main :class="GLOW_AUTH_PANEL_CLASS">
-      <div class="w-full max-w-[494px]">
-        <AuthMobileBrand />
-
-        <header class="mb-[13px]">
-          <h1 class="font-satoshi text-3xl font-bold text-zinc-800">
-            Bem-vindo ao Glow Up Connect
-          </h1>
-          <p class="mt-[5px] font-satoshi text-xl font-normal text-zinc-800/40">
-            {{
-              isAssinaturaFlow
-                ? 'Entre na sua conta para cadastrar o estabelecimento e concluir a assinatura.'
-                : 'Acesse sua conta para gerenciar seus agendamentos.'
-            }}
-          </p>
-        </header>
-
-        <p
-          v-if="errorMessage"
-          class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-          role="alert"
-        >
-          {{ errorMessage }}
+      <header class="mb-10 w-full text-left">
+        <h1 class="font-satoshi text-[32px] font-bold leading-normal text-glow-text">
+          Bem-vindo ao Glow Up Connect
+        </h1>
+        <p class="mt-[5px] font-satoshi text-xl font-normal leading-normal text-glow-text-muted">
+          {{
+            isAssinaturaFlow
+              ? 'Entre na sua conta para cadastrar o estabelecimento e concluir a assinatura.'
+              : 'Acesse sua conta para gerenciar seus agendamentos.'
+          }}
         </p>
+      </header>
 
-        <form class="flex flex-col gap-6" @submit.prevent="handleSubmit">
-          <div class="flex flex-col gap-2">
-            <label for="email" class="font-satoshi text-sm font-normal text-zinc-800">
-              E-mail
-            </label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              autocomplete="email"
-              required
-              :class="GLOW_INPUT_CLASS"
-            />
-          </div>
+      <p
+        v-if="errorMessage"
+        class="mb-4 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        role="alert"
+      >
+        {{ errorMessage }}
+      </p>
 
-          <div class="relative flex flex-col gap-2">
-            <label for="senha" class="font-satoshi text-sm font-normal text-zinc-800">
-              Senha
-            </label>
-            <input
-              id="senha"
-              v-model="senha"
-              :type="mostrarSenha ? 'text' : 'password'"
-              autocomplete="current-password"
-              required
-              :class="[GLOW_INPUT_CLASS, 'pr-12']"
-            />
-            <AuthPasswordToggle :pressed="mostrarSenha" @click="mostrarSenha = !mostrarSenha" />
-          </div>
+      <form class="flex w-full flex-col gap-6" @submit.prevent="handleSubmit">
+        <div class="flex flex-col gap-2">
+          <label for="email" :class="GLOW_LABEL_CLASS">E-mail</label>
+          <input
+            id="email"
+            v-model="email"
+            type="email"
+            autocomplete="email"
+            required
+            :class="GLOW_INPUT_CLASS"
+          />
+        </div>
 
-          <div class="flex flex-col gap-5">
-            <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-              <label class="group flex cursor-pointer select-none items-center gap-2">
-                <input v-model="lembrarConta" type="checkbox" class="sr-only" />
-                <span
-                  class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[2px] border border-glow-text/20 bg-white transition group-has-[:checked]:border-glow-gold group-has-[:checked]:bg-glow-gold"
+        <div class="relative flex flex-col gap-2">
+          <label for="senha" :class="GLOW_LABEL_CLASS">Senha</label>
+          <input
+            id="senha"
+            v-model="senha"
+            :type="mostrarSenha ? 'text' : 'password'"
+            autocomplete="current-password"
+            required
+            :class="[GLOW_INPUT_CLASS, 'pr-12']"
+          />
+          <AuthPasswordToggle :pressed="mostrarSenha" @click="mostrarSenha = !mostrarSenha" />
+        </div>
+
+        <div class="flex flex-col gap-5">
+          <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <label class="group flex cursor-pointer select-none items-center gap-2">
+              <input v-model="lembrarConta" type="checkbox" class="sr-only" />
+              <span
+                class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[2px] border border-glow-text/20 bg-white transition group-has-[:checked]:border-glow-gold group-has-[:checked]:bg-glow-gold"
+                aria-hidden="true"
+              >
+                <svg
+                  class="h-3 w-3 text-white opacity-0 transition group-has-[:checked]:opacity-100"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
                   aria-hidden="true"
                 >
-                  <svg
-                    class="h-3 w-3 text-white opacity-0 transition group-has-[:checked]:opacity-100"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    aria-hidden="true"
-                  >
-                    <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                </span>
-                <span class="font-satoshi text-sm font-medium text-zinc-800/80">
-                  Lembrar minha conta
-                </span>
-              </label>
+                  <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span class="font-satoshi text-sm font-medium text-glow-text-soft">
+                Lembrar minha conta
+              </span>
+            </label>
 
-              <RouterLink
-                :to="ROUTE_PATHS.FORGOT_PASSWORD"
-                class="font-satoshi text-sm font-bold text-yellow-600 hover:underline"
-              >
-                Esqueceu a senha?
-              </RouterLink>
-            </div>
-
-            <button
-              type="submit"
-              :disabled="loading"
-              :class="[GLOW_BUTTON_PRIMARY_CLASS, 'font-satoshi text-xl font-medium text-white']"
-            >
-              <span
-                v-if="loading"
-                class="mr-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
-              />
-              Entrar na plataforma!
-            </button>
+            <RouterLink :to="ROUTE_PATHS.FORGOT_PASSWORD" :class="GLOW_LINK_CLASS">
+              Esqueceu a senha?
+            </RouterLink>
           </div>
-        </form>
 
-        <p class="mt-[25px] font-satoshi text-sm font-bold text-yellow-600">
-          Não possui conta?
-          <RouterLink :to="registerLink" class="hover:underline">Clique aqui.</RouterLink>
-        </p>
-      </div>
-    </main>
+          <AuthRecaptcha ref="captchaRef" :reset-nonce="captchaResetNonce" />
+
+          <button
+            type="submit"
+            :disabled="loading"
+            :class="[GLOW_BUTTON_PRIMARY_CLASS, 'font-satoshi text-xl font-medium text-white']"
+          >
+            <span
+              v-if="loading"
+              class="mr-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
+            />
+            Entrar na plataforma!
+          </button>
+        </div>
+      </form>
+
+      <p class="mt-[25px] w-full font-satoshi text-sm font-bold text-glow-gold-dark">
+        Não possui conta?
+        <RouterLink :to="registerLink" class="hover:underline">Clique aqui.</RouterLink>
+      </p>
+    </div>
   </div>
 </template>

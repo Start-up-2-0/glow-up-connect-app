@@ -51,7 +51,7 @@ Validacao: agendamento deve pertencer ao `UsuarioClienteId` do usuario logado.
 | POST | `/api/convites/{token}/aceitar` | Aceitar convite para equipe/profissional |
 | POST | `/api/convites/{token}/rejeitar` | Rejeitar convite |
 
-> Ao aceitar convite, o usuario pode passar a ter vinculo de negocio e outra role global pode ser necessaria conforme fluxo de onboarding.
+> Ao aceitar convite, a role global permanece `Cliente`. O vínculo na loja (`EstabelecimentoUsuario` + `ProfissionalEstabelecimento` quando aplicável) libera `GET /api/usuario/me/estabelecimentos` com permissões e módulos do plano da loja.
 
 ## Modulos de assinatura
 
@@ -63,7 +63,7 @@ Notificacoes recebidas (e-mail/WhatsApp de agendamento) dependem do **plano do e
 
 | Area | Motivo |
 |------|--------|
-| `GET /api/usuario/me/estabelecimentos` | Role Cliente — retorna **403** `CLIENTE_SEM_ACESSO_NEGOCIO` |
+| `GET /api/usuario/me/estabelecimentos` | Retorna vínculos ativos; lista vazia se não houver loja |
 | `/api/estabelecimentos/{id}/*` | Exige vinculo + permissao de negocio |
 | Equipe, caixa, agenda geral | Roles de estabelecimento |
 | `/api/assinaturas` | Contratacao de plano de negocio |

@@ -8,11 +8,11 @@ defineProps<{
 
 <template>
   <div :class="GLOW_RECOVERY_ALERT_CLASS" role="alert">
-    <svg class="size-3 shrink-0" viewBox="0 0 12 11" fill="none" aria-hidden="true">
+    <svg class="size-3 shrink-0 text-glow-error" viewBox="0 0 12 11" fill="none" aria-hidden="true">
       <path
         d="M6 0.5L11.1962 9.5H0.803848L6 0.5Z"
-        fill="#CF3F3F"
-        stroke="#CF3F3F"
+        fill="currentColor"
+        stroke="currentColor"
         stroke-linejoin="round"
       />
       <path d="M6 4V6.5" stroke="white" stroke-linecap="round" />

@@ -11,13 +11,16 @@ import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { useApiError } from '@/composables/useApiError'
 import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
 import type { PagamentoAssinaturaPayload } from '@/types/assinatura.types'
-import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
+import { ROUTE_PATHS } from '@/constants/routes'
+import { redirectToLandingPlanos } from '@/utils/landingUrl'
 import type {
   OnboardingAssinaturaDraft,
   OnboardingEstabelecimentoDraft,
   OnboardingUsuarioDraft,
   OnboardingWizardStep,
 } from '@/types/onboardingAssinatura.types'
+import { telefoneToApi } from '@/utils/formatters'
+import { draftEnderecoToApi, validateEnderecoForSubmit } from '@/utils/enderecoPayload'
 
 const STORAGE_KEY = 'guc_onboarding_assinatura'
 
@@ -96,6 +99,8 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
   const submitting = ref(false)
   const erro = ref<string | null>(null)
   const fieldErrors = ref<Record<string, string[]>>({})
+  const captchaResetNonce = ref(0)
+  const pendingAutoLogin = ref<{ email: string; senha: string } | null>(null)
   const step = computed({
     get: () => draft.value.step,
     set: (value: OnboardingWizardStep) => {
@@ -127,13 +132,13 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     loading.value = true
     try {
       if (!planoId || Number.isNaN(planoId)) {
-        await router.replace({ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH })
+        redirectToLandingPlanos()
         return
       }
 
       await planosStore.fetchPlanos()
       if (!plano.value) {
-        await router.replace({ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH })
+        redirectToLandingPlanos()
         return
       }
 
@@ -178,9 +183,35 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     confirmarSenha: string
     avatarBase64?: string
     avatarContentType?: string
+    captchaToken?: string
   }) {
     erro.value = null
     fieldErrors.value = {}
+
+    if (pendingAutoLogin.value) {
+      if (!payload.captchaToken) {
+        erro.value = 'Marque o reCAPTCHA novamente para entrar na sua conta.'
+        return
+      }
+
+      loading.value = true
+      try {
+        const loginData = await authStore.login({
+          email: pendingAutoLogin.value.email,
+          senha: pendingAutoLogin.value.senha,
+          captchaToken: payload.captchaToken,
+        })
+        pendingAutoLogin.value = null
+        await finalizarPosCadastro(loginData.requerConfirmacaoEmail ?? false)
+      } catch (err) {
+        captchaResetNonce.value += 1
+        fieldErrors.value = resolveFieldErrors(err)
+        erro.value = resolveError(err, 'Não foi possível entrar após o cadastro.')
+      } finally {
+        loading.value = false
+      }
+      return
+    }
 
     if (payload.email.trim() !== payload.confirmarEmail.trim()) {
       erro.value = 'Os e-mails informados não coincidem.'
@@ -193,18 +224,20 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
 
     loading.value = true
     try {
+      const telefoneApi = telefoneToApi(payload.telefone)
       const { data } = await userService.cadastrar({
         nome: payload.nome.trim(),
         email: payload.email.trim(),
-        telefone: payload.telefone.trim(),
+        telefone: telefoneApi,
         senha: payload.senha,
         avatarBase64: payload.avatarBase64,
         avatarContentType: payload.avatarContentType,
+        captchaToken: payload.captchaToken,
       })
 
       draft.value.usuario = {
         nome: payload.nome.trim(),
-        telefone: payload.telefone.trim(),
+        telefone: telefoneApi,
         email: payload.email.trim(),
         contaCriada: true,
         emailConfirmado: false,
@@ -212,31 +245,37 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
       setStoredEmail(payload.email.trim())
       notifications.push('success', data.mensagem)
 
-      const loginData = await authStore.login({
+      pendingAutoLogin.value = {
         email: payload.email.trim(),
         senha: payload.senha,
-      })
-
-      if (!draft.value.estabelecimento.email) {
-        draft.value.estabelecimento.email = draft.value.usuario.email
       }
-      if (!draft.value.estabelecimento.telefone) {
-        draft.value.estabelecimento.telefone = draft.value.usuario.telefone
-      }
-
-      if (loginData.requerConfirmacaoEmail) {
-        step.value = 'estabelecimento'
-      } else {
-        draft.value.usuario.emailConfirmado = true
-        step.value = 'estabelecimento'
-      }
-      persist()
+      captchaResetNonce.value += 1
+      erro.value =
+        'Conta criada! Marque o reCAPTCHA novamente e clique em Continuar para prosseguir.'
     } catch (err) {
+      captchaResetNonce.value += 1
       fieldErrors.value = resolveFieldErrors(err)
       erro.value = resolveError(err, 'Não foi possível cadastrar.')
     } finally {
       loading.value = false
     }
+  }
+
+  async function finalizarPosCadastro(requerConfirmacaoEmail: boolean) {
+    if (!draft.value.estabelecimento.email) {
+      draft.value.estabelecimento.email = draft.value.usuario.email
+    }
+    if (!draft.value.estabelecimento.telefone) {
+      draft.value.estabelecimento.telefone = draft.value.usuario.telefone
+    }
+
+    if (requerConfirmacaoEmail) {
+      step.value = 'estabelecimento'
+    } else {
+      draft.value.usuario.emailConfirmado = true
+      step.value = 'estabelecimento'
+    }
+    persist()
   }
 
   async function confirmarEmailCodigo(codigo: string) {
@@ -279,12 +318,16 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
       erro.value = 'Envie a logo do estabelecimento.'
       return
     }
-    if (!estabelecimento.cep.trim() || !estabelecimento.logradouro.trim()) {
-      erro.value = 'Preencha o endereço do estabelecimento.'
+    const enderecoError = validateEnderecoForSubmit(estabelecimento)
+    if (enderecoError) {
+      erro.value = enderecoError
       return
     }
 
-    draft.value.estabelecimento = { ...estabelecimento }
+    draft.value.estabelecimento = {
+      ...estabelecimento,
+      telefone: telefoneToApi(estabelecimento.telefone),
+    }
     step.value = 'assinatura'
     persist()
   }
@@ -330,15 +373,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     }
 
     const negocio = draft.value.estabelecimento
-    const endereco = {
-      cep: negocio.cep,
-      logradouro: negocio.logradouro,
-      numero: negocio.numero,
-      bairro: negocio.bairro,
-      cidade: negocio.cidade,
-      estado: negocio.estado,
-      complemento: negocio.complemento || undefined,
-    }
+    const endereco = draftEnderecoToApi(negocio)
 
     submitting.value = true
     try {
@@ -349,7 +384,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
           nome: negocio.nome.trim(),
           descricao: negocio.descricao.trim(),
           logo: negocio.logoDataUrl!,
-          telefone: negocio.telefone.trim(),
+          telefone: telefoneToApi(negocio.telefone),
           email: negocio.email.trim(),
           endereco,
         },
@@ -412,6 +447,8 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     pixCheckoutUrl,
     erro,
     fieldErrors,
+    captchaResetNonce,
+    pendingAutoLogin,
     init,
     cadastrarConta,
     confirmarEmailCodigo,

@@ -2,15 +2,23 @@
 
 Identificacao no catalogo: nome contem **`premium`**.
 
-Inclui **todos os modulos do Plus** (e Basic) mais os abaixo.
+Inclui **todos os modulos do Essencial** mais os abaixo.
 
-## Modulos adicionais (alem do Plus)
+## Modulos adicionais (alem do Essencial)
 
 | Modulo | Disponivel |
 |--------|:----------:|
 | Caixa | sim |
 | Financeiro | sim |
 | ComissaoProfissionais | sim |
+| Clientes | sim |
+
+## Multi-loja
+
+| Limite | Valor |
+|--------|-------|
+| Estabelecimentos por assinatura | **5** |
+| Cobranca | Uma fatura na assinatura titular |
 
 ## Limites comerciais
 
@@ -20,45 +28,21 @@ Inclui **todos os modulos do Plus** (e Basic) mais os abaixo.
 | Agendamentos por dia | Ilimitado |
 | Prioridade na listagem publica | **Sim** |
 
-Estabelecimentos Premium podem aparecer com prioridade em `/api/publico/estabelecimentos/proximos`.
-
 ## Funcionalidades (catalogo comercial)
 
-Tudo do Plus, mais:
+Tudo do Essencial, mais:
 
-- Controle de caixa
-- Fluxo financeiro
+- Ate 5 unidades na mesma assinatura
+- Painel consolidado da rede
+- CRM de clientes
+- Auditoria de negocio
+- Controle de caixa e fluxo financeiro
 - Comissao automatica
-- Relatorios financeiros
-- Dashboard avancado
-- Metricas do estabelecimento
-- Historico financeiro
-- Gestao completa da equipe
 - Prioridade na busca e listagem do marketplace
-
-## O que o Premium desbloqueia na operacao
-
-| Area | Endpoint base | Permissao tipica |
-|------|---------------|------------------|
-| Resumo do caixa | GET `.../caixa` | CaixaVisualizar |
-| Lancamentos | GET `.../caixa/lancamentos` | CaixaVisualizar |
-| Comissoes | *(matriz Profissional; endpoints em evolucao)* | ComissaoVisualizarPropria |
-| Financeiro | *(catalogo; endpoints dedicados em evolucao)* | CaixaGerenciar (Owner) |
-
-## Modulos x roles (exemplo Owner)
-
-Com Premium ativo, Owner tem permissao **e** modulo para:
-
-```text
-Agenda + Servicos + Horarios + Profissionais + Caixa + WhatsApp + Email
-```
-
-Receptionist no mesmo Premium **nao** ve caixa (permissoes de role, nao de plano).
 
 ## Planos anteriores
 
-- [plano-basic.md](./plano-basic.md)
-- [plano-plus.md](./plano-plus.md)
+- [plano-essencial.md](./plano-essencial.md) (substitui Basic e Plus)
 
 ## Referencia de modulos
 

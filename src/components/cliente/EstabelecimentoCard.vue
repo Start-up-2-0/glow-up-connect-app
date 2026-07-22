@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import AvaliacaoNotaResumo from '@/components/avaliacao/AvaliacaoNotaResumo.vue'
 import type { EstabelecimentoProximo } from '@/types/estabelecimento.types'
 import { lojaDetalhePath } from '@/constants/routes'
-import { formatDistanciaKm, formatEnderecoResumo } from '@/utils/formatters'
+import { formatDistanciaKm, formatEnderecoCard } from '@/utils/formatters'
 
 defineProps<{
   item: EstabelecimentoProximo
@@ -12,44 +13,57 @@ defineProps<{
 <template>
   <RouterLink
     :to="lojaDetalhePath(item.publicGuid)"
-    class="group flex gap-4 rounded-lg border border-glow-border-soft bg-glow-surface p-4 transition-colors hover:border-glow-gold-dark hover:bg-glow-hover-surface"
+    class="cliente-estab-card group"
+    :aria-label="`Ver detalhes de ${item.nome}`"
   >
-    <div
-      class="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-glow-canvas"
-    >
+    <div class="cliente-estab-card__logo">
       <img
         v-if="item.logo"
         :src="item.logo"
         :alt="item.nome"
         class="size-full object-cover"
       />
-      <span v-else class="font-satoshi text-lg font-bold text-glow-text-subtle">
+      <span v-else class="cliente-estab-card__logo-fallback">
         {{ item.nome.charAt(0) }}
       </span>
     </div>
 
-    <div class="min-w-0 flex-1">
-      <div class="flex items-start justify-between gap-2">
-        <div class="flex min-w-0 flex-wrap items-center gap-2">
-          <h2 class="truncate font-urbanist text-base font-semibold text-glow-text group-hover:text-glow-text-hover">
-            {{ item.nome }}
-          </h2>
-          <span
-            v-if="item.destaqueMarketplace"
-            class="inline-flex shrink-0 rounded-full bg-glow-gold/15 px-2 py-0.5 font-urbanist text-xs font-medium text-glow-gold-dark"
-          >
-            Destaque
-          </span>
-        </div>
-        <span class="shrink-0 font-urbanist text-xs font-medium text-glow-text-subtle">
-          {{ formatDistanciaKm(item.distanciaKm) }}
-        </span>
-      </div>
-      <p v-if="item.descricao" class="mt-1 line-clamp-2 font-urbanist text-sm text-glow-text-subtle">
-        {{ item.descricao }}
+    <div class="cliente-estab-card__body">
+      <h2 class="cliente-estab-card__name group-hover:text-glow-text-hover">
+        {{ item.nome }}
+      </h2>
+
+      <p class="cliente-estab-card__meta">
+        <svg class="cliente-estab-card__meta-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path
+            d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.75 4.5 8.5 4.5 8.5s4.5-4.75 4.5-8.5c0-2.5-2-4.5-4.5-4.5Z"
+            stroke="currentColor"
+            stroke-width="1.2"
+          />
+          <circle cx="8" cy="6" r="1.5" fill="currentColor" />
+        </svg>
+        {{ formatDistanciaKm(item.distanciaKm) }}
       </p>
-      <p class="mt-2 font-urbanist text-xs text-glow-text-subtle">
-        {{ formatEnderecoResumo(item.endereco) }}
+
+      <AvaliacaoNotaResumo
+        class="cliente-estab-card__rating"
+        :nota-media="item.notaMedia ?? 0"
+        :total-avaliacoes="item.totalAvaliacoes ?? 0"
+        variant="inline"
+      />
+
+      <p class="cliente-estab-card__address">
+        <svg class="cliente-estab-card__address-icon" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path
+            d="M2 4.5h10v7.5H2V4.5Z"
+            stroke="currentColor"
+            stroke-width="1"
+            stroke-linejoin="round"
+          />
+          <path d="M4.5 4.5V3a2.5 2.5 0 0 1 5 0v1.5" stroke="currentColor" stroke-width="1" />
+          <path d="M2 7h10" stroke="currentColor" stroke-width="1" />
+        </svg>
+        <span class="truncate">{{ formatEnderecoCard(item.endereco) }}</span>
       </p>
     </div>
   </RouterLink>

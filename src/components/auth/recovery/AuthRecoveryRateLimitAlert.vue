@@ -7,8 +7,8 @@ defineEmits<{ requestNew: [] }>()
     <svg class="rate-limit-alert__icon" viewBox="0 0 12 11" fill="none" aria-hidden="true">
       <path
         d="M6 0.5L11.1962 9.5H0.803848L6 0.5Z"
-        fill="#CF3F3F"
-        stroke="#CF3F3F"
+        fill="currentColor"
+        stroke="currentColor"
         stroke-linejoin="round"
       />
       <path d="M6 4V6.5" stroke="white" stroke-linecap="round" />
@@ -31,14 +31,16 @@ defineEmits<{ requestNew: [] }>()
   align-items: center;
   gap: 10px;
   border-radius: 4px;
-  background-color: rgba(207, 63, 63, 0.1);
+  background-color: var(--glow-error-bg);
   padding: 10px;
+  color: var(--glow-error);
 }
 
 .rate-limit-alert__icon {
   width: 12px;
   height: 10px;
   flex-shrink: 0;
+  color: var(--glow-error);
 }
 
 .rate-limit-alert__text {
@@ -47,14 +49,14 @@ defineEmits<{ requestNew: [] }>()
   font-size: 10px;
   font-weight: 400;
   line-height: normal;
-  color: #cf3f3f;
+  color: var(--glow-error);
 }
 
 .rate-limit-alert__link {
   font-family: Inter, system-ui, sans-serif;
   font-size: 10px;
   font-weight: 700;
-  color: #cf3f3f;
+  color: var(--glow-error);
   text-decoration: underline;
   cursor: pointer;
   background: none;

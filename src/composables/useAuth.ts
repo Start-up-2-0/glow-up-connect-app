@@ -4,7 +4,6 @@ import { useAuthStore } from '@/stores/auth.store'
 import { useUserStore } from '@/stores/user.store'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { useNegocioStore } from '@/stores/negocio.store'
-import { isClienteRole } from '@/types/user.types'
 import type { LoginPayload } from '@/types/auth.types'
 
 export function useAuth() {
@@ -17,10 +16,7 @@ export function useAuth() {
 
   async function login(payload: LoginPayload, redirect?: string) {
     await authStore.login(payload)
-    const role = userStore.profile?.role
-    if (role !== undefined && !isClienteRole(role)) {
-      await useNegocioStore().fetchEstabelecimentos(true)
-    }
+    await useNegocioStore().fetchEstabelecimentos(true)
     await router.push(redirect ?? ROUTE_PATHS.DASHBOARD)
   }
 
@@ -33,8 +29,7 @@ export function useAuth() {
     if (!profile.value && authStore.isAuthenticated) {
       await userStore.fetchMe()
     }
-    const role = userStore.profile?.role
-    if (role !== undefined && !isClienteRole(role) && authStore.isAuthenticated) {
+    if (authStore.isAuthenticated) {
       await useNegocioStore().fetchEstabelecimentos()
     }
   }

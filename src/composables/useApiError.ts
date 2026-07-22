@@ -64,5 +64,18 @@ export function useApiError() {
     return {}
   }
 
-  return { resolveError, resolveErrorCode, resolveFieldErrors }
+  function resolveErrorDetails<T = unknown>(error: unknown): T | undefined {
+    if (!error || typeof error !== 'object') return undefined
+
+    const axiosError = error as AxiosError<ApiErrorResponse>
+    const data = axiosError.response?.data
+
+    if (isApiErrorResponse(data) && data.details != null) {
+      return data.details as T
+    }
+
+    return undefined
+  }
+
+  return { resolveError, resolveErrorCode, resolveFieldErrors, resolveErrorDetails }
 }

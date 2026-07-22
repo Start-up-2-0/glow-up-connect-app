@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import type { Assinatura } from '@/types/assinatura.types'
 import { classificarRespostaPagamento } from '@/utils/assinaturaPagamento'
+import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
 
 interface ProcessarRespostaCallbacks {
   onTrial: (diasTrial: number) => Promise<void>
@@ -36,7 +37,9 @@ export function useAssinaturaPagamentoResposta() {
 
     if (tipo === 'checkout' && result.pagamentoInicial?.checkoutUrl) {
       limparPix()
-      window.location.href = result.pagamentoInicial.checkoutUrl
+      if (!redirectToThirdPartyUrl(result.pagamentoInicial.checkoutUrl)) {
+        return
+      }
       return
     }
 

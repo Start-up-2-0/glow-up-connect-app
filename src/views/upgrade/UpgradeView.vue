@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
+import { useRoute } from 'vue-router'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import PlanoCard from '@/components/assinatura/PlanoCard.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import { usePlanosStore } from '@/stores/planos.store'
 import { getUpgradeInfo } from '@/constants/upgradeMessages'
-import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
+import { LANDING_PLANOS_URL } from '@/constants/routes'
 
 const route = useRoute()
 const planosStore = usePlanosStore()
@@ -33,13 +33,13 @@ onMounted(() => planosStore.fetchPlanos())
         Disponível no plano <strong>{{ info.planoMinimo }}</strong>
         <span v-if="modulo"> — módulo {{ modulo }}</span>
       </p>
-      <RouterLink :to="{ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH }" class="mt-4 inline-block">
+      <a :href="LANDING_PLANOS_URL" class="mt-4 inline-block">
         <BaseButton variant="primary">Ver todos os planos</BaseButton>
-      </RouterLink>
+      </a>
     </BaseCard>
 
     <LoadingSpinner v-if="planosStore.loading" />
-    <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div v-else class="grid gap-6 md:grid-cols-2">
       <PlanoCard
         v-for="plano in planosStore.planos"
         :key="plano.id"

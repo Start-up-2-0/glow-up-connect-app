@@ -4,5 +4,6 @@ export interface LimitesAssinatura {
   agendamentos: number | null
   usuarios: number | null
   agendamentosPorDia: number | null
+  estabelecimentos: number | null
   prioridadeListagemPublica: boolean
 }

@@ -1,10 +1,10 @@
 export interface WhatsAppConfirmacaoInstrucoes {
   numeroPlataforma: string
-  codigoConfirmacao: string
-  mensagemSugerida: string
+  tokenConfirmacao: string
+  linkConfirmacao: string
   linkWhatsApp: string
+  whatsAppEnviado: boolean
   emailEnviado: boolean
-  expiraEm: string
 }
 
 export interface WhatsAppOptInPayload {

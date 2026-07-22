@@ -11,7 +11,12 @@ export interface NavFilterContext {
 function itemPermitido(
   item: Pick<
     NavItem,
-    'requerModulo' | 'requerModulos' | 'requerPermissao' | 'requerPermissoes' | 'requerAssinatura'
+    | 'requerModulo'
+    | 'requerModulos'
+    | 'requerSemModulo'
+    | 'requerPermissao'
+    | 'requerPermissoes'
+    | 'requerAssinatura'
   >,
   context: NavFilterContext,
 ): boolean {
@@ -23,6 +28,10 @@ function itemPermitido(
       item.requerPermissoes?.length
 
     if (temRequisito) return false
+  }
+
+  if (item.requerSemModulo && context.possuiModulo(item.requerSemModulo)) {
+    return false
   }
 
   if (item.requerModulo && !context.possuiModulo(item.requerModulo)) {

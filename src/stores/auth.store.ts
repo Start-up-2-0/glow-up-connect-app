@@ -36,7 +36,6 @@ export const useAuthStore = defineStore('auth', () => {
   function hydrateFromStorage() {
     const stored = readStoredSession()
     if (stored.token) token.value = stored.token
-    if (stored.refreshToken) refreshToken.value = stored.refreshToken
     if (stored.expiresAt) expiresAt.value = stored.expiresAt
     if (stored.refreshExpiresAt) refreshExpiresAt.value = stored.refreshExpiresAt
   }
@@ -58,7 +57,7 @@ export const useAuthStore = defineStore('auth', () => {
       const loginData = data.data
       applySession({
         token: loginData.token,
-        refreshToken: loginData.refreshToken,
+        refreshToken: '',
         expiresAt: loginData.expiresAt,
         refreshExpiresAt: loginData.refreshExpiresAt,
       })

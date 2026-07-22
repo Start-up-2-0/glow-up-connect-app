@@ -10,10 +10,16 @@ import type { AuthTokens } from '@/types/auth.types'
 import {
   clearSessionStorage,
   getAccessToken,
-  readStoredSession,
   setAccessToken,
 } from '@/utils/storage'
 import { syncSession } from '@/utils/sessionSync'
+import {
+  acquireRequestProof,
+  invalidateRequestProofPool,
+  isExemptRequestProofPath,
+  isRequestProofError,
+  REQUEST_PROOF_HEADER,
+} from '@/composables/useRequestProof'
 import { getUpgradeInfo } from '@/constants/upgradeMessages'
 import { useAppStore } from '@/stores/app.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
@@ -34,7 +40,7 @@ function processQueue(error: unknown, token: string | null = null) {
   failedQueue = []
 }
 
-const PUBLIC_API_PATHS = ['/auth/login', '/auth/refresh', '/planos']
+const PUBLIC_API_PATHS = ['/auth/login', '/auth/refresh', '/planos', '/publico/']
 
 function isPublicApiPath(url?: string): boolean {
   if (!url) return false
@@ -60,24 +66,28 @@ function redirectToLogin() {
 }
 
 async function refreshAccessToken(client: AxiosInstance): Promise<string> {
-  const { refreshToken } = readStoredSession()
-  if (!refreshToken) {
-    throw new Error('Refresh token ausente')
-  }
-
   const { data } = await client.post<{ success: boolean; data: AuthTokens }>(
     '/auth/refresh',
-    { refreshToken },
-    { headers: { [TOKEN_HEADER]: undefined } },
+    {},
+    {
+      headers: { [TOKEN_HEADER]: undefined },
+      withCredentials: true,
+    },
   )
 
   const tokens = data.data
-  syncSession(tokens)
+  syncSession({
+    token: tokens.token,
+    refreshToken: '',
+    expiresAt: tokens.expiresAt,
+    refreshExpiresAt: tokens.refreshExpiresAt,
+  })
   return tokens.token
 }
 
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -85,11 +95,19 @@ const api: AxiosInstance = axios.create({
   timeout: 30_000,
 })
 
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const token = getAccessToken()
   if (token && config.headers) {
     config.headers[TOKEN_HEADER] = token
   }
+
+  if (!isExemptRequestProofPath(config.url)) {
+    const proof = await acquireRequestProof(config.method, config.url)
+    if (proof && config.headers) {
+      config.headers[REQUEST_PROOF_HEADER] = proof
+    }
+  }
+
   return config
 })
 
@@ -127,10 +145,40 @@ function handleSubscriptionError(error: AxiosError<ApiErrorResponse>) {
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ApiErrorResponse>) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean
+      _proofRetry?: boolean
+    }
     const requestUrl = originalRequest?.url
 
+    if (
+      originalRequest &&
+      error.response?.status === 403 &&
+      isRequestProofError(error.response.data?.code) &&
+      !originalRequest._proofRetry
+    ) {
+      originalRequest._proofRetry = true
+      invalidateRequestProofPool()
+      const proof = await acquireRequestProof(originalRequest.method, requestUrl)
+      if (proof && originalRequest.headers) {
+        originalRequest.headers[REQUEST_PROOF_HEADER] = proof
+        return api(originalRequest)
+      }
+    }
+
     if (handleSubscriptionError(error)) {
+      return Promise.reject(error)
+    }
+
+    if (error.response?.status === 429) {
+      const code = error.response.data?.code
+      const message =
+        error.response.data?.message ??
+        'Muitas requisições. Aguarde alguns segundos e tente novamente.'
+      useNotificationsStore().push(
+        code === 'IP_BLOCKED_24H' ? 'error' : 'warning',
+        message,
+      )
       return Promise.reject(error)
     }
 

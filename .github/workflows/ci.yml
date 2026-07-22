@@ -35,4 +35,36 @@ jobs:
           VITE_API_BASE_URL: https://api.example.com
           VITE_APP_NAME: Glow Up Connect
           VITE_TOKEN_HEADER: x-glow-token
+          VITE_LANDING_URL: https://glowupconnect.com.br
         run: npm run build
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: npm audit
+        run: |
+          npm ci
+          npm audit --audit-level=high
+
+      - name: Trivy Dockerfile
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: Dockerfile
+          severity: HIGH,CRITICAL
+          exit-code: 1

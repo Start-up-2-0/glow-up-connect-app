@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
-import { ROUTE_PATHS } from '@/constants/routes'
+import { computed } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
 import { APP_NAME } from '@/constants/storageKeys'
+import { authRouteWithRedirect } from '@/utils/authRedirect'
+import { legalUrl } from '@/utils/landingUrl'
+import { ROUTE_PATHS } from '@/constants/routes'
+
+const route = useRoute()
+const loginLink = computed(() => authRouteWithRedirect(ROUTE_PATHS.LOGIN, route.fullPath))
+const registerLink = computed(() => authRouteWithRedirect(ROUTE_PATHS.REGISTER, route.fullPath))
 </script>
 
 <template>
@@ -13,13 +20,13 @@ import { APP_NAME } from '@/constants/storageKeys'
         </RouterLink>
         <div class="flex items-center gap-3">
           <RouterLink
-            :to="ROUTE_PATHS.LOGIN"
+            :to="loginLink"
             class="text-sm font-medium text-glow-text-subtle hover:text-glow-text"
           >
             Entrar
           </RouterLink>
           <RouterLink
-            :to="ROUTE_PATHS.REGISTER"
+            :to="registerLink"
             class="rounded-lg bg-glow-gold px-4 py-2 text-sm font-medium text-white hover:brightness-95"
           >
             Criar conta
@@ -30,5 +37,11 @@ import { APP_NAME } from '@/constants/storageKeys'
     <main class="mx-auto max-w-7xl px-4 py-8 lg:px-6 lg:py-12">
       <slot />
     </main>
+    <footer class="border-t border-glow-border-soft bg-glow-surface py-6">
+      <div class="mx-auto flex max-w-7xl flex-wrap justify-center gap-4 px-4 text-sm text-glow-text-subtle lg:px-6">
+        <a :href="legalUrl('termos-de-uso')" class="hover:text-glow-text" target="_blank" rel="noopener">Termos de uso</a>
+        <a :href="legalUrl('politica-de-cookies')" class="hover:text-glow-text" target="_blank" rel="noopener">Política de cookies</a>
+      </div>
+    </footer>
   </div>
 </template>

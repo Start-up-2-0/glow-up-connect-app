@@ -148,7 +148,7 @@ async function handleResend() {
       <p :class="[GLOW_RECOVERY_SUBTITLE_CLASS, 'mt-2']">
         <template v-if="hasKnownEmail">
           Insira o código de 6 dígitos enviado para<br />
-          <span class="font-semibold text-[#e4ac04]">{{ maskedEmail }}</span>
+          <span class="font-semibold text-glow-gold-cta">{{ maskedEmail }}</span>
         </template>
         <template v-else>
           Insira o código de 6 dígitos enviado para o seu e-mail.

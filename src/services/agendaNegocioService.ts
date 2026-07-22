@@ -5,6 +5,7 @@ import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
   AgendaFiltro,
   AgendaGeral,
+  AgendaPaginada,
   AgendaProfissional,
   AgendamentoHistorico,
 } from '@/types/negocio/agenda.types'
@@ -12,13 +13,13 @@ import type {
 export const agendaNegocioService = {
   listarGeral(estabelecimentoId: number, filtro?: AgendaFiltro) {
     return api
-      .get<ApiSuccessResponse<AgendaGeral[]>>(negocioPath(estabelecimentoId, '/agenda'), { params: filtro })
+      .get<ApiSuccessResponse<AgendaPaginada<AgendaGeral>>>(negocioPath(estabelecimentoId, '/agenda'), { params: filtro })
       .then(unwrapApi)
   },
 
   listarPropria(estabelecimentoId: number, filtro?: AgendaFiltro) {
     return api
-      .get<ApiSuccessResponse<AgendaProfissional[]>>(
+      .get<ApiSuccessResponse<AgendaPaginada<AgendaProfissional>>>(
         negocioPath(estabelecimentoId, '/agenda/propria'),
         { params: filtro },
       )
@@ -34,6 +35,19 @@ export const agendaNegocioService = {
   cancelar(estabelecimentoId: number, agendamentoId: number, motivo: string) {
     return api
       .post(negocioPath(estabelecimentoId, `/agendamentos/${agendamentoId}/cancelar`), { motivo })
+      .then(unwrapApi)
+  },
+
+  sugerirRemarcacao(
+    estabelecimentoId: number,
+    agendamentoId: number,
+    payload: { data: string; horarioInicio: string; motivo: string },
+  ) {
+    return api
+      .post(
+        negocioPath(estabelecimentoId, `/agendamentos/${agendamentoId}/sugerir-remarcacao`),
+        payload,
+      )
       .then(unwrapApi)
   },
 

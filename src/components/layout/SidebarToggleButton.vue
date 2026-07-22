@@ -17,6 +17,6 @@ defineEmits<{
     :aria-label="collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'"
     @click="$emit('toggle')"
   >
-    <IconChevron :direction="collapsed ? 'right' : 'left'" :size="14" />
+    <IconChevron :direction="collapsed ? 'right' : 'left'" :size="12" />
   </button>
 </template>

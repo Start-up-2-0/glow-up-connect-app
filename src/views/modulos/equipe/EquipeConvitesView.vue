@@ -1,44 +1,144 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import BaseCard from '@/components/ui/BaseCard.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
+import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
+import ContentAlert from '@/components/feedback/ContentAlert.vue'
+import EquipePageHeader from '@/components/equipe/EquipePageHeader.vue'
+import { EQUIPE_PAGE_CLASS } from '@/constants/designTokens'
+import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
+import { useNotificationsStore } from '@/stores/notifications.store'
+import { useApiError } from '@/composables/useApiError'
+import { conviteService } from '@/services/conviteService'
 import { ROUTE_PATHS } from '@/constants/routes'
+import { establishmentRoleLabel } from '@/constants/establishmentRoles'
+import type { ConviteNegocio } from '@/types/convite.types'
+
+const { estabelecimentoId, ready, error: contextError } = useEstabelecimentoView()
+const notifications = useNotificationsStore()
+const { resolveError } = useApiError()
+
+const convites = ref<ConviteNegocio[]>([])
+const loading = ref(false)
+const cancelandoId = ref<number | null>(null)
+
+function formatarData(iso: string): string {
+  return new Date(iso).toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function tipoConviteLabel(tipo: string): string {
+  return tipo === 'Profissional' ? 'Profissional' : 'Usuário da equipe'
+}
+
+async function load() {
+  if (!estabelecimentoId.value) return
+  loading.value = true
+  try {
+    convites.value = await conviteService.listarConvites(estabelecimentoId.value, 'Pendente')
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    loading.value = false
+  }
+}
+
+async function cancelar(convite: ConviteNegocio) {
+  if (!estabelecimentoId.value) return
+  cancelandoId.value = convite.id
+  try {
+    await conviteService.cancelarConvite(estabelecimentoId.value, convite.id)
+    convites.value = convites.value.filter((c) => c.id !== convite.id)
+    notifications.push('success', 'Convite cancelado.')
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    cancelandoId.value = null
+  }
+}
+
+watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-          Convites da equipe
-        </h1>
-        <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-          Profissionais recebem convites por e-mail com link exclusivo para aceitar.
-        </p>
-      </div>
-      <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE">
-        <BaseButton variant="secondary" size="sm">Voltar à equipe</BaseButton>
-      </RouterLink>
+  <div :class="EQUIPE_PAGE_CLASS">
+    <EquipePageHeader
+      title="Links enviados"
+      subtitle="Pessoas que ainda não entraram na equipe. Aguardando aceitar o link."
+    >
+      <template #actions>
+        <RouterLink
+          :to="{ path: ROUTE_PATHS.CONFIG_EQUIPE, query: { acao: 'convite' } }"
+          class="equipe-btn-primary equipe-btn-primary--add"
+        >
+          Gerar convite
+        </RouterLink>
+        <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE" class="equipe-btn-outline equipe-btn-outline--links">
+          Voltar à equipe
+        </RouterLink>
+      </template>
+    </EquipePageHeader>
+
+    <ContentAlert v-if="contextError" variant="error" title="Não foi possível continuar">
+      {{ contextError }}
+    </ContentAlert>
+
+    <LoadingSpinner v-if="loading" />
+
+    <div v-else-if="ready && convites.length === 0" class="equipe-empty-state">
+      <h2 class="equipe-empty-state__title">Nenhum convite pendente</h2>
+      <p class="equipe-empty-state__description">
+        Envie um convite pela equipe para ver a listagem aqui.
+      </p>
     </div>
 
-    <BaseCard title="Como funciona">
-      <ol class="list-decimal space-y-2 pl-5 font-urbanist text-sm text-glow-text-subtle">
-        <li>Convide um profissional informando o e-mail dele.</li>
-        <li>O convidado recebe um e-mail com link no formato <code class="text-glow-text">/convites/...</code>.</li>
-        <li>Ao aceitar, o profissional passa a integrar a equipe do estabelecimento.</li>
-      </ol>
-      <p class="mt-3 font-urbanist text-sm text-glow-text-subtle">
-        Se o profissional já possui conta na plataforma, ele também pode ser vinculado diretamente
-        pela equipe após aceitar o convite.
-      </p>
-      <div class="mt-4 flex flex-wrap gap-3">
-        <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE_NOVO">
-          <BaseButton variant="primary">Convidar profissional</BaseButton>
-        </RouterLink>
-        <RouterLink :to="ROUTE_PATHS.CONVITES">
-          <BaseButton variant="secondary">Página de resposta ao convite</BaseButton>
-        </RouterLink>
-      </div>
-    </BaseCard>
+    <div
+      v-else-if="ready && convites.length > 0"
+      class="equipe-convites-table-wrap"
+    >
+      <table class="equipe-convites-table">
+        <thead>
+          <tr class="equipe-convites-table__head-row">
+            <th class="equipe-convites-table__th">E-mail</th>
+            <th class="equipe-convites-table__th">Função</th>
+            <th class="equipe-convites-table__th">Tipo</th>
+            <th class="equipe-convites-table__th">Expira em</th>
+            <th class="equipe-convites-table__th">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="convite in convites"
+            :key="convite.id"
+            class="equipe-convites-table__row"
+          >
+            <td class="equipe-convites-table__td">{{ convite.email }}</td>
+            <td class="equipe-convites-table__td">
+              {{ establishmentRoleLabel(convite.roleSugerida) }}
+            </td>
+            <td class="equipe-convites-table__td equipe-convites-table__td--muted">
+              {{ tipoConviteLabel(convite.tipoConvite) }}
+            </td>
+            <td class="equipe-convites-table__td equipe-convites-table__td--muted">
+              {{ formatarData(convite.expiraEm) }}
+            </td>
+            <td class="equipe-convites-table__td">
+              <button
+                type="button"
+                class="equipe-btn-outline h-9 px-3 text-xs"
+                :disabled="cancelandoId === convite.id"
+                @click="cancelar(convite)"
+              >
+                {{ cancelandoId === convite.id ? 'Cancelando…' : 'Cancelar' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>

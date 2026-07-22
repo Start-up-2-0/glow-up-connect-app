@@ -15,10 +15,15 @@ export const API_ERROR_MESSAGES: Record<string, string> = {
   LOCALIZACAO_CLIENTE_INVALIDA: 'Localização inválida. Verifique as coordenadas ou tente novamente.',
   AGENDAMENTO_NAO_ENCONTRADO: 'Agendamento não encontrado.',
   AGENDAMENTO_STATUS_INVALIDO: 'Esta ação não é permitida para o status atual do agendamento.',
+  PROFISSIONAL_EQUIPE_COM_AGENDAMENTO_FUTURO:
+    'Este profissional possui agendamentos futuros. Cancele ou reagende antes de remover.',
+  ATENDIMENTO_STATUS_INVALIDO: 'Esta ação não é permitida para o status atual do atendimento.',
   HORARIO_INDISPONIVEL: 'Horário indisponível. Escolha outro horário.',
   CONVITE_NEGOCIO_NAO_ENCONTRADO: 'Convite não encontrado ou inválido.',
-  CONVITE_NEGOCIO_INVALIDO: 'Convite expirado ou já respondido.',
+  CONVITE_NEGOCIO_INVALIDO: 'Convite expirado, já respondido ou destinado a outro e-mail.',
   CONVITE_NEGOCIO_DUPLICADO: 'Já existe um convite pendente para este e-mail.',
+  CONVITE_USUARIO_NAO_CONFIRMADO:
+    'Esta conta ainda não confirmou o e-mail. Peça para confirmar antes de convidar ou vincular.',
   CLIENTE_SEM_ACESSO_NEGOCIO: 'Você não tem acesso a esta área.',
   SUBSCRIPTION_MODULE_BLOCKED: 'Este recurso não está disponível no seu plano atual.',
   INVALID_SUBSCRIPTION_SCOPE: 'Selecione um estabelecimento para continuar.',

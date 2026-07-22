@@ -1,7 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { agendamentoService } from '@/services/agendamentoService'
-import type { AgendamentoCliente, AgendamentoFiltro } from '@/types/agendamento.types'
+import type {
+  AgendamentoCliente,
+  AgendamentoFiltro,
+  RemarcarAgendamentoPayload,
+} from '@/types/agendamento.types'
 
 export const useAgendamentosStore = defineStore('agendamentos', () => {
   const itens = ref<AgendamentoCliente[]>([])
@@ -25,7 +29,7 @@ export const useAgendamentosStore = defineStore('agendamentos', () => {
       const data = await agendamentoService.listarMeus({
         pagina: filtro.pagina ?? 1,
         tamanhoPagina: filtro.tamanhoPagina ?? 20,
-        ordenacao: filtro.ordenacao ?? 'proximos',
+        ordenacao: filtro.ordenacao ?? 'atendimento_desc',
         status: filtro.status,
       })
       total.value = data.total
@@ -53,10 +57,7 @@ export const useAgendamentosStore = defineStore('agendamentos', () => {
     return agendamento
   }
 
-  async function remarcar(
-    id: number,
-    payload: { data: string; horarioInicio: string; motivo: string },
-  ) {
+  async function remarcar(id: number, payload: RemarcarAgendamentoPayload) {
     const agendamento = await agendamentoService.remarcar(id, payload)
     detalheCache.value.set(id, agendamento)
     invalidate()

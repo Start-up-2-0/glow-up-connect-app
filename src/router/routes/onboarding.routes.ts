@@ -31,7 +31,7 @@ export const onboardingRoutes: RouteRecordRaw[] = [
     name: ROUTE_NAMES.ONBOARDING_ASSINATURA,
     component: () => import('@/views/onboarding/OnboardingAssinaturaView.vue'),
     meta: {
-      layout: 'auth',
+      layout: 'agendar-publico',
       onboardingAssinatura: true,
       skipNegocioGuard: true,
       title: 'Contratar plano',
@@ -49,7 +49,7 @@ export const onboardingRoutes: RouteRecordRaw[] = [
     name: ROUTE_NAMES.ASSINATURA_PAGAMENTO_SUCESSO,
     component: () => import('@/views/assinatura/AssinaturaPagamentoRetornoView.vue'),
     meta: {
-      layout: 'auth',
+      layout: 'dashboard',
       requiresAuth: true,
       skipNegocioGuard: true,
       title: 'Pagamento aprovado',
@@ -60,7 +60,7 @@ export const onboardingRoutes: RouteRecordRaw[] = [
     name: ROUTE_NAMES.ASSINATURA_PAGAMENTO_PENDENTE,
     component: () => import('@/views/assinatura/AssinaturaPagamentoRetornoView.vue'),
     meta: {
-      layout: 'auth',
+      layout: 'dashboard',
       requiresAuth: true,
       skipNegocioGuard: true,
       title: 'Pagamento pendente',
@@ -71,7 +71,7 @@ export const onboardingRoutes: RouteRecordRaw[] = [
     name: ROUTE_NAMES.ASSINATURA_PAGAMENTO_FALHA,
     component: () => import('@/views/assinatura/AssinaturaPagamentoRetornoView.vue'),
     meta: {
-      layout: 'auth',
+      layout: 'dashboard',
       requiresAuth: true,
       skipNegocioGuard: true,
       title: 'Pagamento não concluído',

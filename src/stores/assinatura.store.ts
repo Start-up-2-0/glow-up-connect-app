@@ -5,6 +5,7 @@ import { useNegocioStore } from './negocio.store'
 import { usePlanosStore } from './planos.store'
 import type {
   Assinatura,
+  AdicionarEstabelecimentoPayload,
   CobrancaAssinatura,
   CriarAssinaturaPayload,
   TrocarPlanoPayload,
@@ -88,6 +89,18 @@ export const useAssinaturaStore = defineStore('assinatura', () => {
     cobrancas.value = []
   }
 
+  async function adicionarEstabelecimento(
+    assinaturaId: number,
+    payload: AdicionarEstabelecimentoPayload,
+  ) {
+    loading.value = true
+    try {
+      return await assinaturaService.adicionarEstabelecimento(assinaturaId, payload)
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     assinatura,
     cobrancas,
@@ -98,6 +111,7 @@ export const useAssinaturaStore = defineStore('assinatura', () => {
     cancelar,
     fetchAtual,
     fetchCobrancas,
+    adicionarEstabelecimento,
     setAssinatura,
     clear,
   }

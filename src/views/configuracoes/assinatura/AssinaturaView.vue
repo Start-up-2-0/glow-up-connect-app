@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
@@ -8,14 +8,21 @@ import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import AssinaturaResumoCard from '@/components/assinatura/AssinaturaResumoCard.vue'
 import CancelarAssinaturaDialog from '@/components/assinatura/CancelarAssinaturaDialog.vue'
 import TrialStatusBanner from '@/components/assinatura/TrialStatusBanner.vue'
+import AdicionarUnidadePanel from '@/components/assinatura/AdicionarUnidadePanel.vue'
 import { useNegocioContext } from '@/composables/useNegocioContext'
+import { useTrocarEstabelecimento } from '@/composables/useTrocarEstabelecimento'
 import { useAssinaturaStore } from '@/stores/assinatura.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
-import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
+import { assinaturaService } from '@/services/assinaturaService'
+import { ROUTE_PATHS } from '@/constants/routes'
+import { redirectToLandingPlanos } from '@/utils/landingUrl'
+import type { AssinaturaOnboardingContexto } from '@/types/assinaturaOnboarding.types'
+import type { EstabelecimentoOnboarding } from '@/types/assinatura.types'
+import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
 
-const router = useRouter()
 const { assinaturaId, planoNome, estabelecimentoAtivo, ensureContext } = useNegocioContext()
+const { trocarEstabelecimento } = useTrocarEstabelecimento()
 const assinaturaStore = useAssinaturaStore()
 const { assinatura, loading } = storeToRefs(assinaturaStore)
 const notifications = useNotificationsStore()
@@ -23,15 +30,24 @@ const { resolveError } = useApiError()
 
 const dialogAberto = ref(false)
 const cancelando = ref(false)
+const contextoOnboarding = ref<AssinaturaOnboardingContexto | null>(null)
+const exibirFormUnidade = ref(false)
+const adicionandoUnidade = ref(false)
+const erroUnidade = ref<string | null>(null)
 
 onMounted(async () => {
   await ensureContext()
   if (!estabelecimentoAtivo.value) {
-    await router.replace({ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH })
+    redirectToLandingPlanos()
     return
   }
   if (assinaturaId.value) {
     await assinaturaStore.fetchAtual(estabelecimentoAtivo.value.estabelecimentoId)
+  }
+  try {
+    contextoOnboarding.value = await assinaturaService.obterContextoOnboarding()
+  } catch {
+    contextoOnboarding.value = null
   }
 })
 
@@ -42,11 +58,36 @@ async function confirmarCancelamento() {
     await assinaturaStore.cancelar(assinaturaId.value)
     notifications.push('success', 'Assinatura cancelada.')
     dialogAberto.value = false
-    await router.push({ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH })
+    redirectToLandingPlanos()
   } catch (err) {
     notifications.push('error', resolveError(err))
   } finally {
     cancelando.value = false
+  }
+}
+
+async function adicionarUnidade(estabelecimento: EstabelecimentoOnboarding) {
+  const id = contextoOnboarding.value?.assinaturaPremiumId ?? assinaturaId.value
+  if (!id) return
+  adicionandoUnidade.value = true
+  erroUnidade.value = null
+  try {
+    const resultado = await assinaturaStore.adicionarEstabelecimento(id, { estabelecimento })
+    await trocarEstabelecimento(resultado.estabelecimentoId)
+    notifications.push('success', `Unidade "${resultado.nome}" adicionada com sucesso.`)
+    exibirFormUnidade.value = false
+    contextoOnboarding.value = await assinaturaService.obterContextoOnboarding()
+  } catch (err) {
+    erroUnidade.value = resolveError(err)
+  } finally {
+    adicionandoUnidade.value = false
+  }
+}
+
+function concluirPagamento() {
+  const url = assinatura.value?.pagamentoInicial?.checkoutUrl
+  if (url) {
+    redirectToThirdPartyUrl(url)
   }
 }
 </script>
@@ -73,13 +114,39 @@ async function confirmarCancelamento() {
       <p class="mb-4 text-sm text-glow-text-subtle">
         Conclua o pagamento para liberar os módulos operacionais.
       </p>
-      <a
+      <BaseButton
         v-if="assinatura.pagamentoInicial?.checkoutUrl"
-        :href="assinatura.pagamentoInicial.checkoutUrl"
-        class="inline-block"
+        variant="primary"
+        @click="concluirPagamento"
       >
-        <BaseButton variant="primary">Concluir pagamento</BaseButton>
-      </a>
+        Concluir pagamento
+      </BaseButton>
+    </BaseCard>
+
+    <BaseCard
+      v-if="contextoOnboarding?.podeAdicionarLoja"
+      title="Multi-unidades Premium"
+    >
+      <p class="mb-3 text-sm text-glow-text-subtle">
+        {{ contextoOnboarding.lojasVinculadas }}
+        de
+        {{ contextoOnboarding.limiteLojas ?? '—' }}
+        unidades em uso.
+      </p>
+      <BaseButton
+        v-if="!exibirFormUnidade"
+        variant="primary"
+        @click="exibirFormUnidade = true"
+      >
+        Adicionar unidade
+      </BaseButton>
+      <AdicionarUnidadePanel
+        v-else
+        :loading="adicionandoUnidade"
+        :error-message="erroUnidade"
+        @submit="adicionarUnidade"
+        @cancel="exibirFormUnidade = false"
+      />
     </BaseCard>
 
     <LoadingSpinner v-if="loading" />
@@ -92,6 +159,12 @@ async function confirmarCancelamento() {
     <div class="flex flex-wrap gap-3">
       <RouterLink :to="ROUTE_PATHS.CONFIG_ASSINATURA_UPGRADE">
         <BaseButton variant="primary">Trocar plano</BaseButton>
+      </RouterLink>
+      <RouterLink
+        v-if="contextoOnboarding?.podeAdicionarLoja"
+        :to="ROUTE_PATHS.FINANCEIRO_REDE"
+      >
+        <BaseButton variant="secondary">Painel da rede</BaseButton>
       </RouterLink>
       <BaseButton variant="danger" @click="dialogAberto = true">
         Cancelar assinatura

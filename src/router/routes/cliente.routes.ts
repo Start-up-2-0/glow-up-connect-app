@@ -29,10 +29,30 @@ export const clienteRoutes: RouteRecordRaw[] = [
     name: ROUTE_NAMES.LOJA_AGENDAR,
     component: () => import('@/views/dashboard/cliente/AgendarWizardView.vue'),
     meta: {
-      layout: 'dashboard',
-      requiresAuth: true,
-      clienteOnly: true,
+      layout: 'agendar-publico',
+      skipNegocioGuard: true,
       title: 'Agendar',
+    },
+  },
+  {
+    path: `${ROUTE_PATHS.AGENDAMENTO_REMARCACAO}/:token`,
+    name: ROUTE_NAMES.AGENDAMENTO_REMARCACAO,
+    component: () => import('@/views/dashboard/cliente/RemarcacaoResponderView.vue'),
+    meta: {
+      layout: 'public',
+      skipNegocioGuard: true,
+      title: 'Responder reagendamento',
+    },
+  },
+  {
+    path: `${ROUTE_PATHS.AVALIAR_ATENDIMENTO}/:token`,
+    name: ROUTE_NAMES.AVALIAR_ATENDIMENTO,
+    component: () => import('@/views/dashboard/cliente/AvaliarAtendimentoView.vue'),
+    props: { mode: 'token' },
+    meta: {
+      layout: 'public',
+      skipNegocioGuard: true,
+      title: 'Avaliar atendimento',
     },
   },
   {
@@ -58,6 +78,18 @@ export const clienteRoutes: RouteRecordRaw[] = [
     },
   },
   {
+    path: `${ROUTE_PATHS.MEUS_AGENDAMENTOS_DETALHE}/:id/avaliar`,
+    name: ROUTE_NAMES.AGENDAMENTO_AVALIAR,
+    component: () => import('@/views/dashboard/cliente/AvaliarAtendimentoView.vue'),
+    props: { mode: 'agendamento' },
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      clienteOnly: true,
+      title: 'Avaliar atendimento',
+    },
+  },
+  {
     path: ROUTE_PATHS.CONVITES,
     name: ROUTE_NAMES.CONVITES,
     component: () => import('@/views/dashboard/cliente/ConvitesView.vue'),
@@ -73,8 +105,7 @@ export const clienteRoutes: RouteRecordRaw[] = [
     name: ROUTE_NAMES.CONVITE_RESPONDER,
     component: () => import('@/views/dashboard/cliente/ConviteResponderView.vue'),
     meta: {
-      layout: 'dashboard',
-      requiresAuth: true,
+      layout: 'public',
       title: 'Responder convite',
     },
   },

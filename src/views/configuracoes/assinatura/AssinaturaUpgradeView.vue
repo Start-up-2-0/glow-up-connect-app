@@ -32,7 +32,9 @@ const confirmarDowngrade = ref(false)
 onMounted(() => planosStore.fetchPlanos())
 
 function abrirModal(planoIdAlvo: number) {
-  if (planoId.value && planoIdAlvo < planoId.value) {
+  const atual = planos.value.find((p) => p.id === planoId.value)
+  const alvo = planos.value.find((p) => p.id === planoIdAlvo)
+  if (atual && alvo && alvo.preco < atual.preco) {
     planoSelecionadoId.value = planoIdAlvo
     confirmarDowngrade.value = true
     return

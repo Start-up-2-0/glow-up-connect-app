@@ -26,6 +26,8 @@ export interface ProfissionalEquipe {
   telefone: string
   podeReceberAgendamento: boolean
   ativo: boolean
+  notaMedia?: number | null
+  totalAvaliacoes?: number
 }
 
 export interface CadastrarUsuarioEquipePayload {
@@ -47,5 +49,61 @@ export interface CriarConviteProfissionalPayload {
   email: string
   telefone?: string
   nomePublico?: string
+  podeReceberAgendamento?: boolean
+}
+
+/** Convite nominativo para Admin, Gerente ou Recepcionista. */
+export interface CriarConviteUsuarioEquipePayload {
+  email: string
+  role: 'Admin' | 'Manager' | 'Receptionist'
+}
+
+export interface AtualizarRoleUsuarioEquipePayload {
+  role: EstablishmentUserRole
+}
+
+export interface AtualizarStatusUsuarioEquipePayload {
+  ativo: boolean
+}
+
+export interface AtualizarStatusProfissionalEquipePayload {
+  ativo: boolean
+  podeReceberAgendamento: boolean
+  cancelarAgendamentosFuturos?: boolean
+  motivoCancelamento?: string
+}
+
+export interface AgendamentoFuturoEquipe {
+  agendamentoId: number
+  agendamentoItemId: number
+  clienteNome: string
+  servicoNome: string
+  inicio: string
+  fim: string
+  status: string
+}
+
+export interface CancelarAgendamentosFuturosProfissionalEquipePayload {
+  motivo: string
+}
+
+export interface CancelarAgendamentosFuturosProfissionalEquipeResult {
+  quantidadeCancelada: number
+}
+
+export type MembroEquipeTipo = 'usuario' | 'profissional'
+
+/** Membro unificado exibido na listagem da equipe. */
+export interface MembroEquipeItem {
+  id: string
+  tipo: MembroEquipeTipo
+  nome: string
+  cargo: string
+  role: EstablishmentUserRole | 'Profissional'
+  email?: string
+  telefone?: string
+  ativo: boolean
+  usuarioId: number
+  profissionalId?: number
   podeReceberAgendamento?: boolean
 }

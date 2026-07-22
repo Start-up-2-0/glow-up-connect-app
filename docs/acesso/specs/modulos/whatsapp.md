@@ -29,7 +29,7 @@ Configuracoes > **WhatsApp**
 | Solicitar confirmacao | POST `/api/estabelecimentos/{id}/whatsapp/solicitar-confirmacao` |
 | Opt-in | POST `/api/estabelecimentos/{id}/whatsapp/opt-in` |
 
-Reutilizar composable `useWhatsAppConfirmacao` quando possivel.
+Reutilizar composable `useWhatsAppConfirmacao` (cliente e estabelecimento com poll via `GET /perfil`).
 
 ## UX no Basic
 

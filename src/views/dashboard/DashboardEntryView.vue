@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { storeToRefs } from 'pinia'
 import ClienteHomeView from '@/views/dashboard/cliente/ClienteHomeView.vue'
-import DashboardHomeView from '@/views/dashboard/DashboardHomeView.vue'
-import { useUserStore } from '@/stores/user.store'
-import { isClienteRole } from '@/types/user.types'
+import DashboardNegocioResumo from '@/views/dashboard/DashboardNegocioResumo.vue'
+import ProfissionalOperacaoAtalhos from '@/views/dashboard/ProfissionalOperacaoAtalhos.vue'
+import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
 
-const { profile } = storeToRefs(useUserStore())
-
-const isCliente = computed(() => isClienteRole(profile.value?.role))
+const { temContextoOperacional, ehProfissionalOperacional } = useAcessoUsuario()
 </script>
 
 <template>
-  <ClienteHomeView v-if="isCliente" />
-  <DashboardHomeView v-else />
+  <div class="space-y-6 lg:space-y-8">
+    <ClienteHomeView :compact="temContextoOperacional" />
+    <ProfissionalOperacaoAtalhos v-if="ehProfissionalOperacional" />
+    <DashboardNegocioResumo
+      v-else-if="temContextoOperacional"
+    />
+  </div>
 </template>

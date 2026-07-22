@@ -24,6 +24,8 @@ export const useNegocioStore = defineStore('negocio', () => {
   const estabelecimentos = ref<EstabelecimentoAcesso[]>([])
   const estabelecimentoIdSelecionado = ref<number | null>(readEstabelecimentoId())
   const loading = ref(false)
+  const trocandoEstabelecimento = ref(false)
+  const contextoVersao = ref(0)
 
   const estabelecimentoAtivo = computed(() => {
     if (estabelecimentoIdSelecionado.value === null) return null
@@ -49,6 +51,7 @@ export const useNegocioStore = defineStore('negocio', () => {
         agendamentos: null,
         usuarios: null,
         agendamentosPorDia: null,
+        estabelecimentos: null,
         prioridadeListagemPublica: false,
       },
   )
@@ -118,8 +121,37 @@ export const useNegocioStore = defineStore('negocio', () => {
       estabelecimentos.value = data
       resolverEstabelecimentoPadrao()
       return estabelecimentos.value
+    } catch {
+      estabelecimentos.value = []
+      estabelecimentoIdSelecionado.value = null
+      persistEstabelecimentoId(null)
+      return estabelecimentos.value
     } finally {
       loading.value = false
+    }
+  }
+
+  async function trocarEstabelecimento(id: number) {
+    const idAnterior = estabelecimentoIdSelecionado.value
+    trocandoEstabelecimento.value = true
+
+    try {
+      await fetchEstabelecimentos(true)
+
+      const destino = estabelecimentos.value.find((e) => e.estabelecimentoId === id)
+      if (!destino) {
+        throw new Error('Estabelecimento indisponível para este usuário.')
+      }
+
+      selecionarEstabelecimento(id)
+
+      if (idAnterior !== id) {
+        contextoVersao.value += 1
+      }
+
+      return destino
+    } finally {
+      trocandoEstabelecimento.value = false
     }
   }
 
@@ -132,9 +164,21 @@ export const useNegocioStore = defineStore('negocio', () => {
     return estabelecimentoAtivo.value
   }
 
+  function patchEstabelecimentoAtivo(patch: Partial<Pick<EstabelecimentoAcesso, 'nome' | 'logo'>>) {
+    const id = estabelecimentoIdSelecionado.value
+    if (id === null) return
+    const index = estabelecimentos.value.findIndex((e) => e.estabelecimentoId === id)
+    if (index === -1) return
+    estabelecimentos.value[index] = {
+      ...estabelecimentos.value[index],
+      ...patch,
+    }
+  }
+
   function clear() {
     estabelecimentos.value = []
     estabelecimentoIdSelecionado.value = null
+    contextoVersao.value = 0
     persistEstabelecimentoId(null)
   }
 
@@ -142,6 +186,8 @@ export const useNegocioStore = defineStore('negocio', () => {
     estabelecimentos,
     estabelecimentoIdSelecionado,
     loading,
+    trocandoEstabelecimento,
+    contextoVersao,
     estabelecimentoAtivo,
     modulos,
     permissoes,
@@ -161,8 +207,10 @@ export const useNegocioStore = defineStore('negocio', () => {
     possuiAlgumModulo,
     podeAcessar,
     selecionarEstabelecimento,
+    trocarEstabelecimento,
     fetchEstabelecimentos,
     ensureContext,
+    patchEstabelecimentoAtivo,
     clear,
   }
 })

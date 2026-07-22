@@ -25,7 +25,7 @@ const { resolveError } = useApiError()
 const erro = ref<string | null>(null)
 const comparativaAberta = ref(false)
 
-const planoPlus = computed(() => planos.value.find((p) => p.nome === 'Plus'))
+const planoEssencial = computed(() => planos.value.find((p) => p.nome === 'Essencial'))
 
 onMounted(async () => {
   try {
@@ -47,12 +47,12 @@ onMounted(async () => {
       title="Nenhum plano disponível"
       description="Tente novamente mais tarde."
     />
-    <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div v-else class="grid gap-6 md:grid-cols-2">
       <PlanoCard
         v-for="plano in planos"
         :key="plano.id"
         :plano="plano"
-        :destacado="plano.id === planoPlus?.id"
+        :destacado="plano.id === planoEssencial?.id"
         :desabilitado="planos.length === 0"
         :modo-logado="modoLogado"
       />

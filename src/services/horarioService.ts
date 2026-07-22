@@ -40,10 +40,14 @@ export const horarioService = {
       .then(unwrapApi)
   },
 
-  listarProfissionais(estabelecimentoId: number) {
+  listarProfissionais(
+    estabelecimentoId: number,
+    filtros?: { profissionalId?: number; diaSemana?: string; ativo?: boolean },
+  ) {
     return api
       .get<ApiSuccessResponse<HorarioProfissional[]>>(
         negocioPath(estabelecimentoId, '/profissionais/horarios'),
+        { params: filtros },
       )
       .then(unwrapApi)
   },

@@ -4,6 +4,7 @@ import type { ApiSuccessResponse } from './api.types'
 export interface LoginPayload {
   email: string
   senha: string
+  captchaToken?: string
 }
 
 export interface AuthTokens {

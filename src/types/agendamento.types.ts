@@ -1,4 +1,4 @@
-import type { EnderecoResumo } from '@/types/estabelecimento.types'
+import type { EnderecoResumo, EstabelecimentoPublico } from '@/types/estabelecimento.types'
 
 export type AgendamentoStatus =
   | 'PendentePagamento'
@@ -12,7 +12,13 @@ export type AgendamentoStatus =
   | 'Remarcado'
   | 'NaoCompareceu'
 
-export type AgendamentoOrdenacao = 'proximos' | 'recentes'
+export type AgendamentoOrdenacao =
+  | 'proximos'
+  | 'recentes'
+  | 'atendimento_desc'
+  | 'atendimento_asc'
+  | 'criacao_desc'
+  | 'criacao_asc'
 
 export interface AgendamentoClienteItem {
   id: number
@@ -42,6 +48,12 @@ export interface AgendamentoCliente {
   createAd: string
   canceladoEm: string | null
   itens: AgendamentoClienteItem[]
+  avaliacaoStatus?: string
+  avaliacaoResumo?: {
+    notaEstabelecimento: number
+    notaProfissional: number
+    avaliadoEm: string
+  } | null
 }
 
 export interface AgendamentosPaginados {
@@ -59,6 +71,8 @@ export interface AgendamentoFiltro {
   pagina?: number
   tamanhoPagina?: number
   ordenacao?: AgendamentoOrdenacao
+  /** Quando true, a API valida limite de data atual e intervalo de 1 ano. */
+  intervaloPersonalizado?: boolean
 }
 
 export interface CriarAgendamentoPayload {
@@ -67,7 +81,64 @@ export interface CriarAgendamentoPayload {
   servicoIds: number[]
   data: string
   horarioInicio: string
+  inicioSelecionado?: string
   observacao?: string
+}
+
+export interface CriarAgendamentoPublicoPayload {
+  profissionalPublicGuid?: string
+  servicoIds: number[]
+  data: string
+  horarioInicio: string
+  inicioSelecionado?: string
+  clienteNome: string
+  clienteEmail: string
+  clienteTelefone: string
+  observacao?: string
+}
+
+export interface AgendamentoCriado {
+  id: number
+  status: string
+  valorTotal: number
+  duracaoTotalMinutos: number
+  inicio: string
+  fim: string
+}
+
+export interface AgendamentoContextoPublico {
+  estabelecimento: EstabelecimentoPublico
+  profissional: ProfissionalPublico
+  podeReceberAgendamento: boolean
+}
+
+export interface CriarAgendamentoComCadastroPayload {
+  profissionalPublicGuid: string
+  servicoIds: number[]
+  data: string
+  horarioInicio: string
+  inicioSelecionado?: string
+  observacao?: string
+  cadastro: {
+    nome: string
+    email: string
+    telefone: string
+    senha: string
+  }
+}
+
+export interface PropostaRemarcacao {
+  id: number
+  agendamentoId: number
+  status: string
+  dataSugerida: string
+  horarioInicioSugerido: string
+  motivo: string
+  inicioAtual: string | null
+  estabelecimentoNome: string | null
+  profissionalNome: string | null
+  tokenPublico: string
+  expiraEm: string
 }
 
 export interface CancelarAgendamentoPayload {
@@ -77,6 +148,7 @@ export interface CancelarAgendamentoPayload {
 export interface RemarcarAgendamentoPayload {
   data: string
   horarioInicio: string
+  inicioSelecionado?: string
   motivo: string
 }
 
@@ -106,6 +178,7 @@ export interface DisponibilidadeAgenda {
   servicoIds: number[]
   duracaoMinutos: number
   mensagemIndisponibilidade: string | null
+  datasAtendimento: string[]
   slots: SlotDisponivel[]
 }
 
@@ -114,6 +187,7 @@ export interface ConsultarDisponibilidadeParams {
   dataFim: string
   servicoIds: number[]
   profissionalId?: number
+  profissionalPublicGuid?: string
 }
 
 export const AGENDAMENTO_STATUS_CANCELAVEL: readonly string[] = [

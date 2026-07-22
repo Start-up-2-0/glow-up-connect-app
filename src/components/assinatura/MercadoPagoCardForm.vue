@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { loadMercadoPago } from '@mercadopago/sdk-js'
 import BaseInput from '@/components/ui/BaseInput.vue'
+import ThirdPartyConsentNotice from '@/components/legal/ThirdPartyConsentNotice.vue'
+import { useConsent } from '@/composables/useConsent'
 import type { PagamentoAssinaturaPayload } from '@/types/assinatura.types'
 import { extrairErroMercadoPago, obterMercadoPagoCtor } from '@/utils/mercadoPagoErrors'
 
@@ -31,8 +33,12 @@ const sdkErro = ref<string | null>(null)
 
 const publicKey = import.meta.env.VITE_MP_PUBLIC_KEY?.trim() ?? ''
 const mpConfigurado = computed(() => Boolean(publicKey))
+const { hasThirdPartyConsent } = useConsent()
 
 async function garantirSdkCarregado(): Promise<boolean> {
+  if (!hasThirdPartyConsent.value) {
+    return false
+  }
   if (!publicKey) {
     emit('error', 'Chave pública do Mercado Pago não configurada no deploy (VITE_MP_PUBLIC_KEY).')
     return false
@@ -64,7 +70,15 @@ async function garantirSdkCarregado(): Promise<boolean> {
 }
 
 onMounted(() => {
-  void garantirSdkCarregado()
+  if (hasThirdPartyConsent.value) {
+    void garantirSdkCarregado()
+  }
+})
+
+watch(hasThirdPartyConsent, (allowed) => {
+  if (allowed) {
+    void garantirSdkCarregado()
+  }
 })
 
 function validarCampos(): string | null {
@@ -148,8 +162,9 @@ defineExpose({ tokenizar, loading, mpReady, mpConfigurado })
 
 <template>
   <div class="space-y-4">
+    <ThirdPartyConsentNotice v-if="!hasThirdPartyConsent" compact />
     <p
-      v-if="!mpConfigurado"
+      v-else-if="!mpConfigurado"
       class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-700/50 dark:bg-amber-950/30 dark:text-amber-300"
       role="alert"
     >
@@ -164,7 +179,7 @@ defineExpose({ tokenizar, loading, mpReady, mpConfigurado })
       {{ sdkErro }}
     </p>
 
-    <template v-if="variant === 'checkout'">
+    <template v-if="hasThirdPartyConsent && variant === 'checkout'">
       <div class="space-y-3">
         <p class="text-xs font-medium uppercase tracking-wide text-glow-text-subtle">Dados do cartão</p>
         <BaseInput v-model="cardNumber" label="Número do cartão" placeholder="0000 0000 0000 0000" autocomplete="cc-number" />
@@ -181,7 +196,7 @@ defineExpose({ tokenizar, loading, mpReady, mpConfigurado })
       </div>
     </template>
 
-    <template v-else>
+    <template v-else-if="hasThirdPartyConsent">
       <BaseInput v-model="cardNumber" label="Número do cartão" placeholder="0000 0000 0000 0000" autocomplete="cc-number" />
       <BaseInput v-model="cardholderName" label="Nome no cartão" autocomplete="cc-name" />
       <div class="grid grid-cols-2 gap-4">

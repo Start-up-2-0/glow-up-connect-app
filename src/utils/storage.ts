@@ -1,6 +1,36 @@
 import { STORAGE_KEYS } from '@/constants/storageKeys'
 import type { StoredSession } from '@/types/auth.types'
 
+const memoryAccessToken: { value: string | null } = { value: null }
+
+function sessionStorageSafe() {
+  return {
+    get(key: string): string | null {
+      try {
+        return sessionStorage.getItem(key)
+      } catch {
+        return null
+      }
+    },
+    set(key: string, value: string): void {
+      try {
+        sessionStorage.setItem(key, value)
+      } catch {
+        // quota exceeded ou modo privado
+      }
+    },
+    remove(key: string): void {
+      try {
+        sessionStorage.removeItem(key)
+      } catch {
+        // noop
+      }
+    },
+  }
+}
+
+const session = sessionStorageSafe()
+
 export const storage = {
   get(key: string): string | null {
     try {
@@ -32,34 +62,35 @@ export const storage = {
 }
 
 export function readStoredSession(): Partial<StoredSession> {
+  const token = memoryAccessToken.value ?? session.get(STORAGE_KEYS.ACCESS_TOKEN) ?? undefined
   return {
-    token: storage.get(STORAGE_KEYS.ACCESS_TOKEN) ?? undefined,
-    refreshToken: storage.get(STORAGE_KEYS.REFRESH_TOKEN) ?? undefined,
-    expiresAt: storage.get(STORAGE_KEYS.EXPIRES_AT) ?? undefined,
-    refreshExpiresAt: storage.get(STORAGE_KEYS.REFRESH_EXPIRES_AT) ?? undefined,
+    token,
+    expiresAt: session.get(STORAGE_KEYS.EXPIRES_AT) ?? undefined,
+    refreshExpiresAt: session.get(STORAGE_KEYS.REFRESH_EXPIRES_AT) ?? undefined,
   }
 }
 
-export function persistSession(session: StoredSession): void {
-  storage.set(STORAGE_KEYS.ACCESS_TOKEN, session.token)
-  storage.set(STORAGE_KEYS.REFRESH_TOKEN, session.refreshToken)
-  storage.set(STORAGE_KEYS.EXPIRES_AT, session.expiresAt)
-  storage.set(STORAGE_KEYS.REFRESH_EXPIRES_AT, session.refreshExpiresAt)
+export function persistSession(sessionData: StoredSession): void {
+  memoryAccessToken.value = sessionData.token
+  session.set(STORAGE_KEYS.ACCESS_TOKEN, sessionData.token)
+  session.set(STORAGE_KEYS.EXPIRES_AT, sessionData.expiresAt)
+  session.set(STORAGE_KEYS.REFRESH_EXPIRES_AT, sessionData.refreshExpiresAt)
+  storage.remove(STORAGE_KEYS.REFRESH_TOKEN)
 }
 
 export function clearSessionStorage(): void {
-  storage.clear([
-    STORAGE_KEYS.ACCESS_TOKEN,
-    STORAGE_KEYS.REFRESH_TOKEN,
-    STORAGE_KEYS.EXPIRES_AT,
-    STORAGE_KEYS.REFRESH_EXPIRES_AT,
-  ])
+  memoryAccessToken.value = null
+  session.remove(STORAGE_KEYS.ACCESS_TOKEN)
+  session.remove(STORAGE_KEYS.EXPIRES_AT)
+  session.remove(STORAGE_KEYS.REFRESH_EXPIRES_AT)
+  storage.remove(STORAGE_KEYS.REFRESH_TOKEN)
 }
 
 export function getAccessToken(): string | null {
-  return storage.get(STORAGE_KEYS.ACCESS_TOKEN)
+  return memoryAccessToken.value ?? session.get(STORAGE_KEYS.ACCESS_TOKEN)
 }
 
 export function setAccessToken(token: string): void {
-  storage.set(STORAGE_KEYS.ACCESS_TOKEN, token)
+  memoryAccessToken.value = token
+  session.set(STORAGE_KEYS.ACCESS_TOKEN, token)
 }

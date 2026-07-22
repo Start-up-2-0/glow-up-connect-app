@@ -1,14 +1,21 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import IconDashboardGrid from './icons/IconDashboardGrid.vue'
+import type { NavIconName } from '@/types/navIcon.types'
+import { resolveNavIcon } from '@/utils/navIcon'
+import { SIDEBAR_NAV_ITEM_ACTIVE_CLASS, SIDEBAR_NAV_ITEM_CLASS } from '@/constants/designTokens'
+import SidebarNavIcon from './icons/SidebarNavIcon.vue'
 
 const props = defineProps<{
+  id: string
   label: string
   to?: string
+  icon?: NavIconName
   collapsed?: boolean
   selected?: boolean
 }>()
+
+const iconName = computed(() => resolveNavIcon(props.id, props.icon))
 
 const emit = defineEmits<{
   navigate: []
@@ -31,26 +38,26 @@ function onClick() {
     :is="to ? RouterLink : 'button'"
     :to="to"
     type="button"
-    class="group flex h-10 w-full items-center gap-2.5 rounded-lg py-1.5 pl-2 pr-2 transition-colors"
     :class="[
+      SIDEBAR_NAV_ITEM_CLASS,
       collapsed ? 'w-[60px] justify-center px-2' : '',
-      isActive
-        ? 'bg-glow-gold-selected pl-3 font-medium'
-        : 'hover:bg-black/[0.03]',
+      isActive ? SIDEBAR_NAV_ITEM_ACTIVE_CLASS : '',
       !to && !collapsed ? 'cursor-default' : '',
     ]"
     :aria-current="isActive ? 'page' : undefined"
     :aria-disabled="!to ? true : undefined"
     @click="onClick"
   >
-    <IconDashboardGrid
+    <SidebarNavIcon
+      :name="iconName"
       :size="22"
       class="shrink-0 text-glow-text transition-colors group-hover:text-glow-text-hover"
+      :class="isActive ? 'text-glow-gold-cta' : ''"
     />
     <span
       v-if="!collapsed"
       class="truncate font-urbanist text-sm leading-none text-glow-text transition-colors group-hover:text-glow-text-hover"
-      :class="isActive ? 'font-medium' : 'font-normal'"
+      :class="isActive ? 'font-medium text-glow-text' : 'font-normal'"
     >
       {{ label }}
     </span>

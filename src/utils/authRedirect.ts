@@ -23,3 +23,12 @@ export function authRouteWithRedirect(
   const query = redirectQuery(redirect)
   return query ? { path, query } : path
 }
+
+export function isConviteResponderPath(path: string): boolean {
+  return path.startsWith(`${ROUTE_PATHS.CONVITES}/`) && path.length > ROUTE_PATHS.CONVITES.length + 1
+}
+
+export function extractConviteTokenFromPath(path: string): string | undefined {
+  if (!isConviteResponderPath(path)) return undefined
+  return decodeURIComponent(path.slice(ROUTE_PATHS.CONVITES.length + 1))
+}

@@ -1,8 +1,16 @@
 import api from './api'
 import { negocioPath } from '@/utils/negocioApi'
 import type { ApiSuccessResponse } from '@/types/api.types'
-import type { ConviteNegocio } from '@/types/convite.types'
-import type { CriarConviteProfissionalPayload } from '@/types/negocio/equipe.types'
+import type {
+  ConviteOuVinculo,
+  ConviteNegocio,
+  ConvitePreview,
+  StatusConviteFiltro,
+} from '@/types/convite.types'
+import type {
+  CriarConviteProfissionalPayload,
+  CriarConviteUsuarioEquipePayload,
+} from '@/types/negocio/equipe.types'
 
 function unwrap<T>(response: { data: ApiSuccessResponse<T> }): T {
   return response.data.data
@@ -11,9 +19,35 @@ function unwrap<T>(response: { data: ApiSuccessResponse<T> }): T {
 export const conviteService = {
   criarConviteProfissional(estabelecimentoId: number, payload: CriarConviteProfissionalPayload) {
     return api
-      .post<ApiSuccessResponse<ConviteNegocio>>(
+      .post<ApiSuccessResponse<ConviteOuVinculo>>(
         negocioPath(estabelecimentoId, '/convites/profissionais'),
         payload,
+      )
+      .then(unwrap)
+  },
+
+  criarConviteUsuario(estabelecimentoId: number, payload: CriarConviteUsuarioEquipePayload) {
+    return api
+      .post<ApiSuccessResponse<ConviteOuVinculo>>(
+        negocioPath(estabelecimentoId, '/convites/usuarios'),
+        payload,
+      )
+      .then(unwrap)
+  },
+
+  obterPreview(token: string) {
+    return api
+      .get<ApiSuccessResponse<ConvitePreview>>(
+        `/convites/${encodeURIComponent(token)}/preview`,
+      )
+      .then(unwrap)
+  },
+
+  listarConvites(estabelecimentoId: number, status?: StatusConviteFiltro) {
+    return api
+      .get<ApiSuccessResponse<ConviteNegocio[]>>(
+        negocioPath(estabelecimentoId, '/convites'),
+        { params: status ? { status } : undefined },
       )
       .then(unwrap)
   },

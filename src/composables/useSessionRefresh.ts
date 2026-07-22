@@ -14,18 +14,20 @@ function clearRefreshTimer(): void {
 }
 
 async function performRefresh(): Promise<void> {
-  const { refreshToken } = readStoredSession()
-  if (!refreshToken) return
-
-  const { data } = await authService.refresh({ refreshToken })
-  syncSession(data.data)
+  const { data } = await authService.refresh()
+  syncSession({
+    token: data.data.token,
+    refreshToken: '',
+    expiresAt: data.data.expiresAt,
+    refreshExpiresAt: data.data.refreshExpiresAt,
+  })
 }
 
 export function startSessionRefreshScheduler(): void {
   clearRefreshTimer()
 
-  const { expiresAt, refreshToken } = readStoredSession()
-  if (!expiresAt || !refreshToken) return
+  const { expiresAt } = readStoredSession()
+  if (!expiresAt) return
 
   const expiresMs = new Date(expiresAt).getTime()
   if (Number.isNaN(expiresMs)) return

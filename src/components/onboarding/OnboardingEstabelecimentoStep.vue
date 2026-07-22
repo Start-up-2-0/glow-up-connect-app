@@ -1,24 +1,64 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import BaseInput from '@/components/ui/BaseInput.vue'
-import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
+import { computed, ref } from 'vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import TelefoneInput from '@/components/ui/TelefoneInput.vue'
+import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
+import EnderecoForm from '@/components/form/EnderecoForm.vue'
+import OnboardingContratarFormActions from '@/components/onboarding/OnboardingContratarFormActions.vue'
+import {
+  AGENDAR_BTN_CONTINUE_CLASS,
+  GLOW_AUTH_FORM_GRID_CLASS,
+  GLOW_INPUT_CLASS,
+  GLOW_LABEL_CLASS,
+  ONBOARDING_CONTRATAR_CARD_CLASS,
+  ONBOARDING_CONTRATAR_FIELD_CLASS,
+  ONBOARDING_CONTRATAR_FORM_CLASS,
+  ONBOARDING_CONTRATAR_INPUT_CLASS,
+  ONBOARDING_CONTRATAR_LABEL_CLASS,
+} from '@/constants/designTokens'
+import type { OnboardingUiVariant } from '@/constants/onboardingWizardSteps'
 import { readFileAsDataUrl } from '@/utils/avatarFile'
+import { validateEnderecoForSubmit } from '@/utils/enderecoPayload'
+import { telefoneLocalFromApi, telefoneToApi } from '@/utils/formatters'
+import type { EnderecoFormFields } from '@/types/endereco.types'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 
-const props = defineProps<{
-  initial: OnboardingEstabelecimentoDraft
-  loading?: boolean
-  errorMessage?: string | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    initial: OnboardingEstabelecimentoDraft
+    loading?: boolean
+    errorMessage?: string | null
+    variant?: OnboardingUiVariant
+    embedded?: boolean
+    submitLabel?: string
+    backLabel?: string
+    showBack?: boolean
+  }>(),
+  {
+    variant: 'public',
+    embedded: false,
+    submitLabel: 'Continuar para assinatura',
+    backLabel: 'Voltar',
+    showBack: false,
+  },
+)
 
 const emit = defineEmits<{
   submit: [estabelecimento: OnboardingEstabelecimentoDraft]
+  back: []
 }>()
+
+const isPublic = computed(() => props.variant === 'public')
+const isContratar = computed(() => props.variant === 'contratar')
+const fieldIdPrefix = computed(() => {
+  if (isPublic.value) return 'onb-est'
+  if (isContratar.value) return 'onb-est-contratar'
+  return 'onb-est-dash'
+})
 
 const nome = ref(props.initial.nome)
 const descricao = ref(props.initial.descricao)
-const telefone = ref(props.initial.telefone)
+const telefone = ref(telefoneLocalFromApi(props.initial.telefone))
 const email = ref(props.initial.email)
 const cep = ref(props.initial.cep)
 const logradouro = ref(props.initial.logradouro)
@@ -27,8 +67,38 @@ const bairro = ref(props.initial.bairro)
 const cidade = ref(props.initial.cidade)
 const estado = ref(props.initial.estado)
 const complemento = ref(props.initial.complemento)
+
+const endereco = computed<EnderecoFormFields>({
+  get: () => ({
+    cep: cep.value,
+    logradouro: logradouro.value,
+    numero: numero.value,
+    bairro: bairro.value,
+    cidade: cidade.value,
+    estado: estado.value,
+    complemento: complemento.value,
+  }),
+  set: (value) => {
+    cep.value = value.cep
+    logradouro.value = value.logradouro
+    numero.value = value.numero
+    bairro.value = value.bairro
+    cidade.value = value.cidade
+    estado.value = value.estado
+    complemento.value = value.complemento
+  },
+})
+
 const logoDataUrl = ref<string | null>(props.initial.logoDataUrl)
 const logoError = ref<string | null>(null)
+const enderecoError = ref<string | null>(null)
+
+const shellClass = computed(() => {
+  if (isContratar.value && !props.embedded) return ONBOARDING_CONTRATAR_CARD_CLASS
+  return isPublic.value ? 'space-y-6' : ''
+})
+
+const alertMessage = computed(() => props.errorMessage || logoError.value || enderecoError.value)
 
 async function onLogoChange(file: File | null) {
   logoError.value = null
@@ -44,10 +114,20 @@ async function onLogoChange(file: File | null) {
 }
 
 function handleSubmit() {
+  enderecoError.value = null
+
+  if (isContratar.value) {
+    const validationError = validateEnderecoForSubmit(endereco.value)
+    if (validationError) {
+      enderecoError.value = validationError
+      return
+    }
+  }
+
   emit('submit', {
     nome: nome.value,
     descricao: descricao.value,
-    telefone: telefone.value,
+    telefone: telefoneToApi(telefone.value),
     email: email.value,
     cep: cep.value,
     logradouro: logradouro.value,
@@ -62,47 +142,194 @@ function handleSubmit() {
 </script>
 
 <template>
-  <div>
-    <header class="mb-6">
-      <h2 class="font-satoshi text-2xl font-bold text-zinc-800">Cadastre seu estabelecimento</h2>
-      <p class="mt-1 font-satoshi text-base text-zinc-800/50">
+  <div :class="shellClass">
+    <header v-if="!isContratar" :class="isPublic ? '' : 'mb-6'">
+      <h1 :class="isPublic ? 'agendar-section-title' : 'font-satoshi text-2xl font-bold text-glow-text'">
+        Cadastre seu estabelecimento
+      </h1>
+      <p
+        :class="
+          isPublic
+            ? 'agendar-section-subtitle mt-2'
+            : 'mt-1 text-sm text-glow-text-subtle'
+        "
+      >
+        Informe os dados do negócio que será vinculado à assinatura.
+      </p>
+    </header>
+
+    <header v-else class="mb-6">
+      <h1
+        class="font-satoshi font-bold text-glow-text"
+        :class="embedded ? 'text-xl' : 'text-2xl'"
+      >
+        Cadastre seu estabelecimento
+      </h1>
+      <p class="mt-2 font-satoshi text-base text-glow-text-subtle">
         Informe os dados do negócio que será vinculado à assinatura.
       </p>
     </header>
 
     <p
-      v-if="errorMessage || logoError"
-      class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      v-if="alertMessage"
+      :class="isContratar ? 'checkout-alert-error mb-6 px-4 py-3' : 'rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800/50 dark:bg-red-950/30 dark:text-red-300'"
       role="alert"
     >
-      {{ errorMessage || logoError }}
+      {{ alertMessage }}
     </p>
 
-    <form class="space-y-4" @submit.prevent="handleSubmit">
-      <BaseInput v-model="nome" label="Nome do estabelecimento" required />
-      <BaseInput
-        v-model="descricao"
-        label="Descrição"
-        hint="Opcional — breve apresentação do negócio"
-      />
-      <AuthAvatarUpload label="Logo" @change="onLogoChange" @error="(msg) => (logoError = msg)" />
-      <BaseInput v-model="telefone" label="Telefone comercial" required />
-      <BaseInput v-model="email" label="E-mail comercial" type="email" required />
-      <BaseInput v-model="cep" label="CEP" required />
-      <BaseInput v-model="logradouro" label="Logradouro" required />
-      <div class="grid grid-cols-2 gap-4">
-        <BaseInput v-model="numero" label="Número" required />
-        <BaseInput v-model="bairro" label="Bairro" required />
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <BaseInput v-model="cidade" label="Cidade" required />
-        <BaseInput v-model="estado" label="Estado" maxlength="2" required />
-      </div>
-      <BaseInput v-model="complemento" label="Complemento" hint="Opcional" />
+    <form
+      :class="isContratar ? ONBOARDING_CONTRATAR_FORM_CLASS : 'flex w-full flex-col gap-6'"
+      @submit.prevent="handleSubmit"
+    >
+      <template v-if="isContratar">
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label :for="`${fieldIdPrefix}-nome`" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
+            Nome do estabelecimento
+          </label>
+          <input
+            :id="`${fieldIdPrefix}-nome`"
+            v-model="nome"
+            type="text"
+            required
+            placeholder="Informe o nome do seu estabelecimento"
+            :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
+          />
+        </div>
 
-      <BaseButton type="submit" variant="primary" block class="mt-2" :loading="loading">
-        Continuar para assinatura
-      </BaseButton>
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label :for="`${fieldIdPrefix}-descricao`" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
+            Descrição (opcional)
+          </label>
+          <input
+            :id="`${fieldIdPrefix}-descricao`"
+            v-model="descricao"
+            type="text"
+            placeholder="Breve apresentação do seu negócio"
+            :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
+          />
+        </div>
+
+        <AuthAvatarUpload
+          label="Logo do estabelecimento"
+          variant="contratar"
+          @change="onLogoChange"
+          @error="(msg) => (logoError = msg)"
+        />
+
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label :for="`${fieldIdPrefix}-email`" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
+            E-mail comercial
+          </label>
+          <input
+            :id="`${fieldIdPrefix}-email`"
+            v-model="email"
+            type="email"
+            required
+            placeholder="ex: usuario01@gmail.com"
+            :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
+          />
+        </div>
+
+        <TelefoneInput
+          :id="`${fieldIdPrefix}-telefone`"
+          v-model="telefone"
+          label="Telefone comercial"
+          variant="contratar"
+          required
+          placeholder="(00) 0 0000-0000"
+        />
+
+        <EnderecoForm
+          v-model="endereco"
+          variant="contratar"
+          :id-prefix="`${fieldIdPrefix}-end`"
+        />
+
+        <OnboardingContratarFormActions
+          :loading="loading"
+          :submit-label="submitLabel"
+          :back-label="backLabel"
+          :show-back="showBack"
+          @back="emit('back')"
+        />
+      </template>
+
+      <template v-else>
+        <div :class="GLOW_AUTH_FORM_GRID_CLASS">
+          <div class="flex flex-col gap-2 sm:col-span-2">
+            <label :for="`${fieldIdPrefix}-nome`" :class="GLOW_LABEL_CLASS">Nome do estabelecimento</label>
+            <input
+              :id="`${fieldIdPrefix}-nome`"
+              v-model="nome"
+              type="text"
+              required
+              placeholder="Nome do seu negócio"
+              :class="GLOW_INPUT_CLASS"
+            />
+          </div>
+
+          <div class="flex flex-col gap-2 sm:col-span-2">
+            <label :for="`${fieldIdPrefix}-descricao`" :class="GLOW_LABEL_CLASS">Descrição</label>
+            <input
+              :id="`${fieldIdPrefix}-descricao`"
+              v-model="descricao"
+              type="text"
+              placeholder="Opcional — breve apresentação do negócio"
+              :class="GLOW_INPUT_CLASS"
+            />
+          </div>
+
+          <div class="sm:col-span-2">
+            <AuthAvatarUpload label="Logo" @change="onLogoChange" @error="(msg) => (logoError = msg)" />
+          </div>
+
+          <TelefoneInput
+            :id="`${fieldIdPrefix}-telefone`"
+            v-model="telefone"
+            label="Telefone comercial"
+            variant="auth"
+            required
+            placeholder="(00) 0 0000-0000"
+          />
+
+          <div class="flex flex-col gap-2">
+            <label :for="`${fieldIdPrefix}-email`" :class="GLOW_LABEL_CLASS">E-mail comercial</label>
+            <input
+              :id="`${fieldIdPrefix}-email`"
+              v-model="email"
+              type="email"
+              required
+              placeholder="contato@seunegocio.com"
+              :class="GLOW_INPUT_CLASS"
+            />
+          </div>
+
+          <EnderecoForm
+            v-model="endereco"
+            :variant="isPublic ? 'auth' : 'dashboard'"
+            :id-prefix="`${fieldIdPrefix}-end`"
+            grid-class="contents"
+          />
+        </div>
+
+        <button
+          v-if="isPublic"
+          type="submit"
+          :disabled="loading"
+          :class="AGENDAR_BTN_CONTINUE_CLASS"
+        >
+          <span
+            v-if="loading"
+            class="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-glow-text border-t-transparent"
+          />
+          {{ submitLabel }}
+        </button>
+
+        <BaseButton v-else type="submit" variant="primary" block :loading="loading">
+          {{ submitLabel }}
+        </BaseButton>
+      </template>
     </form>
   </div>
 </template>

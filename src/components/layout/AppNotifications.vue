@@ -5,6 +5,14 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import NavbarIconButton from './NavbarIconButton.vue'
 import IconBell from './icons/IconBell.vue'
 
+withDefaults(
+  defineProps<{
+    size?: 'sm' | 'md' | 'lg'
+    panelAlign?: 'left' | 'right'
+  }>(),
+  { size: 'md', panelAlign: 'right' },
+)
+
 const notificationsStore = useNotificationsStore()
 const { items, unreadCount } = storeToRefs(notificationsStore)
 
@@ -36,19 +44,20 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="rootEl" class="relative">
-    <NavbarIconButton label="Notificações" :active="open" @click.stop="toggle">
-      <IconBell :size="20" />
+  <div ref="rootEl" class="relative shrink-0">
+    <NavbarIconButton label="Notificações" :active="open" :size="size" @click.stop="toggle">
+      <IconBell :size="size === 'sm' ? 18 : 20" />
       <span
         v-if="unreadCount > 0"
-        class="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-red-500 ring-2 ring-glow-surface lg:right-2.5 lg:top-2.5"
+        class="absolute right-1 top-1 size-1.5 rounded-full bg-red-500 ring-2 ring-glow-surface"
         aria-hidden="true"
       />
     </NavbarIconButton>
 
     <div
       v-if="open"
-      class="absolute right-0 top-[calc(100%+8px)] z-50 w-72 overflow-hidden rounded border border-glow-border-soft bg-glow-surface py-1 shadow-lg"
+      class="absolute top-[calc(100%+8px)] z-50 w-72 overflow-hidden rounded border border-glow-border-soft bg-glow-surface py-1 shadow-lg"
+      :class="panelAlign === 'left' ? 'left-0' : 'right-0'"
     >
       <p class="border-b border-glow-border-soft px-4 py-2.5 font-urbanist text-sm font-semibold leading-4 text-glow-text">
         Notificações

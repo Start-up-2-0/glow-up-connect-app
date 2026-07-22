@@ -9,7 +9,8 @@ export interface GeolocationCoords {
 
 const ERROR_MESSAGES: Record<GeolocationErrorCode, string> = {
   unsupported: 'Seu navegador não suporta geolocalização.',
-  denied: 'Permita o acesso à localização para encontrar lojas próximas.',
+  denied:
+    'Permita o acesso à localização para encontrar lojas próximas. Se já negou antes, abra o ícone de cadeado na barra de endereço e altere Localização para Permitir.',
   unavailable: 'Não foi possível obter sua localização. Tente novamente.',
   timeout: 'A busca pela localização demorou demais. Tente novamente.',
   unknown: 'Erro ao obter localização.',

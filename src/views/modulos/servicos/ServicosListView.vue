@@ -1,50 +1,116 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import BaseCard from '@/components/ui/BaseCard.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
-import BaseInput from '@/components/ui/BaseInput.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
-import EmptyState from '@/components/feedback/EmptyState.vue'
+import ServicoCard from '@/components/servicos/ServicoCard.vue'
+import ServicoEmptyState from '@/components/servicos/ServicoEmptyState.vue'
+import ServicoIcons from '@/components/servicos/ServicoIcons.vue'
+import ServicoPageHeader from '@/components/servicos/ServicoPageHeader.vue'
+import ServicoPagination from '@/components/servicos/ServicoPagination.vue'
+import { SERVICOS_PAGE_CLASS } from '@/constants/designTokens'
+import { ROUTE_PATHS, servicoEditarPath, servicoProfissionaisPath } from '@/constants/routes'
+import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
+import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { servicoService } from '@/services/servicoService'
 import type { Servico } from '@/types/negocio/servico.types'
-import { formatCurrency, formatLimite } from '@/utils/formatters'
+import { formatLimite } from '@/utils/formatters'
+import { SERVICOS_PAGE_SIZE } from '@/utils/servicoFormatters'
 
+const router = useRouter()
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
+const { possuiPermissao, possuiModulo } = useNegocioContext()
+const { ehProfissionalOperacional } = useAcessoUsuario()
 const negocioStore = useNegocioStore()
-const { limites } = storeToRefs(negocioStore)
+const { limites, estabelecimentoAtivo } = storeToRefs(negocioStore)
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 
 const servicos = ref<Servico[]>([])
 const loading = ref(false)
-const showForm = ref(false)
-const saving = ref(false)
 const togglingId = ref<number | null>(null)
+const pagina = ref(1)
 
-const form = ref<{ nome: string; descricao: string; precoBase: number; duracaoMinutos: number }>({
-  nome: '',
-  descricao: '',
-  precoBase: 0,
-  duracaoMinutos: 30,
-})
-
+const podeGerenciar = computed(() => possuiPermissao('ServicoGerenciar'))
+const ehVisaoProfissional = computed(() => ehProfissionalOperacional.value && !podeGerenciar.value)
+const profissionalProprioId = computed(() => estabelecimentoAtivo.value?.profissionalId ?? null)
+const temModuloProfissionais = computed(() => possuiModulo('Profissionais'))
 const limiteServicos = computed(() => limites.value?.servicos ?? null)
 const usoServicos = computed(() => servicos.value.length)
 const limiteAtingido = computed(
   () => limiteServicos.value !== null && usoServicos.value >= limiteServicos.value,
 )
+const limiteTooltip = computed(() =>
+  limiteAtingido.value
+    ? 'Limite de serviços do plano atingido. Faça upgrade para cadastrar mais.'
+    : undefined,
+)
+
+const totalPaginas = computed(() =>
+  Math.max(1, Math.ceil(servicos.value.length / SERVICOS_PAGE_SIZE)),
+)
+
+const servicosPaginados = computed(() => {
+  const start = (pagina.value - 1) * SERVICOS_PAGE_SIZE
+  return servicos.value.slice(start, start + SERVICOS_PAGE_SIZE)
+})
+
+const pageTitle = computed(() => (ehVisaoProfissional.value ? 'Meus serviços' : 'Serviços'))
+
+const pageSubtitle = computed(() => {
+  if (podeGerenciar.value) {
+    return 'Cadastre e gerencie os serviços oferecidos pelo estabelecimento.'
+  }
+  if (ehVisaoProfissional.value) {
+    return 'Serviços vinculados a você neste estabelecimento.'
+  }
+  return 'Visualize os serviços oferecidos pelo estabelecimento.'
+})
+
+const emptyTitle = computed(() =>
+  podeGerenciar.value ? 'Nenhum serviço cadastrado' : 'Nenhum serviço',
+)
+
+const emptyDescription = computed(() => {
+  if (podeGerenciar.value) {
+    return 'Cadastre o primeiro serviço para começar a receber agendamentos.'
+  }
+  if (ehVisaoProfissional.value) {
+    return 'Nenhum serviço foi vinculado a você ainda.'
+  }
+  return 'Nenhum serviço cadastrado neste estabelecimento.'
+})
+
+function vinculoProprio(servico: Servico) {
+  if (profissionalProprioId.value === null) return null
+  return (
+    servico.profissionais.find(
+      (p) => p.profissionalId === profissionalProprioId.value && p.ativo,
+    ) ?? null
+  )
+}
+
+function precoExibicao(servico: Servico): number {
+  return vinculoProprio(servico)?.preco ?? servico.precoBase
+}
+
+function duracaoExibicao(servico: Servico): number {
+  return vinculoProprio(servico)?.duracaoMinutos ?? servico.duracaoMinutos
+}
 
 async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
   try {
     servicos.value = await servicoService.listar(estabelecimentoId.value)
+    if (pagina.value > totalPaginas.value) {
+      pagina.value = totalPaginas.value
+    }
   } catch (err) {
     notifications.push('error', resolveError(err, 'Não foi possível carregar os serviços.'))
   } finally {
@@ -52,29 +118,8 @@ async function load() {
   }
 }
 
-async function handleCriar() {
-  if (!estabelecimentoId.value || !form.value.nome.trim()) return
-  saving.value = true
-  try {
-    const criado = await servicoService.criar(estabelecimentoId.value, {
-      nome: form.value.nome.trim(),
-      descricao: form.value.descricao?.trim() || undefined,
-      precoBase: Number(form.value.precoBase),
-      duracaoMinutos: Number(form.value.duracaoMinutos),
-    })
-    servicos.value = [...servicos.value, criado]
-    form.value = { nome: '', descricao: '', precoBase: 0, duracaoMinutos: 30 }
-    showForm.value = false
-    notifications.push('success', 'Serviço criado.')
-  } catch (err) {
-    notifications.push('error', resolveError(err, 'Não foi possível criar o serviço.'))
-  } finally {
-    saving.value = false
-  }
-}
-
 async function handleToggleStatus(servico: Servico) {
-  if (!estabelecimentoId.value) return
+  if (!estabelecimentoId.value || !podeGerenciar.value) return
   togglingId.value = servico.id
   try {
     const atualizado = await servicoService.alterarStatus(
@@ -91,6 +136,19 @@ async function handleToggleStatus(servico: Servico) {
   }
 }
 
+function irNovo() {
+  if (limiteAtingido.value) return
+  void router.push(ROUTE_PATHS.SERVICOS_NOVO)
+}
+
+function irEditar(id: number) {
+  void router.push(servicoEditarPath(id))
+}
+
+function irProfissionais(id: number) {
+  void router.push(servicoProfissionaisPath(id))
+}
+
 watch(
   ready,
   (isReady) => {
@@ -101,103 +159,64 @@ watch(
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-          Serviços
-        </h1>
-        <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-          Cadastre e gerencie os serviços oferecidos pelo estabelecimento.
-        </p>
-        <p v-if="limiteServicos !== null" class="mt-1 font-urbanist text-xs text-glow-text-subtle">
-          Uso: {{ usoServicos }} / {{ formatLimite(limiteServicos) }}
-        </p>
-      </div>
-      <BaseButton
-        variant="primary"
-        :disabled="limiteAtingido"
-        @click="showForm = !showForm"
-      >
-        {{ showForm ? 'Cancelar' : 'Novo serviço' }}
-      </BaseButton>
-    </div>
+  <div :class="SERVICOS_PAGE_CLASS">
+    <ServicoPageHeader :title="pageTitle" :subtitle="pageSubtitle">
+      <template v-if="podeGerenciar" #actions>
+        <span
+          v-if="limiteServicos !== null"
+          class="self-center font-urbanist text-xs text-glow-text-subtle"
+        >
+          {{ usoServicos }}/{{ formatLimite(limiteServicos) }}
+        </span>
+        <button
+          type="button"
+          class="servicos-btn-primary servicos-btn-primary--header"
+          :disabled="limiteAtingido"
+          :title="limiteTooltip"
+          @click="irNovo"
+        >
+          <ServicoIcons name="plus" />
+          Novo serviço
+        </button>
+      </template>
+    </ServicoPageHeader>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
 
-    <BaseCard v-if="showForm" title="Novo serviço">
-      <form class="space-y-4" @submit.prevent="handleCriar">
-        <div class="grid gap-4 sm:grid-cols-2">
-          <BaseInput v-model="form.nome" label="Nome" required />
-          <BaseInput
-            v-model="form.descricao"
-            label="Descrição"
-            placeholder="Opcional"
-          />
-          <BaseInput
-            :model-value="String(form.precoBase)"
-            label="Preço base (R$)"
-            type="number"
-            @update:model-value="form.precoBase = Number($event)"
-          />
-          <BaseInput
-            :model-value="String(form.duracaoMinutos)"
-            label="Duração (minutos)"
-            type="number"
-            @update:model-value="form.duracaoMinutos = Number($event)"
-          />
-        </div>
-        <div class="flex justify-end">
-          <BaseButton type="submit" :loading="saving">Salvar</BaseButton>
-        </div>
-      </form>
-    </BaseCard>
-
     <LoadingSpinner v-if="contextLoading || (loading && servicos.length === 0)" />
 
-    <BaseCard v-else-if="servicos.length === 0">
-      <EmptyState
-        title="Nenhum serviço"
-        description="Cadastre o primeiro serviço para começar a receber agendamentos."
-      />
-    </BaseCard>
+    <ServicoEmptyState
+      v-else-if="servicos.length === 0"
+      :title="emptyTitle"
+      :description="emptyDescription"
+      :show-action="podeGerenciar"
+      :action-disabled="limiteAtingido"
+      :action-title="limiteTooltip"
+      @action="irNovo"
+    />
 
-    <div v-else class="space-y-3">
-      <div
-        v-for="servico in servicos"
-        :key="servico.id"
-        class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-glow-border-soft bg-glow-surface p-4"
-      >
-        <div class="min-w-0">
-          <div class="flex flex-wrap items-center gap-2">
-            <p class="font-urbanist text-base font-semibold text-glow-text">{{ servico.nome }}</p>
-            <span
-              class="inline-flex rounded-full px-2.5 py-0.5 font-urbanist text-xs font-medium"
-              :class="
-                servico.ativo
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                  : 'bg-glow-canvas text-glow-text-subtle'
-              "
-            >
-              {{ servico.ativo ? 'Ativo' : 'Inativo' }}
-            </span>
-          </div>
-          <p v-if="servico.descricao" class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-            {{ servico.descricao }}
-          </p>
-          <p class="mt-1 font-urbanist text-sm text-glow-text">
-            {{ formatCurrency(servico.precoBase) }} · {{ servico.duracaoMinutos }} min
-          </p>
-        </div>
-        <BaseButton
-          variant="secondary"
-          size="sm"
-          :loading="togglingId === servico.id"
-          @click="handleToggleStatus(servico)"
-        >
-          {{ servico.ativo ? 'Desativar' : 'Ativar' }}
-        </BaseButton>
+    <template v-else>
+      <div class="servicos-cards-grid">
+        <ServicoCard
+          v-for="servico in servicosPaginados"
+          :key="servico.id"
+          :servico="servico"
+          :preco="precoExibicao(servico)"
+          :duracao="duracaoExibicao(servico)"
+          :pode-gerenciar="podeGerenciar"
+          :tem-modulo-profissionais="temModuloProfissionais"
+          :toggling="togglingId === servico.id"
+          @editar="irEditar(servico.id)"
+          @profissionais="irProfissionais(servico.id)"
+          @toggle-status="handleToggleStatus(servico)"
+        />
       </div>
-    </div>
+
+      <ServicoPagination
+        v-model:pagina="pagina"
+        :total-paginas="totalPaginas"
+        :loading="loading"
+      />
+    </template>
   </div>
 </template>

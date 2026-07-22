@@ -18,6 +18,8 @@ export interface AgendaGeral {
   clienteTelefone: string | null
   status: string
   valorTotal: number
+  inicio: string
+  fim: string
   observacao: string | null
   itens: AgendaGeralItem[]
 }
@@ -34,7 +36,21 @@ export interface AgendaProfissional {
   inicio: string
   fim: string
   status: string
+  agendamentoStatus: string
 }
+
+export type AgendaOrdenacao =
+  | 'atendimento_desc'
+  | 'atendimento_asc'
+  | 'criacao_desc'
+  | 'criacao_asc'
+
+export interface AgendaCustomDateRange {
+  inicio: string
+  fim: string
+}
+
+export const EMPTY_AGENDA_CUSTOM_DATE_RANGE: AgendaCustomDateRange = { inicio: '', fim: '' }
 
 export interface AgendaFiltro {
   profissionalId?: number
@@ -42,6 +58,18 @@ export interface AgendaFiltro {
   status?: string
   inicio?: string
   fim?: string
+  pagina?: number
+  tamanhoPagina?: number
+  ordenacao?: AgendaOrdenacao | string
+  /** Quando true, a API valida limite de data atual e intervalo de 1 ano. */
+  intervaloPersonalizado?: boolean
+}
+
+export interface AgendaPaginada<T> {
+  total: number
+  pagina: number
+  tamanhoPagina: number
+  itens: T[]
 }
 
 export interface AgendamentoHistorico {

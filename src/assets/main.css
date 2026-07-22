@@ -10,51 +10,449 @@
 
 @layer base {
   :root {
-    --glow-gold: #ffbf00;
-    --glow-gold-dark: #c59400;
-    --glow-gold-soft: rgba(255, 191, 0, 0.14);
-    --glow-gold-selected: rgba(255, 191, 0, 0.8);
+    /* Marca — valores fixos */
+    --brand-gold: #ffbf00;
+    --brand-gold-dark: #c59400;
+    --brand-blue: #3c5ccf;
+    --brand-purple: #6c63ff;
+    --brand-purple-soft: #4f47d2;
+    --brand-secondary: #a38a2d;
+
+    /* Semânticos — elevação (light) */
+    --glow-bg-base: #e5e5e5;
+    --glow-bg-surface: #f3f3f3;
+    --glow-bg-elevated: #ffffff;
+    --glow-bg-highlight: rgba(40, 40, 40, 0.04);
+
+    /* Aliases legados */
+    --glow-canvas: var(--glow-bg-base);
+    --glow-surface: var(--glow-bg-surface);
+    --glow-hover-surface: var(--glow-bg-elevated);
+    --glow-surface-tint: var(--glow-bg-highlight);
+
+    /* Texto */
+    --glow-text: #282828;
+    --glow-text-muted: rgba(40, 40, 40, 0.4);
+    --glow-text-soft: rgba(40, 40, 40, 0.8);
+    --glow-text-subtle: rgba(40, 40, 40, 0.5);
+    --glow-text-hover: rgba(40, 40, 40, 0.6);
+    --glow-placeholder: rgba(99, 99, 99, 0.6);
+
+    /* Bordas */
+    --glow-border-soft: rgba(40, 40, 40, 0.25);
+    --glow-border-sidebar: rgba(40, 40, 40, 0.3);
+    --glow-border-accent: rgba(230, 173, 1, 0.45);
+
+    /* Accent / marca interativa */
+    --glow-gold: var(--brand-gold);
+    --glow-gold-dark: var(--brand-gold-dark);
+    --glow-gold-cta: #e6ad01;
+    --glow-accent: var(--brand-gold-dark);
+    --glow-accent-glow: rgba(255, 191, 0, 0.14);
+    --glow-gold-soft: var(--glow-accent-glow);
+    --glow-gold-selected: rgba(255, 191, 0, 0.14);
+    --glow-primary: var(--brand-blue);
+    --glow-purple: var(--brand-purple);
+    --glow-purple-soft: var(--brand-purple-soft);
+    --glow-secondary: var(--brand-secondary);
+    --glow-avatar-bg: #171717;
+
+    /* Status semânticos */
+    --glow-success: #54804e;
+    --glow-success-bg: #c4f2cc;
+    --glow-success-action: #4bc281;
+    --glow-success-dark: #0d5428;
+    --glow-error: #cf3f3f;
+    --glow-error-bg: rgba(207, 63, 63, 0.2);
+    --glow-neutral: #7a7b7a;
+    --glow-neutral-bg: rgba(122, 123, 122, 0.1);
+    --glow-warning: #aa682d;
+    --glow-warning-bg: rgba(170, 104, 45, 0.2);
+    --glow-info: var(--brand-blue);
+    --glow-info-bg: rgba(60, 92, 207, 0.2);
+    --glow-disabled: #a3a3a3;
+    --glow-placeholder-surface: #d9d9d9;
+    --glow-promo-border: #c3a600;
+    --glow-promo-bg: #fbed99;
+    --glow-promo-bg-soft: #fff3cc;
+    --glow-promo-bg-dashboard: #fff8e1;
+    --glow-promo-bg-dark: #3d3500;
+    --glow-promo-text: #524917;
+    --glow-promo-accent: #a67c00;
+    --glow-inverse-surface: #282828;
+
+    /* Sombras */
+    --glow-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    --glow-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --glow-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --glow-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.02), 0 0 0 1px rgba(27, 31, 35, 0.15);
+  }
+
+  .dark {
+    /* Semânticos — elevação (dark premium, matiz quente Glow Up) */
+    --glow-bg-base: #0c0a08;
+    --glow-bg-surface: #1a1714;
+    --glow-bg-elevated: #2a2520;
+    --glow-bg-highlight: #3d3528;
+
+    --glow-canvas: var(--glow-bg-base);
+    --glow-surface: var(--glow-bg-surface);
+    --glow-hover-surface: var(--glow-bg-elevated);
+    --glow-surface-tint: rgba(245, 242, 235, 0.04);
+
+    /* Texto — off-white quente */
+    --glow-text: #f5f2eb;
+    --glow-text-muted: rgba(245, 242, 235, 0.45);
+    --glow-text-soft: rgba(245, 242, 235, 0.8);
+    --glow-text-subtle: rgba(245, 242, 235, 0.55);
+    --glow-text-hover: rgba(245, 242, 235, 0.7);
+    --glow-placeholder: rgba(245, 242, 235, 0.4);
+
+    /* Bordas discretas */
+    --glow-border-soft: rgba(245, 242, 235, 0.08);
+    --glow-border-sidebar: rgba(245, 242, 235, 0.1);
+    --glow-border-accent: rgba(230, 173, 1, 0.35);
+
+    /* Accent — uso escasso e premium */
+    --glow-accent-glow: rgba(255, 191, 0, 0.18);
+    --glow-gold-soft: var(--glow-accent-glow);
+    --glow-gold-selected: rgba(255, 191, 0, 0.12);
+
+    --glow-avatar-bg: #141210;
+
+    /* Status — adaptados ao dark */
+    --glow-success-bg: rgba(16, 185, 129, 0.15);
+    --glow-success: #6ee7b7;
+    --glow-success-dark: #6ee7b7;
+    --glow-error-bg: rgba(207, 63, 63, 0.2);
+    --glow-neutral-bg: rgba(122, 123, 122, 0.15);
+    --glow-info-bg: rgba(60, 92, 207, 0.25);
+    --glow-info: #93b4ff;
+    --glow-warning-bg: rgba(170, 104, 45, 0.25);
+
+    /* Sombras monocromáticas discretas */
+    --glow-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    --glow-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06);
+    --glow-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --glow-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+
+  html {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-glow-canvas font-satoshi antialiased;
+    min-height: 100%;
+    overflow-x: hidden;
+  }
+
+  #app {
+    min-height: 100%;
+  }
+}
+
+@layer components {
+  /* Auth (login, cadastro, recuperação): sempre light conforme Figma, independente do tema global */
+  .auth-light-shell {
     --glow-text: #282828;
     --glow-text-muted: rgba(40, 40, 40, 0.4);
     --glow-text-soft: rgba(40, 40, 40, 0.8);
     --glow-text-subtle: rgba(40, 40, 40, 0.5);
     --glow-text-hover: rgba(40, 40, 40, 0.6);
     --glow-border-soft: rgba(40, 40, 40, 0.25);
-    --glow-border-sidebar: rgba(40, 40, 40, 0.3);
     --glow-surface: #f3f3f3;
-    --glow-canvas: #e5e5e5;
+    --glow-canvas: #ffffff;
     --glow-placeholder: rgba(99, 99, 99, 0.6);
-    --glow-primary: #3c5ccf;
-    --glow-purple: #6c63ff;
-    --glow-purple-soft: #4f47d2;
-    --glow-gold-cta: #e6ad01;
-    --glow-secondary: #a38a2d;
-    --glow-avatar-bg: #171717;
     --glow-hover-surface: #ffffff;
+    color-scheme: light;
+    @apply min-h-screen bg-white text-glow-text;
   }
 
-  .dark {
-    --glow-gold-soft: rgba(255, 191, 0, 0.22);
-    --glow-text: #f3f3f3;
-    --glow-text-muted: rgba(243, 243, 243, 0.45);
-    --glow-text-soft: rgba(243, 243, 243, 0.8);
-    --glow-text-subtle: rgba(243, 243, 243, 0.55);
-    --glow-text-hover: rgba(243, 243, 243, 0.7);
-    --glow-border-soft: rgba(243, 243, 243, 0.15);
-    --glow-border-sidebar: rgba(243, 243, 243, 0.2);
-    --glow-surface: #242424;
-    --glow-canvas: #161616;
-    --glow-placeholder: rgba(243, 243, 243, 0.4);
-    --glow-avatar-bg: #1f1f1f;
-    --glow-hover-surface: #2e2e2e;
+  /* Agendamento público — Figma Fluxo Agendamento Público (node 200:345) */
+  .agendar-publico-shell {
+    --glow-text: #282828;
+    --glow-text-muted: rgba(40, 40, 40, 0.4);
+    --glow-text-soft: rgba(40, 40, 40, 0.8);
+    --glow-text-subtle: rgba(40, 40, 40, 0.6);
+    --glow-border-soft: rgba(40, 40, 40, 0.25);
+    --glow-surface: #f3f3f3;
+    --glow-canvas: #ffffff;
+    --glow-placeholder: rgba(99, 99, 99, 0.6);
+    --glow-hover-surface: #ffffff;
+    color-scheme: light;
+    @apply relative min-h-screen bg-white pb-16 text-glow-text;
   }
 
-  body {
-    @apply bg-glow-canvas font-satoshi antialiased;
+  .agendar-publico-header {
+    @apply border-b border-glow-border-soft px-[68px] pb-6 pt-[29px];
   }
-}
 
-@layer components {
+  .agendar-publico-logo {
+    @apply font-satoshi text-2xl font-light text-glow-text;
+  }
+
+  .agendar-publico-main {
+    @apply mx-auto w-full max-w-[820px] px-4 pb-12 pt-8 sm:px-6;
+  }
+
+  .agendar-wizard-stepper {
+    @apply mb-8;
+  }
+
+  .agendar-wizard-stepper__row {
+    @apply mb-4 flex items-start gap-3;
+  }
+
+  .agendar-wizard-stepper__back {
+    @apply flex size-8 shrink-0 items-center justify-center rounded-full border border-glow-border-soft text-glow-text transition hover:bg-zinc-50;
+  }
+
+  .agendar-wizard-stepper__meta {
+    @apply min-w-0 flex-1;
+  }
+
+  .agendar-wizard-stepper__counter {
+    @apply font-urbanist text-sm text-glow-text-muted;
+  }
+
+  .agendar-wizard-stepper__title {
+    @apply font-urbanist text-base font-medium text-glow-text;
+  }
+
+  .agendar-wizard-stepper__bars {
+    @apply flex gap-3;
+  }
+
+  .agendar-wizard-stepper__bar {
+    @apply h-1 flex-1 rounded-full;
+    background-color: rgba(40, 40, 40, 0.2);
+  }
+
+  .agendar-wizard-stepper__bar--active {
+    @apply bg-glow-gold-cta;
+  }
+
+  .agendar-section-title {
+    @apply font-satoshi text-xl font-normal text-glow-text;
+  }
+
+  .agendar-section-title--identidade {
+    @apply font-urbanist text-lg font-semibold text-glow-text;
+  }
+
+  .agendar-section-subtitle {
+    @apply font-urbanist text-base font-medium text-glow-text-muted;
+  }
+
+  .agendar-section-date {
+    @apply font-satoshi text-base font-normal text-glow-text-muted;
+  }
+
+  /* Etapa revisão — Figma node 210:1154 */
+  .agendar-review-step {
+    @apply space-y-3;
+  }
+
+  .agendar-review-card {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-white px-[22px] py-5;
+  }
+
+  .agendar-review-card__title {
+    @apply mb-[18px] font-urbanist text-base font-semibold text-glow-text;
+  }
+
+  .agendar-review-field__label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .agendar-review-field__value {
+    @apply mt-1 font-urbanist text-sm text-glow-text;
+  }
+
+  .agendar-review-fields-grid {
+    @apply grid gap-4 sm:grid-cols-3;
+  }
+
+  .agendar-review-fields-grid--2 {
+    @apply grid gap-4 sm:grid-cols-2;
+  }
+
+  .agendar-review-profissional-body {
+    @apply flex items-center gap-4;
+  }
+
+  .agendar-review-avatar {
+    @apply flex size-12 shrink-0 items-center justify-center rounded-full font-urbanist text-sm font-semibold text-glow-text;
+    background-color: rgba(40, 40, 40, 0.1);
+  }
+
+  .agendar-review-service-list {
+    @apply list-none space-y-0 p-0;
+  }
+
+  .agendar-review-service-item {
+    @apply flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0;
+  }
+
+  .agendar-review-service-item + .agendar-review-service-item {
+    @apply border-t border-glow-border-soft;
+  }
+
+  .agendar-review-summary-value {
+    @apply font-urbanist text-sm font-bold text-glow-success;
+  }
+
+  .agendar-review-textarea {
+    @apply mt-2 w-full rounded-lg border-[0.3px] border-glow-border-soft px-4 py-3 font-satoshi text-sm text-glow-text outline-none focus:border-glow-gold focus:ring-1 focus:ring-glow-gold;
+  }
+
+  .agendar-slot-btn {
+    @apply flex h-[50px] min-w-0 items-center justify-center rounded-xl border-[0.5px] border-glow-text-muted font-satoshi text-base text-glow-text transition hover:bg-zinc-50;
+  }
+
+  .agendar-slot-btn--selected {
+    @apply border-glow-gold-cta bg-[rgba(40,40,40,0.08)];
+  }
+
+  .agendar-servico-card {
+    @apply min-h-[105px];
+  }
+
+  .agendar-opcao-card {
+    @apply min-h-[80px];
+  }
+
+  .agendar-profissional-card {
+    @apply min-h-[105px];
+  }
+
+  .agendar-resumo-footer {
+    @apply fixed inset-x-0 bottom-0 z-20 px-4 pb-4 pt-2;
+  }
+
+  .agendar-resumo-footer__panel {
+    @apply mx-auto w-full max-w-[695px] rounded-xl bg-glow-inverse-surface px-5 pb-4 pt-5;
+  }
+
+  .agendar-resumo-footer__summary {
+    @apply mb-3 flex flex-wrap items-center justify-between gap-3 font-urbanist text-sm text-white;
+  }
+
+  .agendar-resumo-footer__meta {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .agendar-resumo-footer__dot {
+    @apply size-1.5 shrink-0 rounded-full bg-white/70;
+  }
+
+  .agendar-resumo-footer__total {
+    @apply font-urbanist text-xl font-bold text-white;
+  }
+
+  .agendar-calendar-day {
+    @apply flex h-10 w-full items-center justify-center rounded font-satoshi text-sm font-bold;
+  }
+
+  .agendar-calendar-day--muted {
+    color: rgba(40, 40, 40, 0.2);
+    cursor: default;
+  }
+
+  .agendar-calendar-day--available {
+    color: var(--glow-text);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .agendar-calendar-day--available:hover {
+    background-color: rgba(230, 173, 1, 0.14);
+  }
+
+  .agendar-calendar-day--available:focus-visible {
+    outline: 2px solid var(--glow-gold-cta);
+    outline-offset: 2px;
+  }
+
+  .agendar-calendar-day--selected {
+    color: var(--glow-text);
+    background-color: rgba(230, 173, 1, 0.18);
+    box-shadow: inset 0 0 0 1px rgba(230, 173, 1, 0.45);
+    border-radius: 0.375rem;
+  }
+
+  .agendar-calendar-day--selected:hover {
+    background-color: rgba(230, 173, 1, 0.3);
+  }
+
+  /* Etapa conclusão — Figma node 210:1325 */
+  .agendar-success {
+    @apply mx-auto flex w-full max-w-[515px] flex-col items-center pt-4 text-center;
+  }
+
+  .agendar-success__icon {
+    @apply flex items-center justify-center;
+  }
+
+  .agendar-success__icon-outer {
+    @apply flex size-[75px] items-center justify-center rounded-full;
+    background-color: rgba(84, 128, 78, 0.15);
+  }
+
+  .agendar-success__icon-inner {
+    @apply flex size-[46px] items-center justify-center rounded-full text-white;
+    background-color: var(--glow-success-action);
+  }
+
+  .agendar-success__check {
+    @apply size-5;
+  }
+
+  .agendar-success__title {
+    @apply mt-6 font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .agendar-success__subtitle {
+    @apply mt-2 font-satoshi text-xl font-normal text-glow-text-muted;
+  }
+
+  .agendar-success__card {
+    @apply mt-8 w-full rounded-xl border-[0.5px] border-glow-border-soft bg-white p-5 text-left;
+  }
+
+  .agendar-success__card-header {
+    @apply flex items-center justify-between gap-4 font-urbanist text-base;
+  }
+
+  .agendar-success__card-divider {
+    @apply my-4 border-0 border-t border-glow-border-soft;
+  }
+
+  .agendar-success__details {
+    @apply space-y-1;
+  }
+
+  .agendar-success__row {
+    @apply flex items-start justify-between gap-4 py-0.5 font-urbanist text-base;
+  }
+
+  .agendar-success__label {
+    @apply shrink-0 text-glow-text-subtle;
+  }
+
+  .agendar-success__value {
+    @apply text-right text-glow-text;
+  }
+
+  .agendar-success__actions {
+    @apply mt-6 flex w-full flex-col gap-3;
+  }
+
+  .agendar-success__btn-secondary {
+    @apply flex h-10 w-full items-center justify-center rounded border-[0.5px] border-glow-border-soft bg-white px-2.5 font-satoshi text-base font-bold text-glow-text transition hover:bg-zinc-50;
+  }
+
   .checkout-shell {
     @apply rounded-2xl border border-glow-border-soft bg-glow-surface shadow-sm;
   }
@@ -68,7 +466,7 @@
   }
 
   .checkout-item-card {
-    @apply flex gap-4 rounded-xl border border-glow-border-soft bg-glow-canvas p-4;
+    @apply flex gap-4 rounded-xl border border-glow-border-soft bg-[rgba(40,40,40,0.04)] p-4;
   }
 
   .checkout-promo-row {
@@ -113,6 +511,2519 @@
   }
 
   .checkout-pay-button {
-    @apply flex w-full items-center justify-center gap-2 rounded-xl bg-glow-gold px-5 py-3.5 text-sm font-semibold text-glow-text shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply flex w-full items-center justify-center gap-2 rounded-xl bg-glow-gold-cta px-5 py-3.5 text-sm font-bold text-white shadow-glow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .onboarding-contratar-checkout-shell {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface shadow-sm;
+  }
+
+  .onboarding-contratar-checkout-panel {
+    @apply p-6 lg:p-8;
+  }
+
+  .onboarding-contratar-plan-card {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface-tint p-4;
+  }
+
+  .onboarding-contratar-promo-card {
+    @apply flex items-center gap-3 rounded-xl border border-dashed border-glow-border-soft bg-glow-surface-tint px-4 py-3;
+  }
+
+  .onboarding-contratar-info-box {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface-tint p-4 text-sm leading-relaxed text-glow-text-subtle;
+  }
+
+  .onboarding-contratar-vencimento-btn {
+    @apply flex h-[37px] min-w-[74px] items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3 font-satoshi text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .onboarding-contratar-vencimento-btn--active {
+    @apply border-glow-gold bg-glow-gold-soft text-glow-text;
+  }
+
+  .onboarding-contratar-pay-cta {
+    @apply flex h-10 w-full items-center justify-center gap-3 rounded-xl bg-glow-gold-cta px-4 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  /* Toasts globais — canto superior, fora do fluxo do documento */
+  .toast-stack {
+    @apply pointer-events-none fixed z-[60] flex flex-col;
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+    max-width: 24rem;
+    margin-left: auto;
+  }
+
+  @media (min-width: 640px) {
+    .toast-stack {
+      top: 5.5rem;
+      right: 1.5rem;
+      left: auto;
+    }
+  }
+
+  .toast-item {
+    @apply w-full;
+  }
+
+  /* Alertas no fluxo da página — próximos ao conteúdo relacionado */
+  .content-alert {
+    @apply mb-4;
+  }
+
+  .content-alert--compact {
+    @apply mb-2;
+  }
+
+  /* Campo de formulário com mensagem colada abaixo */
+  .field-group {
+    @apply flex flex-col gap-1;
+  }
+
+  .field-input--error {
+    @apply border-red-400 focus:border-red-500 focus:ring-red-500/30 dark:border-red-500/70 dark:focus:border-red-400;
+  }
+
+  /* Dashboard — uma única área de rolagem (main), sem scroll no documento */
+  .dashboard-shell {
+    @apply max-h-dvh;
+  }
+
+  /* Sidebar nav — rolagem funcional sem barra visível */
+  .sidebar-nav-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .sidebar-nav-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dashboard-main {
+    @apply bg-glow-canvas;
+  }
+
+  .dashboard-main__inner {
+    @apply w-full px-4 py-4 lg:px-6 lg:py-6;
+  }
+
+  /* Larguras de página no dashboard */
+  .page-shell {
+    @apply w-full;
+  }
+
+  .page-shell--form {
+    @apply mx-auto w-full max-w-4xl;
+  }
+
+  .page-shell--narrow {
+    @apply mx-auto w-full max-w-2xl;
+  }
+
+  .panel-shell {
+    @apply overflow-hidden rounded-xl border border-glow-border-soft bg-glow-surface shadow-glow-sm;
+  }
+
+  .panel-shell__header {
+    @apply border-b border-glow-border-soft bg-glow-canvas px-4 py-4 lg:px-6;
+  }
+
+  .panel-shell__body {
+    @apply p-4 lg:p-6;
+  }
+
+  .form-section {
+    @apply rounded-lg border border-glow-border-soft bg-glow-canvas p-4;
+  }
+
+  .form-section__title {
+    @apply mb-3 font-urbanist text-xs font-semibold uppercase tracking-wide text-glow-text-subtle;
+  }
+
+  .form-section__grid {
+    @apply grid gap-3 sm:grid-cols-2;
+  }
+
+  .form-section__grid--single {
+    @apply sm:grid-cols-1;
+  }
+
+  .equipe-acao-card {
+    @apply rounded-xl border border-glow-border-soft bg-glow-surface p-5 shadow-sm transition hover:border-glow-gold-dark hover:bg-glow-hover-surface;
+  }
+
+  /* Agenda + Meus agendamentos — Figma nodes 460:657 / 487:1404 */
+  .agenda-page {
+    @apply space-y-6;
+  }
+
+  .agenda-page__header {
+    @apply flex flex-col gap-4 border-b border-glow-border-soft pb-6 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .agenda-page__title-row {
+    @apply flex flex-wrap items-baseline gap-x-2 gap-y-1;
+  }
+
+  .agenda-page__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .agenda-page__title-date {
+    @apply inline-flex items-center gap-2 font-satoshi text-sm font-medium text-glow-text-muted;
+  }
+
+  .agenda-page__title-dot {
+    @apply size-1.5 rounded-full bg-glow-text-muted;
+  }
+
+  .agenda-page__subtitle {
+    @apply mt-1 font-satoshi text-base text-glow-text-subtle;
+  }
+
+  .agenda-page__filters {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .agenda-filter-btn {
+    @apply inline-flex h-[38px] items-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 font-urbanist text-sm font-semibold text-glow-text-subtle transition hover:bg-glow-hover-surface;
+  }
+
+  .agenda-filter-btn--active {
+    @apply border-glow-gold-dark bg-glow-gold-soft text-glow-text;
+  }
+
+  .agenda-cards-grid {
+    @apply grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 min-[1800px]:grid-cols-5;
+  }
+
+  .agendamento-card {
+    @apply relative flex min-h-[154px] flex-col rounded-xl border-l-4 bg-glow-surface p-5 shadow-glow-card transition hover:bg-glow-hover-surface;
+  }
+
+  .agendamento-card--tall {
+    @apply min-h-[177px];
+  }
+
+  .agendamento-card--interactive {
+    @apply cursor-pointer;
+  }
+
+  .agendamento-card--confirmado {
+    @apply border-l-glow-success-dark;
+  }
+
+  .agendamento-card--pendente {
+    @apply border-l-glow-gold;
+  }
+
+  .agendamento-card--em-atendimento {
+    @apply border-l-glow-neutral;
+  }
+
+  .agendamento-card--concluido {
+    @apply border-l-glow-primary;
+  }
+
+  .agendamento-card--remarcado {
+    @apply border-l-glow-warning;
+  }
+
+  .agendamento-card--cancelado {
+    @apply border-l-glow-error;
+  }
+
+  .agendamento-card--default {
+    @apply border-l-glow-border-soft;
+  }
+
+  .agendamento-card__title {
+    @apply font-urbanist text-base font-semibold text-glow-text;
+  }
+
+  .agendamento-card__subtitle {
+    @apply mt-1 line-clamp-2 font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .agendamento-card__meta-row {
+    @apply mt-3 flex items-center gap-2 font-urbanist text-sm font-medium text-glow-text-hover;
+  }
+
+  .agendamento-card__meta-icon {
+    @apply size-3.5 shrink-0 text-glow-text-hover;
+  }
+
+  .agendamento-card__footer {
+    @apply mt-auto flex items-end justify-between gap-2 pt-4;
+  }
+
+  .agendamento-card__price {
+    @apply inline-flex items-center rounded-full bg-glow-success-bg px-4 py-0.5 font-urbanist text-sm font-bold text-glow-success-dark;
+  }
+
+  .agendamento-card__pending-label {
+    @apply mb-2 font-urbanist text-xs font-semibold uppercase tracking-wide text-glow-text;
+  }
+
+  .agendamento-card__actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .agendamento-card__btn-confirm {
+    @apply inline-flex h-8 min-w-[126px] items-center justify-center gap-1 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-success-action px-3 font-satoshi text-xs font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .agendamento-card__btn-cancel {
+    @apply inline-flex h-8 min-w-[126px] items-center justify-center gap-1 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3 font-satoshi text-xs font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .agendamento-badge {
+    @apply inline-flex items-center justify-center rounded-full px-4 py-1 font-urbanist text-xs font-medium;
+  }
+
+  .agendamento-badge--confirmado {
+    @apply bg-glow-success-bg text-glow-success-dark;
+  }
+
+  .agendamento-badge--pendente {
+    @apply bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-200;
+  }
+
+  .agendamento-badge--em-atendimento {
+    @apply bg-glow-neutral-bg text-glow-neutral;
+  }
+
+  .agendamento-badge--concluido {
+    @apply bg-glow-info-bg text-glow-info;
+  }
+
+  .agendamento-badge--remarcado {
+    @apply bg-glow-warning-bg text-glow-warning;
+  }
+
+  .agendamento-badge--cancelado {
+    @apply bg-glow-error-bg text-glow-error;
+  }
+
+  .agendamento-badge--default {
+    @apply bg-glow-canvas text-glow-text-subtle;
+  }
+
+  .agenda-figma-filter {
+    @apply relative inline-block w-[171px];
+  }
+
+  .agenda-figma-filter__trigger {
+    @apply flex h-[38px] w-full items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 font-urbanist text-sm font-semibold text-glow-text-subtle transition hover:bg-glow-hover-surface;
+  }
+
+  .agenda-figma-filter--active .agenda-figma-filter__trigger {
+    @apply border-glow-gold-dark bg-glow-gold-soft text-glow-text hover:bg-glow-gold-soft;
+  }
+
+  .agenda-figma-filter--open .agenda-figma-filter__trigger {
+    @apply rounded-b-none border-b-0;
+  }
+
+  .agenda-figma-filter__trigger-label {
+    @apply max-w-[120px] truncate whitespace-nowrap;
+  }
+
+  .agenda-figma-filter__icon--status {
+    @apply size-5 shrink-0 text-glow-text-subtle;
+  }
+
+  .agenda-figma-filter__icon--calendar {
+    @apply size-4 shrink-0 text-glow-text-subtle;
+  }
+
+  .agenda-figma-filter--active .agenda-figma-filter__icon--status,
+  .agenda-figma-filter--active .agenda-figma-filter__icon--calendar {
+    @apply text-glow-gold;
+  }
+
+  .agenda-figma-filter__panel {
+    @apply absolute left-0 right-0 top-full z-30 overflow-hidden rounded-b-xl border-[0.5px] border-t-0 border-glow-border-soft bg-glow-surface shadow-glow-md;
+  }
+
+  .agenda-figma-filter__options {
+    @apply flex flex-col;
+  }
+
+  .agenda-figma-filter__option {
+    @apply w-full px-2.5 py-2.5 text-center font-urbanist text-sm font-normal text-glow-text-subtle transition hover:bg-glow-hover-surface;
+  }
+
+  .agenda-figma-filter__option--selected {
+    @apply bg-glow-hover-surface;
+  }
+
+  .agenda-figma-filter__date-field {
+    @apply px-2.5 py-2.5;
+  }
+
+  .agenda-figma-filter__date-input {
+    @apply w-full rounded-xl border-[0.5px] border-glow-border-soft bg-glow-canvas px-3 py-2 text-center font-urbanist text-sm font-normal text-glow-text-subtle outline-none transition focus:border-glow-gold-dark;
+  }
+
+  .agenda-figma-filter__date-range {
+    @apply space-y-3 rounded-t-xl bg-glow-surface px-2.5 pb-2.5 pt-2.5;
+  }
+
+  .agenda-figma-filter__date-range-group {
+    @apply space-y-1.5;
+  }
+
+  .agenda-figma-filter__date-range-label {
+    @apply block px-1 font-urbanist text-xs font-normal text-glow-text;
+  }
+
+  .agenda-figma-filter__date-range-input-wrap {
+    @apply relative h-[30px] rounded-none bg-glow-surface;
+  }
+
+  .agenda-figma-filter__date-range-input {
+    @apply h-[30px] w-full appearance-none rounded-none border-0 bg-glow-surface px-2 font-urbanist text-sm font-normal text-glow-text-subtle outline-none;
+    color-scheme: light;
+  }
+
+  .agenda-figma-filter__date-range-input::-webkit-calendar-picker-indicator {
+    @apply size-3 cursor-pointer opacity-50;
+  }
+
+  .agenda-figma-filter__date-range-error {
+    @apply px-1 font-urbanist text-xs font-normal leading-snug text-red-600;
+  }
+
+  .agenda-figma-filter__divider {
+    @apply mx-2.5 h-px bg-glow-border-soft;
+  }
+
+  .agenda-figma-filter__actions {
+    @apply flex flex-col gap-2 p-2.5;
+  }
+
+  .agenda-figma-filter__apply {
+    @apply flex w-full items-center justify-center rounded-xl bg-glow-gold px-2.5 py-2.5 font-urbanist text-sm font-normal text-white transition hover:brightness-95;
+  }
+
+  .agenda-figma-filter__clear {
+    @apply flex w-full items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-transparent px-2.5 py-2.5 font-urbanist text-sm font-normal text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .agenda-pagination {
+    @apply flex flex-col items-center justify-between gap-3 border-t border-glow-border-soft pt-4 sm:flex-row;
+  }
+
+  .agenda-pagination__summary {
+    @apply font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .agenda-pagination__controls {
+    @apply flex items-center gap-2;
+  }
+
+  .agenda-pagination__button {
+    @apply inline-flex h-[38px] min-w-[108px] items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 font-urbanist text-sm font-semibold text-glow-text-subtle transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Detalhe do agendamento — Figma nodes 409:885 / 470:1460 */
+  .agendamento-detail-page {
+    @apply space-y-6;
+  }
+
+  .agendamento-detail-header {
+    @apply flex items-start gap-3 border-b border-glow-border-soft pb-6;
+  }
+
+  .agendamento-detail-back {
+    @apply mt-1 flex size-8 shrink-0 items-center justify-center rounded-lg border border-glow-border-soft bg-glow-surface text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .agendamento-detail-header__text {
+    @apply min-w-0 flex-1;
+  }
+
+  .agendamento-detail-title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .agendamento-detail-subtitle {
+    @apply mt-1 font-satoshi text-base font-medium text-glow-text-muted;
+  }
+
+  .agendamento-detail-grid {
+    @apply grid gap-6 xl:grid-cols-2;
+  }
+
+  .agendamento-detail-column {
+    @apply space-y-6;
+  }
+
+  .agendamento-detail-section-title {
+    @apply mb-3 font-satoshi text-sm font-medium uppercase tracking-wide text-glow-text-soft;
+  }
+
+  .agendamento-detail-panel {
+    @apply overflow-hidden rounded-xl bg-glow-surface shadow-glow-card;
+  }
+
+  .agendamento-detail-panel__body {
+    @apply space-y-5 p-5;
+  }
+
+  .agendamento-detail-panel__header {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  .agendamento-detail-pending-alert {
+    @apply inline-flex items-center gap-1 rounded-xl border border-glow-promo-border bg-glow-promo-bg px-5 py-1 font-urbanist text-sm font-medium text-glow-promo-text;
+  }
+
+  .agendamento-detail-field {
+    @apply flex gap-3;
+  }
+
+  .agendamento-detail-field__icon {
+    @apply flex size-[30px] shrink-0 items-center justify-center rounded border border-glow-border-soft bg-glow-canvas text-glow-text-subtle;
+  }
+
+  .agendamento-detail-field__label {
+    @apply font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .agendamento-detail-field__value {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .agendamento-detail-divider {
+    @apply border-t border-glow-border-soft;
+  }
+
+  .agendamento-detail-total-row {
+    @apply flex items-center justify-between gap-3 pt-1;
+  }
+
+  .agendamento-detail-total-label {
+    @apply font-urbanist text-sm font-medium text-glow-text-soft;
+  }
+
+  .agendamento-detail-total-value {
+    @apply font-urbanist text-xl font-bold text-glow-text;
+  }
+
+  .agendamento-detail-obs-label {
+    @apply font-urbanist text-sm font-medium text-glow-text-soft;
+  }
+
+  .agendamento-detail-obs-box {
+    @apply min-h-[82px] rounded-xl border border-glow-text-subtle px-5 py-3 font-urbanist text-sm text-glow-text;
+  }
+
+  .agendamento-detail-service-row {
+    @apply flex items-start gap-3 border-b border-glow-border-soft pb-4 last:border-b-0 last:pb-0;
+  }
+
+  .agendamento-detail-service-avatar {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-full bg-glow-text-subtle font-urbanist text-sm font-semibold text-white;
+  }
+
+  .agendamento-detail-service-main {
+    @apply min-w-0 flex-1;
+  }
+
+  .agendamento-detail-service-name {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .agendamento-detail-service-professional {
+    @apply mt-0.5 font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .agendamento-detail-service-side {
+    @apply shrink-0 text-right;
+  }
+
+  .agendamento-detail-service-time {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .agendamento-detail-service-price {
+    @apply mt-0.5 font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .agendamento-detail-historico {
+    @apply relative space-y-5 pl-6;
+  }
+
+  .agendamento-detail-historico::before {
+    content: '';
+    @apply absolute bottom-2 left-[6px] top-2 w-px bg-glow-border-soft;
+  }
+
+  .agendamento-detail-historico-item {
+    @apply relative;
+  }
+
+  .agendamento-detail-historico-item::before {
+    content: '';
+    @apply absolute -left-6 top-1.5 size-3.5 rounded-full border-2 border-glow-surface bg-glow-success-action;
+  }
+
+  .agendamento-detail-historico-status {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .agendamento-detail-historico-meta {
+    @apply mt-0.5 font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .agendamento-detail-actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .agendamento-detail-btn {
+    @apply inline-flex h-8 items-center justify-center gap-1 rounded-xl border-[0.5px] px-3 font-satoshi text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .agendamento-detail-btn--confirm {
+    @apply min-w-[132px] border-glow-border-soft bg-glow-success-action text-white hover:brightness-95;
+  }
+
+  .agendamento-detail-btn--secondary {
+    @apply border-glow-border-soft bg-glow-surface text-glow-text hover:bg-glow-hover-surface;
+  }
+
+  .agendamento-detail-btn--danger {
+    @apply min-w-[132px] border-glow-error bg-glow-surface text-glow-error hover:bg-red-50 dark:hover:bg-red-950/20;
+  }
+
+  .agendamento-detail-avaliado-badge {
+    @apply inline-flex items-center rounded-xl border border-glow-border-soft bg-glow-hover-surface px-3 py-2 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .remarcar-agendamento {
+    @apply mt-8 space-y-3;
+  }
+
+  .remarcar-agendamento__title {
+    @apply font-satoshi text-sm font-medium uppercase tracking-wide text-glow-text-soft;
+  }
+
+  .remarcar-agendamento__panel {
+    @apply rounded-xl border border-glow-border-soft bg-glow-hover-surface p-5 dark:bg-glow-surface;
+  }
+
+  .remarcar-agendamento__layout {
+    @apply grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(280px,736px)];
+  }
+
+  .remarcar-agendamento__left {
+    @apply space-y-4;
+  }
+
+  .remarcar-agendamento__right {
+    @apply flex flex-col;
+  }
+
+  .remarcar-agendamento__label {
+    @apply block font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .remarcar-agendamento__label--spacing {
+    @apply pt-2;
+  }
+
+  .remarcar-agendamento__label--motivo {
+    @apply mb-3 text-glow-text-soft;
+  }
+
+  .remarcar-agendamento__slots-empty {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .remarcar-agendamento__slot-grid {
+    @apply grid gap-1.5;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 96px));
+  }
+
+  .remarcar-agendamento__slot-btn {
+    @apply flex h-[35px] w-[96px] items-center justify-center rounded-xl border border-glow-border-soft bg-glow-surface font-satoshi text-sm text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .remarcar-agendamento__slot-btn--selected {
+    @apply border-glow-gold-dark bg-glow-gold-soft;
+  }
+
+  .remarcar-agendamento__motivo {
+    @apply min-h-[82px] w-full resize-y rounded-lg border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm text-glow-text placeholder:text-glow-placeholder outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold;
+  }
+
+  .remarcar-agendamento__actions {
+    @apply mt-auto flex flex-wrap gap-2 pt-6;
+  }
+
+  .remarcar-agendamento__btn {
+    @apply inline-flex h-8 items-center justify-center rounded-xl px-3 font-satoshi text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .remarcar-agendamento__btn--primary {
+    @apply min-w-[214px] border border-transparent bg-glow-gold-cta text-white hover:brightness-95;
+  }
+
+  .remarcar-agendamento__btn--secondary {
+    @apply min-w-[132px] border border-glow-border-soft bg-glow-hover-surface text-glow-text hover:bg-glow-surface;
+  }
+
+  /* Área cliente — Explorar lojas (Figma MCP 637:1555) */
+  .cliente-explorar-page {
+    @apply w-full;
+  }
+
+  .cliente-explorar-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .cliente-explorar-intro__title {
+    @apply font-satoshi text-2xl font-bold leading-8 text-glow-text;
+  }
+
+  .cliente-explorar-intro__subtitle {
+    @apply font-satoshi text-base font-normal leading-[22px] text-glow-text-subtle;
+  }
+
+  .cliente-explorar-intro__divider {
+    margin-top: 34px;
+  }
+
+  .cliente-explorar-page .cliente-page-header-block {
+    @apply space-y-0;
+  }
+
+  .cliente-explorar-page .cliente-page-divider {
+    margin-top: 34px;
+  }
+
+  .cliente-loja-detalhe-page {
+    @apply space-y-6;
+  }
+
+  .cliente-page-header-block {
+    @apply space-y-6;
+  }
+
+  .cliente-page-header-block__row {
+    @apply flex items-center gap-[33px];
+  }
+
+  .cliente-page-header-block__back {
+    @apply flex size-8 shrink-0 items-center justify-center text-glow-text transition hover:opacity-70;
+  }
+
+  .cliente-page-header {
+    @apply flex flex-wrap items-start justify-between gap-4;
+  }
+
+  .cliente-page-divider {
+    @apply border-t border-glow-border-soft;
+  }
+
+  .cliente-explorar-toolbar {
+    @apply flex justify-end;
+    padding-top: 38px;
+    padding-bottom: 38px;
+  }
+
+  .cliente-explorar-btn-localizacao {
+    @apply inline-flex h-[34px] w-[195px] shrink-0 items-center justify-center gap-[10px] rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface font-urbanist text-sm font-normal text-glow-text transition;
+  }
+
+  .cliente-explorar-btn-localizacao:hover:not(:disabled) {
+    @apply bg-glow-hover-surface;
+  }
+
+  .cliente-explorar-btn-localizacao:focus-visible {
+    @apply outline-none ring-2 ring-glow-gold-cta ring-offset-2 ring-offset-glow-canvas;
+  }
+
+  .cliente-explorar-btn-localizacao:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  .cliente-explorar-btn-localizacao__icon {
+    @apply size-5 shrink-0 text-glow-text;
+  }
+
+  .cliente-explorar-grid {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 388px), 388px));
+    justify-content: start;
+  }
+
+  .cliente-explorar-load-more {
+    @apply flex justify-start pt-6;
+  }
+
+  @media (max-width: 427px) {
+    .cliente-explorar-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cliente-estab-card {
+      max-width: none;
+    }
+  }
+
+  .cliente-btn-outline {
+    @apply inline-flex h-[34px] shrink-0 items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 font-urbanist text-sm font-normal text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .cliente-empty-panel {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-6 py-12;
+  }
+
+  .cliente-card {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface transition-colors hover:border-glow-gold-dark;
+  }
+
+  .cliente-estab-card {
+    @apply cliente-card flex h-[126px] w-full max-w-[388px] min-w-0 items-start overflow-hidden transition-colors;
+    padding: 20px;
+    gap: 15px;
+  }
+
+  .cliente-estab-card:focus-visible {
+    @apply outline-none ring-2 ring-glow-gold-cta ring-offset-2 ring-offset-glow-canvas;
+  }
+
+  .cliente-estab-card:hover {
+    @apply border-glow-gold-dark;
+  }
+
+  .cliente-estab-card__logo {
+    @apply size-14 shrink-0 overflow-hidden rounded bg-glow-placeholder-surface;
+  }
+
+  .cliente-estab-card__logo-fallback {
+    @apply flex size-full items-center justify-center font-satoshi text-xl font-bold text-glow-text-subtle;
+  }
+
+  .cliente-estab-card__body {
+    @apply flex min-w-0 flex-1 flex-col;
+    gap: 6px;
+  }
+
+  .cliente-estab-card__name {
+    @apply truncate font-urbanist text-base font-bold leading-normal text-glow-text;
+  }
+
+  .cliente-estab-card__meta {
+    @apply flex items-center gap-1 font-urbanist text-xs font-normal leading-normal text-glow-text-hover;
+  }
+
+  .cliente-estab-card__meta-icon {
+    @apply size-4 shrink-0;
+  }
+
+  .cliente-estab-card__rating {
+    @apply m-0;
+  }
+
+  .cliente-estab-card__address {
+    @apply flex items-center gap-2.5 font-urbanist text-sm font-normal leading-normal text-glow-text;
+  }
+
+  .cliente-estab-card__address-icon {
+    @apply size-3.5 shrink-0;
+  }
+
+  .cliente-loja-detalhe-layout {
+    @apply grid items-start gap-8 lg:grid-cols-[minmax(0,723px)_278px] lg:gap-[30px];
+  }
+
+  .cliente-loja-panel {
+    @apply cliente-card flex min-h-[382px] w-full max-w-[723px] flex-col p-10;
+  }
+
+  .cliente-loja-panel__header {
+    @apply mb-5 grid gap-x-4;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'status rating'
+      'title rating';
+  }
+
+  .cliente-loja-panel__status {
+    grid-area: status;
+    @apply min-h-[22px] self-start;
+  }
+
+  .cliente-loja-panel__rating {
+    grid-area: rating;
+    @apply justify-self-end self-start;
+  }
+
+  .cliente-loja-panel__nome {
+    grid-area: title;
+    @apply mt-3.5 font-urbanist text-2xl font-bold leading-none text-glow-text;
+  }
+
+  .cliente-loja-rating-panel {
+    @apply inline-flex shrink-0 flex-col items-start gap-2;
+  }
+
+  .cliente-loja-rating-panel__score {
+    @apply ml-1 inline-flex h-[22px] min-w-[71px] items-center justify-center gap-1.5 rounded bg-glow-surface-tint px-2 font-urbanist text-glow-text;
+  }
+
+  .cliente-loja-rating-panel__star {
+    @apply size-4 shrink-0 text-glow-gold-cta;
+  }
+
+  .cliente-loja-rating-panel__value {
+    @apply text-base font-bold leading-none;
+  }
+
+  .cliente-loja-rating-panel__count {
+    @apply m-0 font-urbanist text-xs font-normal leading-none text-glow-text;
+  }
+
+  .cliente-loja-badge {
+    @apply inline-flex h-[22px] items-center gap-2.5 rounded bg-glow-surface-tint px-3.5 font-urbanist text-xs font-semibold text-glow-text;
+  }
+
+  .cliente-loja-badge__dot {
+    @apply size-2 shrink-0 rounded-full bg-glow-success;
+  }
+
+  .cliente-loja-stats-row {
+    @apply mb-5 grid grid-cols-2 gap-[11px];
+  }
+
+  .cliente-loja-stat-box {
+    @apply flex h-[84px] items-center gap-4 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface-tint px-5;
+  }
+
+  .cliente-loja-stat-box__content {
+    @apply flex min-w-0 flex-col gap-1;
+  }
+
+  .cliente-loja-stat-box__icon-wrap {
+    @apply flex size-[42px] shrink-0 items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface text-glow-text;
+  }
+
+  .cliente-loja-stat-box__label {
+    @apply font-urbanist text-sm leading-none text-glow-text;
+  }
+
+  .cliente-loja-stat-box__value {
+    @apply font-urbanist text-base font-bold leading-none text-glow-text;
+  }
+
+  .cliente-loja-stat-box__horarios-grid {
+    @apply grid min-w-0 flex-1 grid-cols-2 gap-6;
+  }
+
+  .cliente-loja-address-bar {
+    @apply mb-5 flex h-[47px] items-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface-tint px-5;
+  }
+
+  .cliente-loja-address-bar__text {
+    @apply truncate font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .cliente-loja-panel__cta {
+    @apply mt-auto block;
+  }
+
+  .cliente-loja-panel__cta-icon {
+    @apply flex size-10 shrink-0 items-center justify-center;
+  }
+
+  .cliente-loja-panel__cta-icon svg {
+    @apply size-7 rotate-[138deg];
+  }
+
+  .cliente-btn-cta {
+    @apply inline-flex h-10 w-full items-center justify-center gap-2.5 rounded-xl bg-glow-gold-cta px-2.5 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .cliente-loja-servicos {
+    @apply w-full max-w-[278px] space-y-4;
+  }
+
+  .cliente-loja-servicos-grid {
+    @apply grid grid-cols-1 gap-2.5;
+  }
+
+  .cliente-servico-card {
+    @apply cliente-card relative flex h-20 w-full items-center px-5;
+  }
+
+  .cliente-servico-card__icon {
+    @apply flex size-[50px] shrink-0 items-center justify-center rounded border-[0.5px] border-glow-border-soft bg-glow-surface-tint text-glow-text;
+  }
+
+  .cliente-servico-card__content {
+    @apply ml-3 min-w-0 flex-1 pr-16;
+  }
+
+  .cliente-servico-card__nome {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .cliente-servico-card__duracao {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .cliente-servico-card__preco {
+    @apply absolute right-5 top-1/2 -translate-y-1/2 font-urbanist text-sm font-bold text-glow-text;
+  }
+
+  .cliente-section-label {
+    @apply font-satoshi text-sm font-medium text-glow-text-soft;
+  }
+
+  .agendar-interno-breadcrumb {
+    @apply mb-6 flex items-center gap-2 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .agendar-prof-modo-card {
+    @apply cliente-card flex w-full items-start gap-4 p-5 text-left transition hover:border-glow-gold-dark;
+  }
+
+  .agendar-prof-modo-card--selected {
+    @apply ring-1 ring-glow-gold-cta;
+  }
+
+  .agendar-prof-pick-card {
+    @apply cliente-card relative flex h-[89px] w-full items-center gap-4 px-5 text-left transition hover:border-glow-gold-dark;
+  }
+
+  .agendar-prof-pick-card--selected {
+    @apply ring-1 ring-glow-gold-cta;
+  }
+
+  /* Serviços — Figma node 696:3155 */
+  .servicos-page {
+    @apply space-y-6;
+  }
+
+  .servicos-page__header {
+    @apply flex flex-col gap-4 border-b border-glow-border-soft pb-6 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .servicos-page__header-main {
+    @apply min-w-0;
+  }
+
+  .servicos-page__header-row {
+    @apply flex items-start gap-3;
+  }
+
+  .servicos-page__back {
+    @apply mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border border-glow-border-soft bg-glow-surface text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .servicos-page__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .servicos-page__subtitle {
+    @apply mt-1 font-satoshi text-base text-glow-text-subtle;
+  }
+
+  .servicos-page__meta {
+    @apply mt-1 flex flex-wrap items-center gap-2 font-satoshi text-base text-glow-text-subtle;
+  }
+
+  .servicos-page__meta-dot {
+    @apply size-1 rounded-full bg-glow-text-subtle;
+  }
+
+  .servicos-page__actions {
+    @apply flex w-full shrink-0 flex-wrap items-center gap-[15px] sm:w-auto sm:justify-end;
+  }
+
+  .servicos-btn-primary {
+    @apply inline-flex h-[34px] w-full items-center justify-center gap-2.5 rounded-xl bg-glow-gold-cta px-4 font-urbanist text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto;
+  }
+
+  .servicos-btn-primary--header {
+    @apply min-w-[195px] gap-2.5 sm:w-[195px];
+  }
+
+  .servicos-btn-primary--header .servico-icon,
+  .servicos-btn-primary--header svg {
+    @apply size-5;
+  }
+
+  .servicos-btn-primary--lg {
+    @apply h-12 w-full max-w-[580px] gap-2.5 text-base;
+  }
+
+  .servicos-btn-outline {
+    @apply inline-flex h-9 items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-xs font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .servicos-btn-delete {
+    @apply inline-flex h-[37px] min-w-[94px] items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-disabled transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .servicos-btn-delete .servico-icon,
+  .servicos-btn-delete svg {
+    @apply text-glow-disabled;
+  }
+
+  .servicos-btn-outline--md {
+    @apply h-[37px] px-3.5 text-sm;
+  }
+
+  .servicos-btn-form-primary {
+    @apply flex h-10 flex-1 items-center justify-center rounded-xl bg-glow-gold-cta px-2.5 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .servicos-btn-form-secondary {
+    @apply flex h-[37px] flex-1 items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .servicos-cards-grid {
+    @apply grid gap-2.5 lg:grid-cols-2;
+  }
+
+  .servico-card {
+    @apply relative min-h-[141px] rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-[22px] shadow-glow-sm;
+  }
+
+  .servico-card__body {
+    @apply flex h-full flex-col gap-4 lg:flex-row lg:items-center lg:justify-between;
+  }
+
+  .servico-card__info {
+    @apply min-w-0 flex-1;
+  }
+
+  .servico-card__title-row {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .servico-card__title {
+    @apply font-urbanist text-base font-bold text-glow-text;
+  }
+
+  .servico-card__description {
+    @apply mt-1 line-clamp-2 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .servico-card__meta {
+    @apply mt-3 flex flex-col gap-1;
+  }
+
+  .servico-card__meta-item {
+    @apply inline-flex items-center gap-2 font-urbanist text-xs text-[rgba(40,40,40,0.6)];
+  }
+
+  .servico-card__meta-item--price {
+    @apply font-bold;
+  }
+
+  .servico-card__meta-icon {
+    @apply size-4 shrink-0 text-glow-text-subtle;
+  }
+
+  .servico-card__actions {
+    @apply flex shrink-0 flex-wrap items-center gap-2.5 lg:justify-end;
+  }
+
+  .servico-status-badge {
+    @apply inline-flex h-[14px] items-center justify-center rounded-full px-4 font-urbanist text-xs font-normal leading-none;
+  }
+
+  .servico-status-badge--ativo {
+    @apply bg-glow-success-bg text-glow-success-dark;
+  }
+
+  .servico-status-badge--inativo {
+    @apply bg-glow-error-bg text-glow-error;
+  }
+
+  .servicos-empty {
+    @apply flex flex-col items-center gap-8 py-16;
+  }
+
+  .servicos-empty__content {
+    @apply flex w-full max-w-3xl flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:gap-8 sm:text-left;
+  }
+
+  .servicos-empty__text {
+    @apply min-w-0 flex-1;
+  }
+
+  .servicos-empty__icon {
+    @apply flex size-[120px] shrink-0 items-center justify-center rounded-2xl border border-dashed border-glow-border-soft bg-glow-hover-surface text-glow-text-subtle;
+  }
+
+  .servicos-empty__title {
+    @apply font-satoshi text-[32px] font-black leading-tight text-glow-text;
+  }
+
+  .servicos-empty__description {
+    @apply mt-3 font-satoshi text-xl text-glow-text-muted;
+  }
+
+  .servicos-empty__action {
+    @apply mt-8 w-full max-w-[580px];
+  }
+
+  .servicos-pagination {
+    @apply flex min-h-[61px] flex-col items-center justify-center gap-4 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 py-4 sm:flex-row sm:gap-[82px];
+  }
+
+  .servicos-pagination__summary {
+    @apply flex items-center gap-[7px] font-satoshi text-sm font-medium text-[rgba(40,40,40,0.6)];
+  }
+
+  .servicos-pagination__current-box {
+    @apply inline-flex h-[29px] min-w-[25px] items-center justify-center rounded border-[0.4px] border-[rgba(40,40,40,0.6)] px-1.5 font-satoshi text-sm font-medium text-[rgba(40,40,40,0.6)];
+  }
+
+  .servicos-pagination__controls {
+    @apply flex items-center gap-2;
+  }
+
+  .servicos-pagination__page {
+    @apply inline-flex h-[29px] min-w-[25px] items-center justify-center rounded border-[0.4px] border-[rgba(40,40,40,0.6)] px-1.5 font-satoshi text-sm font-medium text-[rgba(40,40,40,0.6)] transition hover:bg-glow-hover-surface disabled:cursor-default disabled:opacity-50;
+  }
+
+  .servicos-pagination__page--active {
+    @apply border-glow-gold bg-glow-gold text-white hover:bg-glow-gold;
+  }
+
+  .servicos-form-panel {
+    @apply mx-auto w-full max-w-[721px] rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-4 shadow-sm sm:px-[50px] sm:py-10;
+  }
+
+  .servicos-form-panel__fields {
+    @apply space-y-6;
+  }
+
+  .servicos-form-panel__row {
+    @apply grid gap-6 sm:grid-cols-2;
+  }
+
+  .servicos-form-label {
+    @apply font-satoshi text-sm font-normal text-glow-text;
+  }
+
+  .servicos-form-input {
+    @apply h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-canvas px-[18px] font-inter text-sm text-glow-text outline-none transition placeholder:font-inter placeholder:text-sm placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .servicos-form-input--error {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-500;
+  }
+
+  .servicos-form-field {
+    @apply space-y-2;
+  }
+
+  .servicos-form-field__error {
+    @apply font-urbanist text-xs text-red-600;
+  }
+
+  .servicos-form-profissionais-header {
+    @apply flex flex-wrap items-center justify-between gap-3;
+  }
+
+  .servicos-form-profissionais-box {
+    @apply min-h-[49px] rounded-lg border border-dashed border-glow-border-soft bg-[rgba(40,40,40,0.04)] px-[18px] py-3;
+  }
+
+  .servicos-form-profissionais-box--filled {
+    @apply flex min-h-[78px] flex-wrap gap-2 border-solid bg-glow-canvas;
+  }
+
+  .servicos-form-profissionais-placeholder {
+    @apply font-inter text-sm text-glow-placeholder;
+  }
+
+  .servicos-form-actions {
+    @apply mt-8 flex flex-col gap-3 sm:flex-row;
+  }
+
+  .servico-prof-chip {
+    @apply inline-flex h-11 max-w-full items-center gap-2 rounded-lg border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-2;
+  }
+
+  .servico-prof-chip__avatar {
+    @apply flex size-7 shrink-0 items-center justify-center rounded-full border-[0.5px] border-glow-border-soft bg-glow-hover-surface font-urbanist text-xs font-extrabold text-glow-text;
+  }
+
+  .servico-prof-chip__name {
+    @apply min-w-0 flex-1 truncate font-urbanist text-sm text-glow-text;
+  }
+
+  .servico-prof-chip__remove {
+    @apply flex size-3 shrink-0 items-center justify-center text-glow-text-subtle transition hover:text-glow-text;
+  }
+
+  .servicos-prof-toolbar {
+    @apply flex flex-wrap items-center gap-4;
+  }
+
+  .servicos-prof-select-all {
+    @apply inline-flex items-center gap-2.5 font-urbanist text-sm font-normal text-glow-text;
+  }
+
+  .servicos-prof-select-all--toolbar {
+    @apply text-base font-medium text-glow-text-muted;
+  }
+
+  .servicos-prof-grid {
+    @apply grid grid-cols-[repeat(auto-fill,minmax(244px,1fr))] gap-2.5;
+  }
+
+  .servico-prof-vinculo-card {
+    @apply relative flex min-h-[89px] items-start gap-3 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3.5 py-3.5 shadow-glow-sm;
+  }
+
+  .servico-prof-vinculo-card__body {
+    @apply min-w-0 flex-1;
+  }
+
+  .servico-prof-vinculo-card--selectable {
+    @apply cursor-pointer transition hover:border-glow-gold-dark;
+  }
+
+  .servico-prof-vinculo-card--selected {
+    @apply ring-1 ring-glow-gold-cta;
+  }
+
+  .servico-prof-vinculo-card__checkbox {
+    @apply size-3.5 shrink-0 rounded border border-glow-border-soft text-glow-gold focus:ring-glow-gold;
+  }
+
+  .servico-prof-vinculo-card__avatar {
+    @apply flex size-8 shrink-0 items-center justify-center rounded-full border-[0.5px] border-glow-border-soft bg-glow-hover-surface font-urbanist text-xs font-extrabold text-glow-text;
+  }
+
+  .servico-prof-vinculo-card__name {
+    @apply font-urbanist text-sm font-bold text-glow-text;
+  }
+
+  .servico-prof-vinculo-card__body .servico-prof-rating {
+    @apply mt-1.5;
+  }
+
+  .servico-prof-vinculo-card__remove {
+    @apply absolute right-3 top-3 flex size-4 items-center justify-center text-glow-text-subtle transition hover:text-glow-text;
+  }
+
+  .servico-prof-add-btn {
+    @apply flex size-[76px] items-center justify-center rounded-full border border-dashed border-glow-border-soft bg-glow-hover-surface text-glow-text-subtle transition hover:border-glow-gold hover:text-glow-gold;
+  }
+
+  .servicos-modal-overlay {
+    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4;
+  }
+
+  .servicos-modal {
+    @apply flex max-h-[92dvh] w-full max-w-[441px] flex-col overflow-hidden rounded-t-2xl border-[0.5px] border-glow-border-soft bg-glow-surface shadow-xl sm:max-h-[90dvh] sm:rounded-xl;
+  }
+
+  .servicos-modal-enter-active,
+  .servicos-modal-leave-active {
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .servicos-modal-enter-from,
+  .servicos-modal-leave-to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  @media (min-width: 640px) {
+    .servicos-modal-enter-from,
+    .servicos-modal-leave-to {
+      transform: translateY(8px) scale(0.96);
+    }
+  }
+
+  .servicos-modal__header {
+    @apply space-y-2 border-b border-glow-border-soft px-6 pb-4 pt-6;
+  }
+
+  .servicos-modal__header-top {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  .servicos-modal__close-icon {
+    @apply flex size-8 shrink-0 items-center justify-center rounded-lg text-glow-text-subtle transition hover:bg-glow-hover-surface hover:text-glow-text;
+  }
+
+  .servicos-modal__title {
+    @apply font-urbanist text-base font-semibold text-black;
+  }
+
+  .servicos-modal__subtitle {
+    @apply font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .servicos-modal__toolbar {
+    @apply flex items-center justify-between border-b border-glow-border-soft px-6 py-4;
+  }
+
+  .servicos-modal__count {
+    @apply font-urbanist text-sm text-glow-text;
+  }
+
+  .servicos-modal__list {
+    @apply flex-1 space-y-0 overflow-y-auto px-6 py-2;
+  }
+
+  .servicos-modal__option {
+    @apply flex w-full items-center gap-3 rounded-lg px-1 py-3 text-left transition hover:bg-glow-hover-surface;
+  }
+
+  .servicos-modal__option .servico-prof-vinculo-card__avatar {
+    @apply size-[41px] text-base;
+  }
+
+  .servicos-modal__option-info .servico-prof-vinculo-card__name {
+    @apply font-normal;
+  }
+
+  .servicos-modal__footer {
+    @apply flex items-center justify-center gap-2.5 border-t border-glow-border-soft p-6;
+  }
+
+  .servicos-modal__dismiss {
+    @apply flex h-[37px] w-[138px] shrink-0 items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98];
+  }
+
+  .servicos-modal__confirm {
+    @apply flex h-[37px] w-[249px] shrink-0 items-center justify-center rounded-xl bg-glow-gold-cta font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  @media (max-width: 639px) {
+    .servicos-modal__footer {
+      @apply flex-col gap-3;
+    }
+
+    .servicos-modal__dismiss,
+    .servicos-modal__confirm {
+      @apply w-full max-w-none;
+    }
+  }
+
+  .servico-form-currency .field-group label {
+    @apply servicos-form-label;
+  }
+
+  .servico-form-currency .flex > span {
+    @apply h-[49px] rounded-l-lg border-[0.3px] border-r-0 border-glow-border-soft;
+  }
+
+  .servico-form-currency .flex > input {
+    @apply servicos-form-input h-[49px] rounded-r-lg;
+  }
+
+  .servico-prof-rating {
+    @apply inline-flex h-[22px] items-center gap-1.5 rounded-full bg-[rgba(255,191,0,0.15)] px-3.5 font-urbanist text-sm font-bold text-glow-text;
+  }
+
+  .servico-prof-rating--compact {
+    @apply h-5 px-2.5 text-xs;
+  }
+
+  .servico-prof-rating__star {
+    @apply size-4 shrink-0 text-glow-gold-cta;
+  }
+
+  .servico-prof-rating--compact .servico-prof-rating__star {
+    @apply size-3.5;
+  }
+
+  .servico-prof-rating__value {
+    @apply leading-none;
+  }
+
+  .servicos-modal__option-info {
+    @apply min-w-0 flex-1 text-left;
+  }
+
+  /* Equipe — Figma node 766:3783 */
+  .equipe-page {
+    @apply space-y-6;
+  }
+
+  .equipe-page__header {
+    @apply flex flex-col gap-4 border-b border-glow-border-soft pb-6 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .equipe-page__header-main {
+    @apply min-w-0;
+  }
+
+  .equipe-page__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .equipe-page__subtitle {
+    @apply mt-1 font-satoshi text-base text-glow-text-subtle;
+  }
+
+  .equipe-page__actions {
+    @apply flex w-full shrink-0 flex-wrap items-center gap-[15px] sm:w-auto sm:justify-end;
+  }
+
+  .equipe-btn-primary {
+    @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl bg-glow-gold-cta px-3.5 font-urbanist text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .equipe-btn-primary--add {
+    @apply min-w-[192px];
+  }
+
+  .equipe-btn-outline {
+    @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98];
+  }
+
+  .equipe-btn-outline--links {
+    @apply min-w-[195px];
+  }
+
+  .equipe-add-menu {
+    @apply absolute right-0 z-20 mt-2 w-[min(100vw-2rem,18rem)] overflow-hidden rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface py-1 shadow-lg;
+  }
+
+  .equipe-add-menu__item {
+    @apply block w-full px-4 py-3 text-left transition hover:bg-glow-hover-surface;
+  }
+
+  .equipe-add-menu__title {
+    @apply block font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .equipe-add-menu__desc {
+    @apply mt-0.5 block font-urbanist text-xs leading-snug text-glow-text-subtle;
+  }
+
+  .equipe-members-grid {
+    @apply grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .equipe-member-card {
+    @apply flex min-h-[125px] items-start gap-5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-[22px] shadow-glow-sm;
+  }
+
+  .equipe-member-card__avatar {
+    @apply flex size-[50px] shrink-0 items-center justify-center rounded-full border-[0.5px] border-glow-border-soft bg-[rgba(40,40,40,0.04)] font-urbanist text-xl font-extrabold text-glow-text;
+  }
+
+  .equipe-member-card__body {
+    @apply min-w-0 flex-1;
+  }
+
+  .equipe-member-card__title-row {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .equipe-member-card__name {
+    @apply font-urbanist text-base font-bold text-glow-text;
+  }
+
+  .equipe-member-card__role {
+    @apply inline-flex h-[14px] items-center justify-center rounded-full bg-[rgba(40,40,40,0.1)] px-4 font-urbanist text-xs font-normal leading-none text-glow-text;
+  }
+
+  .equipe-member-card__meta {
+    @apply mt-3 space-y-2;
+  }
+
+  .equipe-member-card__meta-item {
+    @apply flex items-center gap-2.5 font-urbanist text-xs text-[rgba(40,40,40,0.6)];
+  }
+
+  .equipe-member-card__meta-icon {
+    @apply size-3.5 shrink-0 text-[rgba(40,40,40,0.6)];
+  }
+
+  .equipe-empty-slot {
+    @apply min-h-[125px] rounded-xl border border-dashed border-glow-border-soft bg-[rgba(40,40,40,0.02)];
+  }
+
+  .equipe-empty-state {
+    @apply flex flex-col items-center gap-6 py-16 text-center;
+  }
+
+  .equipe-empty-state__title {
+    @apply font-satoshi text-[32px] font-black leading-tight text-glow-text;
+  }
+
+  .equipe-empty-state__description {
+    @apply max-w-md font-satoshi text-xl text-glow-text-muted;
+  }
+
+  .equipe-modal-overlay {
+    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4;
+  }
+
+  .equipe-modal {
+    @apply flex max-h-[92dvh] w-full max-w-[490px] flex-col overflow-hidden rounded-t-2xl border-[0.5px] border-glow-border-soft bg-glow-surface shadow-xl sm:max-h-[90dvh] sm:rounded-xl;
+  }
+
+  .equipe-modal--tall {
+    @apply sm:max-h-[min(858px,90dvh)];
+  }
+
+  .equipe-modal-enter-active,
+  .equipe-modal-leave-active {
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .equipe-modal-enter-from,
+  .equipe-modal-leave-to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  @media (min-width: 640px) {
+    .equipe-modal-enter-from,
+    .equipe-modal-leave-to {
+      transform: translateY(8px) scale(0.96);
+    }
+  }
+
+  .equipe-modal__header {
+    @apply space-y-2 border-b border-glow-border-soft px-6 pb-4 pt-6;
+  }
+
+  .equipe-modal__header-top {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  .equipe-modal__close-icon {
+    @apply flex size-8 shrink-0 items-center justify-center rounded-lg text-glow-text-subtle transition hover:bg-glow-hover-surface hover:text-glow-text;
+  }
+
+  .equipe-modal__title {
+    @apply font-urbanist text-base font-semibold text-black;
+  }
+
+  .equipe-modal__subtitle {
+    @apply font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .equipe-modal__body {
+    @apply flex-1 overflow-y-auto px-6 py-6;
+  }
+
+  .equipe-modal__footer {
+    @apply flex items-center justify-center gap-2.5 border-t border-glow-border-soft px-6 py-6;
+  }
+
+  .equipe-modal__dismiss {
+    @apply flex h-[37px] w-[169px] shrink-0 items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .equipe-modal__confirm {
+    @apply flex h-[37px] min-w-[200px] flex-1 items-center justify-center rounded-xl bg-glow-gold-cta font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .equipe-modal__confirm--copy {
+    @apply w-[121px] flex-none;
+  }
+
+  @media (max-width: 639px) {
+    .equipe-modal__footer {
+      @apply flex-col gap-3;
+    }
+
+    .equipe-modal__dismiss,
+    .equipe-modal__confirm {
+      @apply w-full max-w-none;
+    }
+  }
+
+  .equipe-form-field {
+    @apply space-y-2;
+  }
+
+  .equipe-form-label {
+    @apply font-satoshi text-sm font-normal text-glow-text;
+  }
+
+  .equipe-form-input {
+    @apply h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-canvas px-[18px] font-inter text-sm text-glow-text outline-none transition placeholder:font-inter placeholder:text-sm placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .equipe-form-select {
+    @apply equipe-form-input appearance-none bg-[length:11px_7px] bg-[right_18px_center] bg-no-repeat pr-10;
+    background-image: url("data:image/svg+xml,%3Csvg width='11' height='7' viewBox='0 0 11 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5.5 5.5L10 1' stroke='%23282828' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+
+  .equipe-form-field__hint {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .equipe-form-field__error {
+    @apply font-urbanist text-xs text-red-600;
+  }
+
+  .equipe-form-section-title {
+    @apply font-urbanist text-xs font-normal uppercase tracking-wide text-glow-text-subtle;
+  }
+
+  .equipe-form-panel__row {
+    @apply grid gap-4 sm:grid-cols-2;
+  }
+
+  .equipe-form-actions-inline {
+    @apply flex flex-col-reverse gap-3 sm:flex-row sm:justify-end;
+  }
+
+  .equipe-link-success {
+    @apply space-y-4 rounded-xl border-[0.5px] border-glow-border-soft bg-[rgba(40,40,40,0.04)] p-5;
+  }
+
+  .equipe-link-success__title {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .equipe-link-success__text {
+    @apply font-urbanist text-sm leading-relaxed text-glow-text-subtle;
+  }
+
+  .equipe-link-success__url-box {
+    @apply flex flex-col gap-3 rounded-lg border-[0.5px] border-glow-border-soft bg-glow-surface p-4 sm:flex-row sm:items-center;
+  }
+
+  .equipe-link-success__url {
+    @apply min-w-0 flex-1 break-all font-inter text-xs leading-relaxed text-glow-text sm:text-sm;
+  }
+
+  .equipe-member-card--inactive {
+    @apply opacity-70;
+  }
+
+  .equipe-member-card--interactive {
+    @apply cursor-pointer transition hover:brightness-[0.99] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-gold-cta;
+  }
+
+  .equipe-member-card__inactive-badge {
+    @apply inline-flex h-[14px] items-center justify-center rounded-full bg-red-100 px-3 font-urbanist text-[10px] font-medium leading-none text-red-700;
+  }
+
+  .equipe-modal--detalhe {
+    @apply sm:max-h-[min(720px,90dvh)];
+  }
+
+  .equipe-membro-detalhe {
+    @apply space-y-5;
+  }
+
+  .equipe-membro-detalhe__profile {
+    @apply flex items-center gap-4;
+  }
+
+  .equipe-membro-detalhe__nome {
+    @apply font-urbanist text-base font-bold text-glow-text;
+  }
+
+  .equipe-membro-detalhe__badges {
+    @apply mt-1 flex flex-wrap items-center gap-2;
+  }
+
+  .equipe-membro-detalhe__status-badge {
+    @apply inline-flex h-[14px] items-center justify-center rounded-full px-3 font-urbanist text-[10px] font-medium leading-none;
+  }
+
+  .equipe-membro-detalhe__status-badge--inactive {
+    @apply bg-red-100 text-red-700;
+  }
+
+  .equipe-membro-detalhe__meta {
+    @apply grid gap-3 rounded-xl border-[0.5px] border-glow-border-soft bg-[rgba(40,40,40,0.02)] p-4 sm:grid-cols-2;
+  }
+
+  .equipe-membro-detalhe__meta dt {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .equipe-membro-detalhe__meta dd {
+    @apply mt-0.5 font-urbanist text-sm text-glow-text;
+  }
+
+  .equipe-membro-detalhe__readonly {
+    @apply font-urbanist text-sm text-glow-text;
+  }
+
+  .equipe-convites-table-wrap {
+    @apply overflow-x-auto rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface shadow-sm;
+  }
+
+  .equipe-convites-table {
+    @apply w-full min-w-[640px] text-left font-urbanist text-sm;
+  }
+
+  .equipe-convites-table__head-row {
+    @apply border-b border-glow-border-soft text-glow-text-subtle;
+  }
+
+  .equipe-convites-table__th {
+    @apply px-5 py-3 font-medium;
+  }
+
+  .equipe-convites-table__row {
+    @apply border-b border-glow-border-soft last:border-0;
+  }
+
+  .equipe-convites-table__td {
+    @apply px-5 py-3 text-glow-text;
+  }
+
+  .equipe-convites-table__td--muted {
+    @apply text-glow-text-subtle;
+  }
+
+  .equipe-membro-detalhe__danger {
+    @apply space-y-3 rounded-xl border border-red-200 bg-red-50/60 p-4 dark:border-red-900/40 dark:bg-red-950/20;
+  }
+
+  .equipe-membro-detalhe__danger-title {
+    @apply font-urbanist text-sm font-semibold text-red-800 dark:text-red-300;
+  }
+
+  .equipe-membro-detalhe__danger-text {
+    @apply font-urbanist text-sm leading-relaxed text-red-900/80 dark:text-red-200/80;
+  }
+
+  .equipe-btn-danger {
+    @apply inline-flex h-[37px] items-center justify-center rounded-xl border border-red-300 bg-white px-4 font-urbanist text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60;
+  }
+
+  .equipe-remover-confirm {
+    @apply space-y-4 rounded-xl border-[0.5px] border-glow-border-soft bg-[rgba(40,40,40,0.02)] p-4;
+  }
+
+  .equipe-remover-confirm__title {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .equipe-remover-confirm__list {
+    @apply list-disc space-y-2 pl-5 font-urbanist text-sm leading-relaxed text-glow-text-subtle;
+  }
+
+  .equipe-remover-confirm__actions {
+    @apply flex flex-col-reverse gap-3 sm:flex-row sm:justify-end;
+  }
+
+  .equipe-remover-confirm__loading {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .equipe-remover-agendamentos {
+    @apply space-y-3 rounded-xl border border-amber-200 bg-amber-50/80 p-4 dark:border-amber-900/60 dark:bg-amber-950/20;
+  }
+
+  .equipe-remover-agendamentos__title {
+    @apply font-urbanist text-sm font-semibold text-amber-900 dark:text-amber-200;
+  }
+
+  .equipe-remover-agendamentos__text {
+    @apply font-urbanist text-sm leading-relaxed text-amber-900/80 dark:text-amber-100/80;
+  }
+
+  .equipe-remover-agendamentos__list {
+    @apply max-h-48 space-y-2 overflow-y-auto;
+  }
+
+  .equipe-remover-agendamentos__item {
+    @apply flex items-start justify-between gap-3 rounded-lg border border-amber-200/80 bg-white/70 px-3 py-2 dark:border-amber-900/40 dark:bg-black/20;
+  }
+
+  .equipe-remover-agendamentos__item-main {
+    @apply min-w-0 space-y-0.5;
+  }
+
+  .equipe-remover-agendamentos__cliente {
+    @apply block font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .equipe-remover-agendamentos__servico,
+  .equipe-remover-agendamentos__horario {
+    @apply block font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .equipe-remover-agendamentos__link {
+    @apply shrink-0 font-urbanist text-xs font-semibold text-glow-gold-cta underline-offset-2 hover:underline;
+  }
+
+  .equipe-remover-agendamentos__actions {
+    @apply flex flex-col-reverse gap-2 sm:flex-row sm:justify-end;
+  }
+
+  .equipe-btn-danger--outline {
+    @apply border-red-200 bg-red-50 text-red-800 hover:bg-red-100 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200;
+  }
+
+  .equipe-form-textarea {
+    @apply w-full rounded-xl border-[0.5px] border-glow-border-soft bg-glow-canvas px-3 py-2 font-urbanist text-sm text-glow-text outline-none transition focus:border-glow-gold disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  /* Horários — Figma node 800:4293 */
+  .horarios-page {
+    @apply space-y-6;
+  }
+
+  .horarios-page__header {
+    @apply flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .horarios-page__header-main {
+    @apply min-w-0 max-w-xl;
+  }
+
+  .horarios-page__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .horarios-page__subtitle {
+    @apply mt-1 font-satoshi text-base leading-snug text-glow-text-subtle;
+  }
+
+  .horarios-page__actions {
+    @apply flex shrink-0 flex-wrap items-center gap-3;
+  }
+
+  .horarios-page__error {
+    @apply font-urbanist text-sm text-red-600;
+  }
+
+  .horarios-tabs {
+    @apply relative flex gap-8 border-b border-glow-border-soft pb-0;
+  }
+
+  .horarios-tabs__item {
+    @apply relative z-[1] border-b-2 border-transparent px-2 pb-3 font-urbanist text-sm font-medium text-glow-text-subtle transition hover:text-glow-text;
+  }
+
+  .horarios-tabs__item--active {
+    @apply text-glow-text;
+  }
+
+  .horarios-tabs__indicator {
+    @apply pointer-events-none absolute bottom-0 h-1 rounded-full bg-glow-gold transition-all duration-200;
+  }
+
+  .horarios-tabs__indicator--loja {
+    @apply left-2 w-[54px];
+  }
+
+  .horarios-tabs__indicator--profissionais {
+    @apply left-[84px] w-[113px];
+  }
+
+  .horarios-section-title {
+    @apply font-satoshi text-xl font-bold text-glow-text;
+  }
+
+  .horarios-loja {
+    @apply space-y-5;
+  }
+
+  .horarios-loja-grid {
+    @apply grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6;
+  }
+
+  .horario-dia-card {
+    @apply flex min-h-[360px] flex-col rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm transition-colors;
+  }
+
+  .horario-dia-card--editavel {
+    @apply border-glow-gold-dark bg-glow-gold-soft;
+  }
+
+  .horario-dia-card--bloqueado {
+    @apply border-glow-border-soft;
+  }
+
+  .horario-dia-card__hint {
+    @apply mb-4 flex items-start gap-2 rounded-lg border border-glow-border-soft bg-glow-hover-surface px-3 py-2 font-urbanist text-xs leading-snug text-glow-text-subtle;
+  }
+
+  .horario-dia-card__hint--editavel {
+    @apply border-glow-gold-dark bg-glow-gold-soft text-glow-text;
+  }
+
+  .horario-dia-card__hint-icon {
+    @apply mt-0.5 size-3.5 shrink-0 text-glow-text-subtle;
+  }
+
+  .horario-dia-card__hint--editavel .horario-dia-card__hint-icon {
+    @apply text-glow-gold;
+  }
+
+  .horario-dia-card__header {
+    @apply mb-5 flex items-start justify-between gap-2;
+  }
+
+  .horario-dia-card__title {
+    @apply font-urbanist text-base font-semibold text-glow-text;
+  }
+
+  .horario-dia-card__fields {
+    @apply flex flex-1 flex-col gap-5;
+  }
+
+  .horario-dia-card__actions {
+    @apply mt-auto flex flex-col gap-2 pt-5;
+  }
+
+  .horario-field {
+    @apply block space-y-2;
+  }
+
+  .horario-field__label {
+    @apply block font-satoshi text-sm text-glow-text;
+  }
+
+  .horario-field__input {
+    @apply h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-canvas px-[18px] font-inter text-sm text-glow-text outline-none transition placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:bg-glow-hover-surface disabled:text-glow-text-subtle;
+  }
+
+  .horario-field__input--editable {
+    @apply cursor-pointer border-glow-gold-dark bg-white focus:border-glow-gold focus:ring-2 focus:ring-glow-gold-soft dark:bg-glow-canvas;
+  }
+
+  .horario-field__value {
+    @apply flex h-[49px] items-center rounded-lg border border-dashed border-glow-border-soft bg-glow-hover-surface px-[18px] font-inter text-sm text-glow-text-subtle;
+  }
+
+  .horario-field__select-wrap {
+    @apply relative;
+  }
+
+  .horario-field__input--select {
+    @apply appearance-none pr-10;
+  }
+
+  .horario-field__select-wrap::after {
+    content: '';
+    @apply pointer-events-none absolute right-[18px] top-1/2 size-0 -translate-y-1/2 border-x-[5px] border-t-[6px] border-x-transparent border-t-glow-text-subtle;
+  }
+
+  .horario-status-badge {
+    @apply inline-flex h-[14px] items-center justify-center rounded-full px-4 font-urbanist text-xs font-normal leading-none;
+  }
+
+  .horario-status-badge--ativo {
+    @apply bg-glow-success-bg text-glow-success-dark;
+  }
+
+  .horario-status-badge--inativo {
+    @apply bg-glow-error-bg text-glow-error;
+  }
+
+  .horarios-btn-primary {
+    @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl bg-glow-gold-cta px-3.5 font-urbanist text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .horarios-btn-primary--block {
+    @apply w-full;
+  }
+
+  .horarios-btn-primary--sm {
+    @apply h-[30px] min-w-[100px] px-3.5 text-sm;
+  }
+
+  .horarios-btn-outline {
+    @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .horarios-btn-outline--block {
+    @apply w-full;
+  }
+
+  .horarios-btn-outline--sm {
+    @apply h-[30px] min-w-[120px] px-3.5 text-sm;
+  }
+
+  .horarios-btn-ativar {
+    @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl bg-glow-success-bg px-3.5 font-urbanist text-sm font-medium text-glow-success-dark transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .horarios-btn-ativar--block {
+    @apply w-full;
+  }
+
+  .horarios-btn-ativar--sm {
+    @apply h-[30px] min-w-[120px] px-3.5 text-sm;
+  }
+
+  .horarios-profissionais,
+  .horarios-profissionais-wrap {
+    @apply space-y-6;
+  }
+
+  .horarios-prof-form-grid {
+    @apply grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,499px)_minmax(0,1fr)];
+  }
+
+  .horarios-panel {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+  }
+
+  .horarios-panel__title {
+    @apply font-urbanist text-base font-semibold text-glow-text;
+  }
+
+  .horarios-panel__hint {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .horarios-checkbox-row {
+    @apply mt-4 flex cursor-pointer items-center gap-2 font-urbanist text-sm text-glow-text;
+  }
+
+  .horarios-checkbox {
+    @apply size-3.5 shrink-0 rounded border-glow-border-soft text-glow-gold focus:ring-glow-gold;
+  }
+
+  .horarios-prof-chips-scroll {
+    @apply mt-4 max-h-[131px] overflow-y-auto pr-1;
+  }
+
+  .horarios-prof-chips {
+    @apply flex flex-wrap gap-2.5;
+  }
+
+  .horarios-prof-chip {
+    @apply inline-flex h-[37px] cursor-pointer items-center gap-2 rounded-lg border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3 font-urbanist text-sm text-glow-text transition;
+  }
+
+  .horarios-prof-chip--selected {
+    @apply border-glow-gold bg-[rgba(255,191,0,0.12)];
+  }
+
+  .horarios-panel__fields {
+    @apply mt-5 grid grid-cols-1 gap-4 md:grid-cols-3;
+  }
+
+  .horarios-panel__actions {
+    @apply mt-6 flex flex-wrap gap-3;
+  }
+
+  .horarios-profissional-filter {
+    @apply max-w-[498px];
+  }
+
+  .horarios-empty-list {
+    @apply font-urbanist text-base text-glow-text-subtle;
+  }
+
+  .horarios-prof-list-grid {
+    @apply grid grid-cols-1 gap-2.5 lg:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .horario-prof-list-card {
+    @apply flex min-h-[86px] flex-col gap-3 rounded-lg border-[0.3px] border-glow-border-soft bg-glow-surface p-4 sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .horario-prof-list-card__main {
+    @apply min-w-0 flex-1;
+  }
+
+  .horario-prof-list-card__title-row {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .horario-prof-list-card__title {
+    @apply font-urbanist text-base text-glow-text;
+  }
+
+  .horario-prof-list-card__time {
+    @apply mt-1 inline-flex items-center gap-2 font-urbanist text-sm text-[rgba(40,40,40,0.6)];
+  }
+
+  .horario-prof-list-card__actions {
+    @apply flex shrink-0 flex-col gap-2 sm:items-end;
+  }
+
+  .horario-dia-card__profissionais {
+    @apply mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-3 py-2.5 font-urbanist text-sm font-medium text-glow-text transition hover:border-glow-gold-dark hover:bg-glow-gold-soft;
+  }
+
+  .horario-dia-card__profissionais-icon {
+    @apply size-4 shrink-0 text-glow-text-subtle;
+  }
+
+  .horario-dia-card__profissionais-count {
+    @apply inline-flex min-w-[20px] items-center justify-center rounded-full bg-glow-gold-cta px-1.5 py-0.5 font-urbanist text-xs font-semibold text-white;
+  }
+
+  .horarios-modal-profissionais {
+    @apply max-w-[560px];
+  }
+
+  .horarios-modal-profissionais__body {
+    @apply space-y-4;
+  }
+
+  .horarios-modal-profissionais__loja-ref {
+    @apply flex flex-wrap items-center justify-between gap-2 rounded-lg border border-glow-border-soft bg-glow-hover-surface px-4 py-3;
+  }
+
+  .horarios-modal-profissionais__loja-ref-label {
+    @apply font-urbanist text-xs font-medium uppercase tracking-wide text-glow-text-subtle;
+  }
+
+  .horarios-modal-profissionais__loja-ref-value {
+    @apply font-satoshi text-sm font-semibold text-glow-text;
+  }
+
+  .horarios-modal-profissionais__toolbar {
+    @apply flex items-center justify-between gap-3;
+  }
+
+  .horarios-modal-profissionais__count {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .horarios-modal-profissionais__toggle-all {
+    @apply font-urbanist text-sm font-medium text-glow-gold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .horarios-modal-profissionais__list {
+    @apply space-y-3;
+  }
+
+  .horarios-modal-profissionais__item {
+    @apply rounded-xl border border-glow-border-soft bg-glow-surface p-4 transition-colors;
+  }
+
+  .horarios-modal-profissionais__item--selected {
+    @apply border-glow-gold-dark bg-glow-gold-soft;
+  }
+
+  .horarios-modal-profissionais__select-row {
+    @apply flex cursor-pointer items-center gap-3;
+  }
+
+  .horarios-modal-profissionais__checkbox {
+    @apply size-4 shrink-0 rounded border-glow-border-soft text-glow-gold focus:ring-glow-gold;
+  }
+
+  .horarios-modal-profissionais__nome {
+    @apply min-w-0 flex-1 font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .horarios-modal-profissionais__vinculado-badge {
+    @apply inline-flex rounded-full bg-glow-success-bg px-2 py-0.5 font-urbanist text-xs text-glow-success-dark;
+  }
+
+  .horarios-modal-profissionais__config {
+    @apply mt-4 space-y-4 border-t border-glow-border-soft pt-4;
+  }
+
+  .horarios-modal-profissionais__modo {
+    @apply space-y-2;
+  }
+
+  .horarios-modal-profissionais__modo-legend {
+    @apply mb-2 font-urbanist text-xs font-medium uppercase tracking-wide text-glow-text-subtle;
+  }
+
+  .horarios-modal-profissionais__radio {
+    @apply flex cursor-pointer items-start gap-2.5 rounded-lg px-1 py-1.5;
+  }
+
+  .horarios-modal-profissionais__radio-text {
+    @apply font-urbanist text-sm text-glow-text;
+  }
+
+  .horarios-modal-profissionais__radio-hint {
+    @apply block font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .horarios-modal-profissionais__horarios {
+    @apply grid grid-cols-2 gap-3;
+  }
+
+  .horarios-modal-profissionais__heranca {
+    @apply rounded-lg bg-glow-hover-surface px-3 py-2 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .horarios-modal-profissionais__section {
+    @apply space-y-3;
+  }
+
+  .horarios-modal-profissionais__section-title {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .horarios-modal-profissionais__prof-header {
+    @apply flex items-start gap-3;
+  }
+
+  .horarios-modal-profissionais__prof-info {
+    @apply min-w-0 flex-1 space-y-1;
+  }
+
+  .horarios-modal-profissionais__tipo-badge {
+    @apply inline-flex rounded-full px-2 py-0.5 font-urbanist text-xs;
+  }
+
+  .horarios-modal-profissionais__tipo-badge--loja {
+    @apply bg-glow-gold-soft text-glow-text;
+  }
+
+  .horarios-modal-profissionais__tipo-badge--personalizado {
+    @apply bg-glow-hover-surface text-glow-text-subtle;
+  }
+
+  .horarios-modal-profissionais__horario-resumo {
+    @apply block font-satoshi text-xs text-glow-text-subtle;
+  }
+
+  .horarios-modal-profissionais__row-actions {
+    @apply mt-4 flex flex-wrap gap-2 border-t border-glow-border-soft pt-4;
+  }
+
+  .horarios-modal-profissionais__remove-btn {
+    @apply text-glow-error;
+  }
+
+  .horarios-modal-profissionais__item--disponivel {
+    @apply bg-glow-hover-surface;
+  }
+
+  .horarios-modal-profissionais__empty {
+    @apply rounded-lg border border-dashed border-glow-border-soft px-4 py-6 text-center font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  /* Financeiro */
+  .financeiro-page {
+    @apply space-y-6;
+  }
+
+  .financeiro-page__header {
+    @apply flex flex-col gap-4 border-b border-glow-border-soft pb-6 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .financeiro-page__header-main {
+    @apply min-w-0;
+  }
+
+  .financeiro-page__header-row {
+    @apply flex items-start gap-3;
+  }
+
+  .financeiro-page__back {
+    @apply mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-lg border-[0.5px] border-glow-border-soft text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .financeiro-page__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .financeiro-page__subtitle {
+    @apply mt-1 font-satoshi text-base text-glow-text-subtle;
+  }
+
+  .financeiro-page__actions {
+    @apply flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto sm:justify-end;
+  }
+
+  .financeiro-page__filters {
+    @apply flex flex-wrap items-end gap-3;
+  }
+
+  .financeiro-btn-primary {
+    @apply inline-flex h-[37px] items-center justify-center gap-2 rounded-xl bg-glow-gold-cta px-3.5 font-urbanist text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .financeiro-btn-outline {
+    @apply inline-flex h-[37px] items-center justify-center gap-2 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .financeiro-quick-filters {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .financeiro-quick-filters__btn {
+    @apply inline-flex h-9 items-center justify-center rounded-lg border-[0.5px] border-glow-border-soft bg-glow-surface px-3 font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .financeiro-quick-filters__btn--active {
+    @apply border-glow-gold bg-glow-gold-soft font-semibold text-glow-text;
+  }
+
+  .financeiro-kpi-grid {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .financeiro-kpi-card {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+  }
+
+  .financeiro-kpi-card__label {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .financeiro-kpi-card__value {
+    @apply mt-1 font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .financeiro-kpi-card__value--positive {
+    @apply text-green-700;
+  }
+
+  .financeiro-kpi-card__value--negative {
+    @apply text-glow-error;
+  }
+
+  .financeiro-table-wrap {
+    @apply overflow-x-auto rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface;
+  }
+
+  .financeiro-table {
+    @apply w-full min-w-[40rem] font-urbanist text-sm;
+  }
+
+  .financeiro-table thead tr {
+    @apply border-b border-glow-border-soft text-left text-glow-text-subtle;
+  }
+
+  .financeiro-table th {
+    @apply px-5 py-3 font-medium;
+  }
+
+  .financeiro-table td {
+    @apply border-b border-glow-border-soft px-5 py-3 text-glow-text;
+  }
+
+  .financeiro-table__row-card {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-4 md:hidden;
+  }
+
+  .financeiro-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 font-urbanist text-xs font-medium;
+  }
+
+  .financeiro-badge--aberta {
+    @apply bg-blue-50 text-blue-700;
+  }
+
+  .financeiro-badge--baixada {
+    @apply bg-glow-hover-surface text-glow-text-subtle;
+  }
+
+  .financeiro-badge--vencida {
+    @apply bg-red-50 text-glow-error;
+  }
+
+  .financeiro-badge--estornada {
+    @apply bg-amber-50 text-amber-800;
+  }
+
+  .financeiro-empty {
+    @apply flex flex-col items-center gap-4 rounded-xl border border-dashed border-glow-border-soft px-6 py-12 text-center;
+  }
+
+  .financeiro-empty__title {
+    @apply font-satoshi text-lg font-bold text-glow-text;
+  }
+
+  .financeiro-empty__desc {
+    @apply max-w-sm font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .financeiro-atalhos-grid {
+    @apply grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4;
+  }
+
+  .financeiro-atalho-card {
+    @apply flex flex-col gap-1 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-4 text-left transition hover:border-glow-gold hover:bg-glow-hover-surface;
+  }
+
+  .financeiro-atalho-card__label {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .financeiro-atalho-card__desc {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-alert-banner {
+    @apply rounded-xl border px-4 py-3 font-urbanist text-sm;
+  }
+
+  .financeiro-alert-banner--warning {
+    @apply border-amber-200 bg-amber-50 text-amber-900;
+  }
+
+  .financeiro-alert-banner--info {
+    @apply border-green-200 bg-green-50 text-green-800;
+  }
+
+  .financeiro-modal-overlay {
+    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4;
+  }
+
+  .financeiro-modal {
+    @apply flex max-h-[92dvh] w-full max-w-[490px] flex-col overflow-hidden rounded-t-2xl border-[0.5px] border-glow-border-soft bg-glow-surface shadow-xl sm:max-h-[90dvh] sm:rounded-xl;
+  }
+
+  .financeiro-modal__header {
+    @apply space-y-1 border-b border-glow-border-soft px-6 pb-4 pt-6;
+  }
+
+  .financeiro-modal__title {
+    @apply font-satoshi text-lg font-bold text-glow-text;
+  }
+
+  .financeiro-modal__body {
+    @apply flex-1 overflow-y-auto px-6 py-4;
+  }
+
+  .financeiro-modal__footer {
+    @apply flex flex-wrap justify-end gap-2 border-t border-glow-border-soft px-6 py-4;
+  }
+
+  .financeiro-drawer-overlay {
+    @apply fixed inset-0 z-[90] bg-black/30;
+  }
+
+  .financeiro-drawer {
+    @apply fixed inset-y-0 right-0 z-[95] flex w-full max-w-md flex-col border-l border-glow-border-soft bg-glow-surface shadow-xl;
+  }
+
+  .financeiro-search {
+    @apply flex h-10 w-full max-w-md items-center gap-2 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3;
+  }
+
+  .financeiro-search__input {
+    @apply min-w-0 flex-1 bg-transparent font-urbanist text-sm text-glow-text outline-none placeholder:text-glow-placeholder;
+  }
+
+  @media print {
+    .financeiro-no-print {
+      display: none !important;
+    }
+
+    .financeiro-page {
+      @apply space-y-4;
+    }
   }
 }

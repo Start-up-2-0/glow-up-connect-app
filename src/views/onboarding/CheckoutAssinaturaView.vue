@@ -17,9 +17,11 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useUserStore } from '@/stores/user.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
-import { LANDING_PLANOS_HASH, ROUTE_PATHS } from '@/constants/routes'
-import { formatBRL } from '@/utils/formatters'
+import { ROUTE_PATHS } from '@/constants/routes'
+import { redirectToLandingPlanos } from '@/utils/landingUrl'
+import { formatBRL, telefoneToApi } from '@/utils/formatters'
 import { USER_ROLE } from '@/types/user.types'
+import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
 const route = useRoute()
 const router = useRouter()
 const planosStore = usePlanosStore()
@@ -73,7 +75,7 @@ onMounted(async () => {
   }
 
   if (!plano.value) {
-    await router.replace({ path: ROUTE_PATHS.HOME, hash: LANDING_PLANOS_HASH })
+    redirectToLandingPlanos()
     return
   }
 
@@ -142,7 +144,7 @@ async function finalizarCheckout() {
         profissionalAutonomo: {
           nomePublico: nome.value,
           logo,
-          telefone: telefone.value,
+          telefone: telefoneToApi(telefone.value),
           email: email.value,
           endereco,
         },
@@ -156,7 +158,7 @@ async function finalizarCheckout() {
         estabelecimento: {
           nome: nome.value,
           logo,
-          telefone: telefone.value,
+          telefone: telefoneToApi(telefone.value),
           email: email.value,
           endereco,
         },
@@ -177,7 +179,7 @@ async function finalizarCheckout() {
 
     if (result.status === 'PendentePagamento') {
       if (result.pagamentoInicial?.checkoutUrl) {
-        window.location.href = result.pagamentoInicial.checkoutUrl
+        redirectToThirdPartyUrl(result.pagamentoInicial.checkoutUrl)
         return
       }
       await aguardarAtivacao()

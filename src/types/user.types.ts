@@ -58,6 +58,7 @@ export interface CadastroPayload {
   senha: string
   avatarBase64?: string
   avatarContentType?: string
+  captchaToken?: string
 }
 
 export interface CadastroResponse {
@@ -89,6 +90,8 @@ export interface EstabelecimentoAcesso {
   logo: string
   role: string
   possuiVinculoProfissional: boolean
+  profissionalId?: number | null
+  profissionalPublicGuid?: string | null
   permissoes: string[]
   assinaturaAtiva: boolean
   assinaturaId?: number | null

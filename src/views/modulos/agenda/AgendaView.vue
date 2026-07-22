@@ -1,38 +1,69 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { RouterLink } from 'vue-router'
-import BaseCard from '@/components/ui/BaseCard.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
+import { useRoute } from 'vue-router'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
-import AgendamentoStatusBadge from '@/components/cliente/AgendamentoStatusBadge.vue'
+import AgendaPageHeader from '@/components/agenda/AgendaPageHeader.vue'
+import AgendaFigmaFilter from '@/components/agenda/AgendaFigmaFilter.vue'
+import AgendaStatusFilterIcon from '@/components/agenda/AgendaStatusFilterIcon.vue'
+import AgendaCalendarFilterIcon from '@/components/agenda/AgendaCalendarFilterIcon.vue'
+import AgendaFigmaDateRangeFilter from '@/components/agenda/AgendaFigmaDateRangeFilter.vue'
+import AgendaSortFilterIcon from '@/components/agenda/AgendaSortFilterIcon.vue'
+import AgendaPagination from '@/components/agenda/AgendaPagination.vue'
+import AgendamentoCard from '@/components/agenda/AgendamentoCard.vue'
 import CancelarAgendamentoModal from '@/components/cliente/CancelarAgendamentoModal.vue'
-import NotificacoesIndicador from '@/components/negocio/NotificacoesIndicador.vue'
+import { AGENDA_DEFAULT_ORDENACAO } from '@/constants/agendaFilters'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
+import { useAgendaPageFilters } from '@/composables/useAgendaPageFilters'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { agendaNegocioService } from '@/services/agendaNegocioService'
 import type { AgendaGeral, AgendaProfissional } from '@/types/negocio/agenda.types'
+import { agendaDetalhePath } from '@/constants/routes'
+import { formatAgendaDateRangeLabel, hasAgendaCustomDateRange } from '@/utils/agendaDateRange'
+import { formatDateShortNumeric } from '@/utils/formatters'
 import {
-  agendaDetalhePath,
-  ROUTE_PATHS,
-} from '@/constants/routes'
-import { formatCurrency, formatDateTime } from '@/utils/formatters'
+  podeFinalizarItemAtendimento,
+  podeIniciarItemAtendimento,
+  possuiPermissaoFinalizarAtendimento,
+  possuiPermissaoIniciarAtendimento,
+  statusPermiteFinalizarItemAtendimento,
+  statusPermiteIniciarItemAtendimento,
+} from '@/utils/agendamentoAtendimento'
 
-function dayRange(date: Date) {
-  const inicio = new Date(date)
-  inicio.setHours(0, 0, 0, 0)
-  const fim = new Date(date)
-  fim.setHours(23, 59, 59, 999)
-  return { inicio: inicio.toISOString(), fim: fim.toISOString() }
-}
-
+const route = useRoute()
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
 const { possuiPermissao } = useNegocioContext()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
+
+const {
+  statusFilter,
+  periodFilter,
+  customDateRange,
+  sortFilter,
+  pagina,
+  total,
+  totalPaginas,
+  statusOptions,
+  periodOptions,
+  sortOptions,
+  apiFiltro,
+  resetPagina,
+  applyPeriodFilter,
+  applyCustomDateRange,
+  clearPeriodFilter,
+  clearCustomDateRange,
+  applySortFilter,
+  clearSortFilter,
+} = useAgendaPageFilters('mes')
+
+const periodoFromQuery = route.query.periodo
+if (periodoFromQuery === 'semana' || periodoFromQuery === 'mes' || periodoFromQuery === 'hoje') {
+  periodFilter.value = periodoFromQuery
+}
 
 const agendaGeral = ref<AgendaGeral[]>([])
 const agendaPropria = ref<AgendaProfissional[]>([])
@@ -42,37 +73,125 @@ const cancelModalOpen = ref(false)
 const cancelTargetId = ref<number | null>(null)
 
 const visaoGeral = computed(() => possuiPermissao('AgendaVisualizarGeral'))
+const podeConfirmarOuCancelar = computed(
+  () => possuiPermissao('AgendaCancelar') || possuiPermissao('AgendaReagendar'),
+)
+const podeIniciarAtendimento = computed(() => possuiPermissaoIniciarAtendimento(possuiPermissao))
+const podeFinalizarAtendimento = computed(() => possuiPermissaoFinalizarAtendimento(possuiPermissao))
 
-const itensHoje = computed(() => {
-  if (visaoGeral.value) {
-    return agendaGeral.value.map((a) => ({
-      id: a.id,
-      clienteNome: a.clienteNome,
-      status: a.status,
-      valorTotal: a.valorTotal,
-      inicio: a.itens[0]?.inicio ?? '',
-      label: a.itens.map((i) => i.servicoNome).join(', '),
-    }))
+const pageTitle = computed(() => {
+  if (hasAgendaCustomDateRange(customDateRange.value)) {
+    return visaoGeral.value ? 'Agenda personalizada' : 'Meus agendamentos personalizados'
   }
+  if (periodFilter.value === 'semana') return visaoGeral.value ? 'Agenda da semana' : 'Meus agendamentos da semana'
+  if (periodFilter.value === 'hoje') return visaoGeral.value ? 'Agenda de hoje' : 'Meus agendamentos de hoje'
+  return visaoGeral.value ? 'Agenda do mês' : 'Meus agendamentos do mês'
+})
+
+const pageSubtitle = computed(() => {
+  if (hasAgendaCustomDateRange(customDateRange.value)) {
+    return 'Agendamentos do intervalo de datas selecionado.'
+  }
+  if (periodFilter.value === 'semana') return 'Visão semanal dos agendamentos.'
+  if (periodFilter.value === 'hoje') return 'Agendamentos do dia atual.'
+  if (periodFilter.value === 'mes' || !periodFilter.value) {
+    return 'Agendamentos do mês atual, com os horários mais recentes primeiro.'
+  }
+  return visaoGeral.value
+    ? 'Agendamentos do período selecionado.'
+    : 'Horários marcados com você nesta loja.'
+})
+
+const showDateInTitle = computed(
+  () => hasAgendaCustomDateRange(customDateRange.value) || periodFilter.value === 'hoje',
+)
+const dateLabel = computed(() => {
+  if (hasAgendaCustomDateRange(customDateRange.value)) {
+    return formatAgendaDateRangeLabel(customDateRange.value)
+  }
+  return showDateInTitle.value ? formatDateShortNumeric() : undefined
+})
+
+function itemComAcaoAtendimento(itens: AgendaGeral['itens'], agendamentoStatus: string) {
+  return itens.find(
+    (item) =>
+      statusPermiteIniciarItemAtendimento(item.status, agendamentoStatus) ||
+      statusPermiteFinalizarItemAtendimento(item.status, agendamentoStatus),
+  )
+}
+
+const itens = computed(() => {
+  if (visaoGeral.value) {
+    return agendaGeral.value.map((a) => {
+      const itemAcao = itemComAcaoAtendimento(a.itens, a.status) ?? a.itens[0]
+      return {
+        id: a.id,
+        agendamentoItemId: itemAcao?.id ?? null,
+        clienteNome: a.clienteNome,
+        status: a.status,
+        agendamentoStatus: a.status,
+        itemStatus: itemAcao?.status ?? a.status,
+        valorTotal: a.valorTotal,
+        inicio: a.inicio || itemAcao?.inicio || '',
+        fim: a.fim || itemAcao?.fim || '',
+        label: a.itens.map((i) => i.servicoNome).join(', '),
+      }
+    })
+  }
+
   return agendaPropria.value.map((a) => ({
     id: a.agendamentoId,
+    agendamentoItemId: a.agendamentoItemId,
     clienteNome: a.clienteNome,
-    status: a.status,
+    status: a.agendamentoStatus || a.status,
+    agendamentoStatus: a.agendamentoStatus || a.status,
+    itemStatus: a.status,
     valorTotal: 0,
     inicio: a.inicio,
+    fim: a.fim,
     label: a.servicoNome,
   }))
 })
 
+function statusPermiteIniciarCard(item: (typeof itens.value)[number]): boolean {
+  if (!item.agendamentoItemId) return false
+  return statusPermiteIniciarItemAtendimento(item.itemStatus, item.agendamentoStatus)
+}
+
+function statusPermiteFinalizarCard(item: (typeof itens.value)[number]): boolean {
+  if (!item.agendamentoItemId) return false
+  return statusPermiteFinalizarItemAtendimento(item.itemStatus, item.agendamentoStatus)
+}
+
+function podeIniciarCard(item: (typeof itens.value)[number]): boolean {
+  if (!item.agendamentoItemId) return false
+  return podeIniciarItemAtendimento(
+    item.itemStatus,
+    item.agendamentoStatus,
+    item.inicio,
+    item.fim,
+  )
+}
+
+function podeFinalizarCard(item: (typeof itens.value)[number]): boolean {
+  if (!item.agendamentoItemId) return false
+  return podeFinalizarItemAtendimento(item.itemStatus, item.agendamentoStatus)
+}
+
 async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
-  const filtro = dayRange(new Date())
   try {
     if (visaoGeral.value) {
-      agendaGeral.value = await agendaNegocioService.listarGeral(estabelecimentoId.value, filtro)
+      const data = await agendaNegocioService.listarGeral(estabelecimentoId.value, apiFiltro.value)
+      agendaGeral.value = data.itens
+      total.value = data.total
+      pagina.value = data.pagina
     } else {
-      agendaPropria.value = await agendaNegocioService.listarPropria(estabelecimentoId.value, filtro)
+      const data = await agendaNegocioService.listarPropria(estabelecimentoId.value, apiFiltro.value)
+      agendaPropria.value = data.itens
+      total.value = data.total
+      pagina.value = data.pagina
     }
   } catch (err) {
     notifications.push('error', resolveError(err, 'Não foi possível carregar a agenda.'))
@@ -100,6 +219,34 @@ function abrirCancelar(id: number) {
   cancelModalOpen.value = true
 }
 
+async function handleIniciarAtendimento(itemId: number) {
+  if (!estabelecimentoId.value) return
+  actionId.value = itemId
+  try {
+    await agendaNegocioService.iniciarAtendimento(estabelecimentoId.value, itemId)
+    notifications.push('success', 'Atendimento iniciado.')
+    await load()
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    actionId.value = null
+  }
+}
+
+async function handleFinalizarAtendimento(itemId: number) {
+  if (!estabelecimentoId.value) return
+  actionId.value = itemId
+  try {
+    await agendaNegocioService.finalizarAtendimento(estabelecimentoId.value, itemId)
+    notifications.push('success', 'Atendimento concluído.')
+    await load()
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    actionId.value = null
+  }
+}
+
 async function handleCancelar(motivo: string) {
   if (!estabelecimentoId.value || cancelTargetId.value === null) return
   actionId.value = cancelTargetId.value
@@ -115,6 +262,11 @@ async function handleCancelar(motivo: string) {
   }
 }
 
+function onPaginaChange(novaPagina: number) {
+  pagina.value = novaPagina
+  void load()
+}
+
 watch(
   ready,
   (isReady) => {
@@ -122,87 +274,123 @@ watch(
   },
   { immediate: true },
 )
+
+watch([statusFilter, periodFilter, customDateRange, sortFilter], () => {
+  resetPagina()
+  if (ready.value) void load()
+})
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-          Agenda de hoje
-        </h1>
-        <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-          Agendamentos do dia atual.
-        </p>
-        <NotificacoesIndicador class="mt-2" />
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <RouterLink :to="ROUTE_PATHS.AGENDA_SEMANA">
-          <BaseButton variant="secondary" size="sm">Semana</BaseButton>
-        </RouterLink>
-        <RouterLink :to="ROUTE_PATHS.AGENDA_MES">
-          <BaseButton variant="secondary" size="sm">Mês</BaseButton>
-        </RouterLink>
-      </div>
-    </div>
+  <div class="agenda-page">
+    <AgendaPageHeader
+      :title="pageTitle"
+      :subtitle="pageSubtitle"
+      :date-label="dateLabel"
+    >
+      <template #filters>
+        <AgendaFigmaFilter
+          v-model="statusFilter"
+          label="Filtrar por Status"
+          :options="statusOptions"
+        >
+          <template #icon>
+            <AgendaStatusFilterIcon />
+          </template>
+        </AgendaFigmaFilter>
+
+        <AgendaFigmaFilter
+          :model-value="periodFilter"
+          label="Filtrar por Período"
+          :options="periodOptions"
+          default-value="mes"
+          clear-value="mes"
+          @update:model-value="applyPeriodFilter"
+          @clear="clearPeriodFilter"
+        >
+          <template #icon>
+            <AgendaCalendarFilterIcon />
+          </template>
+        </AgendaFigmaFilter>
+
+        <AgendaFigmaDateRangeFilter
+          v-model="customDateRange"
+          @apply="applyCustomDateRange"
+          @clear="clearCustomDateRange"
+        />
+
+        <AgendaFigmaFilter
+          :model-value="sortFilter"
+          label="Ordenar por"
+          :options="sortOptions"
+          :default-value="AGENDA_DEFAULT_ORDENACAO"
+          :clear-value="AGENDA_DEFAULT_ORDENACAO"
+          min-width="220px"
+          @update:model-value="applySortFilter"
+          @clear="clearSortFilter"
+        >
+          <template #icon>
+            <AgendaSortFilterIcon />
+          </template>
+        </AgendaFigmaFilter>
+      </template>
+    </AgendaPageHeader>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
 
-    <LoadingSpinner v-if="contextLoading || (loading && itensHoje.length === 0)" />
+    <LoadingSpinner v-if="contextLoading || (loading && itens.length === 0)" />
 
-    <BaseCard v-else-if="itensHoje.length === 0">
-      <EmptyState
-        title="Nenhum agendamento hoje"
-        description="Não há horários marcados para o dia de hoje."
-      />
-    </BaseCard>
+    <EmptyState
+      v-else-if="itens.length === 0"
+      title="Nenhum agendamento"
+      description="Não há horários para o período e filtros selecionados."
+    />
 
-    <div v-else class="space-y-3">
-      <div
-        v-for="item in itensHoje"
-        :key="item.id"
-        class="rounded-lg border border-glow-border-soft bg-glow-surface p-4"
-      >
-        <div class="flex flex-wrap items-start justify-between gap-2">
-          <div class="min-w-0">
-            <RouterLink
-              :to="agendaDetalhePath(item.id)"
-              class="font-urbanist text-base font-semibold text-glow-text hover:text-glow-gold-dark"
-            >
-              {{ item.clienteNome }}
-            </RouterLink>
-            <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-              {{ item.inicio ? formatDateTime(item.inicio) : '—' }}
-            </p>
-            <p class="mt-1 font-urbanist text-sm text-glow-text">{{ item.label }}</p>
-            <p v-if="item.valorTotal > 0" class="mt-1 font-urbanist text-sm font-medium text-glow-text">
-              {{ formatCurrency(item.valorTotal) }}
-            </p>
-          </div>
-          <AgendamentoStatusBadge :status="item.status" />
-        </div>
-        <div
-          v-if="item.status === 'PendenteConfirmacao'"
-          class="mt-3 flex flex-wrap gap-2"
-        >
-          <BaseButton
-            size="sm"
-            :loading="actionId === item.id"
-            @click="handleConfirmar(item.id)"
-          >
-            Confirmar
-          </BaseButton>
-          <BaseButton
-            variant="danger"
-            size="sm"
-            :loading="actionId === item.id"
-            @click="abrirCancelar(item.id)"
-          >
-            Cancelar
-          </BaseButton>
-        </div>
+    <template v-else>
+      <div class="agenda-cards-grid">
+        <AgendamentoCard
+          v-for="item in itens"
+          :key="`${item.id}-${item.agendamentoItemId ?? 0}`"
+          :title="item.clienteNome"
+          :subtitle="item.label"
+          :inicio="item.inicio"
+          :valor-total="item.valorTotal"
+          :status="item.status"
+          tall
+          :to="
+            item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar
+              ? undefined
+              : agendaDetalhePath(item.id)
+          "
+          :show-actions="item.status === 'PendenteConfirmacao' && podeConfirmarOuCancelar"
+          :show-atendimento-actions="
+            (podeIniciarAtendimento && statusPermiteIniciarCard(item)) ||
+            (podeFinalizarAtendimento && statusPermiteFinalizarCard(item))
+          "
+          :pode-iniciar-atendimento="podeIniciarAtendimento && statusPermiteIniciarCard(item)"
+          :pode-finalizar-atendimento="podeFinalizarAtendimento && statusPermiteFinalizarCard(item)"
+          :iniciar-atendimento-habilitado="podeIniciarCard(item)"
+          :finalizar-atendimento-habilitado="podeFinalizarCard(item)"
+          :action-loading="actionId === item.id || actionId === item.agendamentoItemId"
+          @confirm="handleConfirmar(item.id)"
+          @cancel="abrirCancelar(item.id)"
+          @iniciar-atendimento="
+            item.agendamentoItemId && handleIniciarAtendimento(item.agendamentoItemId)
+          "
+          @finalizar-atendimento="
+            item.agendamentoItemId && handleFinalizarAtendimento(item.agendamentoItemId)
+          "
+        />
       </div>
-    </div>
+
+      <AgendaPagination
+        :pagina="pagina"
+        :total-paginas="totalPaginas"
+        :total="total"
+        :loading="loading"
+        @update:pagina="onPaginaChange"
+      />
+    </template>
 
     <CancelarAgendamentoModal v-model="cancelModalOpen" @confirm="handleCancelar" />
   </div>

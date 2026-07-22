@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import BaseInput from '@/components/ui/BaseInput.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
-import { useNotificationsStore } from '@/stores/notifications.store'
+import { useWhatsAppConfirmacao } from '@/composables/useWhatsAppConfirmacao'
 import { useApiError } from '@/composables/useApiError'
-import { whatsappEstabelecimentoService } from '@/services/whatsappEstabelecimentoService'
+import {
+  whatsappEstabelecimentoService,
+  type EstabelecimentoPerfil,
+} from '@/services/whatsappEstabelecimentoService'
 
 const CARD_CLASS =
   'overflow-hidden rounded-xl border border-glow-border-soft bg-glow-surface shadow-sm'
@@ -15,51 +17,88 @@ const CARD_BODY_CLASS = 'p-5'
 
 const { estabelecimentoAtivo, estabelecimentoId, ready, error: contextError, loading } =
   useEstabelecimentoView()
-const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 
-const solicitando = ref(false)
-const confirmando = ref(false)
-const optIn = ref(true)
-const codigo = ref('')
-const confirmado = ref(false)
+const perfil = ref<EstabelecimentoPerfil | null>(null)
+const carregandoPerfil = ref(false)
+const perfilError = ref<string | null>(null)
 
-async function handleSolicitar() {
+const {
+  instrucoes,
+  solicitando,
+  polling,
+  pollError,
+  solicitarConfirmacao,
+  toggleOptIn,
+} = useWhatsAppConfirmacao({
+  solicitarConfirmacao: () => {
+    const id = estabelecimentoId.value
+    if (!id) {
+      return Promise.reject(new Error('Estabelecimento não selecionado.'))
+    }
+    return whatsappEstabelecimentoService.solicitarConfirmacao(id)
+  },
+  pollConfirmado: async () => {
+    const id = estabelecimentoId.value
+    if (!id) return false
+    const atual = await whatsappEstabelecimentoService.obterPerfil(id)
+    perfil.value = atual
+    return atual.whatsAppConfirmado
+  },
+  atualizarOptIn: async (optIn: boolean) => {
+    const id = estabelecimentoId.value
+    if (!id) return
+    await whatsappEstabelecimentoService.atualizarOptIn(id, optIn)
+    await carregarPerfil()
+  },
+})
+
+watch(
+  estabelecimentoId,
+  async (id) => {
+    if (!id) return
+    await carregarPerfil()
+  },
+  { immediate: true },
+)
+
+async function carregarPerfil() {
   if (!estabelecimentoId.value) return
-  solicitando.value = true
+  carregandoPerfil.value = true
+  perfilError.value = null
   try {
-    await whatsappEstabelecimentoService.solicitarConfirmacao(estabelecimentoId.value)
-    notifications.push('success', 'Instruções de confirmação enviadas por e-mail.')
+    perfil.value = await whatsappEstabelecimentoService.obterPerfil(estabelecimentoId.value)
   } catch (err) {
-    notifications.push('error', resolveError(err))
+    perfilError.value = resolveError(err, 'Não foi possível carregar o status do WhatsApp.')
   } finally {
-    solicitando.value = false
+    carregandoPerfil.value = false
   }
 }
 
-async function handleConfirmar() {
-  if (!estabelecimentoId.value || !codigo.value.trim()) return
-  confirmando.value = true
+const whatsAppState = computed(() => {
+  if (!perfil.value?.telefone) return 'sem-telefone'
+  if (perfil.value.whatsAppConfirmado) return 'confirmado'
+  if (perfil.value.whatsAppPendenteConfirmacao || instrucoes.value || polling.value) {
+    return 'pendente'
+  }
+  return 'nao-confirmado'
+})
+
+async function handleSolicitar() {
+  perfilError.value = null
   try {
-    await whatsappEstabelecimentoService.confirmar(estabelecimentoId.value, codigo.value.trim())
-    confirmado.value = true
-    notifications.push('success', 'WhatsApp confirmado.')
+    await solicitarConfirmacao()
   } catch (err) {
-    notifications.push('error', resolveError(err))
-  } finally {
-    confirmando.value = false
+    perfilError.value = resolveError(err, 'Não foi possível solicitar confirmação.')
   }
 }
 
 async function handleOptInChange(event: Event) {
-  if (!estabelecimentoId.value) return
   const target = event.target as HTMLInputElement
   try {
-    await whatsappEstabelecimentoService.atualizarOptIn(estabelecimentoId.value, target.checked)
-    optIn.value = target.checked
-    notifications.push('success', 'Preferência de alertas atualizada.')
+    await toggleOptIn(target.checked)
   } catch (err) {
-    notifications.push('error', resolveError(err))
+    perfilError.value = resolveError(err, 'Não foi possível atualizar alertas.')
     target.checked = !target.checked
   }
 }
@@ -77,9 +116,10 @@ async function handleOptInChange(event: Event) {
     </header>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
-    <LoadingSpinner v-if="loading && !ready" class="mx-auto py-12" />
+    <p v-if="perfilError" class="font-urbanist text-sm text-red-600">{{ perfilError }}</p>
+    <LoadingSpinner v-if="(loading && !ready) || carregandoPerfil" class="mx-auto py-12" />
 
-    <section v-else-if="ready" :class="CARD_CLASS">
+    <section v-else-if="ready && perfil" :class="CARD_CLASS">
       <div :class="CARD_HEADER_CLASS">
         <div class="flex items-start gap-3">
           <div
@@ -102,33 +142,40 @@ async function handleOptInChange(event: Event) {
       </div>
 
       <div :class="CARD_BODY_CLASS" class="space-y-4">
-        <div class="rounded-lg border border-glow-border-soft bg-glow-canvas px-4 py-3">
+        <div
+          class="rounded-lg border border-glow-border-soft bg-glow-canvas px-4 py-3"
+          :class="whatsAppState === 'pendente' ? 'border-amber-200 dark:border-amber-800' : ''"
+        >
           <span
             class="inline-flex rounded-full px-2.5 py-0.5 font-urbanist text-xs font-medium"
             :class="
-              confirmado
+              whatsAppState === 'confirmado'
                 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
+                : whatsAppState === 'pendente'
+                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
+                  : 'bg-glow-canvas text-glow-text-subtle'
             "
           >
-            {{ confirmado ? 'Confirmado' : 'Aguardando confirmação' }}
+            {{
+              whatsAppState === 'confirmado'
+                ? 'Confirmado'
+                : whatsAppState === 'pendente'
+                  ? 'Aguardando confirmação'
+                  : whatsAppState === 'sem-telefone'
+                    ? 'Sem telefone'
+                    : 'Não confirmado'
+            }}
           </span>
         </div>
 
-        <template v-if="!confirmado">
+        <div v-if="whatsAppState === 'sem-telefone'" class="rounded-lg bg-glow-canvas px-4 py-3">
           <p class="font-urbanist text-sm text-glow-text-subtle">
-            Solicite a confirmação por e-mail ou informe o código recebido.
+            Cadastre o telefone comercial do estabelecimento no perfil do negócio para habilitar
+            alertas via WhatsApp.
           </p>
-          <BaseButton variant="secondary" :loading="solicitando" @click="handleSolicitar">
-            Enviar confirmação por e-mail
-          </BaseButton>
-          <form class="flex flex-wrap items-end gap-3" @submit.prevent="handleConfirmar">
-            <BaseInput v-model="codigo" label="Código de confirmação" class="min-w-[12rem] flex-1" />
-            <BaseButton type="submit" :loading="confirmando">Confirmar</BaseButton>
-          </form>
-        </template>
+        </div>
 
-        <template v-else>
+        <template v-else-if="whatsAppState === 'confirmado'">
           <label
             class="flex cursor-pointer items-center justify-between gap-4 rounded-lg border border-glow-border-soft bg-glow-canvas px-4 py-3"
           >
@@ -142,7 +189,7 @@ async function handleOptInChange(event: Event) {
               <input
                 type="checkbox"
                 class="peer sr-only"
-                :checked="optIn"
+                :checked="perfil.whatsAppOptIn ?? false"
                 @change="handleOptInChange"
               />
               <div
@@ -150,6 +197,49 @@ async function handleOptInChange(event: Event) {
               />
             </div>
           </label>
+        </template>
+
+        <template v-else>
+          <p class="font-urbanist text-sm text-glow-text-subtle">
+            Verifique o WhatsApp e seu e-mail. Toque em "Abrir WhatsApp" e envie a mensagem do número
+            comercial cadastrado.
+          </p>
+
+          <div
+            v-if="pollError"
+            class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 font-urbanist text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300"
+            role="alert"
+          >
+            {{ pollError }}
+          </div>
+
+          <div v-if="instrucoes?.linkWhatsApp" class="flex flex-wrap items-center gap-3">
+            <a
+              :href="instrucoes.linkWhatsApp"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex h-10 items-center gap-2 rounded-lg bg-green-600 px-4 font-urbanist text-sm font-medium text-white transition hover:bg-green-700"
+            >
+              Abrir WhatsApp
+            </a>
+            <p
+              v-if="polling"
+              class="flex items-center gap-2 font-urbanist text-xs text-glow-text-subtle"
+            >
+              <span
+                class="inline-block size-3.5 animate-spin rounded-full border-2 border-glow-text-subtle border-t-transparent"
+              />
+              Aguardando confirmação…
+            </p>
+          </div>
+
+          <BaseButton
+            variant="secondary"
+            :loading="solicitando"
+            @click="handleSolicitar"
+          >
+            {{ whatsAppState === 'pendente' && instrucoes ? 'Reenviar instruções' : 'Solicitar confirmação' }}
+          </BaseButton>
         </template>
       </div>
     </section>

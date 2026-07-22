@@ -18,7 +18,14 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
   const unreadCount = computed(() => items.value.filter((item) => !item.read).length)
 
-  function push(type: NotificationType, message: string) {
+  const DEFAULT_DURATION_MS: Record<NotificationType, number> = {
+    success: 5000,
+    info: 5000,
+    warning: 7000,
+    error: 8000,
+  }
+
+  function push(type: NotificationType, message: string, durationMs?: number) {
     const notification: AppNotification = {
       id: `n-${++notificationCounter}`,
       type,
@@ -27,6 +34,12 @@ export const useNotificationsStore = defineStore('notifications', () => {
       createdAt: Date.now(),
     }
     items.value.unshift(notification)
+
+    const timeout = durationMs ?? DEFAULT_DURATION_MS[type]
+    if (timeout > 0) {
+      window.setTimeout(() => remove(notification.id), timeout)
+    }
+
     return notification.id
   }
 

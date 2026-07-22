@@ -1,26 +1,50 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import BaseCard from '@/components/ui/BaseCard.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import AgendamentoStatusBadge from '@/components/cliente/AgendamentoStatusBadge.vue'
 import CancelarAgendamentoModal from '@/components/cliente/CancelarAgendamentoModal.vue'
+import AgendamentoDetailHeader from '@/components/agenda/detail/AgendamentoDetailHeader.vue'
+import AgendamentoDetailField from '@/components/agenda/detail/AgendamentoDetailField.vue'
+import AgendamentoDetailSection from '@/components/agenda/detail/AgendamentoDetailSection.vue'
+import AgendamentoDetailServices from '@/components/agenda/detail/AgendamentoDetailServices.vue'
+import AgendamentoDetailHistorico from '@/components/agenda/detail/AgendamentoDetailHistorico.vue'
+import RemarcarAgendamentoPanel from '@/components/agenda/detail/RemarcarAgendamentoPanel.vue'
+import ReceberAgendamentoModal from '@/components/financeiro/ReceberAgendamentoModal.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
+import { useNegocioContext } from '@/composables/useNegocioContext'
+import { useRemarcarAgendamentoSlots } from '@/composables/useRemarcarAgendamentoSlots'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { agendaNegocioService } from '@/services/agendaNegocioService'
-import type { AgendaGeral, AgendamentoHistorico } from '@/types/negocio/agenda.types'
+import { caixaService } from '@/services/caixaService'
+import { ROUTE_PATHS } from '@/constants/routes'
+import type { FormaRecebimentoPresencial } from '@/types/negocio/caixa.types'
+import type {
+  AgendaGeral,
+  AgendaProfissional,
+  AgendamentoHistorico,
+} from '@/types/negocio/agenda.types'
 import {
+  motivoInicioIndisponivel,
+  podeIniciarItemAtendimento,
+  possuiPermissaoFinalizarAtendimento,
+  possuiPermissaoIniciarAtendimento,
+  statusPermiteFinalizarItemAtendimento,
+  statusPermiteIniciarItemAtendimento,
+} from '@/utils/agendamentoAtendimento'
+import {
+  formatAgendaDetailSubtitle,
   formatCurrency,
-  formatDateTime,
   formatTelefone,
-  agendamentoStatusLabel,
+  toAgendaTimeOnlyString,
+  toDateOnlyFromIsoUtc,
 } from '@/utils/formatters'
 
 const route = useRoute()
-const { estabelecimentoId, ready, error: contextError } = useEstabelecimentoView()
+const { estabelecimentoId, estabelecimentoAtivo, ready, error: contextError } = useEstabelecimentoView()
+const { possuiPermissao } = useNegocioContext()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 
@@ -29,18 +53,183 @@ const agendamento = ref<AgendaGeral | null>(null)
 const historico = ref<AgendamentoHistorico[]>([])
 const loading = ref(false)
 const actionLoading = ref(false)
+const atendimentoItemLoadingId = ref<number | null>(null)
 const cancelModalOpen = ref(false)
+const sugerirModalOpen = ref(false)
+const receberModalOpen = ref(false)
+
+const {
+  date: sugerirDate,
+  motivo: sugerirMotivo,
+  slots: sugerirSlots,
+  datasAtendimento: sugerirDatasAtendimento,
+  selectedSlotInicio: sugerirSlotInicio,
+  datasLoading: sugerirDatasLoading,
+  slotsLoading: sugerirSlotsLoading,
+  mensagemIndisponibilidade: sugerirMensagemIndisponibilidade,
+  minSelectableDate: sugerirMinDate,
+  maxSelectableDate: sugerirMaxDate,
+  initialize: initializeSugerir,
+  reset: resetSugerirForm,
+  getSelectedSlot: getSugerirSlot,
+} = useRemarcarAgendamentoSlots({
+  getPublicGuid: () => estabelecimentoAtivo.value?.publicGuid,
+  getServicoIds: () => agendamento.value?.itens.map((item) => item.servicoId) ?? [],
+  getProfissionalId: () => agendamento.value?.itens[0]?.profissionalId,
+  onError: (message) => {
+    notifications.push('error', message)
+  },
+})
+
+const visaoGeral = computed(() => possuiPermissao('AgendaVisualizarGeral'))
+const podeIniciarAtendimento = computed(() => possuiPermissaoIniciarAtendimento(possuiPermissao))
+const podeFinalizarAtendimento = computed(() => possuiPermissaoFinalizarAtendimento(possuiPermissao))
+const podeGerenciarAgenda = computed(
+  () => possuiPermissao('AgendaCancelar') || possuiPermissao('AgendaReagendar'),
+)
+const podeReceberPresencial = computed(() => possuiPermissao('CaixaGerenciar'))
+
+const statusElegiveisRecebimento = new Set([
+  'PendentePagamento',
+  'Confirmado',
+  'PendenteConfirmacao',
+  'Remarcado',
+  'EmAtendimento',
+  'Concluido',
+])
+
+const showReceber = computed(() => {
+  const status = agendamento.value?.status
+  return !!status && statusElegiveisRecebimento.has(status) && podeReceberPresencial.value
+})
+
+const subtitle = computed(() =>
+  agendamento.value?.inicio ? formatAgendaDetailSubtitle(agendamento.value.inicio) : undefined,
+)
+
+const serviceItens = computed(() =>
+  (agendamento.value?.itens ?? []).map((item) => ({
+    id: item.id,
+    servicoNome: item.servicoNome,
+    profissionalNome: item.profissionalNome,
+    inicio: item.inicio,
+    fim: item.fim,
+    valor: item.valor,
+    status: item.status,
+  })),
+)
+
+const podeSugerirRemarcacao = computed(() => {
+  const status = agendamento.value?.status
+  return status === 'PendenteConfirmacao' || status === 'Confirmado' || status === 'Remarcado'
+})
+
+const showConfirmar = computed(() => agendamento.value?.status === 'PendenteConfirmacao')
+
+const showCancelar = computed(() => {
+  const status = agendamento.value?.status
+  return status === 'PendenteConfirmacao' || status === 'Confirmado' || status === 'Remarcado'
+})
+
+const itemParaIniciar = computed(() => {
+  if (!agendamento.value) return null
+  return (
+    agendamento.value.itens.find((item) =>
+      statusPermiteIniciarItemAtendimento(item.status, agendamento.value!.status),
+    ) ?? null
+  )
+})
+
+const itemParaConcluir = computed(() => {
+  if (!agendamento.value) return null
+  return (
+    agendamento.value.itens.find((item) =>
+      statusPermiteFinalizarItemAtendimento(item.status, agendamento.value!.status),
+    ) ?? null
+  )
+})
+
+const showIniciarAtendimentoGeral = computed(
+  () => !!itemParaIniciar.value && podeIniciarAtendimento.value,
+)
+
+const showConcluirAtendimentoGeral = computed(
+  () => !!itemParaConcluir.value && podeFinalizarAtendimento.value,
+)
+
+const iniciarGeralHabilitado = computed(() => {
+  const item = itemParaIniciar.value
+  if (!item || !agendamento.value) return false
+  return podeIniciarItemAtendimento(
+    item.status,
+    agendamento.value.status,
+    item.inicio,
+    item.fim,
+  )
+})
+
+const tituloIniciarGeral = computed(() => {
+  const item = itemParaIniciar.value
+  if (!item || iniciarGeralHabilitado.value) return undefined
+  return motivoInicioIndisponivel(item.inicio) ?? undefined
+})
+
+function mapProfissionalParaAgendamento(itens: AgendaProfissional[]): AgendaGeral | null {
+  const doAgendamento = itens.filter((item) => item.agendamentoId === agendamentoId.value)
+  if (doAgendamento.length === 0) return null
+
+  const primeiro = doAgendamento[0]!
+  return {
+    id: primeiro.agendamentoId,
+    usuarioClienteId: primeiro.usuarioClienteId,
+    clienteNome: primeiro.clienteNome,
+    clienteEmail: primeiro.clienteEmail,
+    clienteTelefone: primeiro.clienteTelefone,
+    status: primeiro.agendamentoStatus || primeiro.status,
+    valorTotal: 0,
+    inicio: primeiro.inicio,
+    fim: primeiro.fim,
+    observacao: null,
+    itens: doAgendamento.map((item) => ({
+      id: item.agendamentoItemId,
+      servicoId: item.servicoId,
+      servicoNome: item.servicoNome,
+      profissionalId: 0,
+      profissionalNome: '',
+      inicio: item.inicio,
+      fim: item.fim,
+      valor: 0,
+      status: item.status,
+    })),
+  }
+}
 
 async function load() {
   if (!estabelecimentoId.value || !Number.isFinite(agendamentoId.value)) return
   loading.value = true
   try {
-    const lista = await agendaNegocioService.listarGeral(estabelecimentoId.value)
-    agendamento.value = lista.find((a) => a.id === agendamentoId.value) ?? null
-    historico.value = await agendaNegocioService.historico(
-      estabelecimentoId.value,
-      agendamentoId.value,
-    )
+    if (visaoGeral.value) {
+      const lista = await agendaNegocioService.listarGeral(estabelecimentoId.value, {
+        pagina: 1,
+        tamanhoPagina: 50,
+        inicio: new Date(2020, 0, 1).toISOString(),
+        fim: new Date(2035, 0, 1).toISOString(),
+      })
+      agendamento.value = lista.itens.find((a) => a.id === agendamentoId.value) ?? null
+      historico.value = await agendaNegocioService.historico(
+        estabelecimentoId.value,
+        agendamentoId.value,
+      )
+    } else {
+      const lista = await agendaNegocioService.listarPropria(estabelecimentoId.value, {
+        pagina: 1,
+        tamanhoPagina: 50,
+        inicio: new Date(2020, 0, 1).toISOString(),
+        fim: new Date(2035, 0, 1).toISOString(),
+      })
+      agendamento.value = mapProfissionalParaAgendamento(lista.itens)
+      historico.value = []
+    }
   } catch (err) {
     notifications.push('error', resolveError(err, 'Agendamento não encontrado.'))
   } finally {
@@ -62,6 +251,106 @@ async function handleConfirmar() {
   }
 }
 
+async function handleIniciarAtendimento(itemId: number | string) {
+  if (!estabelecimentoId.value || !agendamento.value) return
+  const item = agendamento.value.itens.find((i) => i.id === Number(itemId))
+  if (
+    item &&
+    !podeIniciarItemAtendimento(item.status, agendamento.value.status, item.inicio, item.fim)
+  ) {
+    notifications.push(
+      'warning',
+      motivoInicioIndisponivel(item.inicio) ?? 'Não é possível iniciar este atendimento agora.',
+    )
+    return
+  }
+  atendimentoItemLoadingId.value = Number(itemId)
+  try {
+    await agendaNegocioService.iniciarAtendimento(estabelecimentoId.value, Number(itemId))
+    notifications.push('success', 'Atendimento iniciado.')
+    await load()
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    atendimentoItemLoadingId.value = null
+  }
+}
+
+async function handleFinalizarAtendimento(itemId: number | string) {
+  if (!estabelecimentoId.value) return
+  atendimentoItemLoadingId.value = Number(itemId)
+  try {
+    await agendaNegocioService.finalizarAtendimento(estabelecimentoId.value, Number(itemId))
+    notifications.push('success', 'Atendimento concluído.')
+    await load()
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    atendimentoItemLoadingId.value = null
+  }
+}
+
+async function handleIniciarPrimeiroDisponivel() {
+  if (itemParaIniciar.value) await handleIniciarAtendimento(itemParaIniciar.value.id)
+}
+
+async function handleConcluirPrimeiroDisponivel() {
+  if (itemParaConcluir.value) await handleFinalizarAtendimento(itemParaConcluir.value.id)
+}
+
+async function handleReceber(payload: {
+  formaRecebimento: FormaRecebimentoPresencial
+  valor?: number
+}) {
+  if (!estabelecimentoId.value || !agendamento.value) return
+  actionLoading.value = true
+  try {
+    await caixaService.receberAgendamento(estabelecimentoId.value, agendamento.value.id, payload)
+    notifications.push('success', 'Recebimento registrado no caixa.')
+    receberModalOpen.value = false
+    await load()
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+async function handleSugerirRemarcacao() {
+  if (!estabelecimentoId.value || !agendamento.value) return
+  const slot = getSugerirSlot()
+  if (!slot || !sugerirMotivo.value.trim()) {
+    notifications.push('warning', 'Selecione um horário e informe o motivo.')
+    return
+  }
+  actionLoading.value = true
+  try {
+    await agendaNegocioService.sugerirRemarcacao(estabelecimentoId.value, agendamento.value.id, {
+      data: toDateOnlyFromIsoUtc(slot.inicio),
+      horarioInicio: toAgendaTimeOnlyString(slot.inicio),
+      motivo: sugerirMotivo.value.trim(),
+    })
+    notifications.push('success', 'Sugestão enviada ao cliente.')
+    sugerirModalOpen.value = false
+    resetSugerirForm()
+    await load()
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+function openSugerirRemarcacao() {
+  sugerirModalOpen.value = true
+  resetSugerirForm()
+  void initializeSugerir()
+}
+
+function closeSugerirRemarcacao() {
+  sugerirModalOpen.value = false
+}
+
 async function handleCancelar(motivo: string) {
   if (!estabelecimentoId.value || !agendamento.value) return
   actionLoading.value = true
@@ -77,7 +366,7 @@ async function handleCancelar(motivo: string) {
 }
 
 watch(
-  [ready, agendamentoId],
+  [ready, agendamentoId, visaoGeral],
   () => {
     if (ready.value) void load()
   },
@@ -86,84 +375,195 @@ watch(
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div>
-      <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-        Detalhe do agendamento
-      </h1>
-    </div>
+  <div class="agendamento-detail-page">
+    <AgendamentoDetailHeader
+      title="Detalhe do agendamento"
+      :subtitle="subtitle"
+      :back-to="ROUTE_PATHS.AGENDA"
+    />
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
     <LoadingSpinner v-if="loading" />
 
     <template v-else-if="agendamento">
-      <BaseCard title="Resumo">
-        <div class="space-y-3 font-urbanist text-sm">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="font-semibold text-glow-text">{{ agendamento.clienteNome }}</span>
-            <AgendamentoStatusBadge :status="agendamento.status" />
+      <div class="agendamento-detail-grid">
+        <div class="agendamento-detail-column">
+          <AgendamentoDetailSection title="Resumo">
+            <div class="agendamento-detail-panel__header">
+              <span />
+              <div
+                v-if="agendamento.status === 'PendenteConfirmacao'"
+                class="agendamento-detail-pending-alert"
+              >
+                <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M8 4.5V8.5M8 11.5H8.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                  <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2" />
+                </svg>
+                Aguardando confirmação
+              </div>
+              <AgendamentoStatusBadge v-else :status="agendamento.status" />
+            </div>
+
+            <AgendamentoDetailField label="Cliente">
+              <template #icon>
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.2" />
+                  <path d="M5 19c0-3 3.1-5 7-5s7 2 7 5" stroke="currentColor" stroke-width="1.2" />
+                </svg>
+              </template>
+              {{ agendamento.clienteNome }}
+            </AgendamentoDetailField>
+
+            <AgendamentoDetailField v-if="agendamento.clienteEmail" label="E-mail">
+              <template #icon>
+                <svg class="size-4" viewBox="0 0 16 14" fill="none" aria-hidden="true">
+                  <rect x="1" y="2" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+                  <path d="M1 4L8 8.5L15 4" stroke="currentColor" stroke-width="1.2" />
+                </svg>
+              </template>
+              {{ agendamento.clienteEmail }}
+            </AgendamentoDetailField>
+
+            <AgendamentoDetailField v-if="agendamento.clienteTelefone" label="Telefone">
+              <template #icon>
+                <svg class="size-4" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <path d="M5 3h2l1.5 4-2 1.5a9 9 0 0 0 4 4L12 10.5 16 12v2a2 2 0 0 1-2 2C7.6 16 2 10.4 2 3a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.2" />
+                </svg>
+              </template>
+              {{ formatTelefone(agendamento.clienteTelefone) }}
+            </AgendamentoDetailField>
+
+            <div class="agendamento-detail-divider" />
+
+            <div class="agendamento-detail-total-row">
+              <span class="agendamento-detail-total-label">Valor total</span>
+              <span class="agendamento-detail-total-value">
+                {{ formatCurrency(agendamento.valorTotal) }}
+              </span>
+            </div>
+
+            <div v-if="agendamento.observacao" class="space-y-2">
+              <p class="agendamento-detail-obs-label">Observação</p>
+              <div class="agendamento-detail-obs-box">{{ agendamento.observacao }}</div>
+            </div>
+          </AgendamentoDetailSection>
+
+          <div
+            v-if="
+              showConfirmar ||
+              showReceber ||
+              podeSugerirRemarcacao ||
+              showCancelar ||
+              showIniciarAtendimentoGeral ||
+              showConcluirAtendimentoGeral
+            "
+            class="agendamento-detail-actions"
+          >
+            <button
+              v-if="showReceber"
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--confirm min-w-[185px]"
+              :disabled="actionLoading"
+              @click="receberModalOpen = true"
+            >
+              Receber pagamento
+            </button>
+            <button
+              v-if="showConfirmar && podeGerenciarAgenda"
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--confirm"
+              :disabled="actionLoading"
+              @click="handleConfirmar"
+            >
+              <svg class="size-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              Confirmar
+            </button>
+            <button
+              v-if="showIniciarAtendimentoGeral"
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--confirm min-w-[185px]"
+              :disabled="!!atendimentoItemLoadingId || !iniciarGeralHabilitado"
+              :title="tituloIniciarGeral"
+              @click="handleIniciarPrimeiroDisponivel"
+            >
+              Iniciar atendimento
+            </button>
+            <button
+              v-if="showConcluirAtendimentoGeral"
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--secondary min-w-[185px]"
+              :disabled="!!atendimentoItemLoadingId"
+              @click="handleConcluirPrimeiroDisponivel"
+            >
+              Concluir atendimento
+            </button>
+            <button
+              v-if="podeSugerirRemarcacao && podeGerenciarAgenda"
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--secondary min-w-[185px]"
+              :disabled="actionLoading"
+              @click="openSugerirRemarcacao"
+            >
+              Sugerir novo horário
+            </button>
+            <button
+              v-if="showCancelar && podeGerenciarAgenda"
+              type="button"
+              class="agendamento-detail-btn agendamento-detail-btn--danger"
+              :disabled="actionLoading"
+              @click="cancelModalOpen = true"
+            >
+              Cancelar
+            </button>
           </div>
-          <p v-if="agendamento.clienteEmail" class="text-glow-text-subtle">
-            {{ agendamento.clienteEmail }}
-          </p>
-          <p v-if="agendamento.clienteTelefone" class="text-glow-text-subtle">
-            {{ formatTelefone(agendamento.clienteTelefone) }}
-          </p>
-          <p class="font-medium text-glow-text">
-            Total: {{ formatCurrency(agendamento.valorTotal) }}
-          </p>
-          <p v-if="agendamento.observacao" class="text-glow-text-subtle">
-            {{ agendamento.observacao }}
-          </p>
         </div>
 
-        <div class="mt-4 space-y-2 border-t border-glow-border-soft pt-4">
-          <p
-            v-for="item in agendamento.itens"
-            :key="item.id"
-            class="font-urbanist text-sm text-glow-text"
-          >
-            {{ item.servicoNome }} · {{ item.profissionalNome }} ·
-            {{ formatDateTime(item.inicio) }}
-          </p>
+        <div class="agendamento-detail-column">
+          <AgendamentoDetailServices
+            :itens="serviceItens"
+            :agendamento-status="agendamento.status"
+            :pode-iniciar="podeIniciarAtendimento"
+            :pode-finalizar="podeFinalizarAtendimento"
+            :action-loading-id="atendimentoItemLoadingId"
+            @iniciar="handleIniciarAtendimento"
+            @finalizar="handleFinalizarAtendimento"
+          />
+          <AgendamentoDetailHistorico v-if="visaoGeral" :itens="historico" />
         </div>
-
-        <div
-          v-if="agendamento.status === 'PendenteConfirmacao'"
-          class="mt-4 flex flex-wrap gap-2"
-        >
-          <BaseButton :loading="actionLoading" @click="handleConfirmar">Confirmar</BaseButton>
-          <BaseButton variant="danger" :loading="actionLoading" @click="cancelModalOpen = true">
-            Cancelar
-          </BaseButton>
-        </div>
-      </BaseCard>
-
-      <BaseCard title="Histórico">
-        <div v-if="historico.length === 0" class="font-urbanist text-sm text-glow-text-subtle">
-          Nenhum registro no histórico.
-        </div>
-        <ol v-else class="space-y-3">
-          <li
-            v-for="h in historico"
-            :key="h.id"
-            class="border-l-2 border-glow-border-soft pl-4 font-urbanist text-sm"
-          >
-            <p class="font-medium text-glow-text">
-              {{ agendamentoStatusLabel(h.statusAnterior) }} →
-              {{ agendamentoStatusLabel(h.statusNovo) }}
-            </p>
-            <p class="text-xs text-glow-text-subtle">{{ formatDateTime(h.criadoEm) }}</p>
-            <p v-if="h.usuarioExecutorNome" class="text-xs text-glow-text-subtle">
-              por {{ h.usuarioExecutorNome }}
-            </p>
-            <p v-if="h.motivo" class="text-xs text-glow-text-subtle">{{ h.motivo }}</p>
-          </li>
-        </ol>
-      </BaseCard>
+      </div>
     </template>
 
     <BaseAlert v-else variant="error">Agendamento não encontrado.</BaseAlert>
+
     <CancelarAgendamentoModal v-model="cancelModalOpen" @confirm="handleCancelar" />
+
+    <RemarcarAgendamentoPanel
+      v-if="sugerirModalOpen"
+      v-model:date="sugerirDate"
+      v-model:motivo="sugerirMotivo"
+      v-model:selected-slot-inicio="sugerirSlotInicio"
+      title="Sugerir novo horário"
+      primary-label="Enviar sugestão"
+      secondary-label="Voltar"
+      :slots="sugerirSlots"
+      :datas-atendimento="sugerirDatasAtendimento"
+      :min-date="sugerirMinDate"
+      :max-date="sugerirMaxDate"
+      :datas-loading="sugerirDatasLoading"
+      :slots-loading="sugerirSlotsLoading"
+      :mensagem-indisponibilidade="sugerirMensagemIndisponibilidade"
+      :confirm-loading="actionLoading"
+      @confirm="handleSugerirRemarcacao"
+      @cancel="closeSugerirRemarcacao"
+    />
+
+    <ReceberAgendamentoModal
+      v-model="receberModalOpen"
+      :valor-total="agendamento?.valorTotal ?? 0"
+      :loading="actionLoading"
+      @confirm="handleReceber"
+    />
   </div>
 </template>

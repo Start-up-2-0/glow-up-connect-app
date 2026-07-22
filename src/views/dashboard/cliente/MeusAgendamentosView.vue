@@ -1,95 +1,158 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import BaseCard from '@/components/ui/BaseCard.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
-import AgendamentoStatusBadge from '@/components/cliente/AgendamentoStatusBadge.vue'
+import AgendaPageHeader from '@/components/agenda/AgendaPageHeader.vue'
+import AgendaFigmaFilter from '@/components/agenda/AgendaFigmaFilter.vue'
+import AgendaStatusFilterIcon from '@/components/agenda/AgendaStatusFilterIcon.vue'
+import AgendaCalendarFilterIcon from '@/components/agenda/AgendaCalendarFilterIcon.vue'
+import AgendaFigmaDateRangeFilter from '@/components/agenda/AgendaFigmaDateRangeFilter.vue'
+import AgendaSortFilterIcon from '@/components/agenda/AgendaSortFilterIcon.vue'
+import AgendaPagination from '@/components/agenda/AgendaPagination.vue'
+import AgendamentoCard from '@/components/agenda/AgendamentoCard.vue'
+import { AGENDA_DEFAULT_ORDENACAO, AGENDA_PAGE_SIZE } from '@/constants/agendaFilters'
 import { useAgendamentosStore } from '@/stores/agendamentos.store'
+import { useMeusAgendamentosFilters } from '@/composables/useAgendaPageFilters'
 import { agendamentoDetalhePath } from '@/constants/routes'
-import type { AgendamentoOrdenacao } from '@/types/agendamento.types'
-import { formatCurrency, formatDateTime } from '@/utils/formatters'
+import type { AgendamentoCliente } from '@/types/agendamento.types'
 
 const store = useAgendamentosStore()
 const { itens, total, loading } = storeToRefs(store)
 
-const ordenacao = ref<AgendamentoOrdenacao>('proximos')
+const {
+  statusFilter,
+  periodFilter,
+  customDateRange,
+  sortFilter,
+  pagina,
+  statusOptions,
+  periodOptions,
+  sortOptions,
+  apiFiltro,
+  resetPagina,
+  applyPeriodFilter,
+  applyCustomDateRange,
+  clearPeriodFilter,
+  clearCustomDateRange,
+  applySortFilter,
+  clearSortFilter,
+} = useMeusAgendamentosFilters()
 
-async function load(reset = true) {
-  await store.fetchLista({ ordenacao: ordenacao.value, pagina: 1 }, !reset)
+const totalPaginas = computed(() => Math.max(1, Math.ceil(total.value / AGENDA_PAGE_SIZE)))
+
+function avaliacaoSubtitle(item: AgendamentoCliente): string | undefined {
+  if (item.avaliacaoStatus === 'Pendente') return 'Avaliação pendente'
+  if (item.avaliacaoStatus === 'Realizada' && item.avaliacaoResumo) {
+    return `Avaliado · Loja ${item.avaliacaoResumo.notaEstabelecimento}/5`
+  }
+  return undefined
 }
 
-async function loadMore() {
-  await store.fetchLista(
-    { ordenacao: ordenacao.value, pagina: store.pagina + 1 },
-    true,
-  )
+async function load() {
+  const data = await store.fetchLista({ ...apiFiltro.value }, false)
+  pagina.value = data.pagina
 }
 
-onMounted(() => load(true))
+function onPaginaChange(novaPagina: number) {
+  pagina.value = novaPagina
+  void load()
+}
+
+onMounted(() => {
+  resetPagina()
+  void load()
+})
+
+watch([statusFilter, periodFilter, customDateRange, sortFilter], () => {
+  resetPagina()
+  void load()
+})
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-          Meus agendamentos
-        </h1>
-        <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-          Acompanhe, cancele ou remarque seus horários.
-        </p>
-      </div>
+  <div class="agenda-page">
+    <AgendaPageHeader
+      title="Meus agendamentos"
+      subtitle="Agendamentos do mês atual, com os horários mais recentes primeiro."
+    >
+      <template #filters>
+        <AgendaFigmaFilter
+          v-model="statusFilter"
+          label="Filtrar por Status"
+          :options="statusOptions"
+        >
+          <template #icon>
+            <AgendaStatusFilterIcon />
+          </template>
+        </AgendaFigmaFilter>
 
-      <select
-        v-model="ordenacao"
-        class="rounded border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-sm"
-        @change="load(true)"
-      >
-        <option value="proximos">Próximos</option>
-        <option value="recentes">Recentes</option>
-      </select>
-    </div>
+        <AgendaFigmaFilter
+          :model-value="periodFilter"
+          label="Filtrar por Período"
+          :options="periodOptions"
+          default-value="mes"
+          clear-value="mes"
+          @update:model-value="applyPeriodFilter"
+          @clear="clearPeriodFilter"
+        >
+          <template #icon>
+            <AgendaCalendarFilterIcon />
+          </template>
+        </AgendaFigmaFilter>
+
+        <AgendaFigmaDateRangeFilter
+          v-model="customDateRange"
+          @apply="applyCustomDateRange"
+          @clear="clearCustomDateRange"
+        />
+
+        <AgendaFigmaFilter
+          :model-value="sortFilter"
+          label="Ordenar por"
+          :options="sortOptions"
+          :default-value="AGENDA_DEFAULT_ORDENACAO"
+          :clear-value="AGENDA_DEFAULT_ORDENACAO"
+          min-width="220px"
+          @update:model-value="applySortFilter"
+          @clear="clearSortFilter"
+        >
+          <template #icon>
+            <AgendaSortFilterIcon />
+          </template>
+        </AgendaFigmaFilter>
+      </template>
+    </AgendaPageHeader>
 
     <LoadingSpinner v-if="loading && itens.length === 0" />
 
-    <BaseCard v-else-if="itens.length === 0">
-      <EmptyState
-        title="Nenhum agendamento"
-        description="Quando você agendar em uma loja, seus horários aparecerão aqui."
-      />
-    </BaseCard>
+    <EmptyState
+      v-else-if="itens.length === 0"
+      title="Nenhum agendamento"
+      description="Quando você agendar em uma loja, seus horários aparecerão aqui."
+    />
 
-    <div v-else class="space-y-3">
-      <RouterLink
-        v-for="item in itens"
-        :key="item.id"
-        :to="agendamentoDetalhePath(item.id)"
-        class="block rounded-lg border border-glow-border-soft bg-glow-surface p-4 transition-colors hover:border-glow-gold-dark hover:bg-glow-hover-surface"
-      >
-        <div class="flex flex-wrap items-start justify-between gap-2">
-          <div class="min-w-0">
-            <p class="font-urbanist text-base font-semibold text-glow-text">
-              {{ item.estabelecimentoNome }}
-            </p>
-            <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-              {{ formatDateTime(item.inicio) }}
-            </p>
-          </div>
-          <AgendamentoStatusBadge :status="item.status" />
-        </div>
-        <p class="mt-2 font-urbanist text-sm font-medium text-glow-text">
-          {{ formatCurrency(item.valorTotal) }}
-        </p>
-      </RouterLink>
-
-      <div v-if="itens.length < total" class="flex justify-center pt-2">
-        <BaseButton variant="secondary" :loading="loading" @click="loadMore">
-          Carregar mais
-        </BaseButton>
+    <template v-else>
+      <div class="agenda-cards-grid">
+        <AgendamentoCard
+          v-for="item in itens"
+          :key="item.id"
+          :title="item.estabelecimentoNome"
+          :subtitle="avaliacaoSubtitle(item)"
+          :inicio="item.inicio"
+          :valor-total="item.valorTotal"
+          :status="item.status"
+          :to="agendamentoDetalhePath(item.id)"
+        />
       </div>
-    </div>
+
+      <AgendaPagination
+        :pagina="pagina"
+        :total-paginas="totalPaginas"
+        :total="total"
+        :loading="loading"
+        @update:pagina="onPaginaChange"
+      />
+    </template>
   </div>
 </template>
