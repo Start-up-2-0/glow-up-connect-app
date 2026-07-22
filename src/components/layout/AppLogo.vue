@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import logoUrl from '@/assets/logo/logo.png'
+import logoUrl from '@/assets/logo/logo_original.png'
 
 withDefaults(
   defineProps<{

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import loginCrest from '@/assets/logo/logo.png'
+import loginCrest from '@/assets/logo/logo_original.png'
 import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
 import { useAuth } from '@/composables/useAuth'
 import { useApiError } from '@/composables/useApiError'

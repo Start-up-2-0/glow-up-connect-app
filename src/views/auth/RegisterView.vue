@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import registerCrest from '@/assets/logo/logo.png'
+import registerCrest from '@/assets/logo/logo_original.png'
 import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
