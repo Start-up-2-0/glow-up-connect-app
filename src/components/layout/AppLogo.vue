@@ -18,7 +18,7 @@ withDefaults(
     alt="Glow Up Connect"
     :class="[
       'object-contain object-left',
-      compact ? 'h-10 w-10' : sidebar ? 'size-[107px]' : mobile ? 'h-[120px] w-[168px]' : 'h-[112px] w-[148px]',
+      compact ? 'h-10 w-10' : sidebar ? 'app-logo--sidebar' : mobile ? 'h-[120px] w-[168px]' : 'h-[112px] w-[148px]',
       logoClass,
     ]"
   />

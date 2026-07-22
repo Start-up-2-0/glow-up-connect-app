@@ -23,7 +23,7 @@ defineEmits<{
       class="flex w-full items-center"
       :class="collapsed ? 'justify-center' : 'justify-between gap-2'"
     >
-      <AppLogo v-if="!collapsed" :mobile="mobile" sidebar />
+      <AppLogo v-if="!collapsed" :mobile="mobile" sidebar class="min-w-0 flex-1" />
       <SidebarToggleButton
         :collapsed="collapsed"
         class="shrink-0"
