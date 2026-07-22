@@ -128,7 +128,7 @@ onMounted(async () => {
         </p>
         <p
           v-if="prioridadeMarketplace"
-          class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-950/50 dark:text-amber-200"
+          class="inline-flex items-center gap-1 rounded-full bg-glow-accent-glow px-2.5 py-0.5 text-xs font-medium text-glow-gold-dark"
         >
           Destaque no marketplace
         </p>
@@ -141,7 +141,7 @@ onMounted(async () => {
               <span
                 v-for="mod in modulosAmigaveis"
                 :key="mod"
-                class="inline-flex rounded-full bg-glow-canvas px-2.5 py-0.5 text-xs font-medium text-glow-text"
+                class="inline-flex rounded-full bg-glow-bg-highlight px-2.5 py-0.5 text-xs font-medium text-glow-text"
               >
                 {{ mod }}
               </span>

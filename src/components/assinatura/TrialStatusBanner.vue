@@ -19,7 +19,7 @@ const diasRestantes = computed(() => {
 
 <template>
   <div
-    class="rounded-lg border border-amber-300/50 bg-amber-50 px-4 py-3 dark:border-amber-500/30 dark:bg-amber-950/30"
+    class="rounded-xl border border-glow-border-accent bg-glow-accent-glow px-4 py-3 shadow-glow-sm"
     role="status"
   >
     <p class="font-urbanist text-sm font-semibold text-glow-text">
@@ -29,7 +29,7 @@ const diasRestantes = computed(() => {
       Primeira cobrança em {{ formatDate(proximaDataVencimento) }}.
       <RouterLink
         :to="ROUTE_PATHS.CONFIG_ASSINATURA_FATURAS"
-        class="font-medium text-glow-gold hover:underline"
+        class="font-medium text-glow-gold-dark hover:underline"
       >
         Ver faturas
       </RouterLink>

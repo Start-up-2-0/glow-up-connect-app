@@ -66,7 +66,7 @@ onMounted(async () => {
         v-for="link in quickLinks"
         :key="link.to"
         :to="link.to"
-        class="group block rounded-lg border border-glow-border-soft bg-glow-surface p-4 transition-colors hover:border-glow-gold-dark hover:bg-glow-hover-surface"
+        class="group glow-card glow-card--interactive block p-4"
       >
         <h2 class="font-urbanist text-base font-semibold text-glow-text group-hover:text-glow-text-hover">
           {{ link.title }}

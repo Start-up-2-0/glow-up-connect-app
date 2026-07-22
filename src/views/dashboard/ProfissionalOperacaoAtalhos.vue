@@ -40,7 +40,7 @@ async function copiarLink() {
     <div class="grid gap-4 sm:grid-cols-2">
       <RouterLink
         :to="ROUTE_PATHS.AGENDA"
-        class="group block rounded-lg border border-glow-border-soft bg-glow-surface p-4 transition-colors hover:border-glow-gold-dark hover:bg-glow-hover-surface"
+        class="group glow-card glow-card--interactive block p-4"
       >
         <h3 class="font-urbanist text-base font-semibold text-glow-text group-hover:text-glow-text-hover">
           Minha agenda
@@ -52,7 +52,7 @@ async function copiarLink() {
 
       <RouterLink
         :to="ROUTE_PATHS.CONFIG_HORARIOS"
-        class="group block rounded-lg border border-glow-border-soft bg-glow-surface p-4 transition-colors hover:border-glow-gold-dark hover:bg-glow-hover-surface"
+        class="group glow-card glow-card--interactive block p-4"
       >
         <h3 class="font-urbanist text-base font-semibold text-glow-text group-hover:text-glow-text-hover">
           Meus horários
@@ -67,7 +67,7 @@ async function copiarLink() {
       <p class="mb-3 font-urbanist text-sm text-glow-text-subtle">
         Envie este link para clientes agendarem diretamente com você.
       </p>
-      <p class="mb-3 break-all rounded-lg bg-glow-canvas px-3 py-2 font-urbanist text-xs text-glow-text">
+      <p class="mb-3 break-all rounded-lg bg-glow-bg-highlight px-3 py-2 font-urbanist text-xs text-glow-text">
         {{ linkAgendamentoPublico }}
       </p>
       <BaseButton variant="secondary" size="sm" @click="copiarLink">

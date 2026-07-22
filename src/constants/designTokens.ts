@@ -7,18 +7,20 @@ export const GLOW_COLORS = {
   primary: '#3c5ccf',
   secondary: '#a38a2d',
 
-  /** Texto (light) */
-  text: '#282828',
-  textMuted: 'rgba(40, 40, 40, 0.4)',
-  textSoft: 'rgba(40, 40, 40, 0.8)',
-  surface: '#f3f3f3',
+  /** Texto (light premium) */
+  text: '#1a1612',
+  textMuted: 'rgba(26, 22, 18, 0.45)',
+  textSoft: 'rgba(26, 22, 18, 0.82)',
+  surface: '#e8e2d9',
+  elevated: '#f5f1ea',
+  base: '#d9d2c8',
 
   /** Elevação dark premium */
-  darkBase: '#0c0a08',
-  darkSurface: '#1a1714',
-  darkElevated: '#2a2520',
-  darkHighlight: '#3d3528',
-  darkText: '#f5f2eb',
+  darkBase: '#0a0806',
+  darkSurface: '#1a1612',
+  darkElevated: '#2c2620',
+  darkHighlight: '#3f382e',
+  darkText: '#f5f0e8',
 
   /** Status */
   success: '#54804e',
@@ -168,8 +170,7 @@ export const CLIENTE_PAGE_DIVIDER_CLASS = 'cliente-page-divider'
 export const CLIENTE_BTN_OUTLINE_CLASS =
   'cliente-btn-outline inline-flex h-[34px] shrink-0 items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 font-urbanist text-sm font-normal text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60'
 
-export const CLIENTE_CARD_CLASS =
-  'cliente-card rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface'
+export const CLIENTE_CARD_CLASS = 'cliente-card glow-card'
 
 export const CLIENTE_BTN_CTA_CLASS =
   'cliente-btn-cta inline-flex h-10 w-full items-center justify-center gap-2.5 rounded-xl bg-glow-gold-cta px-2.5 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60'
@@ -197,4 +198,4 @@ export const SIDEBAR_NAV_ITEM_CLASS =
   'group flex h-11 w-full items-center gap-3 rounded-lg py-2 pl-2 pr-2 transition-colors hover:bg-glow-surface-tint'
 
 export const SIDEBAR_NAV_ITEM_ACTIVE_CLASS =
-  'bg-glow-gold-selected pl-4 font-medium shadow-[inset_2px_0_0_var(--glow-gold-cta)]'
+  'bg-glow-gold-selected pl-4 font-medium text-glow-text shadow-[inset_3px_0_0_var(--glow-gold-cta)]'

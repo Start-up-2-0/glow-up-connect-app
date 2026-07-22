@@ -54,7 +54,7 @@ function onToggleCollapsed() {
 
 <template>
   <aside
-    class="flex h-full min-h-0 shrink-0 flex-col overflow-hidden border-r border-glow-border-sidebar bg-glow-surface transition-[width] duration-300 ease-in-out"
+    class="flex h-full min-h-0 shrink-0 flex-col overflow-hidden border-r border-glow-border-sidebar bg-glow-bg-surface shadow-glow-sm transition-[width] duration-300 ease-in-out"
     :class="sidebarWidthClass"
   >
     <div

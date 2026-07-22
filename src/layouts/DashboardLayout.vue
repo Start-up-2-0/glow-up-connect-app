@@ -40,11 +40,11 @@ const appStore = useAppStore()
     <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
       <header
         v-if="!appStore.sidebarOpen"
-        class="flex shrink-0 items-center border-b border-glow-border-soft bg-glow-surface px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] lg:hidden"
+        class="flex shrink-0 items-center border-b border-glow-border-soft bg-glow-bg-surface px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] lg:hidden"
       >
         <button
           type="button"
-          class="flex size-10 items-center justify-center rounded border border-glow-border-soft bg-glow-canvas text-glow-text"
+          class="flex size-10 items-center justify-center rounded border border-glow-border-soft bg-glow-bg-highlight text-glow-text"
           aria-label="Abrir menu"
           @click="appStore.toggleSidebar()"
         >

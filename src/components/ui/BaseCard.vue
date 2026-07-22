@@ -11,7 +11,7 @@ withDefaults(
 <template>
   <div
     :class="[
-      'rounded-lg border border-glow-border-soft bg-glow-surface',
+      'glow-card',
       padding ? 'p-4' : '',
     ]"
   >
