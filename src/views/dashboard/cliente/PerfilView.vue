@@ -11,6 +11,7 @@ import PerfilStatusCard from '@/components/perfil/PerfilStatusCard.vue'
 import PerfilSidebar from '@/components/perfil/PerfilSidebar.vue'
 import PerfilSaveBar from '@/components/perfil/PerfilSaveBar.vue'
 import PerfilPasswordRules from '@/components/perfil/PerfilPasswordRules.vue'
+import PerfilTabNav from '@/components/perfil/PerfilTabNav.vue'
 import { useUserStore } from '@/stores/user.store'
 import { useFetchOnce } from '@/composables/useFetchOnce'
 import { useWhatsAppConfirmacao } from '@/composables/useWhatsAppConfirmacao'
@@ -30,16 +31,20 @@ import {
   telefoneToApi,
 } from '@/utils/formatters'
 
-const SECTIONS = [
-  { id: 'informacoes', label: 'Perfil' },
-  { id: 'conta', label: 'Conta' },
-  { id: 'seguranca', label: 'Segurança' },
-  { id: 'notificacoes', label: 'Notificações' },
-] as const
+type PerfilTabId = 'informacoes' | 'conta' | 'seguranca' | 'notificacoes'
+
+const TABS = [
+  { id: 'informacoes' as const, label: 'Perfil', description: 'Dados e foto', icon: '👤' },
+  { id: 'conta' as const, label: 'Conta', description: 'Status e plano', icon: '🏷️' },
+  { id: 'seguranca' as const, label: 'Segurança', description: 'Senha e acesso', icon: '🔒' },
+  { id: 'notificacoes' as const, label: 'Notificações', description: 'Alertas e avisos', icon: '🔔' },
+]
 
 const userStore = useUserStore()
 const { profile, saving, changingPassword } = storeToRefs(userStore)
 const { resolveError } = useApiError()
+
+const activeTab = ref<PerfilTabId>('informacoes')
 
 const form = reactive({ nome: '', telefone: '' })
 const passwordForm = reactive({ senha: '', confirmarSenha: '' })
@@ -112,6 +117,10 @@ const whatsAppLabel = computed(() => {
   return map[whatsAppState.value]
 })
 
+function selectTab(id: string) {
+  activeTab.value = id as PerfilTabId
+}
+
 function syncFormFromProfile() {
   if (!profile.value) return
   form.nome = profile.value.nome
@@ -129,10 +138,6 @@ function onAvatarChange(file: File) {
 
 function onAvatarError(message: string) {
   profileError.value = message
-}
-
-function scrollToSection(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 onMounted(async () => {
@@ -236,282 +241,301 @@ async function handleSolicitarWhatsApp() {
       </div>
     </header>
 
-    <nav class="perfil-nav" aria-label="Seções do perfil">
-      <button
-        v-for="section in SECTIONS"
-        :key="section.id"
-        type="button"
-        class="perfil-nav__item"
-        @click="scrollToSection(section.id)"
-      >
-        {{ section.label }}
-      </button>
-    </nav>
-
     <LoadingSpinner v-if="loading && !profile" class="mx-auto py-12" />
 
     <template v-else-if="profile">
+      <PerfilTabNav :tabs="TABS" :active-id="activeTab" @select="selectTab" />
+
       <PerfilStatusCard
         :items="statusItems"
         :progresso="progressoPerfil"
         :seguranca-label="passwordExpanded ? 'Em atualização' : 'Boa'"
       />
 
-      <div class="perfil-layout">
-        <PerfilSidebar
-          :current-src="profile.avatarBase64"
-          :name="form.nome || profile.nome"
-          :role-label="getUserRoleLabel(profile.role)"
-          :ativo="profile.ativo"
-          @change="onAvatarChange"
-          @error="onAvatarError"
-        >
-          <template #email>{{ profile.email }}</template>
-          <template #telefone>{{ profile.telefone ? formatTelefone(profile.telefone) : 'Não informado' }}</template>
-          <template #whatsapp>{{ whatsAppLabel }}</template>
-        </PerfilSidebar>
+      <div class="perfil-content-panel" role="tabpanel">
+        <Transition name="perfil-tab-panel" mode="out-in">
+          <!-- Tab: Perfil -->
+          <div v-if="activeTab === 'informacoes'" key="informacoes" class="perfil-tab-panel">
+            <div class="perfil-layout">
+              <PerfilSidebar
+                :current-src="profile.avatarBase64"
+                :name="form.nome || profile.nome"
+                :role-label="getUserRoleLabel(profile.role)"
+                :ativo="profile.ativo"
+                @change="onAvatarChange"
+                @error="onAvatarError"
+              >
+                <template #email>{{ profile.email }}</template>
+                <template #telefone>{{ profile.telefone ? formatTelefone(profile.telefone) : 'Não informado' }}</template>
+                <template #whatsapp>{{ whatsAppLabel }}</template>
+              </PerfilSidebar>
 
-        <div class="perfil-sections">
-          <!-- WhatsApp alert -->
-          <section
-            v-if="whatsAppState !== 'confirmado'"
-            class="perfil-card perfil-card--alert"
-          >
-            <div class="perfil-card__alert-icon">🟡</div>
-            <div class="perfil-card__alert-body">
-              <h2 class="perfil-card__alert-title">Confirme seu WhatsApp</h2>
-              <p class="perfil-card__alert-desc">
-                Receba lembretes automáticos de agendamento e atualizações importantes.
-              </p>
-              <div v-if="whatsAppState === 'sem-telefone'" class="perfil-card__alert-actions">
-                <button type="button" class="perfil-link-btn" @click="scrollToSection('informacoes')">
-                  Cadastrar telefone
-                </button>
-              </div>
-              <template v-else>
-                <div v-if="pollError" class="perfil-inline-alert perfil-inline-alert--warning">
-                  {{ pollError }}
-                </div>
-                <div class="perfil-card__alert-actions">
-                  <a
-                    v-if="instrucoes?.linkWhatsApp"
-                    :href="instrucoes.linkWhatsApp"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="perfil-btn perfil-btn--primary"
-                  >
-                    Confirmar no WhatsApp
-                  </a>
-                  <BaseButton
-                    v-else
-                    variant="primary"
-                    :loading="solicitando"
-                    @click="handleSolicitarWhatsApp"
-                  >
-                    Confirmar
-                  </BaseButton>
-                  <span v-if="polling" class="perfil-polling">Aguardando confirmação…</span>
-                </div>
-              </template>
-            </div>
-          </section>
-
-          <!-- Informações -->
-          <section id="informacoes" class="perfil-card">
-            <div class="perfil-card__header">
-              <h2 class="perfil-card__title">Informações pessoais</h2>
-              <p class="perfil-card__subtitle">Atualize nome e telefone de contato.</p>
-            </div>
-
-            <form class="perfil-card__body" @submit.prevent="handleSaveProfile">
-              <BaseAlert v-if="profileError" variant="error">{{ profileError }}</BaseAlert>
-              <div v-if="profileSuccess" class="perfil-inline-alert perfil-inline-alert--success" role="status">
-                Perfil atualizado com sucesso.
-              </div>
-
-              <BaseInput v-model="form.nome" label="Nome completo" autocomplete="name" required />
-
-              <TelefoneInput
-                v-model="form.telefone"
-                label="Telefone"
-                unified
-                :show-ddi-prefix="false"
-                hint="Formato: +55 (DDD) número"
-              />
-
-              <div class="perfil-email-field">
-                <label class="perfil-email-field__label">E-mail</label>
-                <div class="perfil-email-field__value">
-                  <span>{{ profile.email }}</span>
-                  <span class="perfil-email-field__lock">🔒 Utilizado para login</span>
-                </div>
-                <button type="button" class="perfil-link-btn">Alterar e-mail</button>
-              </div>
-            </form>
-          </section>
-
-          <!-- Conta -->
-          <section id="conta" class="perfil-card">
-            <div class="perfil-card__header">
-              <h2 class="perfil-card__title">Conta</h2>
-              <p class="perfil-card__subtitle">Informações gerais da sua conta na plataforma.</p>
-            </div>
-            <dl class="perfil-dl">
-              <div class="perfil-dl__row">
-                <dt>Tipo</dt>
-                <dd>{{ getUserRoleLabel(profile.role) }}</dd>
-              </div>
-              <div class="perfil-dl__row">
-                <dt>Status</dt>
-                <dd>{{ profile.ativo ? 'Ativa' : 'Inativa' }}</dd>
-              </div>
-              <div class="perfil-dl__row">
-                <dt>Membro desde</dt>
-                <dd>{{ profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('pt-BR') : '—' }}</dd>
-              </div>
-            </dl>
-          </section>
-
-          <!-- Segurança -->
-          <section id="seguranca" class="perfil-card">
-            <div class="perfil-card__header">
-              <h2 class="perfil-card__title">Segurança</h2>
-              <p class="perfil-card__subtitle">Proteja o acesso à sua conta.</p>
-            </div>
-
-            <div class="perfil-card__body">
-              <div class="perfil-security-row">
-                <div>
-                  <p class="perfil-security-row__label">Senha</p>
-                  <p class="perfil-security-row__meta">Última alteração não disponível</p>
-                </div>
-                <BaseButton
-                  variant="secondary"
-                  size="sm"
-                  @click="passwordExpanded = !passwordExpanded"
+              <div class="perfil-tab-panel__stack">
+                <section
+                  v-if="whatsAppState !== 'confirmado'"
+                  class="perfil-card perfil-card--alert"
                 >
-                  {{ passwordExpanded ? 'Cancelar' : 'Alterar senha' }}
-                </BaseButton>
+                  <div class="perfil-card__alert-icon">🟡</div>
+                  <div class="perfil-card__alert-body">
+                    <h2 class="perfil-card__alert-title">Confirme seu WhatsApp</h2>
+                    <p class="perfil-card__alert-desc">
+                      Receba lembretes automáticos de agendamento e atualizações importantes.
+                    </p>
+                    <div v-if="whatsAppState === 'sem-telefone'" class="perfil-card__alert-actions">
+                      <p class="perfil-card__alert-desc">Cadastre seu telefone no formulário abaixo.</p>
+                    </div>
+                    <template v-else>
+                      <div v-if="pollError" class="perfil-inline-alert perfil-inline-alert--warning">
+                        {{ pollError }}
+                      </div>
+                      <div class="perfil-card__alert-actions">
+                        <a
+                          v-if="instrucoes?.linkWhatsApp"
+                          :href="instrucoes.linkWhatsApp"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="perfil-btn perfil-btn--primary"
+                        >
+                          Confirmar no WhatsApp
+                        </a>
+                        <BaseButton
+                          v-else
+                          variant="primary"
+                          :loading="solicitando"
+                          @click="handleSolicitarWhatsApp"
+                        >
+                          Confirmar
+                        </BaseButton>
+                        <span v-if="polling" class="perfil-polling">Aguardando confirmação…</span>
+                      </div>
+                    </template>
+                  </div>
+                </section>
+
+                <section class="perfil-card">
+                  <div class="perfil-card__header">
+                    <h2 class="perfil-card__title">Informações pessoais</h2>
+                    <p class="perfil-card__subtitle">Atualize nome e telefone de contato.</p>
+                  </div>
+
+                  <form class="perfil-card__body" @submit.prevent="handleSaveProfile">
+                    <BaseAlert v-if="profileError" variant="error">{{ profileError }}</BaseAlert>
+                    <div
+                      v-if="profileSuccess"
+                      class="perfil-inline-alert perfil-inline-alert--success"
+                      role="status"
+                    >
+                      Perfil atualizado com sucesso.
+                    </div>
+
+                    <BaseInput v-model="form.nome" label="Nome completo" autocomplete="name" required />
+
+                    <TelefoneInput
+                      v-model="form.telefone"
+                      label="Telefone"
+                      unified
+                      :show-ddi-prefix="false"
+                      hint="Formato: +55 (DDD) número"
+                    />
+
+                    <div class="perfil-email-field">
+                      <label class="perfil-email-field__label">E-mail</label>
+                      <div class="perfil-email-field__value">
+                        <span>{{ profile.email }}</span>
+                        <span class="perfil-email-field__lock">🔒 Utilizado para login</span>
+                      </div>
+                      <button type="button" class="perfil-link-btn">Alterar e-mail</button>
+                    </div>
+                  </form>
+                </section>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Conta -->
+          <div v-else-if="activeTab === 'conta'" key="conta" class="perfil-tab-panel">
+            <section class="perfil-card">
+              <div class="perfil-card__header">
+                <h2 class="perfil-card__title">Conta</h2>
+                <p class="perfil-card__subtitle">Informações gerais da sua conta na plataforma.</p>
+              </div>
+              <dl class="perfil-dl">
+                <div class="perfil-dl__row">
+                  <dt>Tipo</dt>
+                  <dd>{{ getUserRoleLabel(profile.role) }}</dd>
+                </div>
+                <div class="perfil-dl__row">
+                  <dt>Status</dt>
+                  <dd>{{ profile.ativo ? 'Ativa' : 'Inativa' }}</dd>
+                </div>
+                <div class="perfil-dl__row">
+                  <dt>E-mail</dt>
+                  <dd>{{ profile.email }}</dd>
+                </div>
+                <div class="perfil-dl__row">
+                  <dt>Telefone</dt>
+                  <dd>{{ profile.telefone ? formatTelefone(profile.telefone) : 'Não informado' }}</dd>
+                </div>
+                <div class="perfil-dl__row">
+                  <dt>Membro desde</dt>
+                  <dd>{{ profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('pt-BR') : '—' }}</dd>
+                </div>
+                <div class="perfil-dl__row">
+                  <dt>Perfil completo</dt>
+                  <dd>{{ progressoPerfil }}%</dd>
+                </div>
+              </dl>
+            </section>
+          </div>
+
+          <!-- Tab: Segurança -->
+          <div v-else-if="activeTab === 'seguranca'" key="seguranca" class="perfil-tab-panel">
+            <section class="perfil-card">
+              <div class="perfil-card__header">
+                <h2 class="perfil-card__title">Segurança</h2>
+                <p class="perfil-card__subtitle">Proteja o acesso à sua conta.</p>
               </div>
 
-              <form v-if="passwordExpanded" class="perfil-password-form" @submit.prevent="handleChangePassword">
-                <BaseAlert v-if="passwordError" variant="error">{{ passwordError }}</BaseAlert>
-                <div v-if="passwordSuccess" class="perfil-inline-alert perfil-inline-alert--success">
-                  Senha alterada com sucesso.
-                </div>
-
-                <div class="perfil-password-form__grid">
-                  <div class="relative [&_input]:pr-12">
-                    <BaseInput
-                      v-model="passwordForm.senha"
-                      label="Nova senha"
-                      :type="mostrarNovaSenha ? 'text' : 'password'"
-                      autocomplete="new-password"
-                      required
-                    />
-                    <AuthPasswordToggle
-                      class="!bottom-[11px]"
-                      :pressed="mostrarNovaSenha"
-                      @click="mostrarNovaSenha = !mostrarNovaSenha"
-                    />
+              <div class="perfil-card__body">
+                <div class="perfil-security-row">
+                  <div>
+                    <p class="perfil-security-row__label">Senha</p>
+                    <p class="perfil-security-row__meta">Última alteração não disponível</p>
                   </div>
-                  <div class="relative [&_input]:pr-12">
-                    <BaseInput
-                      v-model="passwordForm.confirmarSenha"
-                      label="Confirmar nova senha"
-                      :type="mostrarConfirmarSenha ? 'text' : 'password'"
-                      autocomplete="new-password"
-                      required
-                    />
-                    <AuthPasswordToggle
-                      class="!bottom-[11px]"
-                      :pressed="mostrarConfirmarSenha"
-                      @click="mostrarConfirmarSenha = !mostrarConfirmarSenha"
-                    />
-                  </div>
-                </div>
-
-                <PerfilPasswordRules :password="passwordForm.senha" />
-
-                <div class="perfil-password-form__actions">
-                  <BaseButton type="submit" :loading="changingPassword" :disabled="!canChangePassword">
-                    Atualizar senha
+                  <BaseButton
+                    variant="secondary"
+                    size="sm"
+                    @click="passwordExpanded = !passwordExpanded"
+                  >
+                    {{ passwordExpanded ? 'Cancelar' : 'Alterar senha' }}
                   </BaseButton>
                 </div>
-              </form>
 
-              <div class="perfil-security-row perfil-security-row--muted">
-                <div>
-                  <p class="perfil-security-row__label">Autenticação em dois fatores (2FA)</p>
-                  <p class="perfil-security-row__meta">Desativado</p>
-                </div>
-                <BaseButton variant="secondary" size="sm" disabled>Ativar</BaseButton>
-              </div>
+                <form
+                  v-if="passwordExpanded"
+                  class="perfil-password-form"
+                  @submit.prevent="handleChangePassword"
+                >
+                  <BaseAlert v-if="passwordError" variant="error">{{ passwordError }}</BaseAlert>
+                  <div v-if="passwordSuccess" class="perfil-inline-alert perfil-inline-alert--success">
+                    Senha alterada com sucesso.
+                  </div>
 
-              <div class="perfil-sessions">
-                <h3 class="perfil-sessions__title">Dispositivos conectados</h3>
-                <ul class="perfil-sessions__list">
-                  <li class="perfil-sessions__item">
-                    <div>
-                      <p class="perfil-sessions__device">Windows · Chrome</p>
-                      <p class="perfil-sessions__meta">Sessão atual · Agora</p>
+                  <div class="perfil-password-form__grid">
+                    <div class="relative [&_input]:pr-12">
+                      <BaseInput
+                        v-model="passwordForm.senha"
+                        label="Nova senha"
+                        :type="mostrarNovaSenha ? 'text' : 'password'"
+                        autocomplete="new-password"
+                        required
+                      />
+                      <AuthPasswordToggle
+                        class="!bottom-[11px]"
+                        :pressed="mostrarNovaSenha"
+                        @click="mostrarNovaSenha = !mostrarNovaSenha"
+                      />
                     </div>
-                  </li>
-                </ul>
-                <p class="perfil-sessions__hint">Gerenciamento completo de sessões em breve.</p>
-              </div>
-            </div>
-          </section>
+                    <div class="relative [&_input]:pr-12">
+                      <BaseInput
+                        v-model="passwordForm.confirmarSenha"
+                        label="Confirmar nova senha"
+                        :type="mostrarConfirmarSenha ? 'text' : 'password'"
+                        autocomplete="new-password"
+                        required
+                      />
+                      <AuthPasswordToggle
+                        class="!bottom-[11px]"
+                        :pressed="mostrarConfirmarSenha"
+                        @click="mostrarConfirmarSenha = !mostrarConfirmarSenha"
+                      />
+                    </div>
+                  </div>
 
-          <!-- Notificações -->
-          <section id="notificacoes" class="perfil-card">
-            <div class="perfil-card__header">
-              <h2 class="perfil-card__title">Notificações</h2>
-              <p class="perfil-card__subtitle">Escolha como deseja ser avisado.</p>
-            </div>
-            <ul class="perfil-prefs">
-              <li class="perfil-prefs__item">
-                <div>
-                  <p class="perfil-prefs__label">E-mail</p>
-                  <p class="perfil-prefs__desc">Confirmações e atualizações da conta</p>
+                  <PerfilPasswordRules :password="passwordForm.senha" />
+
+                  <div class="perfil-password-form__actions">
+                    <BaseButton type="submit" :loading="changingPassword" :disabled="!canChangePassword">
+                      Atualizar senha
+                    </BaseButton>
+                  </div>
+                </form>
+
+                <div class="perfil-security-row perfil-security-row--muted">
+                  <div>
+                    <p class="perfil-security-row__label">Autenticação em dois fatores (2FA)</p>
+                    <p class="perfil-security-row__meta">Desativado</p>
+                  </div>
+                  <BaseButton variant="secondary" size="sm" disabled>Ativar</BaseButton>
                 </div>
-                <input v-model="notificacoes.email" type="checkbox" class="perfil-toggle" disabled />
-              </li>
-              <li class="perfil-prefs__item">
-                <div>
-                  <p class="perfil-prefs__label">WhatsApp</p>
-                  <p class="perfil-prefs__desc">Lembretes de agendamento</p>
+
+                <div class="perfil-sessions">
+                  <h3 class="perfil-sessions__title">Dispositivos conectados</h3>
+                  <ul class="perfil-sessions__list">
+                    <li class="perfil-sessions__item">
+                      <div>
+                        <p class="perfil-sessions__device">Windows · Chrome</p>
+                        <p class="perfil-sessions__meta">Sessão atual · Agora</p>
+                      </div>
+                    </li>
+                  </ul>
+                  <p class="perfil-sessions__hint">Gerenciamento completo de sessões em breve.</p>
                 </div>
-                <input
-                  type="checkbox"
-                  class="perfil-toggle"
-                  :checked="profile.whatsAppOptIn ?? false"
-                  :disabled="whatsAppState !== 'confirmado'"
-                  @change="handleOptInChange"
-                />
-              </li>
-              <li class="perfil-prefs__item">
-                <div>
-                  <p class="perfil-prefs__label">Push</p>
-                  <p class="perfil-prefs__desc">Notificações no navegador</p>
-                </div>
-                <input v-model="notificacoes.push" type="checkbox" class="perfil-toggle" disabled />
-              </li>
-              <li class="perfil-prefs__item">
-                <div>
-                  <p class="perfil-prefs__label">SMS</p>
-                  <p class="perfil-prefs__desc">Alertas por mensagem de texto</p>
-                </div>
-                <input v-model="notificacoes.sms" type="checkbox" class="perfil-toggle" disabled />
-              </li>
-            </ul>
-          </section>
-        </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- Tab: Notificações -->
+          <div v-else key="notificacoes" class="perfil-tab-panel">
+            <section class="perfil-card">
+              <div class="perfil-card__header">
+                <h2 class="perfil-card__title">Notificações</h2>
+                <p class="perfil-card__subtitle">Escolha como deseja ser avisado.</p>
+              </div>
+              <ul class="perfil-prefs">
+                <li class="perfil-prefs__item">
+                  <div>
+                    <p class="perfil-prefs__label">E-mail</p>
+                    <p class="perfil-prefs__desc">Confirmações e atualizações da conta</p>
+                  </div>
+                  <input v-model="notificacoes.email" type="checkbox" class="perfil-toggle" disabled />
+                </li>
+                <li class="perfil-prefs__item">
+                  <div>
+                    <p class="perfil-prefs__label">WhatsApp</p>
+                    <p class="perfil-prefs__desc">Lembretes de agendamento</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    class="perfil-toggle"
+                    :checked="profile.whatsAppOptIn ?? false"
+                    :disabled="whatsAppState !== 'confirmado'"
+                    @change="handleOptInChange"
+                  />
+                </li>
+                <li class="perfil-prefs__item">
+                  <div>
+                    <p class="perfil-prefs__label">Push</p>
+                    <p class="perfil-prefs__desc">Notificações no navegador</p>
+                  </div>
+                  <input v-model="notificacoes.push" type="checkbox" class="perfil-toggle" disabled />
+                </li>
+                <li class="perfil-prefs__item">
+                  <div>
+                    <p class="perfil-prefs__label">SMS</p>
+                    <p class="perfil-prefs__desc">Alertas por mensagem de texto</p>
+                  </div>
+                  <input v-model="notificacoes.sms" type="checkbox" class="perfil-toggle" disabled />
+                </li>
+              </ul>
+            </section>
+          </div>
+        </Transition>
       </div>
     </template>
 
     <PerfilSaveBar
-      :visible="isProfileDirty"
+      :visible="isProfileDirty && activeTab === 'informacoes'"
       :loading="saving"
       @cancel="cancelProfileChanges"
       @save="handleSaveProfile"

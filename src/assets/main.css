@@ -4648,6 +4648,56 @@
     @apply rounded-full border border-glow-border-soft bg-glow-surface px-4 py-1.5 font-urbanist text-sm font-medium text-glow-text-subtle transition hover:border-glow-gold-cta hover:text-glow-text;
   }
 
+  .perfil-tabs {
+    @apply grid grid-cols-2 gap-3 lg:grid-cols-4;
+  }
+
+  .perfil-tabs__card {
+    @apply flex flex-col items-start rounded-2xl border border-glow-border-soft bg-glow-surface p-4 text-left shadow-glow-sm transition hover:-translate-y-0.5 hover:border-glow-gold-cta hover:shadow-md;
+  }
+
+  .perfil-tabs__card--active {
+    @apply border-glow-gold-cta bg-glow-hover-surface shadow-md;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      0 0 0 1px rgba(146, 103, 155, 0.2);
+  }
+
+  .perfil-tabs__icon {
+    @apply text-xl;
+  }
+
+  .perfil-tabs__label {
+    @apply mt-2 font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .perfil-tabs__desc {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-content-panel {
+    @apply min-h-[320px];
+  }
+
+  .perfil-tab-panel__stack {
+    @apply flex flex-col gap-6 xl:col-span-8;
+  }
+
+  .perfil-tab-panel-enter-active,
+  .perfil-tab-panel-leave-active {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .perfil-tab-panel-enter-from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  .perfil-tab-panel-leave-to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
   .perfil-status-card {
     @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
   }
@@ -4763,6 +4813,10 @@
 
   .perfil-sections {
     @apply flex flex-col gap-8 xl:col-span-8;
+  }
+
+  .perfil-tab-panel .perfil-layout {
+    @apply gap-6;
   }
 
   .perfil-card {
