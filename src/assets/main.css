@@ -207,7 +207,7 @@
     --glow-border-soft: rgba(44, 21, 75, 0.12);
     --glow-placeholder: #9e94aa;
     color-scheme: light;
-    @apply min-h-screen bg-glow-bg-base text-glow-text;
+    @apply min-h-dvh bg-glow-bg-base text-glow-text;
   }
 
   /* Agendamento público */
@@ -225,11 +225,11 @@
     --glow-border-soft: rgba(44, 21, 75, 0.12);
     --glow-placeholder: #9e94aa;
     color-scheme: light;
-    @apply relative min-h-screen bg-glow-bg-base pb-16 text-glow-text;
+    @apply relative min-h-dvh bg-glow-bg-base pb-16 text-glow-text;
   }
 
   .agendar-publico-header {
-    @apply border-b border-glow-border-soft px-[68px] pb-6 pt-[29px];
+    @apply border-b border-glow-border-soft px-4 pb-6 pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-8 lg:px-[68px] lg:pt-[29px];
   }
 
   .agendar-publico-logo {
@@ -372,7 +372,7 @@
   }
 
   .agendar-resumo-footer {
-    @apply fixed inset-x-0 bottom-0 z-20 px-4 pb-4 pt-2;
+    @apply fixed inset-x-0 bottom-0 z-20 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2;
   }
 
   .agendar-resumo-footer__panel {
@@ -602,7 +602,7 @@
   /* Toasts globais — canto superior, fora do fluxo do documento */
   .toast-stack {
     @apply pointer-events-none fixed z-[60] flex flex-col;
-    top: 1rem;
+    top: max(1rem, env(safe-area-inset-top));
     right: 1rem;
     left: 1rem;
     max-width: 24rem;
@@ -758,7 +758,7 @@
   }
 
   .agenda-page__filters {
-    @apply flex flex-wrap gap-2;
+    @apply grid grid-cols-2 gap-2 sm:flex sm:flex-wrap;
   }
 
   .agenda-filter-btn {
@@ -846,11 +846,11 @@
   }
 
   .agendamento-card__btn-confirm {
-    @apply inline-flex h-8 min-w-[126px] items-center justify-center gap-1 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-success-action px-3 font-satoshi text-xs font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-success-action px-3 font-satoshi text-xs font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:h-8 sm:min-h-0;
   }
 
   .agendamento-card__btn-cancel {
-    @apply inline-flex h-8 min-w-[126px] items-center justify-center gap-1 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3 font-satoshi text-xs font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3 font-satoshi text-xs font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60 sm:h-8 sm:min-h-0;
   }
 
   .agendamento-badge {
@@ -886,7 +886,11 @@
   }
 
   .agenda-figma-filter {
-    @apply relative inline-block w-[171px];
+    @apply relative w-full min-w-0 sm:inline-block sm:w-[171px];
+  }
+
+  .agenda-figma-filter--wide {
+    @apply sm:w-[220px];
   }
 
   .agenda-figma-filter__trigger {
@@ -1159,7 +1163,7 @@
   }
 
   .agendamento-detail-btn {
-    @apply inline-flex h-8 items-center justify-center gap-1 rounded-xl border-[0.5px] px-3 font-satoshi text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-11 items-center justify-center gap-1 rounded-xl border-[0.5px] px-3 font-satoshi text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 sm:h-8 sm:min-h-0;
   }
 
   .agendamento-detail-btn--confirm {
@@ -1175,7 +1179,18 @@
   }
 
   .agendamento-detail-avaliado-badge {
-    @apply inline-flex items-center rounded-xl border border-glow-border-soft bg-glow-hover-surface px-3 py-2 font-urbanist text-sm text-glow-text-subtle;
+    @apply inline-flex min-h-11 items-center rounded-xl border border-glow-border-soft bg-glow-hover-surface px-3 py-2 font-urbanist text-sm text-glow-text-subtle sm:min-h-0;
+  }
+
+  @media (max-width: 639px) {
+    .agendamento-detail-actions {
+      @apply flex-col;
+    }
+
+    .agendamento-detail-actions .agendamento-detail-btn,
+    .agendamento-detail-actions .agendamento-detail-avaliado-badge {
+      @apply w-full;
+    }
   }
 
   .remarcar-agendamento {
@@ -1341,7 +1356,7 @@
   .cliente-explorar-grid {
     display: grid;
     gap: 10px;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 388px), 388px));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 388px), 1fr));
     justify-content: start;
     margin-top: 38px;
   }
@@ -1436,7 +1451,7 @@
   }
 
   .cliente-loja-panel {
-    @apply cliente-card flex min-h-[382px] w-full max-w-[723px] flex-col p-10;
+    @apply cliente-card flex min-h-[382px] w-full max-w-[723px] flex-col p-5 sm:p-8 lg:p-10;
   }
 
   .cliente-loja-panel__header {
@@ -1543,7 +1558,7 @@
   }
 
   .cliente-loja-servicos {
-    @apply w-full max-w-[278px] space-y-4;
+    @apply w-full space-y-4 lg:max-w-[278px];
   }
 
   .cliente-loja-servicos-grid {
@@ -1758,11 +1773,11 @@
   }
 
   .servicos-empty__title {
-    @apply font-satoshi text-[32px] font-black leading-tight text-glow-text;
+    @apply font-satoshi text-2xl font-black leading-tight text-glow-text sm:text-[32px];
   }
 
   .servicos-empty__description {
-    @apply mt-3 font-satoshi text-xl text-glow-text-muted;
+    @apply mt-3 font-satoshi text-base text-glow-text-muted sm:text-xl;
   }
 
   .servicos-empty__action {
@@ -2154,11 +2169,11 @@
   }
 
   .equipe-empty-state__title {
-    @apply font-satoshi text-[32px] font-black leading-tight text-glow-text;
+    @apply font-satoshi text-2xl font-black leading-tight text-glow-text sm:text-[32px];
   }
 
   .equipe-empty-state__description {
-    @apply max-w-md font-satoshi text-xl text-glow-text-muted;
+    @apply max-w-md font-satoshi text-base text-glow-text-muted sm:text-xl;
   }
 
   .equipe-modal-overlay {
@@ -2383,6 +2398,10 @@
 
   .equipe-convites-table__td--muted {
     @apply text-glow-text-subtle;
+  }
+
+  .equipe-convites__row-card {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-4 shadow-sm md:hidden;
   }
 
   .equipe-membro-detalhe__danger {
@@ -3401,6 +3420,26 @@
 
   .financeiro-table__row-card {
     @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-4 md:hidden;
+  }
+
+  .financeiro-table__row-meta {
+    @apply mt-3 space-y-2;
+  }
+
+  .financeiro-table__row-meta-item {
+    @apply flex items-center justify-between gap-2;
+  }
+
+  .financeiro-table__row-meta-label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-table__row-meta-value {
+    @apply font-urbanist text-sm text-glow-text;
+  }
+
+  .financeiro-table__row-actions {
+    @apply mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end;
   }
 
   .financeiro-badge {
@@ -4662,7 +4701,7 @@
   }
 
   .perfil-tabs__card {
-    @apply flex flex-col items-start rounded-2xl border border-glow-border-soft bg-glow-surface p-4 text-left shadow-glow-sm transition hover:-translate-y-0.5 hover:border-glow-gold-cta hover:shadow-md;
+    @apply flex flex-col items-start rounded-2xl border border-glow-border-soft bg-glow-surface p-3 text-left shadow-glow-sm transition hover:-translate-y-0.5 hover:border-glow-gold-cta hover:shadow-md sm:p-4;
   }
 
   .perfil-tabs__card--active {
@@ -4708,7 +4747,7 @@
   }
 
   .perfil-status-card {
-    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-4 shadow-glow-sm sm:p-6;
   }
 
   .perfil-status-card__head {
@@ -4833,7 +4872,7 @@
   }
 
   .perfil-card__header {
-    @apply border-b border-glow-border-soft px-6 py-4;
+    @apply border-b border-glow-border-soft px-4 py-3 sm:px-6 sm:py-4;
   }
 
   .perfil-card__title {
@@ -4845,11 +4884,11 @@
   }
 
   .perfil-card__body {
-    @apply space-y-5 p-6;
+    @apply space-y-5 p-4 sm:p-6;
   }
 
   .perfil-card--alert {
-    @apply flex gap-4 border-amber-200 bg-amber-50 p-6;
+    @apply flex flex-col gap-4 border-amber-200 bg-amber-50 p-4 sm:flex-row sm:p-6;
   }
 
   .perfil-card__alert-icon {
@@ -4885,7 +4924,7 @@
   }
 
   .perfil-dl {
-    @apply space-y-3 p-6;
+    @apply space-y-3 p-4 sm:p-6;
   }
 
   .perfil-dl__row {
@@ -4901,7 +4940,7 @@
   }
 
   .perfil-security-row {
-    @apply flex items-center justify-between gap-4 rounded-xl border border-glow-border-soft bg-glow-hover-surface px-4 py-4;
+    @apply flex flex-col items-stretch gap-3 rounded-xl border border-glow-border-soft bg-glow-hover-surface px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4;
   }
 
   .perfil-security-row--muted {
@@ -4925,7 +4964,7 @@
   }
 
   .perfil-password-form__actions {
-    @apply flex justify-end;
+    @apply flex flex-col gap-2 sm:flex-row sm:justify-end;
   }
 
   .perfil-password-rules__title {
@@ -4989,7 +5028,7 @@
   }
 
   .perfil-toggle {
-    @apply size-5 accent-glow-gold-cta;
+    @apply size-6 shrink-0 accent-glow-gold-cta sm:size-5;
   }
 
   .perfil-inline-alert {
@@ -5017,7 +5056,7 @@
   }
 
   .perfil-save-bar {
-    @apply fixed inset-x-0 bottom-0 z-40 flex flex-col gap-3 border-t border-glow-border-soft bg-glow-surface px-4 py-4 shadow-lg sm:flex-row sm:items-center sm:justify-between sm:px-6;
+    @apply fixed inset-x-0 bottom-0 z-40 flex flex-col gap-3 border-t border-glow-border-soft bg-glow-surface px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 shadow-lg sm:flex-row sm:items-center sm:justify-between sm:px-6;
   }
 
   .perfil-save-bar__text {
@@ -5025,15 +5064,15 @@
   }
 
   .perfil-save-bar__actions {
-    @apply flex gap-2;
+    @apply flex w-full gap-2 sm:w-auto;
   }
 
   .perfil-save-bar__cancel {
-    @apply rounded-lg border border-glow-border-soft px-4 py-2 font-urbanist text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface;
+    @apply min-h-11 flex-1 rounded-lg border border-glow-border-soft px-4 py-2 font-urbanist text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface sm:flex-none;
   }
 
   .perfil-save-bar__save {
-    @apply rounded-lg bg-glow-gold-cta px-4 py-2 font-urbanist text-sm font-semibold text-white transition hover:brightness-95 disabled:opacity-60;
+    @apply min-h-11 flex-1 rounded-lg bg-glow-gold-cta px-4 py-2 font-urbanist text-sm font-semibold text-white transition hover:brightness-95 disabled:opacity-60 sm:flex-none;
   }
 
   .perfil-save-bar-enter-active,

@@ -130,7 +130,7 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
               title="Sem dados"
               description="Não há faturamento por profissional no período."
             />
-            <div v-else class="financeiro-table-wrap">
+            <div v-else class="financeiro-table-wrap hidden md:block">
               <table class="financeiro-table">
                 <thead>
                   <tr>
@@ -148,6 +148,27 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
                 </tbody>
               </table>
             </div>
+            <div class="space-y-3 md:hidden">
+              <div
+                v-for="p in analitico.porProfissional"
+                :key="p.profissionalId"
+                class="financeiro-table__row-card"
+              >
+                <p class="font-urbanist font-medium text-glow-text">{{ p.nomePublico }}</p>
+                <div class="financeiro-table__row-meta">
+                  <div class="financeiro-table__row-meta-item">
+                    <span class="financeiro-table__row-meta-label">Atendimentos</span>
+                    <span class="financeiro-table__row-meta-value">{{ p.quantidade }}</span>
+                  </div>
+                  <div class="financeiro-table__row-meta-item">
+                    <span class="financeiro-table__row-meta-label">Faturamento</span>
+                    <span class="font-satoshi font-bold text-glow-text">
+                      {{ formatCurrency(p.faturamento) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div>
             <h3 class="mb-3 font-urbanist text-sm font-semibold text-glow-text">Por forma de pagamento</h3>
@@ -156,7 +177,7 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
               title="Sem dados"
               description="Não há recebimentos no período."
             />
-            <div v-else class="financeiro-table-wrap">
+            <div v-else class="financeiro-table-wrap hidden md:block">
               <table class="financeiro-table">
                 <thead>
                   <tr>
@@ -173,6 +194,27 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
                   </tr>
                 </tbody>
               </table>
+            </div>
+            <div class="space-y-3 md:hidden">
+              <div
+                v-for="f in analitico.porFormaPagamento"
+                :key="f.formaPagamento"
+                class="financeiro-table__row-card"
+              >
+                <p class="font-urbanist font-medium text-glow-text">{{ f.formaPagamento }}</p>
+                <div class="financeiro-table__row-meta">
+                  <div class="financeiro-table__row-meta-item">
+                    <span class="financeiro-table__row-meta-label">Quantidade</span>
+                    <span class="financeiro-table__row-meta-value">{{ f.quantidade }}</span>
+                  </div>
+                  <div class="financeiro-table__row-meta-item">
+                    <span class="financeiro-table__row-meta-label">Total</span>
+                    <span class="font-satoshi font-bold text-glow-text">
+                      {{ formatCurrency(f.total) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

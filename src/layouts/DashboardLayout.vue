@@ -44,7 +44,7 @@ const appStore = useAppStore()
       >
         <button
           type="button"
-          class="flex size-10 items-center justify-center rounded border border-glow-border-soft bg-glow-bg-highlight text-glow-text"
+          class="flex size-11 items-center justify-center rounded border border-glow-border-soft bg-glow-bg-highlight text-glow-text"
           aria-label="Abrir menu"
           @click="appStore.toggleSidebar()"
         >

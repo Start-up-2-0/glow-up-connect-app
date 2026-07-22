@@ -7,7 +7,7 @@ const { acceptAll, rejectNonEssential, openPreferences } = useConsent()
 
 <template>
   <div
-    class="fixed inset-x-0 bottom-0 z-50 border-t border-glow-border-soft bg-glow-surface p-4 shadow-lg sm:p-5"
+    class="fixed inset-x-0 bottom-0 z-50 border-t border-glow-border-soft bg-glow-surface p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lg sm:p-5"
     role="dialog"
     aria-labelledby="cookie-banner-title"
     aria-describedby="cookie-banner-desc"

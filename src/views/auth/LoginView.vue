@@ -21,6 +21,9 @@ import {
   GLOW_INPUT_CLASS,
   GLOW_LABEL_CLASS,
   GLOW_LINK_CLASS,
+  GLOW_AUTH_LOGO_CLASS,
+  GLOW_AUTH_SUBTITLE_CLASS,
+  GLOW_AUTH_TITLE_CLASS,
   GLOW_LOGIN_CONTENT_CLASS,
   GLOW_LOGIN_PAGE_CLASS,
 } from '@/constants/designTokens'
@@ -101,16 +104,16 @@ async function handleSubmit() {
       <img
         :src="loginCrest"
         alt="Glow Up Connect"
-        class="mb-[22px] h-[168px] w-[168px] shrink-0 object-contain"
+        :class="GLOW_AUTH_LOGO_CLASS"
         width="168"
         height="168"
       />
 
       <header class="mb-10 w-full text-left">
-        <h1 class="font-satoshi text-[32px] font-bold leading-normal text-glow-text">
+        <h1 :class="GLOW_AUTH_TITLE_CLASS">
           Bem-vindo ao Glow Up Connect
         </h1>
-        <p class="mt-[5px] font-satoshi text-xl font-normal leading-normal text-glow-text-muted">
+        <p :class="GLOW_AUTH_SUBTITLE_CLASS">
           {{
             isAssinaturaFlow
               ? 'Entre na sua conta para cadastrar o estabelecimento e concluir a assinatura.'
@@ -155,10 +158,10 @@ async function handleSubmit() {
 
         <div class="flex flex-col gap-5">
           <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-            <label class="group flex cursor-pointer select-none items-center gap-2">
+            <label class="group flex min-h-11 cursor-pointer select-none items-center gap-3 py-1">
               <input v-model="lembrarConta" type="checkbox" class="sr-only" />
               <span
-                class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[2px] border border-glow-text/20 bg-white transition group-has-[:checked]:border-glow-gold group-has-[:checked]:bg-glow-gold"
+                class="flex size-[22px] shrink-0 items-center justify-center rounded-[2px] border border-glow-text/20 bg-white transition group-has-[:checked]:border-glow-gold group-has-[:checked]:bg-glow-gold"
                 aria-hidden="true"
               >
                 <svg

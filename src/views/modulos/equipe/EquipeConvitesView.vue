@@ -96,49 +96,86 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
       </p>
     </div>
 
-    <div
-      v-else-if="ready && convites.length > 0"
-      class="equipe-convites-table-wrap"
-    >
-      <table class="equipe-convites-table">
-        <thead>
-          <tr class="equipe-convites-table__head-row">
-            <th class="equipe-convites-table__th">E-mail</th>
-            <th class="equipe-convites-table__th">Função</th>
-            <th class="equipe-convites-table__th">Tipo</th>
-            <th class="equipe-convites-table__th">Expira em</th>
-            <th class="equipe-convites-table__th">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="convite in convites"
-            :key="convite.id"
-            class="equipe-convites-table__row"
-          >
-            <td class="equipe-convites-table__td">{{ convite.email }}</td>
-            <td class="equipe-convites-table__td">
-              {{ establishmentRoleLabel(convite.roleSugerida) }}
-            </td>
-            <td class="equipe-convites-table__td equipe-convites-table__td--muted">
-              {{ tipoConviteLabel(convite.tipoConvite) }}
-            </td>
-            <td class="equipe-convites-table__td equipe-convites-table__td--muted">
-              {{ formatarData(convite.expiraEm) }}
-            </td>
-            <td class="equipe-convites-table__td">
-              <button
-                type="button"
-                class="equipe-btn-outline h-9 px-3 text-xs"
-                :disabled="cancelandoId === convite.id"
-                @click="cancelar(convite)"
-              >
-                {{ cancelandoId === convite.id ? 'Cancelando…' : 'Cancelar' }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <template v-else-if="ready && convites.length > 0">
+      <div class="equipe-convites-table-wrap hidden md:block">
+        <table class="equipe-convites-table">
+          <thead>
+            <tr class="equipe-convites-table__head-row">
+              <th class="equipe-convites-table__th">E-mail</th>
+              <th class="equipe-convites-table__th">Função</th>
+              <th class="equipe-convites-table__th">Tipo</th>
+              <th class="equipe-convites-table__th">Expira em</th>
+              <th class="equipe-convites-table__th">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="convite in convites"
+              :key="convite.id"
+              class="equipe-convites-table__row"
+            >
+              <td class="equipe-convites-table__td">{{ convite.email }}</td>
+              <td class="equipe-convites-table__td">
+                {{ establishmentRoleLabel(convite.roleSugerida) }}
+              </td>
+              <td class="equipe-convites-table__td equipe-convites-table__td--muted">
+                {{ tipoConviteLabel(convite.tipoConvite) }}
+              </td>
+              <td class="equipe-convites-table__td equipe-convites-table__td--muted">
+                {{ formatarData(convite.expiraEm) }}
+              </td>
+              <td class="equipe-convites-table__td">
+                <button
+                  type="button"
+                  class="equipe-btn-outline h-9 px-3 text-xs"
+                  :disabled="cancelandoId === convite.id"
+                  @click="cancelar(convite)"
+                >
+                  {{ cancelandoId === convite.id ? 'Cancelando…' : 'Cancelar' }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="space-y-3 md:hidden">
+        <div
+          v-for="convite in convites"
+          :key="convite.id"
+          class="equipe-convites__row-card"
+        >
+          <p class="break-all font-urbanist font-medium text-glow-text">{{ convite.email }}</p>
+          <div class="financeiro-table__row-meta">
+            <div class="financeiro-table__row-meta-item">
+              <span class="financeiro-table__row-meta-label">Função</span>
+              <span class="financeiro-table__row-meta-value">
+                {{ establishmentRoleLabel(convite.roleSugerida) }}
+              </span>
+            </div>
+            <div class="financeiro-table__row-meta-item">
+              <span class="financeiro-table__row-meta-label">Tipo</span>
+              <span class="financeiro-table__row-meta-value">
+                {{ tipoConviteLabel(convite.tipoConvite) }}
+              </span>
+            </div>
+            <div class="financeiro-table__row-meta-item">
+              <span class="financeiro-table__row-meta-label">Expira em</span>
+              <span class="financeiro-table__row-meta-value">{{ formatarData(convite.expiraEm) }}</span>
+            </div>
+          </div>
+          <div class="financeiro-table__row-actions">
+            <button
+              type="button"
+              class="equipe-btn-outline min-h-11 w-full px-3 text-sm sm:w-auto"
+              :disabled="cancelandoId === convite.id"
+              @click="cancelar(convite)"
+            >
+              {{ cancelandoId === convite.id ? 'Cancelando…' : 'Cancelar convite' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </template>
   </div>
 </template>

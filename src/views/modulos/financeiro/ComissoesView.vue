@@ -275,7 +275,7 @@ watch(aba, () => void load())
         title="Nenhuma comissão paga"
         description="Pagamentos de comissão aparecerão aqui."
       />
-      <div v-else class="financeiro-table-wrap">
+      <div v-else class="financeiro-table-wrap hidden md:block">
         <table class="financeiro-table">
           <thead>
             <tr>
@@ -293,6 +293,22 @@ watch(aba, () => void load())
           </tbody>
         </table>
       </div>
+
+      <div v-if="historico.length > 0" class="space-y-3 md:hidden">
+        <div
+          v-for="item in historico"
+          :key="item.id"
+          class="financeiro-table__row-card"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0 flex-1">
+              <p class="font-urbanist font-medium text-glow-text">{{ item.descricao }}</p>
+              <p class="text-sm text-glow-text-subtle">{{ formatDateTime(item.criadoEm) }}</p>
+            </div>
+            <p class="shrink-0 font-satoshi font-bold text-glow-text">{{ formatCurrency(item.valor) }}</p>
+          </div>
+        </div>
+      </div>
     </template>
 
     <template v-else-if="aba === 'extrato'">
@@ -301,7 +317,7 @@ watch(aba, () => void load())
         title="Nenhuma comissão no período"
         description="Suas comissões calculadas aparecerão aqui."
       />
-      <div v-else class="financeiro-table-wrap">
+      <div v-else class="financeiro-table-wrap hidden md:block">
         <table class="financeiro-table">
           <thead>
             <tr>
@@ -320,6 +336,30 @@ watch(aba, () => void load())
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div v-if="extrato.length > 0" class="space-y-3 md:hidden">
+        <div
+          v-for="item in extrato"
+          :key="item.lancamentoId"
+          class="financeiro-table__row-card"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0 flex-1">
+              <p class="font-urbanist font-medium text-glow-text">{{ item.descricao }}</p>
+              <p class="text-sm text-glow-text-subtle">{{ formatDateTime(item.criadoEm) }}</p>
+            </div>
+            <p class="shrink-0 font-satoshi font-bold text-glow-text">{{ formatCurrency(item.valor) }}</p>
+          </div>
+          <div class="financeiro-table__row-meta">
+            <div class="financeiro-table__row-meta-item">
+              <span class="financeiro-table__row-meta-label">Agendamento</span>
+              <span class="financeiro-table__row-meta-value">
+                {{ item.agendamentoId ? `#${item.agendamentoId}` : '—' }}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </template>
 

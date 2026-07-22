@@ -24,6 +24,9 @@ import { conviteService } from '@/services/conviteService'
 import { establishmentRoleLabel } from '@/constants/establishmentRoles'
 import {
   GLOW_AUTH_FORM_GRID_CLASS,
+  GLOW_AUTH_LOGO_CLASS,
+  GLOW_AUTH_SUBTITLE_CLASS,
+  GLOW_AUTH_TITLE_CLASS,
   GLOW_BODY_TEXT_CLASS,
   GLOW_BUTTON_PRIMARY_CLASS,
   GLOW_INPUT_CLASS,
@@ -198,16 +201,16 @@ function onAvatarError(message: string) {
       <img
         :src="registerCrest"
         alt="Glow Up Connect"
-        class="mb-[22px] h-[168px] w-[168px] shrink-0 object-contain"
+        :class="GLOW_AUTH_LOGO_CLASS"
         width="168"
         height="168"
       />
 
       <header class="mb-10 w-full text-center">
-        <h1 class="font-satoshi text-[32px] font-bold leading-normal text-glow-text">
+        <h1 :class="GLOW_AUTH_TITLE_CLASS">
           {{ isAssinaturaFlow ? 'Crie sua conta para assinar' : 'Crie agora a sua conta!' }}
         </h1>
-        <p class="mt-[5px] font-satoshi text-xl font-normal leading-normal text-glow-text-muted">
+        <p :class="GLOW_AUTH_SUBTITLE_CLASS">
           {{
             isAssinaturaFlow
               ? 'Cadastre-se para configurar seu estabelecimento e contratar o plano escolhido.'
@@ -332,12 +335,23 @@ function onAvatarError(message: string) {
           </div>
         </div>
 
-        <label class="flex items-start gap-3">
-          <input
-            v-model="aceitoTermos"
-            type="checkbox"
-            class="mt-1 h-4 w-4 rounded border-glow-text/40 text-glow-gold focus:ring-glow-gold"
-          />
+        <label class="group flex min-h-11 cursor-pointer items-start gap-3 py-1">
+          <input v-model="aceitoTermos" type="checkbox" class="sr-only" />
+          <span
+            class="mt-0.5 flex size-[22px] shrink-0 items-center justify-center rounded-[2px] border border-glow-text/20 bg-white transition group-has-[:checked]:border-glow-gold group-has-[:checked]:bg-glow-gold"
+            aria-hidden="true"
+          >
+            <svg
+              class="h-3 w-3 text-white opacity-0 transition group-has-[:checked]:opacity-100"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              aria-hidden="true"
+            >
+              <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
           <span :class="GLOW_BODY_TEXT_CLASS">
             Li e aceito os
             <a

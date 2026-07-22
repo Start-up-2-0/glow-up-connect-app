@@ -73,9 +73,18 @@ export const GLOW_BODY_TEXT_CLASS = 'font-satoshi text-sm font-normal text-glow-
 
 /** Fundo lavanda fixo — telas de auth não seguem o tema dark do app */
 export const GLOW_LOGIN_PAGE_CLASS =
-  'flex min-h-screen items-center justify-center bg-glow-bg-base px-6 py-10'
+  'flex min-h-dvh items-center justify-center bg-glow-bg-base px-4 py-[max(2.5rem,env(safe-area-inset-top))] pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-10'
 
 export const GLOW_LOGIN_CONTENT_CLASS = 'flex w-full max-w-[494px] flex-col items-center'
+
+export const GLOW_AUTH_LOGO_CLASS =
+  'mb-[22px] h-28 w-28 shrink-0 object-contain sm:h-[168px] sm:w-[168px]'
+
+export const GLOW_AUTH_TITLE_CLASS =
+  'font-satoshi text-2xl font-bold leading-tight text-glow-text sm:text-[32px] sm:leading-normal'
+
+export const GLOW_AUTH_SUBTITLE_CLASS =
+  'mt-[5px] font-satoshi text-lg font-normal leading-snug text-glow-text-muted sm:text-xl sm:leading-normal'
 
 /** Grid 2 colunas do formulário de cadastro (Figma telaCadastro) */
 export const GLOW_AUTH_FORM_GRID_CLASS = 'grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-x-2'
@@ -95,12 +104,12 @@ export const GLOW_BUTTON_PRIMARY_CLASS =
 export const GLOW_LINK_CLASS = 'text-sm font-bold text-glow-gold-dark hover:underline'
 
 export const GLOW_RECOVERY_LAYOUT_CLASS =
-  'flex min-h-screen flex-col items-center justify-start bg-glow-bg-base px-6 pb-10 pt-10 sm:pt-16'
+  'flex min-h-dvh flex-col items-center justify-start bg-glow-bg-base px-4 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[max(2.5rem,env(safe-area-inset-top))] sm:px-6 sm:pb-10 sm:pt-16'
 
 export const GLOW_RECOVERY_CONTENT_CLASS = 'flex w-full max-w-[461px] shrink-0 flex-col items-stretch'
 
 export const GLOW_RECOVERY_TITLE_CLASS =
-  'text-center font-inter text-[36px] font-semibold leading-normal text-glow-text'
+  'text-center font-inter text-2xl font-semibold leading-tight text-glow-text sm:text-[36px] sm:leading-normal'
 
 export const GLOW_RECOVERY_SUBTITLE_CLASS =
   'text-center font-inter text-base font-normal text-glow-text-muted'
