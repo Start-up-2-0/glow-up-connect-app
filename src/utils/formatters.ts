@@ -70,6 +70,13 @@ export function maskTelefoneLocal(digits: string): string {
   return `(${ddd}) ${rest.slice(0, 4)}-${rest.slice(4)}`
 }
 
+/** Máscara unificada com DDI (+55) em um único campo. */
+export function maskTelefoneUnified(digits: string): string {
+  const local = maskTelefoneLocal(digits)
+  if (!local) return ''
+  return `+55 ${local}`
+}
+
 export function formatTelefone(telefone: string | null | undefined): string {
   if (!telefone) return '—'
   const digits = normalizeTelefone(telefone)

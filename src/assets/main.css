@@ -4618,4 +4618,369 @@
   .dashboard-skeleton--avatar {
     @apply size-10 rounded-full;
   }
+
+  /* Perfil */
+  .perfil-page {
+    @apply w-full space-y-8 pb-24;
+  }
+
+  .perfil-page--dirty {
+    @apply pb-32;
+  }
+
+  .perfil-page__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .perfil-page__meta {
+    @apply mt-2 flex flex-wrap items-center gap-2 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .perfil-page__meta-dot {
+    @apply size-1 rounded-full bg-glow-border-soft;
+  }
+
+  .perfil-nav {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .perfil-nav__item {
+    @apply rounded-full border border-glow-border-soft bg-glow-surface px-4 py-1.5 font-urbanist text-sm font-medium text-glow-text-subtle transition hover:border-glow-gold-cta hover:text-glow-text;
+  }
+
+  .perfil-status-card {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .perfil-status-card__head {
+    @apply mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .perfil-status-card__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .perfil-status-card__subtitle {
+    @apply mt-0.5 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .perfil-status-card__progress {
+    @apply min-w-[180px];
+  }
+
+  .perfil-status-card__progress-label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-status-card__progress-track {
+    @apply mt-1 h-2 overflow-hidden rounded-full bg-glow-hover-surface;
+  }
+
+  .perfil-status-card__progress-bar {
+    @apply block h-full rounded-full bg-glow-gold-cta transition-all duration-500;
+  }
+
+  .perfil-status-card__progress-value {
+    @apply mt-1 block text-right font-urbanist text-xs font-semibold text-glow-text;
+  }
+
+  .perfil-status-card__list {
+    @apply grid gap-2 sm:grid-cols-2 lg:grid-cols-4;
+  }
+
+  .perfil-status-card__item {
+    @apply flex items-center gap-2 rounded-xl bg-glow-hover-surface px-3 py-2 font-urbanist text-sm text-glow-text;
+  }
+
+  .perfil-status-card__item--ok .perfil-status-card__icon {
+    @apply text-emerald-500;
+  }
+
+  .perfil-status-card__item--warning .perfil-status-card__icon {
+    @apply text-amber-500;
+  }
+
+  .perfil-layout {
+    @apply grid grid-cols-1 gap-8 xl:grid-cols-12 xl:items-start;
+  }
+
+  .perfil-sidebar {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm xl:col-span-4;
+  }
+
+  .perfil-sidebar__avatar-wrap {
+    @apply relative mx-auto w-fit;
+  }
+
+  .perfil-sidebar__avatar-overlay {
+    @apply absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-full bg-glow-purple font-urbanist text-xs font-medium text-white opacity-0 transition;
+    background-color: rgba(82, 46, 95, 0.75);
+  }
+
+  .perfil-sidebar__avatar-overlay--visible {
+    @apply opacity-100;
+  }
+
+  .perfil-sidebar__identity {
+    @apply mt-4 text-center;
+  }
+
+  .perfil-sidebar__name {
+    @apply font-satoshi text-lg font-bold text-glow-text;
+  }
+
+  .perfil-sidebar__role {
+    @apply mt-0.5 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .perfil-sidebar__badge {
+    @apply mt-2 inline-flex rounded-full px-2.5 py-0.5 font-urbanist text-xs font-medium;
+  }
+
+  .perfil-sidebar__badge--active {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .perfil-sidebar__badge--inactive {
+    @apply bg-red-100 text-red-800;
+  }
+
+  .perfil-sidebar__divider {
+    @apply my-4 border-t border-glow-border-soft;
+  }
+
+  .perfil-sidebar__contacts {
+    @apply space-y-2.5;
+  }
+
+  .perfil-sidebar__contact {
+    @apply grid grid-cols-[1.5rem_1fr] gap-2 font-urbanist text-sm text-glow-text;
+  }
+
+  .perfil-sidebar__edit {
+    @apply mt-4 w-full rounded-lg border border-glow-border-soft py-2 font-urbanist text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .perfil-sections {
+    @apply flex flex-col gap-8 xl:col-span-8;
+  }
+
+  .perfil-card {
+    @apply scroll-mt-24 rounded-2xl border border-glow-border-soft bg-glow-surface shadow-glow-sm;
+  }
+
+  .perfil-card__header {
+    @apply border-b border-glow-border-soft px-6 py-4;
+  }
+
+  .perfil-card__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .perfil-card__subtitle {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .perfil-card__body {
+    @apply space-y-5 p-6;
+  }
+
+  .perfil-card--alert {
+    @apply flex gap-4 border-amber-200 bg-amber-50 p-6;
+  }
+
+  .perfil-card__alert-icon {
+    @apply text-2xl;
+  }
+
+  .perfil-card__alert-title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .perfil-card__alert-desc {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .perfil-card__alert-actions {
+    @apply mt-4 flex flex-wrap items-center gap-3;
+  }
+
+  .perfil-email-field__label {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .perfil-email-field__value {
+    @apply mt-2 flex flex-col gap-1 rounded-xl border border-glow-border-soft bg-glow-hover-surface px-4 py-3 font-urbanist text-sm text-glow-text;
+  }
+
+  .perfil-email-field__lock {
+    @apply text-xs text-glow-text-subtle;
+  }
+
+  .perfil-link-btn {
+    @apply mt-2 font-urbanist text-sm font-medium text-glow-gold-cta transition hover:brightness-110;
+  }
+
+  .perfil-dl {
+    @apply space-y-3 p-6;
+  }
+
+  .perfil-dl__row {
+    @apply flex items-center justify-between gap-4 border-b border-glow-border-soft pb-3 font-urbanist text-sm last:border-0 last:pb-0;
+  }
+
+  .perfil-dl__row dt {
+    @apply text-glow-text-subtle;
+  }
+
+  .perfil-dl__row dd {
+    @apply font-medium text-glow-text;
+  }
+
+  .perfil-security-row {
+    @apply flex items-center justify-between gap-4 rounded-xl border border-glow-border-soft bg-glow-hover-surface px-4 py-4;
+  }
+
+  .perfil-security-row--muted {
+    @apply mt-4 opacity-80;
+  }
+
+  .perfil-security-row__label {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .perfil-security-row__meta {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-password-form {
+    @apply mt-4 space-y-4 rounded-xl border border-glow-border-soft bg-glow-hover-surface p-4;
+  }
+
+  .perfil-password-form__grid {
+    @apply grid gap-4 md:grid-cols-2;
+  }
+
+  .perfil-password-form__actions {
+    @apply flex justify-end;
+  }
+
+  .perfil-password-rules__title {
+    @apply font-urbanist text-xs font-semibold text-glow-text-subtle;
+  }
+
+  .perfil-password-rules__list {
+    @apply mt-2 space-y-1;
+  }
+
+  .perfil-password-rules__item {
+    @apply flex items-center gap-2 font-urbanist text-sm text-glow-text-subtle transition;
+  }
+
+  .perfil-password-rules__item--met {
+    @apply text-emerald-600;
+  }
+
+  .perfil-sessions {
+    @apply mt-4 rounded-xl border border-glow-border-soft bg-glow-hover-surface p-4;
+  }
+
+  .perfil-sessions__title {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .perfil-sessions__list {
+    @apply mt-3 space-y-2;
+  }
+
+  .perfil-sessions__item {
+    @apply rounded-lg bg-glow-surface px-3 py-2;
+  }
+
+  .perfil-sessions__device {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .perfil-sessions__meta {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-sessions__hint {
+    @apply mt-2 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-prefs {
+    @apply divide-y divide-glow-border-soft p-2;
+  }
+
+  .perfil-prefs__item {
+    @apply flex items-center justify-between gap-4 px-4 py-4;
+  }
+
+  .perfil-prefs__label {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .perfil-prefs__desc {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-toggle {
+    @apply size-5 accent-glow-gold-cta;
+  }
+
+  .perfil-inline-alert {
+    @apply rounded-lg px-4 py-3 font-urbanist text-sm;
+  }
+
+  .perfil-inline-alert--success {
+    @apply border border-green-200 bg-green-50 text-green-800;
+  }
+
+  .perfil-inline-alert--warning {
+    @apply border border-amber-200 bg-amber-50 text-amber-800;
+  }
+
+  .perfil-btn {
+    @apply inline-flex h-10 items-center rounded-lg px-4 font-urbanist text-sm font-medium transition;
+  }
+
+  .perfil-btn--primary {
+    @apply bg-green-600 text-white hover:bg-green-700;
+  }
+
+  .perfil-polling {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-save-bar {
+    @apply fixed inset-x-0 bottom-0 z-40 flex flex-col gap-3 border-t border-glow-border-soft bg-glow-surface px-4 py-4 shadow-lg sm:flex-row sm:items-center sm:justify-between sm:px-6;
+  }
+
+  .perfil-save-bar__text {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .perfil-save-bar__actions {
+    @apply flex gap-2;
+  }
+
+  .perfil-save-bar__cancel {
+    @apply rounded-lg border border-glow-border-soft px-4 py-2 font-urbanist text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .perfil-save-bar__save {
+    @apply rounded-lg bg-glow-gold-cta px-4 py-2 font-urbanist text-sm font-semibold text-white transition hover:brightness-95 disabled:opacity-60;
+  }
+
+  .perfil-save-bar-enter-active,
+  .perfil-save-bar-leave-active {
+    transition: transform 0.25s ease, opacity 0.25s ease;
+  }
+
+  .perfil-save-bar-enter-from,
+  .perfil-save-bar-leave-to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
 }

@@ -7,7 +7,7 @@ import {
   ONBOARDING_CONTRATAR_LABEL_CLASS,
   ONBOARDING_CONTRATAR_TELEFONE_PREFIX_CLASS,
 } from '@/constants/designTokens'
-import { maskTelefoneLocal, telefoneLocalFromInput } from '@/utils/formatters'
+import { maskTelefoneLocal, telefoneLocalFromInput, maskTelefoneUnified } from '@/utils/formatters'
 
 const props = withDefaults(
   defineProps<{
@@ -21,12 +21,14 @@ const props = withDefaults(
     disabled?: boolean
     autocomplete?: string
     showDdiPrefix?: boolean
+    unified?: boolean
     variant?: 'dashboard' | 'auth' | 'contratar'
   }>(),
   {
     placeholder: '(79) 99191-7634',
     autocomplete: 'tel-national',
     showDdiPrefix: true,
+    unified: false,
     variant: 'dashboard',
   },
 )
@@ -35,7 +37,10 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
 const inputId = props.id ?? `telefone-${Math.random().toString(36).slice(2, 9)}`
 
-const displayValue = computed(() => maskTelefoneLocal(props.modelValue))
+const displayValue = computed(() => {
+  if (props.unified) return maskTelefoneUnified(props.modelValue)
+  return maskTelefoneLocal(props.modelValue)
+})
 
 const prefixClass = computed(() => {
   if (props.variant === 'contratar') return ONBOARDING_CONTRATAR_TELEFONE_PREFIX_CLASS
@@ -54,7 +59,11 @@ const inputClass = computed(() => {
   let base = dashboardInputClass
   if (props.variant === 'auth') base = GLOW_INPUT_CLASS
   if (props.variant === 'contratar') base = contratarInputClass
-  const shape = props.showDdiPrefix ? `${base} rounded-r-lg` : `${base} rounded-lg`
+  const shape = props.unified
+    ? `${base} rounded-lg`
+    : props.showDdiPrefix
+      ? `${base} rounded-r-lg`
+      : `${base} rounded-lg`
   return props.error ? `${shape} field-input--error` : shape
 })
 
@@ -86,7 +95,7 @@ function onInput(event: Event) {
   const input = event.target as HTMLInputElement
   const digits = telefoneLocalFromInput(input.value)
   emit('update:modelValue', digits)
-  input.value = maskTelefoneLocal(digits)
+  input.value = props.unified ? maskTelefoneUnified(digits) : maskTelefoneLocal(digits)
 }
 
 function onKeydown(event: KeyboardEvent) {
@@ -107,13 +116,13 @@ function onKeydown(event: KeyboardEvent) {
       {{ label }}
     </label>
     <div class="flex">
-      <span v-if="showDdiPrefix" :class="prefixClass" aria-hidden="true">+55</span>
+      <span v-if="showDdiPrefix && !props.unified" :class="prefixClass" aria-hidden="true">+55</span>
       <input
         :id="inputId"
         :value="displayValue"
         type="tel"
         inputmode="numeric"
-        :placeholder="placeholder"
+        :placeholder="props.unified ? '+55 (79) 99191-7634' : placeholder"
         :required="required"
         :disabled="disabled"
         :autocomplete="autocomplete"
