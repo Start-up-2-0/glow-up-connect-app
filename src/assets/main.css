@@ -653,7 +653,7 @@
 
   /* Logo sidebar */
   .app-logo--sidebar {
-    @apply h-[64px] w-full max-w-[186px] min-w-0;
+    @apply h-[80px] w-full max-w-[204px] min-w-0;
   }
 
   /* Sidebar nav — rolagem funcional sem barra visível */
@@ -3525,20 +3525,168 @@
     @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
   }
 
+  .dashboard-page-header__meta {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
   .dashboard-page-header__actions {
     @apply flex flex-wrap gap-2;
   }
 
-  .dashboard-kpi-grid {
-    @apply grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4;
+  .dashboard-page-header--compact {
+    @apply gap-3 pb-1;
   }
 
-  .dashboard-kpi-grid--hero .dashboard-kpi-grid__main {
-    @apply sm:col-span-2;
+  .dashboard-page-header--compact .dashboard-page-header__title {
+    @apply text-xl sm:text-2xl;
+  }
+
+  .dashboard-header-btn-icon {
+    @apply mr-2 size-4;
+  }
+
+  .dashboard-page--negocio {
+    @apply space-y-5;
+  }
+
+  .dashboard-trial-strip {
+    @apply flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-glow-border-accent bg-glow-accent-glow px-4 py-2.5 font-urbanist text-sm;
+  }
+
+  .dashboard-trial-strip__badge {
+    @apply rounded-md bg-glow-hover-surface px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-glow-gold-cta;
+  }
+
+  .dashboard-trial-strip__text {
+    @apply font-medium text-glow-text;
+  }
+
+  .dashboard-trial-strip__divider {
+    @apply hidden h-3 w-px bg-glow-border-soft sm:block;
+  }
+
+  .dashboard-trial-strip__billing {
+    @apply text-glow-text-subtle;
+  }
+
+  .dashboard-trial-strip__link {
+    @apply ml-auto font-medium text-glow-gold-cta transition hover:brightness-110;
+  }
+
+  .dashboard-operacional {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-operacional__head {
+    @apply mb-4;
+  }
+
+  .dashboard-operacional__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-operacional__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-operacional__grid {
+    @apply grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5;
+  }
+
+  .dashboard-operacional__label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-operacional__value {
+    @apply mt-1 font-satoshi text-xl font-bold text-glow-text;
+  }
+
+  .dashboard-operacional__value--green {
+    @apply text-emerald-400;
+  }
+
+  .dashboard-exec-grid {
+    @apply grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4;
+  }
+
+  .dashboard-exec-grid__revenue {
+    @apply md:col-span-2 md:row-span-2;
+  }
+
+  .dashboard-exec-grid__rating {
+    @apply md:col-span-2 xl:col-span-1;
+  }
+
+  .dashboard-revenue-hero {
+    @apply flex h-full flex-col justify-between rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      0 0 0 1px rgba(84, 128, 78, 0.1);
+  }
+
+  .dashboard-revenue-hero__label-row {
+    @apply flex items-center gap-3;
+  }
+
+  .dashboard-revenue-hero__icon-wrap {
+    @apply flex size-10 items-center justify-center rounded-xl;
+  }
+
+  .dashboard-revenue-hero__icon-wrap--green {
+    @apply bg-emerald-500/15 text-emerald-400;
+  }
+
+  .dashboard-revenue-hero__icon {
+    @apply size-5;
+  }
+
+  .dashboard-revenue-hero__label {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-revenue-hero__value {
+    @apply mt-4 font-satoshi text-4xl font-bold text-emerald-400 sm:text-5xl;
+  }
+
+  .dashboard-revenue-hero__value--loading {
+    @apply text-glow-text-subtle;
+  }
+
+  .dashboard-revenue-hero__sparkline {
+    @apply mt-6 border-t border-glow-border-soft pt-4;
+  }
+
+  .dashboard-revenue-hero__sparkline-label {
+    @apply mb-3 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-revenue-hero__bars {
+    @apply flex h-16 items-end gap-1.5;
+  }
+
+  .dashboard-revenue-hero__bar {
+    @apply min-h-[4px] flex-1 rounded-sm bg-emerald-500/50 transition-all;
+  }
+
+  .dashboard-trend {
+    @apply mt-2 inline-flex items-center gap-2 font-urbanist text-sm;
+  }
+
+  .dashboard-trend--up {
+    @apply text-emerald-400;
+  }
+
+  .dashboard-trend--down {
+    @apply text-red-400;
+  }
+
+  .dashboard-trend__label {
+    @apply text-glow-text-subtle;
   }
 
   .dashboard-kpi {
-    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-4 shadow-glow-sm;
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
   }
 
   .dashboard-kpi--gold {
@@ -3546,6 +3694,34 @@
       0 1px 2px rgba(0, 0, 0, 0.05),
       inset 0 1px 0 rgba(255, 255, 255, 0.03),
       0 0 0 1px rgba(212, 175, 55, 0.08);
+  }
+
+  .dashboard-kpi--green .dashboard-kpi__icon-wrap {
+    @apply bg-emerald-500/15 text-emerald-400;
+  }
+
+  .dashboard-kpi--blue .dashboard-kpi__icon-wrap {
+    @apply bg-sky-500/15 text-sky-400;
+  }
+
+  .dashboard-kpi--purple .dashboard-kpi__icon-wrap {
+    @apply bg-violet-500/15 text-violet-400;
+  }
+
+  .dashboard-kpi--orange .dashboard-kpi__icon-wrap {
+    @apply bg-orange-500/15 text-orange-400;
+  }
+
+  .dashboard-kpi--yellow .dashboard-kpi__icon-wrap {
+    @apply bg-amber-500/15 text-amber-400;
+  }
+
+  .dashboard-kpi--gold .dashboard-kpi__icon-wrap {
+    @apply bg-glow-hover-surface text-glow-gold-cta;
+  }
+
+  .dashboard-kpi--gold .dashboard-kpi__value {
+    @apply text-glow-gold-cta;
   }
 
   .dashboard-kpi__head {
@@ -3572,16 +3748,276 @@
     @apply mt-2 font-satoshi text-2xl font-bold text-glow-text;
   }
 
-  .dashboard-kpi--gold .dashboard-kpi__value {
-    @apply text-glow-gold-cta;
-  }
-
   .dashboard-kpi__value--loading {
     @apply text-glow-text-subtle;
   }
 
   .dashboard-kpi__hint {
     @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-kpi__substats {
+    @apply mt-4 space-y-1.5 border-t border-glow-border-soft pt-3;
+  }
+
+  .dashboard-kpi__substat {
+    @apply flex items-center justify-between font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-kpi__substat strong {
+    @apply font-semibold text-glow-text;
+  }
+
+  .dashboard-star-rating {
+    @apply mt-3;
+  }
+
+  .dashboard-star-rating__stars {
+    @apply flex gap-0.5 text-base leading-none;
+  }
+
+  .dashboard-star-rating__star {
+    @apply text-glow-border-soft;
+  }
+
+  .dashboard-star-rating__star--filled {
+    @apply text-glow-gold-cta;
+  }
+
+  .dashboard-star-rating__meta {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-insights {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-insights__title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-insights__list {
+    @apply mt-3 grid gap-2 sm:grid-cols-2;
+  }
+
+  .dashboard-insights__item {
+    @apply flex items-start gap-3 rounded-xl border border-glow-border-soft bg-glow-hover-surface px-4 py-3;
+  }
+
+  .dashboard-insights__icon-wrap {
+    @apply flex size-8 shrink-0 items-center justify-center rounded-lg bg-glow-surface;
+  }
+
+  .dashboard-insights__item--positive .dashboard-insights__icon-wrap {
+    @apply text-emerald-400;
+  }
+
+  .dashboard-insights__item--warning .dashboard-insights__icon-wrap {
+    @apply text-amber-400;
+  }
+
+  .dashboard-insights__item--info .dashboard-insights__icon-wrap {
+    @apply text-sky-400;
+  }
+
+  .dashboard-insights__message {
+    @apply font-urbanist text-sm text-glow-text;
+  }
+
+  .dashboard-charts-grid {
+    @apply grid grid-cols-1 gap-4 xl:grid-cols-2;
+  }
+
+  .dashboard-chart-card {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-chart-card__header {
+    @apply mb-4;
+  }
+
+  .dashboard-chart-card__title-row {
+    @apply flex items-start gap-3;
+  }
+
+  .dashboard-chart-card__icon-wrap {
+    @apply flex size-10 shrink-0 items-center justify-center rounded-xl;
+  }
+
+  .dashboard-chart-card__icon-wrap--green {
+    @apply bg-emerald-500/15 text-emerald-400;
+  }
+
+  .dashboard-chart-card__icon-wrap--yellow {
+    @apply bg-amber-500/15 text-amber-400;
+  }
+
+  .dashboard-chart-card__icon {
+    @apply size-5;
+  }
+
+  .dashboard-chart-card__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-chart-card__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-chart-card__body {
+    @apply h-56;
+  }
+
+  .dashboard-chart-card__empty {
+    @apply rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-8 text-center;
+  }
+
+  .dashboard-chart-card__empty-title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-chart-card__empty-desc {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-distribution {
+    @apply space-y-4;
+  }
+
+  .dashboard-distribution__head {
+    @apply mb-1.5 flex items-center justify-between gap-2;
+  }
+
+  .dashboard-distribution__name {
+    @apply truncate font-urbanist text-sm text-glow-text;
+  }
+
+  .dashboard-distribution__count {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-distribution__track {
+    @apply h-2 overflow-hidden rounded-full bg-glow-hover-surface;
+  }
+
+  .dashboard-distribution__bar {
+    @apply block h-full rounded-full bg-amber-500/70;
+  }
+
+  .dashboard-quick-actions--shortcuts .dashboard-quick-actions__grid {
+    @apply grid-cols-2 xl:grid-cols-4;
+  }
+
+  .dashboard-quick-actions--shortcuts .dashboard-quick-actions__item {
+    @apply flex-col items-start gap-4 p-6;
+  }
+
+  .dashboard-quick-actions--shortcuts .dashboard-quick-actions__icon-wrap {
+    @apply size-12 rounded-xl;
+  }
+
+  .dashboard-quick-actions--shortcuts .dashboard-quick-actions__icon {
+    @apply size-6;
+  }
+
+  .dashboard-agenda-preview {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-agenda-preview__header {
+    @apply mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .dashboard-agenda-preview__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-agenda-preview__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-agenda-preview__list {
+    @apply divide-y divide-glow-border-soft;
+  }
+
+  .dashboard-agenda-preview__row {
+    @apply flex items-center gap-4 py-3 first:pt-0 last:pb-0;
+  }
+
+  .dashboard-agenda-preview__row--livre .dashboard-agenda-preview__label {
+    @apply italic text-glow-text-subtle;
+  }
+
+  .dashboard-agenda-preview__time {
+    @apply w-14 shrink-0 font-satoshi text-sm font-bold text-sky-400;
+  }
+
+  .dashboard-agenda-preview__content {
+    @apply flex min-w-0 flex-1 items-center justify-between gap-2;
+  }
+
+  .dashboard-agenda-preview__label {
+    @apply truncate font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .dashboard-panel__empty--action {
+    @apply py-10;
+  }
+
+  .dashboard-panel__empty-icon-wrap {
+    @apply mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-glow-surface;
+  }
+
+  .dashboard-panel__empty-icon {
+    @apply size-6 text-glow-text-subtle;
+  }
+
+  .dashboard-panel__empty-action {
+    @apply mt-4 inline-flex rounded-lg bg-glow-gold-cta px-4 py-2 font-urbanist text-sm font-medium text-white transition hover:brightness-95;
+  }
+
+  .dashboard-team-list--rich .dashboard-team-list__row--rich {
+    @apply items-center rounded-xl border border-glow-border-soft bg-glow-hover-surface p-4;
+  }
+
+  .dashboard-team-list__status {
+    @apply size-2.5 shrink-0 rounded-full;
+  }
+
+  .dashboard-team-list__status--online {
+    @apply bg-emerald-400;
+  }
+
+  .dashboard-team-list__status--offline {
+    @apply bg-glow-border-soft;
+  }
+
+  .dashboard-team-list__body {
+    @apply min-w-0 flex-1;
+  }
+
+  .dashboard-team-list__stats {
+    @apply text-right;
+  }
+
+  .dashboard-team-list__stat {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-team-list__stat strong {
+    @apply block text-sm font-semibold text-glow-text;
+  }
+
+  .dashboard-team-list__rating {
+    @apply mt-1 font-urbanist text-xs text-glow-gold-cta;
+  }
+
+  .dashboard-kpi-grid {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4;
+  }
+
+  .dashboard-kpi-grid--hero .dashboard-kpi-grid__main {
+    @apply sm:col-span-2;
   }
 
   .dashboard-quick-actions__title {
@@ -3762,5 +4198,424 @@
 
   .dashboard-icon {
     @apply size-4 shrink-0;
+  }
+
+  /* Dashboard Cliente */
+  .dashboard-page--cliente {
+    @apply space-y-5;
+  }
+
+  .dashboard-cliente-fade-in {
+    animation: dashboardClienteFadeIn 0.45s ease-out;
+  }
+
+  @keyframes dashboardClienteFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .dashboard-cliente-hero {
+    @apply relative overflow-hidden rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-cliente-hero__glow {
+    @apply pointer-events-none absolute -right-8 -top-8 size-32 rounded-full opacity-60;
+    background: radial-gradient(circle, var(--palette-lilac-light) 0%, transparent 70%);
+    animation: dashboardClienteGlow 6s ease-in-out infinite alternate;
+  }
+
+  @keyframes dashboardClienteGlow {
+    from { transform: scale(1); opacity: 0.45; }
+    to { transform: scale(1.15); opacity: 0.7; }
+  }
+
+  .dashboard-cliente-hero__content {
+    @apply relative;
+  }
+
+  .dashboard-cliente-hero__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text sm:text-3xl;
+  }
+
+  .dashboard-cliente-hero__title--loading {
+    @apply text-glow-text-subtle;
+  }
+
+  .dashboard-cliente-hero__subtitle {
+    @apply mt-2 max-w-2xl font-urbanist text-sm text-glow-text-subtle sm:text-base;
+  }
+
+  .dashboard-proximo-agendamento {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm transition hover:shadow-md;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 0 0 1px rgba(146, 103, 155, 0.12);
+  }
+
+  .dashboard-proximo-agendamento__header {
+    @apply mb-5 flex items-start gap-3;
+  }
+
+  .dashboard-proximo-agendamento__icon-wrap {
+    @apply flex size-11 items-center justify-center rounded-xl bg-glow-hover-surface text-glow-gold-cta;
+  }
+
+  .dashboard-proximo-agendamento__icon {
+    @apply size-5;
+  }
+
+  .dashboard-proximo-agendamento__eyebrow {
+    @apply font-urbanist text-xs font-semibold uppercase tracking-wide text-glow-gold-cta;
+  }
+
+  .dashboard-proximo-agendamento__title {
+    @apply font-satoshi text-lg font-bold text-glow-text;
+  }
+
+  .dashboard-proximo-agendamento__empty {
+    @apply rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-5 py-6 text-center;
+  }
+
+  .dashboard-proximo-agendamento__empty-icon {
+    @apply text-3xl;
+  }
+
+  .dashboard-proximo-agendamento__empty-title {
+    @apply mt-2 font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-proximo-agendamento__empty-desc {
+    @apply mx-auto mt-2 max-w-md font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-proximo-agendamento__cta {
+    @apply mt-4 inline-flex rounded-xl bg-glow-gold-cta px-5 py-2.5 font-urbanist text-sm font-semibold text-white transition hover:brightness-95;
+  }
+
+  .dashboard-proximo-agendamento__card {
+    @apply flex w-full flex-col gap-4 rounded-xl border border-glow-border-soft bg-glow-hover-surface p-5 text-left transition hover:-translate-y-0.5 hover:border-glow-gold-cta hover:shadow-glow-sm sm:flex-row sm:items-center;
+  }
+
+  .dashboard-proximo-agendamento__when {
+    @apply shrink-0;
+  }
+
+  .dashboard-proximo-agendamento__day {
+    @apply block font-urbanist text-xs font-semibold uppercase tracking-wide text-glow-gold-cta;
+  }
+
+  .dashboard-proximo-agendamento__time {
+    @apply mt-1 block font-satoshi text-3xl font-bold text-glow-text;
+  }
+
+  .dashboard-proximo-agendamento__info {
+    @apply min-w-0 flex-1;
+  }
+
+  .dashboard-proximo-agendamento__loja {
+    @apply font-satoshi text-lg font-bold text-glow-text;
+  }
+
+  .dashboard-proximo-agendamento__meta {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-cliente-stats {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-3;
+  }
+
+  .dashboard-cliente-stats__item {
+    @apply flex items-start gap-3 rounded-2xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm transition hover:-translate-y-0.5 hover:shadow-md;
+  }
+
+  .dashboard-cliente-stats__icon-wrap {
+    @apply flex size-10 shrink-0 items-center justify-center rounded-xl;
+  }
+
+  .dashboard-cliente-stats__icon-wrap--money {
+    @apply bg-violet-500/15 text-violet-500;
+  }
+
+  .dashboard-cliente-stats__icon-wrap--calendar {
+    @apply bg-sky-500/15 text-sky-500;
+  }
+
+  .dashboard-cliente-stats__icon-wrap--heart {
+    @apply bg-fuchsia-500/15 text-fuchsia-500;
+  }
+
+  .dashboard-cliente-stats__icon {
+    @apply size-5;
+  }
+
+  .dashboard-cliente-stats__label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-cliente-stats__value {
+    @apply mt-1 font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .dashboard-cliente-stats__hint {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-cliente-progress {
+    @apply grid gap-3 sm:grid-cols-2;
+  }
+
+  .dashboard-cliente-progress__block {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+  }
+
+  .dashboard-cliente-progress__head {
+    @apply mb-3 flex items-center justify-between gap-2;
+  }
+
+  .dashboard-cliente-progress__label {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-cliente-progress__link {
+    @apply font-urbanist text-xs font-medium text-glow-gold-cta transition hover:brightness-110;
+  }
+
+  .dashboard-cliente-progress__track {
+    @apply h-2 overflow-hidden rounded-full bg-glow-hover-surface;
+  }
+
+  .dashboard-cliente-progress__track--dotted {
+    @apply relative h-3 bg-transparent;
+  }
+
+  .dashboard-cliente-progress__bar {
+    @apply block h-full rounded-full bg-glow-gold-cta transition-all duration-500;
+  }
+
+  .dashboard-cliente-progress__dot {
+    @apply block size-3 rounded-full bg-glow-gold-cta;
+  }
+
+  .dashboard-cliente-progress__hint {
+    @apply mt-2 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-page--cliente .dashboard-quick-actions--shortcuts .dashboard-quick-actions__item {
+    @apply border-glow-border-soft transition hover:-translate-y-0.5 hover:border-glow-gold-cta hover:shadow-glow-sm;
+  }
+
+  .dashboard-page--cliente .dashboard-quick-actions--shortcuts .dashboard-quick-actions__icon-wrap {
+    @apply bg-glow-hover-surface text-glow-gold-cta;
+  }
+
+  .dashboard-recomendados {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-recomendados__header {
+    @apply mb-4 flex items-center justify-between gap-2;
+  }
+
+  .dashboard-recomendados__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-recomendados__grid {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-3;
+  }
+
+  .dashboard-recomendados__card {
+    @apply flex flex-col justify-between rounded-xl border border-glow-border-soft bg-glow-hover-surface p-4 transition hover:-translate-y-0.5 hover:border-glow-gold-cta;
+  }
+
+  .dashboard-recomendados__card-top {
+    @apply flex items-start gap-3;
+  }
+
+  .dashboard-recomendados__avatar {
+    @apply flex size-10 shrink-0 items-center justify-center rounded-full bg-glow-surface font-satoshi text-sm font-bold text-glow-gold-cta;
+  }
+
+  .dashboard-recomendados__name {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .dashboard-recomendados__meta {
+    @apply mt-1 flex flex-wrap gap-2 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-recomendados__action {
+    @apply mt-4 w-full rounded-lg bg-glow-gold-cta py-2 font-urbanist text-sm font-medium text-white transition hover:brightness-95;
+  }
+
+  .dashboard-recomendados__empty {
+    @apply rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-5 text-center;
+  }
+
+  .dashboard-recomendados__empty-text {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-recomendados__cta {
+    @apply mt-3 font-urbanist text-sm font-medium text-glow-gold-cta;
+  }
+
+  .dashboard-novidades {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-novidades__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-novidades__list {
+    @apply mt-3 space-y-2;
+  }
+
+  .dashboard-novidades__item {
+    @apply flex items-start gap-3 rounded-xl bg-glow-hover-surface px-4 py-3;
+  }
+
+  .dashboard-novidades__icon {
+    @apply text-base;
+  }
+
+  .dashboard-novidades__message {
+    @apply font-urbanist text-sm text-glow-text;
+  }
+
+  .dashboard-timeline {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-timeline__header {
+    @apply mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .dashboard-timeline__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-timeline__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-timeline__empty--compact {
+    @apply rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-5 text-center;
+  }
+
+  .dashboard-timeline__empty-title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-timeline__empty-desc {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-timeline__cta {
+    @apply mt-3 font-urbanist text-sm font-medium text-glow-gold-cta;
+  }
+
+  .dashboard-timeline__groups {
+    @apply space-y-4;
+  }
+
+  .dashboard-timeline__group-label {
+    @apply mb-2 font-urbanist text-xs font-semibold uppercase tracking-wide text-glow-gold-cta;
+  }
+
+  .dashboard-timeline__list {
+    @apply divide-y divide-glow-border-soft rounded-xl border border-glow-border-soft bg-glow-hover-surface;
+  }
+
+  .dashboard-timeline__row {
+    @apply flex items-center gap-3 px-4 py-3;
+  }
+
+  .dashboard-timeline__check {
+    @apply text-sm text-emerald-500;
+  }
+
+  .dashboard-timeline__main {
+    @apply min-w-0 flex-1;
+  }
+
+  .dashboard-timeline__service {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .dashboard-timeline__meta {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-favoritos {
+    @apply space-y-4;
+  }
+
+  .dashboard-favoritos__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-favoritos__grid {
+    @apply grid grid-cols-1 gap-4 xl:grid-cols-2;
+  }
+
+  .dashboard-favoritos__panel {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+  }
+
+  .dashboard-favoritos__panel-title {
+    @apply mb-3 font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .dashboard-favoritos__empty--compact {
+    @apply rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-5 text-center;
+  }
+
+  .dashboard-favoritos__empty-icon {
+    @apply text-2xl;
+  }
+
+  .dashboard-favoritos__empty-title {
+    @apply mt-2 font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-favoritos__empty-desc {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-favoritos__cta {
+    @apply mt-3 font-urbanist text-sm font-medium text-glow-gold-cta;
+  }
+
+  .dashboard-skeleton {
+    @apply block animate-pulse rounded-lg bg-glow-hover-surface;
+  }
+
+  .dashboard-skeleton--line {
+    @apply h-4 w-full;
+  }
+
+  .dashboard-skeleton--line.dashboard-skeleton--lg {
+    @apply h-8 w-2/3;
+  }
+
+  .dashboard-skeleton--line.dashboard-skeleton--sm {
+    @apply h-3 w-1/2;
+  }
+
+  .dashboard-skeleton--bar {
+    @apply h-2 w-full;
+  }
+
+  .dashboard-skeleton--avatar {
+    @apply size-10 rounded-full;
   }
 }

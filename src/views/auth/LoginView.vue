@@ -101,9 +101,9 @@ async function handleSubmit() {
       <img
         :src="loginCrest"
         alt="Glow Up Connect"
-        class="mb-[22px] h-[145px] w-[145px] shrink-0 object-contain"
-        width="145"
-        height="145"
+        class="mb-[22px] h-[168px] w-[168px] shrink-0 object-contain"
+        width="168"
+        height="168"
       />
 
       <header class="mb-10 w-full text-left">

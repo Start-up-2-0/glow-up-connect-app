@@ -24,7 +24,7 @@ const collapsed = computed(() => !props.mobile && appStore.sidebarCollapsed)
 
 const sidebarWidthClass = computed(() => {
   if (props.mobile) return 'w-[min(100vw,320px)]'
-  return collapsed.value ? 'w-[99px]' : 'w-[272px]'
+  return collapsed.value ? 'w-[99px]' : 'w-[288px]'
 })
 
 const innerPaddingClass = computed(() => {

@@ -31,7 +31,7 @@ const logoUrl = computed(() => {
     alt="Glow Up Connect"
     :class="[
       'object-contain object-left',
-      compact ? 'h-10 w-10' : sidebar ? 'app-logo--sidebar' : mobile ? 'h-[120px] w-[168px]' : 'h-[112px] w-[148px]',
+      compact ? 'h-10 w-10' : sidebar ? 'app-logo--sidebar' : mobile ? 'h-[136px] w-[190px]' : 'h-[128px] w-[168px]',
       logoClass,
     ]"
   />
