@@ -3503,4 +3503,264 @@
       @apply space-y-4;
     }
   }
+
+  /* Dashboard */
+  .dashboard-page {
+    @apply space-y-4;
+  }
+
+  .dashboard-page-header {
+    @apply flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .dashboard-page-header__greeting {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-page-header__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .dashboard-page-header__subtitle {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-page-header__actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .dashboard-kpi-grid {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4;
+  }
+
+  .dashboard-kpi-grid--hero .dashboard-kpi-grid__main {
+    @apply sm:col-span-2;
+  }
+
+  .dashboard-kpi {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-4 shadow-glow-sm;
+  }
+
+  .dashboard-kpi--gold {
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      0 0 0 1px rgba(212, 175, 55, 0.08);
+  }
+
+  .dashboard-kpi__head {
+    @apply flex items-center gap-2;
+  }
+
+  .dashboard-kpi__icon-wrap {
+    @apply flex size-8 items-center justify-center rounded-lg bg-glow-hover-surface;
+  }
+
+  .dashboard-kpi__icon {
+    @apply size-4 text-glow-text-subtle;
+  }
+
+  .dashboard-kpi--gold .dashboard-kpi__icon {
+    @apply text-glow-gold-cta;
+  }
+
+  .dashboard-kpi__label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-kpi__value {
+    @apply mt-2 font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .dashboard-kpi--gold .dashboard-kpi__value {
+    @apply text-glow-gold-cta;
+  }
+
+  .dashboard-kpi__value--loading {
+    @apply text-glow-text-subtle;
+  }
+
+  .dashboard-kpi__hint {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-quick-actions__title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-quick-actions__grid {
+    @apply grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4;
+  }
+
+  .dashboard-quick-actions__item {
+    @apply flex items-start gap-3 rounded-xl border border-glow-border-soft bg-glow-surface p-3 text-left transition hover:bg-glow-hover-surface;
+  }
+
+  .dashboard-quick-actions__icon-wrap {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-lg bg-glow-hover-surface;
+  }
+
+  .dashboard-quick-actions__icon {
+    @apply size-4 text-glow-text-subtle;
+  }
+
+  .dashboard-quick-actions__content {
+    @apply min-w-0;
+  }
+
+  .dashboard-quick-actions__label {
+    @apply block font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .dashboard-quick-actions__desc {
+    @apply mt-0.5 block font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-panel {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-4 shadow-glow-sm sm:p-5;
+  }
+
+  .dashboard-panel__header {
+    @apply mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .dashboard-panel__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-panel__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-panel__link {
+    @apply inline-flex items-center gap-1 font-urbanist text-sm font-medium text-glow-gold-cta transition hover:brightness-110;
+  }
+
+  .dashboard-panel__link-icon {
+    @apply size-3.5;
+  }
+
+  .dashboard-panel__empty {
+    @apply rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-8 text-center;
+  }
+
+  .dashboard-panel__empty-title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-panel__empty-desc {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-two-col {
+    @apply grid grid-cols-1 gap-4 xl:grid-cols-2;
+  }
+
+  .dashboard-activity-list {
+    @apply divide-y divide-glow-border-soft;
+  }
+
+  .dashboard-activity-list__row {
+    @apply flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0;
+  }
+
+  .dashboard-activity-list__row--stacked {
+    @apply items-start;
+  }
+
+  .dashboard-activity-list__main {
+    @apply min-w-0;
+  }
+
+  .dashboard-activity-list__title {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .dashboard-activity-list__meta {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-favorite-grid {
+    @apply grid grid-cols-1 gap-2 sm:grid-cols-2;
+  }
+
+  .dashboard-favorite-card {
+    @apply flex flex-col items-start rounded-xl border border-glow-border-soft bg-glow-hover-surface p-3 text-left transition hover:border-glow-gold hover:bg-glow-surface;
+  }
+
+  .dashboard-favorite-card--static {
+    @apply cursor-default hover:border-glow-border-soft hover:bg-glow-hover-surface;
+  }
+
+  .dashboard-favorite-card__avatar {
+    @apply flex size-9 items-center justify-center rounded-full bg-glow-surface font-satoshi text-sm font-bold text-glow-gold-cta;
+  }
+
+  .dashboard-favorite-card__name {
+    @apply mt-2 font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .dashboard-favorite-card__meta {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-team-list {
+    @apply space-y-3;
+  }
+
+  .dashboard-team-list__row {
+    @apply flex items-center gap-3;
+  }
+
+  .dashboard-team-list__avatar {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-full bg-glow-hover-surface font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-team-list__name {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .dashboard-team-list__meta {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-inline-stats {
+    @apply flex flex-wrap items-center gap-3 rounded-xl border border-glow-border-soft bg-glow-hover-surface px-4 py-3 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-inline-stats__item strong {
+    @apply text-glow-text;
+  }
+
+  .dashboard-inline-stats__divider {
+    @apply hidden h-4 w-px bg-glow-border-soft sm:block;
+  }
+
+  .dashboard-alert {
+    @apply rounded-xl border border-glow-border-soft bg-glow-hover-surface p-4;
+  }
+
+  .dashboard-alert__title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-alert__desc {
+    @apply mt-1 mb-3 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-link-card {
+    @apply rounded-xl border border-glow-border-soft bg-glow-surface p-4;
+  }
+
+  .dashboard-link-card__label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-link-card__url {
+    @apply my-2 break-all rounded-lg bg-glow-hover-surface px-3 py-2 font-urbanist text-xs text-glow-text;
+  }
+
+  .dashboard-icon {
+    @apply size-4 shrink-0;
+  }
 }

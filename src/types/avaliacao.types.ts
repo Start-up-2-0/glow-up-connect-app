@@ -46,6 +46,26 @@ export interface AvaliacaoComentarioItem {
   clienteNome: string
 }
 
+export interface AvaliacaoNegocioItem {
+  id: number
+  agendamentoId: number
+  notaEstabelecimento: number
+  comentarioEstabelecimento: string | null
+  notaProfissional: number
+  comentarioProfissional: string | null
+  avaliadoEm: string
+  clienteNome: string
+  profissionalNome: string
+}
+
+export interface AvaliacoesNegocioPaginadas {
+  resumo: AvaliacaoResumoPublico
+  total: number
+  pagina: number
+  tamanhoPagina: number
+  itens: AvaliacaoNegocioItem[]
+}
+
 export interface AvaliacoesPaginadas {
   resumo: AvaliacaoResumoPublico
   total: number
