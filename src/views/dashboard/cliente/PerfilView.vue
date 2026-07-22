@@ -13,6 +13,7 @@ import PerfilSaveBar from '@/components/perfil/PerfilSaveBar.vue'
 import PerfilPasswordRules from '@/components/perfil/PerfilPasswordRules.vue'
 import PerfilTabNav from '@/components/perfil/PerfilTabNav.vue'
 import { useUserStore } from '@/stores/user.store'
+import { useNotificationsStore } from '@/stores/notifications.store'
 import { useFetchOnce } from '@/composables/useFetchOnce'
 import { useWhatsAppConfirmacao } from '@/composables/useWhatsAppConfirmacao'
 import { useApiError } from '@/composables/useApiError'
@@ -41,6 +42,7 @@ const TABS = [
 ]
 
 const userStore = useUserStore()
+const notificationsStore = useNotificationsStore()
 const { profile, saving, changingPassword } = storeToRefs(userStore)
 const { resolveError } = useApiError()
 
@@ -119,6 +121,13 @@ const whatsAppLabel = computed(() => {
 
 function selectTab(id: string) {
   activeTab.value = id as PerfilTabId
+}
+
+function handleAlterarEmail() {
+  notificationsStore.push(
+    'info',
+    'Este e-mail é usado para login e alertas. Para alterá-lo, entre em contato com o suporte da plataforma.',
+  )
 }
 
 function syncFormFromProfile() {
@@ -342,9 +351,15 @@ async function handleSolicitarWhatsApp() {
                       <label class="perfil-email-field__label">E-mail</label>
                       <div class="perfil-email-field__value">
                         <span>{{ profile.email }}</span>
-                        <span class="perfil-email-field__lock">🔒 Utilizado para login</span>
+                        <span class="perfil-email-field__lock">🔒 Utilizado para login e alertas</span>
                       </div>
-                      <button type="button" class="perfil-link-btn">Alterar e-mail</button>
+                      <button
+                        type="button"
+                        class="perfil-link-btn"
+                        @click="handleAlterarEmail"
+                      >
+                        Alterar e-mail
+                      </button>
                     </div>
                   </form>
                 </section>
