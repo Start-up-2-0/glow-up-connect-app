@@ -29,12 +29,15 @@ export const GLOW_COLORS = {
   elevated: '#faf9fd',
   base: '#ebe7f7',
 
-  /** Dark theme */
-  darkBase: '#0d0825',
-  darkSurface: '#2c154b',
-  darkElevated: '#522e5f',
-  darkHighlight: '#755e8a',
-  darkText: '#ebe7f7',
+  /** Dark theme — cinza/branco + dourado */
+  darkBase: '#0a0806',
+  darkSurface: '#1a1612',
+  darkElevated: '#2c2620',
+  darkHighlight: '#3f382e',
+  darkText: '#f5f0e8',
+  darkGold: '#ffbf00',
+  darkGoldDark: '#c59400',
+  darkGoldCta: '#e6ad01',
 
   /** Status */
   success: '#4a9e6e',

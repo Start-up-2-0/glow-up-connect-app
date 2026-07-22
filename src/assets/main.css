@@ -111,62 +111,68 @@
 
   .dark {
     /*
-     * Tema escuro — hierarquia exata da referência
-     * #0D0825 → #2C154B → #522E5F → #755E8A
+     * Tema escuro — cinza e branco com botões dourados (identidade original)
      */
-    --glow-bg-base: var(--palette-purple-black);
-    --glow-bg-surface: var(--palette-purple-dark);
-    --glow-bg-elevated: var(--palette-purple-medium);
-    --glow-bg-highlight: var(--palette-purple-light);
+    --glow-bg-base: #0a0806;
+    --glow-bg-surface: #1a1612;
+    --glow-bg-elevated: #2c2620;
+    --glow-bg-highlight: #3f382e;
 
     --glow-canvas: var(--glow-bg-base);
     --glow-surface: var(--glow-bg-surface);
     --glow-hover-surface: var(--glow-bg-highlight);
-    --glow-surface-tint: rgba(235, 231, 247, 0.04);
+    --glow-surface-tint: rgba(245, 240, 232, 0.04);
 
-    /* Texto — branco lilás */
-    --glow-text: var(--palette-lilac-white);
-    --glow-text-muted: var(--palette-gray-lilac);
-    --glow-text-soft: rgba(235, 231, 247, 0.88);
-    --glow-text-subtle: var(--palette-gray-purple);
-    --glow-text-hover: var(--palette-lilac-light);
-    --glow-placeholder: var(--palette-gray-lilac);
+    /* Texto — off-white */
+    --glow-text: #f5f0e8;
+    --glow-text-muted: rgba(245, 240, 232, 0.45);
+    --glow-text-soft: rgba(245, 240, 232, 0.82);
+    --glow-text-subtle: rgba(245, 240, 232, 0.58);
+    --glow-text-hover: rgba(245, 240, 232, 0.72);
+    --glow-placeholder: rgba(245, 240, 232, 0.38);
 
     /* Bordas discretas */
-    --glow-border-soft: rgba(235, 231, 247, 0.08);
-    --glow-border-sidebar: rgba(235, 231, 247, 0.1);
-    --glow-border-accent: rgba(207, 176, 218, 0.35);
+    --glow-border-soft: rgba(245, 240, 232, 0.07);
+    --glow-border-sidebar: rgba(245, 240, 232, 0.09);
+    --glow-border-accent: rgba(230, 173, 1, 0.38);
 
-    /* Accent */
-    --glow-accent: var(--palette-lilac-medium);
-    --glow-accent-glow: rgba(207, 176, 218, 0.2);
-    --glow-gold-cta: var(--palette-lilac-medium);
+    /* Botões e accent dourado */
+    --glow-gold: #ffbf00;
+    --glow-gold-dark: #c59400;
+    --glow-gold-cta: #e6ad01;
+    --glow-accent: #c59400;
+    --glow-accent-glow: rgba(255, 191, 0, 0.2);
     --glow-gold-soft: var(--glow-accent-glow);
-    --glow-gold-selected: rgba(146, 103, 155, 0.22);
+    --glow-gold-selected: rgba(230, 173, 1, 0.1);
 
-    --glow-avatar-bg: #1a0f35;
-    --glow-neutral-warm: var(--palette-gray-purple);
-    --glow-neutral-soft: var(--palette-gray-lilac);
-    --glow-accent-muted: var(--palette-lavender);
+    --glow-avatar-bg: #141210;
+    --glow-neutral-warm: #6b6560;
+    --glow-neutral-soft: #9e9490;
+    --glow-accent-muted: #b8a078;
 
-    /* Status dark */
+    /* Status — adaptados ao dark */
     --glow-success: #6ee7b7;
-    --glow-success-bg: rgba(74, 158, 110, 0.16);
+    --glow-success-bg: rgba(16, 185, 129, 0.14);
     --glow-success-dark: #6ee7b7;
-    --glow-error: #e8a0a2;
-    --glow-error-bg: rgba(153, 93, 95, 0.2);
-    --glow-neutral-bg: rgba(97, 82, 107, 0.2);
-    --glow-info: #a8c0f0;
-    --glow-info-bg: rgba(91, 127, 212, 0.2);
-    --glow-warning-bg: rgba(153, 93, 95, 0.18);
-    --glow-promo-bg-soft: rgba(146, 103, 155, 0.15);
-    --glow-promo-bg-dashboard: rgba(82, 46, 95, 0.45);
+    --glow-error: #f87171;
+    --glow-error-bg: rgba(207, 63, 63, 0.16);
+    --glow-neutral-bg: rgba(158, 148, 144, 0.12);
+    --glow-info: #93b4ff;
+    --glow-info-bg: rgba(60, 92, 207, 0.2);
+    --glow-warning: #d4a574;
+    --glow-warning-bg: rgba(170, 104, 45, 0.18);
+    --glow-promo-border: #b8940a;
+    --glow-promo-bg-soft: rgba(230, 173, 1, 0.1);
+    --glow-promo-bg-dashboard: rgba(230, 173, 1, 0.08);
+    --glow-promo-bg-dark: #3d3520;
+    --glow-promo-text: #f5f0e8;
+    --glow-promo-accent: #e6ad01;
 
-    /* Sombras */
-    --glow-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(207, 176, 218, 0.05);
-    --glow-shadow-md: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(207, 176, 218, 0.06);
-    --glow-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
-    --glow-shadow-card: 0 2px 16px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(207, 176, 218, 0.07);
+    /* Sombras monocromáticas */
+    --glow-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    --glow-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    --glow-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.52);
+    --glow-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.05);
   }
 
   html {
