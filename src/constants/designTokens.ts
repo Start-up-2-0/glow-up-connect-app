@@ -145,14 +145,14 @@ export const ONBOARDING_CONTRATAR_PAGE_CLASS =
   '-mx-4 -mt-4 min-h-full bg-glow-canvas px-4 pb-8 pt-9 lg:-mx-6 lg:-mt-6 lg:px-8'
 
 export const ONBOARDING_CONTRATAR_CARD_CLASS =
-  'rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-6 py-8 shadow-glow-sm sm:px-10 sm:py-10'
+  'onboarding-contratar-card px-6 py-8 sm:px-10 sm:py-10'
 
 export const ONBOARDING_CONTRATAR_FORM_CLASS = 'flex w-full flex-col gap-6'
 
 export const ONBOARDING_CONTRATAR_FIELD_CLASS = 'flex flex-col gap-2'
 
 export const ONBOARDING_CONTRATAR_INPUT_CLASS =
-  'h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-hover-surface px-[18px] font-inter text-sm text-glow-text placeholder:font-inter placeholder:text-sm placeholder:text-glow-placeholder outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold'
+  'onboarding-contratar-input h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft px-[18px] font-inter text-sm text-glow-text placeholder:font-inter placeholder:text-sm placeholder:text-glow-placeholder outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold'
 
 export const ONBOARDING_CONTRATAR_LABEL_CLASS =
   'font-satoshi text-sm font-normal text-glow-text'
@@ -164,13 +164,13 @@ export const ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS =
   'flex h-10 w-full items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3.5 font-satoshi text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60'
 
 export const ONBOARDING_CONTRATAR_DROPZONE_CLASS =
-  'flex h-[49px] w-full cursor-pointer items-center rounded-lg border border-dashed border-glow-border-soft bg-glow-hover-surface transition hover:border-glow-gold'
+  'onboarding-contratar-input flex h-[49px] w-full cursor-pointer items-center rounded-lg border border-dashed border-glow-border-soft transition hover:border-glow-gold'
 
 export const ONBOARDING_CONTRATAR_DROPZONE_TEXT_CLASS =
   'font-inter text-sm text-glow-placeholder'
 
 export const ONBOARDING_CONTRATAR_TELEFONE_PREFIX_CLASS =
-  'inline-flex h-[49px] shrink-0 items-center rounded-l-lg border-[0.3px] border-r-0 border-glow-border-soft bg-glow-hover-surface px-[18px] font-inter text-sm text-glow-text-subtle'
+  'onboarding-contratar-input inline-flex h-[49px] shrink-0 items-center rounded-l-lg border-[0.3px] border-r-0 border-glow-border-soft px-[18px] font-inter text-sm text-glow-text-subtle'
 
 /** Área cliente — Explorar lojas / Detalhe (Figma) */
 export const CLIENTE_PAGE_HEADER_CLASS = 'cliente-page-header'

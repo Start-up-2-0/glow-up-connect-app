@@ -558,8 +558,17 @@
     @apply flex w-full items-center justify-center gap-2 rounded-xl bg-glow-gold-cta px-5 py-3.5 text-sm font-bold text-white shadow-glow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
   }
 
+  /* Wizard Contratar plano — card e campos com contraste sobre o canvas */
+  .onboarding-contratar-card {
+    @apply rounded-xl border border-glow-border-soft bg-glow-bg-elevated shadow-glow-card;
+  }
+
+  .onboarding-contratar-input {
+    @apply bg-glow-surface;
+  }
+
   .onboarding-contratar-checkout-shell {
-    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface shadow-sm;
+    @apply rounded-xl border border-glow-border-soft bg-glow-bg-elevated shadow-glow-card;
   }
 
   .onboarding-contratar-checkout-panel {
