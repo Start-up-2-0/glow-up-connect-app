@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import DiaVencimentoSelect from '@/components/assinatura/DiaVencimentoSelect.vue'
 import { formatBRL } from '@/utils/formatters'
 import type { MetodoPagamentoAssinatura } from '@/types/pagamento.types'
 import type { Plano, PromocaoLancamento } from '@/types/plano.types'
@@ -9,8 +8,6 @@ const props = withDefaults(
   defineProps<{
     plano: Plano
     promocao: PromocaoLancamento | null
-    diasPermitidos: number[]
-    diaVencimento: number | null
     metodoPagamento: MetodoPagamentoAssinatura
     variant?: 'default' | 'contratar'
   }>(),
@@ -18,8 +15,6 @@ const props = withDefaults(
     variant: 'default',
   },
 )
-
-const emit = defineEmits<{ 'update:diaVencimento': [value: number] }>()
 
 const isContratar = computed(() => props.variant === 'contratar')
 const modulosExibidos = computed(() => props.plano.modulos.slice(0, 5))
@@ -99,20 +94,12 @@ const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
       </div>
     </div>
 
-    <hr v-if="isContratar" class="my-6 border-glow-border-soft" />
+    <div :class="isContratar ? 'mt-6 space-y-3' : 'mt-6 space-y-3 border-t border-glow-border-soft pt-5'">
+      <p class="font-urbanist text-sm text-glow-text-subtle">
+        A renovação será calculada automaticamente a partir da data de contratação. A fatura é gerada
+        {{ promocao?.diasAntecedenciaGeracaoCobranca ?? 7 }} dias antes do vencimento.
+      </p>
 
-    <div :class="isContratar ? '' : 'mt-6 border-t border-glow-border-soft pt-5'">
-      <DiaVencimentoSelect
-        :model-value="diaVencimento"
-        label="Dia de vencimento mensal"
-        :variant="isContratar ? 'contratar' : 'default'"
-        @update:model-value="emit('update:diaVencimento', $event)"
-      />
-    </div>
-
-    <hr v-if="isContratar" class="my-6 border-glow-border-soft" />
-
-    <div :class="isContratar ? 'space-y-3' : 'mt-6 space-y-3 border-t border-glow-border-soft pt-5'">
       <div class="flex items-center justify-between font-urbanist text-sm text-glow-text-soft">
         <span>Subtotal</span>
         <span>{{ formatBRL(plano.preco) }}/mês</span>

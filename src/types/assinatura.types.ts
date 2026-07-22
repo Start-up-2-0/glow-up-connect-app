@@ -3,6 +3,7 @@ export type TipoAssinatura = 'Estabelecimento' | 'ProfissionalAutonomo'
 export type StatusAssinatura =
   | 'Trial'
   | 'Ativa'
+  | 'Inadimplente'
   | 'PendentePagamento'
   | 'Cancelada'
   | 'Suspensa'
@@ -61,7 +62,6 @@ export interface CriarAssinaturaPayload {
   estabelecimentoId?: number
   profissionalAutonomo?: ProfissionalAutonomoOnboarding
   gateway: 'MercadoPago'
-  diaVencimento: number
   pagamento?: PagamentoAssinaturaPayload
 }
 
@@ -78,7 +78,7 @@ export interface Assinatura {
   gateway: string
   inicio: string
   fim: string | null
-  diaVencimento: number
+  dataReferenciaCiclo: string
   proximaDataVencimento: string
   proximaDataGeracaoCobranca: string
   proximaDataAlerta: string

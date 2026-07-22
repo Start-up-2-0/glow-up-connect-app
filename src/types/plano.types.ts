@@ -19,9 +19,9 @@ export interface PromocaoLancamento {
   disponivel: boolean
   vagasRestantes: number
   diasTrial: number
-  diasVencimentoPermitidos: number[]
   diasAntecedenciaAlertaFatura: number
   diasAntecedenciaGeracaoCobranca: number
+  diasToleranciaInadimplencia: number
 }
 
 export interface PlanosResponse {

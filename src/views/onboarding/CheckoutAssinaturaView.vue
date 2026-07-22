@@ -6,7 +6,6 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
-import DiaVencimentoSelect from '@/components/assinatura/DiaVencimentoSelect.vue'
 import MercadoPagoCardForm from '@/components/assinatura/MercadoPagoCardForm.vue'
 import PromocaoLancamentoBanner from '@/components/assinatura/PromocaoLancamentoBanner.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
@@ -22,6 +21,7 @@ import { redirectToLandingPlanos } from '@/utils/landingUrl'
 import { formatBRL, telefoneToApi } from '@/utils/formatters'
 import { USER_ROLE } from '@/types/user.types'
 import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
+
 const route = useRoute()
 const router = useRouter()
 const planosStore = usePlanosStore()
@@ -41,7 +41,6 @@ const erro = ref<string | null>(null)
 const planoId = computed(() => Number(route.query.planoId))
 const plano = computed(() => planosStore.getPlanoById(planoId.value))
 
-const diaVencimento = ref<number | null>(null)
 const nome = ref('')
 const telefone = ref('')
 const email = ref('')
@@ -53,10 +52,6 @@ const cidade = ref('')
 const estado = ref('')
 const complemento = ref('')
 const logoFile = ref<File | null>(null)
-
-const diasPermitidos = computed(
-  () => promocao.value?.diasVencimentoPermitidos ?? [5, 10, 15, 20],
-)
 
 const isAutonomo = computed(
   () => userStore.profile?.role === USER_ROLE.PROFISSIONAL_AUTONOMO,
@@ -79,7 +74,6 @@ onMounted(async () => {
     return
   }
 
-  diaVencimento.value = diasPermitidos.value[1] ?? 10
   email.value = userStore.profile?.email ?? ''
   nome.value = userStore.profile?.nome ?? ''
 })
@@ -107,8 +101,8 @@ async function aguardarAtivacao() {
 async function finalizarCheckout() {
   erro.value = null
 
-  if (!plano.value || diaVencimento.value === null) {
-    erro.value = 'Selecione o plano e o dia de vencimento.'
+  if (!plano.value) {
+    erro.value = 'Selecione o plano.'
     return
   }
 
@@ -149,7 +143,6 @@ async function finalizarCheckout() {
           endereco,
         },
         gateway: 'MercadoPago' as const,
-        diaVencimento: diaVencimento.value,
         pagamento,
       }
     : {
@@ -163,7 +156,6 @@ async function finalizarCheckout() {
           endereco,
         },
         gateway: 'MercadoPago' as const,
-        diaVencimento: diaVencimento.value,
         pagamento,
       }
 
@@ -214,6 +206,9 @@ function onLogoError(message: string) {
       <p v-if="plano" class="mt-1 text-sm text-glow-text-subtle">
         Plano {{ plano.nome }} — {{ formatBRL(plano.preco) }}/mês
       </p>
+      <p class="mt-2 text-sm text-glow-text-subtle">
+        A renovação será calculada automaticamente a partir da data de contratação.
+      </p>
     </div>
 
     <PromocaoLancamentoBanner v-if="promocao?.disponivel" :promocao="promocao" />
@@ -239,13 +234,6 @@ function onLogoError(message: string) {
           </div>
           <BaseInput v-model="complemento" label="Complemento" hint="Opcional" />
         </div>
-      </BaseCard>
-
-      <BaseCard title="Cobrança">
-        <DiaVencimentoSelect
-          v-model="diaVencimento"
-          :dias-permitidos="diasPermitidos"
-        />
       </BaseCard>
 
       <BaseCard title="Cartão de crédito">

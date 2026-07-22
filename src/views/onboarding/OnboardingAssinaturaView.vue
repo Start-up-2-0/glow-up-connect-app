@@ -41,10 +41,6 @@ const isCheckoutStep = computed(() => step.value === 'assinatura')
 
 const publicStep = computed(() => resolvePublicOnboardingStep(step.value))
 
-const diasPermitidos = computed(
-  () => promocao.value?.diasVencimentoPermitidos ?? [5, 10, 15, 20],
-)
-
 onMounted(() => {
   void init()
 })
@@ -103,7 +99,6 @@ function handlePublicBack() {
         variant="public"
         :plano="plano"
         :promocao="promocao"
-        :dias-permitidos="diasPermitidos"
         :submitting="submitting"
         :aguardando-pagamento="aguardandoPagamento"
         :pix-qr-code="pixQrCode"

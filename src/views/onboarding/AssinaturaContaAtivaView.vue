@@ -46,10 +46,6 @@ const isCheckoutStep = computed(() => step.value === 'assinatura')
 
 const stepSubtitle = computed(() => ASSINATURA_LOGADA_STEP_SUBTITLES[step.value])
 
-const diasPermitidos = computed(
-  () => promocao.value?.diasVencimentoPermitidos ?? [5, 10, 15, 20],
-)
-
 onMounted(() => {
   void init()
 })
@@ -113,7 +109,6 @@ function voltarDeInformacoesBasicas() {
         variant="dashboard"
         :plano="plano"
         :promocao="promocao"
-        :dias-permitidos="diasPermitidos"
         :submitting="submitting"
         :aguardando-pagamento="aguardandoPagamento"
         :pix-qr-code="pixQrCode"

@@ -16,7 +16,6 @@ const props = withDefaults(
   defineProps<{
     plano: Plano
     promocao: PromocaoLancamento | null
-    diasPermitidos: number[]
     submitting?: boolean
     aguardandoPagamento?: boolean
     errorMessage?: string | null
@@ -31,12 +30,11 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   back: []
-  submit: [diaVencimento: number, pagamento?: PagamentoAssinaturaPayload]
+  submit: [pagamento?: PagamentoAssinaturaPayload]
 }>()
 
 const cardFormRef = ref<InstanceType<typeof MercadoPagoCardForm> | null>(null)
 const pixFormRef = ref<InstanceType<typeof PagamentoPixForm> | null>(null)
-const diaVencimento = ref<number | null>(props.diasPermitidos[1] ?? props.diasPermitidos[0] ?? 10)
 const metodoPagamento = ref<MetodoPagamentoAssinatura>('cartao')
 const erroLocal = ref<string | null>(null)
 const tokenizando = ref(false)
@@ -88,13 +86,8 @@ function validarCpfPix(cpf: string): string | null {
 async function handleSubmit() {
   erroLocal.value = null
 
-  if (diaVencimento.value === null) {
-    erroLocal.value = 'Selecione o dia de vencimento da cobrança.'
-    return
-  }
-
   if (usarCheckoutPro) {
-    emit('submit', diaVencimento.value)
+    emit('submit')
     return
   }
 
@@ -105,7 +98,7 @@ async function handleSubmit() {
       erroLocal.value = erroCpf
       return
     }
-    emit('submit', diaVencimento.value, criarPagamentoPix(cpf))
+    emit('submit', criarPagamentoPix(cpf))
     return
   }
 
@@ -118,7 +111,7 @@ async function handleSubmit() {
       }
       return
     }
-    emit('submit', diaVencimento.value, pagamento)
+    emit('submit', pagamento)
   } finally {
     tokenizando.value = false
   }
@@ -153,10 +146,7 @@ async function handleSubmit() {
             variant="contratar"
             :plano="plano"
             :promocao="promocao"
-            :dias-permitidos="diasPermitidos"
-            :dia-vencimento="diaVencimento"
             :metodo-pagamento="metodoPagamento"
-            @update:dia-vencimento="diaVencimento = $event"
           />
         </div>
       </section>
@@ -271,10 +261,7 @@ async function handleSubmit() {
         <CheckoutResumoPlano
           :plano="plano"
           :promocao="promocao"
-          :dias-permitidos="diasPermitidos"
-          :dia-vencimento="diaVencimento"
           :metodo-pagamento="metodoPagamento"
-          @update:dia-vencimento="diaVencimento = $event"
         />
       </section>
 

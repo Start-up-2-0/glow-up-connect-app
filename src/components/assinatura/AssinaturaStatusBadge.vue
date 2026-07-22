@@ -10,6 +10,7 @@ const config = computed(() => {
   const map: Record<string, { label: string; className: string }> = {
     Trial: { label: 'Período de teste', className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200' },
     Ativa: { label: 'Ativa', className: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' },
+    Inadimplente: { label: 'Aguardando pagamento', className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200' },
     PendentePagamento: { label: 'Pagamento pendente', className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200' },
     Cancelada: { label: 'Cancelada', className: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
     Suspensa: { label: 'Suspensa', className: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200' },

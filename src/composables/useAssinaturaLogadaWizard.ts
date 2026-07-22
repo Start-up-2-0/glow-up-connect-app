@@ -414,7 +414,7 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     )
   }
 
-  async function finalizarAssinatura(diaVencimento: number, pagamento?: PagamentoAssinaturaPayload) {
+  async function finalizarAssinatura(pagamento?: PagamentoAssinaturaPayload) {
     erro.value = null
 
     if (!plano.value) {
@@ -428,7 +428,6 @@ export function useAssinaturaLogadaWizard(planoId: number) {
         planoId: plano.value.id,
         tipoAssinatura: 'Estabelecimento' as const,
         gateway: 'MercadoPago' as const,
-        diaVencimento,
         ...(pagamento ? { pagamento } : {}),
       }
 
