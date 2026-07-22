@@ -109,12 +109,6 @@ export const clienteNavItems: NavItem[] = [
     icon: 'user',
     children: [
       {
-        id: 'convites',
-        label: 'Convites',
-        to: ROUTE_PATHS.CONVITES,
-        icon: 'invites',
-      },
-      {
         id: 'perfil',
         label: 'Meu perfil',
         to: ROUTE_PATHS.PERFIL,

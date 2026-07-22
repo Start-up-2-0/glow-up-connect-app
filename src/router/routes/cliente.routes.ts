@@ -90,17 +90,6 @@ export const clienteRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: ROUTE_PATHS.CONVITES,
-    name: ROUTE_NAMES.CONVITES,
-    component: () => import('@/views/dashboard/cliente/ConvitesView.vue'),
-    meta: {
-      layout: 'dashboard',
-      requiresAuth: true,
-      clienteOnly: true,
-      title: 'Convites',
-    },
-  },
-  {
     path: `${ROUTE_PATHS.CONVITES}/:token`,
     name: ROUTE_NAMES.CONVITE_RESPONDER,
     component: () => import('@/views/dashboard/cliente/ConviteResponderView.vue'),
