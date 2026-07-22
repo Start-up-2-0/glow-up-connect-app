@@ -13,6 +13,7 @@ import FinanceiroDashboardEmpty from '@/components/financeiro/FinanceiroDashboar
 import FinanceiroChartEntradasSaidas from '@/components/financeiro/FinanceiroChartEntradasSaidas.vue'
 import FinanceiroQuickActions from '@/components/financeiro/FinanceiroQuickActions.vue'
 import FinanceiroRecentMovimentos from '@/components/financeiro/FinanceiroRecentMovimentos.vue'
+import ExportarDropdown from '@/components/financeiro/ExportarDropdown.vue'
 import MovimentoFormModal from '@/components/financeiro/MovimentoFormModal.vue'
 import { FINANCEIRO_PAGE_CLASS } from '@/constants/designTokens'
 import { ROUTE_PATHS } from '@/constants/routes'
@@ -22,6 +23,7 @@ import { useFinanceiroFiltros } from '@/composables/useFinanceiroFiltros'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { financeiroService } from '@/services/financeiroService'
+import { caixaService } from '@/services/caixaService'
 import {
   calcularVariacaoPercentual,
   createEmptyFinanceiroDashboard,
@@ -31,6 +33,7 @@ import {
 } from '@/utils/financeiroDashboard'
 import type { FinanceiroDashboard } from '@/types/negocio/financeiro.types'
 import type { CriarMovimentoPayload, MovimentoDirecao, MovimentoFinanceiro } from '@/types/negocio/financeiro.types'
+import type { ExportFormato } from '@/types/negocio/caixa.types'
 import { formatCurrency } from '@/utils/formatters'
 
 const router = useRouter()
@@ -80,7 +83,6 @@ const acoesRapidas = computed(() => {
   const items = [
     { id: 'entrada', label: 'Nova venda', icon: 'venda' as const },
     { id: 'saida', label: 'Nova despesa', icon: 'despesa' as const },
-    { id: 'relatorios', label: 'Ver relatórios', icon: 'relatorio' as const },
     { id: 'entradas', label: 'Fluxo de caixa', icon: 'grafico' as const },
   ]
   return items
@@ -157,8 +159,31 @@ function abrirForm(direcao: MovimentoDirecao) {
 function onAcaoRapida(id: string) {
   if (id === 'entrada') abrirForm('entrada')
   else if (id === 'saida') abrirForm('saida')
-  else if (id === 'relatorios') router.push(ROUTE_PATHS.FINANCEIRO_RELATORIOS)
   else if (id === 'entradas') router.push(ROUTE_PATHS.FINANCEIRO_ENTRADAS)
+}
+
+async function exportar(formato: ExportFormato) {
+  if (!estabelecimentoId.value) return
+  try {
+    const response = await caixaService.exportarRelatorio(
+      estabelecimentoId.value,
+      formato,
+      apiFiltro.value,
+    )
+    const ext = formato === 'xlsx' ? 'xlsx' : formato === 'pdf' ? 'pdf' : 'csv'
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `relatorio-financeiro.${ext}`
+    link.click()
+    window.URL.revokeObjectURL(url)
+  } catch (err) {
+    notifications.push('error', resolveError(err))
+  }
+}
+
+function imprimir() {
+  window.print()
 }
 
 async function onCriar(payload: CriarMovimentoPayload) {
@@ -201,12 +226,20 @@ watch(ready, (isReady) => {
       </div>
 
       <div class="financeiro-dashboard-header__toolbar">
-        <FinanceiroQuickFilters v-model="periodPreset" @aplicar="onPresetChange" />
-        <FinanceiroPeriodoFiltro
-          v-if="periodPreset === 'custom'"
-          v-model:inicio="inicioCustom"
-          v-model:fim="fimCustom"
-          @aplicar="load"
+        <div class="flex flex-wrap items-end gap-3">
+          <FinanceiroQuickFilters v-model="periodPreset" @aplicar="onPresetChange" />
+          <FinanceiroPeriodoFiltro
+            v-if="periodPreset === 'custom'"
+            v-model:inicio="inicioCustom"
+            v-model:fim="fimCustom"
+            @aplicar="load"
+          />
+        </div>
+        <ExportarDropdown
+          v-if="dashboard"
+          class="financeiro-no-print"
+          @export="exportar"
+          @print="imprimir"
         />
       </div>
     </header>

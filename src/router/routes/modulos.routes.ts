@@ -182,24 +182,33 @@ export const modulosRoutes: RouteRecordRaw[] = [
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_RELATORIOS,
-    name: ROUTE_NAMES.FINANCEIRO_RELATORIOS,
-    component: () => import('@/views/modulos/financeiro/RelatoriosView.vue'),
+    redirect: ROUTE_PATHS.FINANCEIRO,
+  },
+  {
+    path: ROUTE_PATHS.FINANCEIRO_CONCILIACAO,
+    name: ROUTE_NAMES.FINANCEIRO_CONCILIACAO,
+    component: () => import('@/views/modulos/financeiro/ConciliacaoView.vue'),
     meta: {
       layout: 'dashboard',
       requiresAuth: true,
       businessOnly: true,
       requerModulo: 'Financeiro',
       requerPermissao: 'CaixaVisualizar',
-      title: 'Relatórios',
+      title: 'Conciliação',
     },
   },
   {
-    path: ROUTE_PATHS.FINANCEIRO_CONCILIACAO,
-    redirect: { path: ROUTE_PATHS.FINANCEIRO_RELATORIOS, query: { secao: 'conciliacao' } },
-  },
-  {
     path: ROUTE_PATHS.FINANCEIRO_REDE,
-    redirect: { path: ROUTE_PATHS.FINANCEIRO_RELATORIOS, query: { secao: 'rede' } },
+    name: ROUTE_NAMES.FINANCEIRO_REDE,
+    component: () => import('@/views/modulos/financeiro/RedeView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'Financeiro',
+      requerPermissao: 'CaixaVisualizar',
+      title: 'Painel da rede',
+    },
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_MINHAS_COMISSOES,

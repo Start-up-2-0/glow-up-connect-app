@@ -66,13 +66,6 @@ const financeiroNavItem: NavItem = {
       requerModulo: 'ComissaoProfissionais',
       requerPermissao: 'CaixaVisualizar',
     },
-    {
-      id: 'financeiro-relatorios',
-      label: 'Relatórios',
-      to: ROUTE_PATHS.FINANCEIRO_RELATORIOS,
-      requerModulo: 'Financeiro',
-      requerPermissao: 'CaixaVisualizar',
-    },
   ],
 }
 

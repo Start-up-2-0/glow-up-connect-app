@@ -3002,7 +3002,7 @@
   }
 
   .financeiro-dashboard-header__toolbar {
-    @apply flex flex-wrap items-end gap-3;
+    @apply flex flex-wrap items-end justify-between gap-3;
   }
 
   .financeiro-summary-bar {
