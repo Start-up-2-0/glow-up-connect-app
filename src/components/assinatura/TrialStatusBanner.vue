@@ -7,6 +7,8 @@ import { formatDate } from '@/utils/formatters'
 const props = defineProps<{
   diasTrial: number
   proximaDataVencimento: string
+  compact?: boolean
+  planoNome?: string
 }>()
 
 const diasRestantes = computed(() => {
@@ -19,6 +21,28 @@ const diasRestantes = computed(() => {
 
 <template>
   <div
+    v-if="compact"
+    class="dashboard-trial-strip"
+    role="status"
+  >
+    <span class="dashboard-trial-strip__badge">Trial</span>
+    <span class="dashboard-trial-strip__text">
+      {{ planoNome ? `${planoNome} · ` : '' }}{{ diasRestantes }} dias restantes
+    </span>
+    <span class="dashboard-trial-strip__divider" />
+    <span class="dashboard-trial-strip__billing">
+      Primeira cobrança: {{ formatDate(proximaDataVencimento) }}
+    </span>
+    <RouterLink
+      :to="ROUTE_PATHS.CONFIG_ASSINATURA_FATURAS"
+      class="dashboard-trial-strip__link"
+    >
+      Faturas
+    </RouterLink>
+  </div>
+
+  <div
+    v-else
     class="rounded-xl border border-glow-border-accent bg-glow-accent-glow px-4 py-3 shadow-glow-sm"
     role="status"
   >

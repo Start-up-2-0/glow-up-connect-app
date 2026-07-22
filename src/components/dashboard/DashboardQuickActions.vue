@@ -11,6 +11,7 @@ export interface DashboardQuickAction {
 defineProps<{
   title?: string
   actions: DashboardQuickAction[]
+  variant?: 'default' | 'shortcuts'
 }>()
 
 defineEmits<{
@@ -19,7 +20,7 @@ defineEmits<{
 </script>
 
 <template>
-  <section class="dashboard-quick-actions">
+  <section class="dashboard-quick-actions" :class="variant === 'shortcuts' ? 'dashboard-quick-actions--shortcuts' : ''">
     <h2 v-if="title" class="dashboard-quick-actions__title">{{ title }}</h2>
     <div class="dashboard-quick-actions__grid">
       <button

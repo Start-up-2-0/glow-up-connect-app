@@ -9,13 +9,19 @@ import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader.vue'
 import DashboardKpiCard from '@/components/dashboard/DashboardKpiCard.vue'
 import DashboardQuickActions from '@/components/dashboard/DashboardQuickActions.vue'
 import DashboardPanel from '@/components/dashboard/DashboardPanel.vue'
+import DashboardRevenueHero from '@/components/dashboard/DashboardRevenueHero.vue'
+import DashboardOperacionalResumo from '@/components/dashboard/DashboardOperacionalResumo.vue'
+import DashboardInsights from '@/components/dashboard/DashboardInsights.vue'
+import DashboardRevenueChart from '@/components/dashboard/DashboardRevenueChart.vue'
+import DashboardServicosChart from '@/components/dashboard/DashboardServicosChart.vue'
+import DashboardAgendaPreview from '@/components/dashboard/DashboardAgendaPreview.vue'
+import DashboardIcon from '@/components/dashboard/DashboardIcon.vue'
 import { useDashboardNegocioData } from '@/composables/useDashboardNegocioData'
 import { useDashboardRole } from '@/composables/useDashboardRole'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useAssinaturaStore } from '@/stores/assinatura.store'
 import { ROUTE_PATHS } from '@/constants/routes'
-import { formatCurrency, formatDate, formatTime } from '@/utils/formatters'
-import AgendamentoStatusBadge from '@/components/cliente/AgendamentoStatusBadge.vue'
+import { formatCurrency } from '@/utils/formatters'
 
 const router = useRouter()
 const negocioStore = useNegocioStore()
@@ -35,20 +41,38 @@ const { assinatura } = storeToRefs(assinaturaStore)
 const {
   loading,
   totalGanhoMes,
+  totalGanhoHoje,
+  variacaoReceitaMes,
+  variacaoAgendamentos,
   agendamentosHoje,
+  agendamentosOntem,
+  agendamentosSemana,
+  cancelamentosHoje,
   clientesAtivos,
+  clientesAtendidosHoje,
   servicosAtivos,
   profissionais,
-  ultimosAtendimentos,
   avaliacaoResumo,
+  receitaUltimos7Dias,
+  receitaUltimos30Dias,
+  distribuicaoServicos,
+  agendaTimeline,
+  taxaOcupacao,
+  insights,
   load,
 } = useDashboardNegocioData()
 
+const headerMeta = computed(() => {
+  const parts = [roleExibicao.value]
+  if (planoNome.value) parts.unshift(planoNome.value)
+  return parts.join(' · ')
+})
+
 const acoes = computed(() => [
-  { id: 'agenda', label: 'Agenda', description: 'Veja os horários do dia', icon: 'calendar' as const },
-  { id: 'financeiro', label: 'Financeiro', description: 'Acompanhe receitas e despesas', icon: 'money' as const },
-  { id: 'equipe', label: 'Equipe', description: 'Gerencie profissionais', icon: 'users' as const },
-  { id: 'clientes', label: 'Clientes', description: 'Base de clientes da loja', icon: 'user' as const },
+  { id: 'agenda', label: 'Agenda', description: 'Ver horários', icon: 'calendar' as const },
+  { id: 'financeiro', label: 'Financeiro', description: 'Fluxo de caixa', icon: 'money' as const },
+  { id: 'equipe', label: 'Equipe', description: 'Profissionais', icon: 'users' as const },
+  { id: 'clientes', label: 'Clientes', description: 'Cadastro', icon: 'user' as const },
 ])
 
 async function carregar() {
@@ -82,13 +106,17 @@ watch(
 </script>
 
 <template>
-  <div class="dashboard-page">
+  <div class="dashboard-page dashboard-page--negocio">
     <DashboardPageHeader
+      compact
       :title="estabelecimentoAtivo?.nome ?? 'Painel do negócio'"
-      :subtitle="`Visão geral da operação · ${roleExibicao}${planoNome ? ` · ${planoNome}` : ''}`"
+      :meta="headerMeta"
     >
       <template #actions>
-        <BaseButton @click="router.push(ROUTE_PATHS.AGENDA)">Ver agenda</BaseButton>
+        <BaseButton size="lg" @click="router.push(ROUTE_PATHS.AGENDA)">
+          <DashboardIcon name="calendar" class="dashboard-header-btn-icon" />
+          Ver agenda
+        </BaseButton>
       </template>
     </DashboardPageHeader>
 
@@ -97,6 +125,8 @@ watch(
         (assinatura?.emTrial || emTrial) &&
         (assinatura?.proximaDataVencimento || proximaDataVencimento)
       "
+      compact
+      :plano-nome="planoNome ?? undefined"
       :dias-trial="assinatura?.diasTrial ?? diasTrial ?? 30"
       :proxima-data-vencimento="assinatura?.proximaDataVencimento ?? proximaDataVencimento ?? ''"
     />
@@ -112,52 +142,94 @@ watch(
       </RouterLink>
     </div>
 
-    <div class="dashboard-kpi-grid dashboard-kpi-grid--hero">
-      <DashboardKpiCard
-        class="dashboard-kpi-grid__main"
-        label="Ganho no mês"
+    <DashboardOperacionalResumo
+      :receita-hoje="formatCurrency(totalGanhoHoje)"
+      :agendamentos="agendamentosHoje"
+      :clientes="clientesAtendidosHoje"
+      :cancelamentos="cancelamentosHoje"
+      :ocupacao="taxaOcupacao != null ? `${taxaOcupacao}%` : '—'"
+      :loading="loading"
+    />
+
+    <div class="dashboard-exec-grid">
+      <DashboardRevenueHero
+        class="dashboard-exec-grid__revenue"
         :value="formatCurrency(totalGanhoMes)"
-        hint="Entradas registradas no período"
-        icon="money"
-        variant="gold"
+        :trend="variacaoReceitaMes"
+        trend-label="Comparado ao mês passado"
+        :sparkline="receitaUltimos7Dias"
         :loading="loading"
       />
+
       <DashboardKpiCard
-        label="Agendamentos hoje"
+        label="Agenda hoje"
         :value="String(agendamentosHoje)"
         icon="calendar"
+        color="blue"
+        :trend="variacaoAgendamentos"
+        trend-label="vs ontem"
+        :sub-stats="[
+          { label: 'Ontem', value: String(agendamentosOntem) },
+          { label: 'Semana', value: String(agendamentosSemana) },
+        ]"
         :loading="loading"
       />
+
       <DashboardKpiCard
         label="Clientes"
         :value="String(clientesAtivos)"
         icon="users"
+        color="purple"
+        hint="Base cadastrada na loja"
         :loading="loading"
       />
+
       <DashboardKpiCard
         label="Serviços ativos"
         :value="String(servicosAtivos)"
         icon="scissors"
+        color="yellow"
+        :loading="loading"
+      />
+
+      <DashboardKpiCard
+        label="Equipe"
+        :value="String(profissionais.length)"
+        icon="users"
+        color="orange"
+        hint="Profissionais ativos"
+        :loading="loading"
+      />
+
+      <DashboardKpiCard
+        class="dashboard-exec-grid__rating"
+        label="Avaliação"
+        :value="avaliacaoResumo ? avaliacaoResumo.notaMedia.toFixed(1) : '0.0'"
+        icon="star"
+        color="gold"
+        :rating="avaliacaoResumo ? { nota: avaliacaoResumo.notaMedia, total: avaliacaoResumo.totalAvaliacoes } : { nota: 0, total: 0 }"
         :loading="loading"
       />
     </div>
 
-    <div v-if="avaliacaoResumo" class="dashboard-inline-stats">
-      <span class="dashboard-inline-stats__item">
-        Avaliação média: <strong>{{ avaliacaoResumo.notaMedia.toFixed(1) }}</strong>
-      </span>
-      <span class="dashboard-inline-stats__divider" />
-      <span class="dashboard-inline-stats__item">
-        Total de avaliações: <strong>{{ avaliacaoResumo.totalAvaliacoes }}</strong>
-      </span>
+    <DashboardInsights :insights="insights" :loading="loading" />
+
+    <div class="dashboard-charts-grid">
+      <DashboardRevenueChart :data="receitaUltimos30Dias" :loading="loading" />
+      <DashboardServicosChart :data="distribuicaoServicos" :loading="loading" />
     </div>
 
-    <DashboardQuickActions title="Ações rápidas" :actions="acoes" @action="onAcao" />
+    <DashboardQuickActions
+      title="Ações rápidas"
+      variant="shortcuts"
+      :actions="acoes"
+      @action="onAcao"
+    />
 
     <div class="dashboard-two-col">
       <DashboardPanel
         title="Profissionais"
-        subtitle="Equipe vinculada ao estabelecimento"
+        subtitle="Desempenho da equipe hoje"
         link-label="Gerenciar"
         :loading="loading"
         :empty="!loading && profissionais.length === 0"
@@ -165,46 +237,33 @@ watch(
         empty-description="Convide profissionais para começar a receber agendamentos."
         @link="router.push(ROUTE_PATHS.CONFIG_EQUIPE)"
       >
-        <ul class="dashboard-team-list">
-          <li v-for="prof in profissionais" :key="prof.id" class="dashboard-team-list__row">
+        <ul class="dashboard-team-list dashboard-team-list--rich">
+          <li v-for="prof in profissionais" :key="prof.id" class="dashboard-team-list__row dashboard-team-list__row--rich">
+            <span
+              class="dashboard-team-list__status"
+              :class="prof.podeReceberAgendamento ? 'dashboard-team-list__status--online' : 'dashboard-team-list__status--offline'"
+            />
             <span class="dashboard-team-list__avatar">{{ prof.nomePublico.charAt(0) }}</span>
-            <div>
+            <div class="dashboard-team-list__body">
               <p class="dashboard-team-list__name">{{ prof.nomePublico }}</p>
-              <p class="dashboard-team-list__meta">
-                {{ prof.podeReceberAgendamento ? 'Recebendo agendamentos' : 'Indisponível' }}
-                <template v-if="prof.notaMedia"> · ★ {{ prof.notaMedia.toFixed(1) }}</template>
+              <p class="dashboard-team-list__meta">Profissional</p>
+            </div>
+            <div class="dashboard-team-list__stats">
+              <p class="dashboard-team-list__stat">
+                <span>Hoje</span>
+                <strong>{{ prof.agendamentosHoje }} agendamento{{ prof.agendamentosHoje === 1 ? '' : 's' }}</strong>
               </p>
+              <p v-if="prof.notaMedia" class="dashboard-team-list__rating">★ {{ prof.notaMedia.toFixed(1) }}</p>
             </div>
           </li>
         </ul>
       </DashboardPanel>
 
-      <DashboardPanel
-        title="Últimos atendimentos"
-        subtitle="Movimentação recente da agenda"
-        link-label="Ver agenda"
+      <DashboardAgendaPreview
+        :timeline="agendaTimeline"
         :loading="loading"
-        :empty="!loading && ultimosAtendimentos.length === 0"
-        empty-title="Nenhum atendimento recente"
-        empty-description="Os atendimentos realizados aparecerão aqui."
-        @link="router.push(ROUTE_PATHS.AGENDA)"
-      >
-        <ul class="dashboard-activity-list">
-          <li
-            v-for="item in ultimosAtendimentos"
-            :key="item.id"
-            class="dashboard-activity-list__row"
-          >
-            <div class="dashboard-activity-list__main">
-              <p class="dashboard-activity-list__title">{{ item.clienteNome }}</p>
-              <p class="dashboard-activity-list__meta">
-                {{ formatDate(item.inicio) }} {{ formatTime(item.inicio) }} · {{ formatCurrency(item.valorTotal) }}
-              </p>
-            </div>
-            <AgendamentoStatusBadge :status="item.status" />
-          </li>
-        </ul>
-      </DashboardPanel>
+        @ver-agenda="router.push(ROUTE_PATHS.AGENDA)"
+      />
     </div>
   </div>
 </template>
