@@ -1255,6 +1255,18 @@
     gap: 6px;
   }
 
+  .cliente-explorar-intro__top {
+    @apply flex items-start justify-between gap-4;
+  }
+
+  .cliente-explorar-intro__text {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 6px;
+  }
+
   .cliente-explorar-intro__title {
     @apply font-satoshi text-2xl font-bold leading-8 text-glow-text;
   }
@@ -1299,12 +1311,6 @@
     @apply border-t border-glow-border-soft;
   }
 
-  .cliente-explorar-toolbar {
-    @apply flex justify-end;
-    padding-top: 38px;
-    padding-bottom: 38px;
-  }
-
   .cliente-explorar-btn-localizacao {
     @apply inline-flex h-[34px] w-[195px] shrink-0 items-center justify-center gap-[10px] rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface font-urbanist text-sm font-normal text-glow-text transition;
   }
@@ -1330,6 +1336,7 @@
     gap: 10px;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 388px), 388px));
     justify-content: start;
+    margin-top: 38px;
   }
 
   .cliente-explorar-load-more {
@@ -1337,6 +1344,14 @@
   }
 
   @media (max-width: 427px) {
+    .cliente-explorar-intro__top {
+      @apply flex-wrap;
+    }
+
+    .cliente-explorar-btn-localizacao {
+      @apply w-full;
+    }
+
     .cliente-explorar-grid {
       grid-template-columns: minmax(0, 1fr);
     }

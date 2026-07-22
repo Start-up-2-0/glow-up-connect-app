@@ -87,8 +87,42 @@ onMounted(async () => {
 <template>
   <div class="cliente-explorar-page">
     <header class="cliente-explorar-intro">
-      <h1 class="cliente-explorar-intro__title">Explorar lojas</h1>
-      <p class="cliente-explorar-intro__subtitle">{{ subtituloLocal }}</p>
+      <div class="cliente-explorar-intro__top">
+        <div class="cliente-explorar-intro__text">
+          <h1 class="cliente-explorar-intro__title">Explorar lojas</h1>
+          <p class="cliente-explorar-intro__subtitle">{{ subtituloLocal }}</p>
+        </div>
+
+        <button
+          type="button"
+          class="cliente-explorar-btn-localizacao"
+          :disabled="geoLoading || loading"
+          @click="handleRetryLocation"
+        >
+          <svg
+            class="cliente-explorar-btn-localizacao__icon"
+            :class="{ 'animate-spin': geoLoading }"
+            viewBox="0 0 20 20"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M17.5 10a7.5 7.5 0 1 1-2.2-5.3"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linecap="round"
+            />
+            <path
+              d="M17.5 3.5V10h-6.5"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Atualizar localização
+        </button>
+      </div>
     </header>
 
     <div
@@ -97,38 +131,6 @@ onMounted(async () => {
       role="separator"
       aria-hidden="true"
     />
-
-    <div class="cliente-explorar-toolbar">
-      <button
-        type="button"
-        class="cliente-explorar-btn-localizacao"
-        :disabled="geoLoading || loading"
-        @click="handleRetryLocation"
-      >
-        <svg
-          class="cliente-explorar-btn-localizacao__icon"
-          :class="{ 'animate-spin': geoLoading }"
-          viewBox="0 0 20 20"
-          fill="none"
-          aria-hidden="true"
-        >
-          <path
-            d="M17.5 10a7.5 7.5 0 1 1-2.2-5.3"
-            stroke="currentColor"
-            stroke-width="1.2"
-            stroke-linecap="round"
-          />
-          <path
-            d="M17.5 3.5V10h-6.5"
-            stroke="currentColor"
-            stroke-width="1.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-        Atualizar localização
-      </button>
-    </div>
 
     <BaseAlert v-if="errorMessage && !loading" variant="warning" class="mt-6">
       {{ errorMessage }}
