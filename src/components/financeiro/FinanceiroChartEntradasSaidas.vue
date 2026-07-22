@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Bar } from 'vue-chartjs'
+import FinanceiroIcon from '@/components/financeiro/FinanceiroIcon.vue'
 import {
   BarElement,
   CategoryScale,
@@ -42,13 +43,16 @@ const options = {
 </script>
 
 <template>
-  <div class="financeiro-chart-card">
+  <div class="financeiro-chart-card" :class="{ 'financeiro-chart-card--empty': empty }">
     <div class="financeiro-chart-card__header">
-      <div>
-        <p class="financeiro-kpi-card__label">Estatísticas</p>
-        <p class="financeiro-chart-card__subtitle">Entradas vs saídas no período</p>
+      <div class="financeiro-chart-card__title-row">
+        <FinanceiroIcon name="grafico" class="financeiro-chart-card__title-icon" />
+        <div>
+          <p class="financeiro-kpi-card__label">Fluxo de caixa</p>
+          <p class="financeiro-chart-card__subtitle">Entradas vs saídas no período</p>
+        </div>
       </div>
-      <div class="financeiro-chart-card__legend">
+      <div v-if="!empty" class="financeiro-chart-card__legend">
         <span class="financeiro-chart-card__legend-item">
           <span class="financeiro-chart-card__dot financeiro-chart-card__dot--entrada" />
           Entradas
@@ -60,14 +64,15 @@ const options = {
       </div>
     </div>
 
-    <div class="financeiro-chart-card__body">
+    <div v-if="empty" class="financeiro-chart-card__empty-compact">
+      <p class="financeiro-chart-card__empty-title">Ainda não existem dados suficientes para gerar gráficos</p>
+      <p class="financeiro-chart-card__empty-desc">
+        Registre movimentações para visualizar o fluxo de caixa aqui.
+      </p>
+    </div>
+
+    <div v-else class="financeiro-chart-card__body">
       <Bar :data="chartData" :options="options" />
-      <div v-if="empty" class="financeiro-chart-card__empty">
-        <p class="financeiro-chart-card__empty-title">Nenhuma movimentação</p>
-        <p class="financeiro-chart-card__empty-desc">
-          Ainda não há entradas ou saídas neste período. Registre a primeira movimentação para acompanhar aqui.
-        </p>
-      </div>
     </div>
   </div>
 </template>

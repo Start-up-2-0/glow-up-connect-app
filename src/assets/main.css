@@ -2894,7 +2894,7 @@
 
   /* Financeiro */
   .financeiro-page {
-    @apply space-y-6;
+    @apply space-y-4;
   }
 
   .financeiro-page__header {
@@ -2946,7 +2946,99 @@
   }
 
   .financeiro-quick-filters__btn--active {
-    @apply border-glow-gold bg-glow-gold-soft font-semibold text-glow-text;
+    @apply border-glow-border-soft bg-glow-hover-surface font-medium text-glow-text;
+  }
+
+  .financeiro-segmented {
+    @apply inline-flex flex-wrap items-center rounded-xl border border-glow-border-soft bg-glow-hover-surface p-1;
+  }
+
+  .financeiro-segmented__btn {
+    @apply inline-flex h-8 items-center justify-center rounded-lg px-3 font-urbanist text-sm text-glow-text-subtle transition hover:text-glow-text;
+  }
+
+  .financeiro-segmented__btn--active {
+    @apply bg-glow-surface font-semibold text-glow-text shadow-glow-sm;
+  }
+
+  .financeiro-dashboard-header {
+    @apply space-y-4 border-b border-glow-border-soft pb-5;
+  }
+
+  .financeiro-dashboard-header__top {
+    @apply flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .financeiro-dashboard-header__actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .financeiro-dashboard-header__toolbar {
+    @apply flex flex-wrap items-end gap-3;
+  }
+
+  .financeiro-summary-bar {
+    @apply grid grid-cols-1 gap-3 rounded-xl border border-glow-border-soft bg-glow-surface px-4 py-3 shadow-glow-sm sm:grid-cols-[1fr_auto_1fr_auto_1fr];
+  }
+
+  .financeiro-summary-bar__item {
+    @apply flex items-center gap-3;
+  }
+
+  .financeiro-summary-bar__icon {
+    @apply size-4 shrink-0;
+  }
+
+  .financeiro-summary-bar__icon--entrada {
+    @apply text-green-600;
+  }
+
+  .financeiro-summary-bar__icon--saida {
+    @apply text-glow-error;
+  }
+
+  .financeiro-summary-bar__icon--lucro {
+    @apply text-glow-gold-cta;
+  }
+
+  .financeiro-summary-bar__label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-summary-bar__value {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .financeiro-summary-bar__value--positive {
+    @apply text-green-700;
+  }
+
+  .financeiro-summary-bar__value--negative {
+    @apply text-glow-error;
+  }
+
+  .financeiro-summary-bar__divider {
+    @apply hidden h-8 w-px bg-glow-border-soft sm:block;
+  }
+
+  .financeiro-icon {
+    @apply size-4 shrink-0;
+  }
+
+  .financeiro-trend {
+    @apply mt-1 flex flex-wrap items-center gap-1 font-urbanist text-xs;
+  }
+
+  .financeiro-trend--up {
+    @apply text-green-700;
+  }
+
+  .financeiro-trend--down {
+    @apply text-glow-error;
+  }
+
+  .financeiro-trend__label {
+    @apply text-glow-text-subtle;
   }
 
   .financeiro-kpi-grid {
@@ -2954,7 +3046,8 @@
   }
 
   .financeiro-kpi-card {
-    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+    @apply rounded-xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.02);
   }
 
   .financeiro-kpi-card__header {
@@ -2985,24 +3078,24 @@
     @apply bg-glow-text-subtle;
   }
 
-  .financeiro-dashboard-grid {
-    @apply grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-12;
-  }
-
-  .financeiro-dashboard-grid__hero {
-    @apply xl:col-span-6;
-  }
-
-  .financeiro-dashboard-grid__entrada {
-    @apply xl:col-span-3;
-  }
-
-  .financeiro-dashboard-grid__saida {
-    @apply xl:col-span-3;
-  }
-
   .financeiro-dashboard-hero {
-    @apply flex h-full flex-col justify-between gap-4 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm lg:flex-row lg:items-end;
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm sm:p-6;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      0 0 0 1px rgba(212, 175, 55, 0.06);
+  }
+
+  .financeiro-dashboard-hero__main {
+    @apply grid grid-cols-1 gap-5 lg:grid-cols-[1.4fr_1fr];
+  }
+
+  .financeiro-dashboard-hero__label-row {
+    @apply flex items-center gap-2;
+  }
+
+  .financeiro-dashboard-hero__icon {
+    @apply size-4 text-glow-gold-cta;
   }
 
   .financeiro-dashboard-hero__label {
@@ -3010,31 +3103,215 @@
   }
 
   .financeiro-dashboard-hero__value {
-    @apply mt-2 font-satoshi text-4xl font-bold tracking-tight text-glow-text;
+    @apply mt-2 font-satoshi text-4xl font-bold tracking-tight text-glow-gold-cta sm:text-5xl;
   }
 
-  .financeiro-dashboard-hero__trend {
+  .financeiro-dashboard-hero__lucro-hint {
     @apply mt-2 font-urbanist text-sm;
   }
 
-  .financeiro-dashboard-hero__trend--positive {
+  .financeiro-dashboard-hero__lucro-hint--positive {
     @apply text-green-700;
   }
 
-  .financeiro-dashboard-hero__trend--neutral {
-    @apply text-glow-text-subtle;
+  .financeiro-dashboard-hero__lucro-hint--negative {
+    @apply text-glow-error;
   }
 
-  .financeiro-dashboard-hero__actions {
-    @apply flex flex-wrap gap-2;
+  .financeiro-dashboard-hero__side {
+    @apply grid grid-cols-2 gap-3;
+  }
+
+  .financeiro-dashboard-hero__mini {
+    @apply rounded-xl border border-glow-border-soft bg-glow-hover-surface p-4;
+  }
+
+  .financeiro-dashboard-hero__mini-head {
+    @apply flex items-center gap-2 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-dashboard-hero__mini-icon {
+    @apply size-3.5;
+  }
+
+  .financeiro-dashboard-hero__mini-icon--entrada {
+    @apply text-green-600;
+  }
+
+  .financeiro-dashboard-hero__mini-icon--saida {
+    @apply text-glow-error;
+  }
+
+  .financeiro-dashboard-hero__mini-value {
+    @apply mt-2 font-satoshi text-xl font-bold;
+  }
+
+  .financeiro-dashboard-hero__mini-value--entrada {
+    @apply text-green-700;
+  }
+
+  .financeiro-dashboard-hero__mini-value--saida {
+    @apply text-glow-error;
+  }
+
+  .financeiro-metric-strip {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-3;
+  }
+
+  .financeiro-metric-strip__item {
+    @apply rounded-xl border border-glow-border-soft bg-glow-surface p-4 text-left shadow-glow-sm transition;
+  }
+
+  .financeiro-metric-strip__item--clickable {
+    @apply cursor-pointer hover:border-glow-border-soft hover:bg-glow-hover-surface;
+  }
+
+  .financeiro-metric-strip__head {
+    @apply flex items-center gap-2;
+  }
+
+  .financeiro-metric-strip__icon {
+    @apply size-3.5 text-glow-text-subtle;
+  }
+
+  .financeiro-metric-strip__label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-metric-strip__value {
+    @apply mt-1 font-satoshi text-lg font-bold text-glow-text;
+  }
+
+  .financeiro-metric-strip__value--positive {
+    @apply text-green-700;
+  }
+
+  .financeiro-metric-strip__value--negative {
+    @apply text-glow-error;
+  }
+
+  .financeiro-metric-strip__hint {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-dashboard-empty {
+    @apply flex gap-4 rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-4 sm:items-start;
+  }
+
+  .financeiro-dashboard-empty__icon-wrap {
+    @apply flex size-10 shrink-0 items-center justify-center rounded-xl bg-glow-surface;
+  }
+
+  .financeiro-dashboard-empty__icon {
+    @apply size-5 text-glow-gold-cta;
+  }
+
+  .financeiro-dashboard-empty__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .financeiro-dashboard-empty__desc {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .financeiro-dashboard-empty__tips {
+    @apply mt-2 list-inside list-disc space-y-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-dashboard-empty__actions {
+    @apply mt-3 flex flex-wrap gap-2;
+  }
+
+  .financeiro-quick-actions {
+    @apply space-y-3;
+  }
+
+  .financeiro-quick-actions__title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .financeiro-quick-actions__grid {
+    @apply grid grid-cols-2 gap-2 sm:grid-cols-4;
+  }
+
+  .financeiro-quick-actions__btn {
+    @apply flex items-center gap-2 rounded-xl border border-glow-border-soft bg-glow-surface px-3 py-3 font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .financeiro-quick-actions__icon {
+    @apply size-4 shrink-0 text-glow-text-subtle;
+  }
+
+  .financeiro-recent {
+    @apply rounded-xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+  }
+
+  .financeiro-recent__header {
+    @apply mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .financeiro-recent__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .financeiro-recent__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-recent__link {
+    @apply font-urbanist text-sm font-medium text-glow-gold-cta transition hover:brightness-110;
+  }
+
+  .financeiro-recent__list {
+    @apply divide-y divide-glow-border-soft;
+  }
+
+  .financeiro-recent__row {
+    @apply flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0;
+  }
+
+  .financeiro-recent__meta {
+    @apply min-w-0;
+  }
+
+  .financeiro-recent__date {
+    @apply block font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-recent__desc {
+    @apply block truncate font-urbanist text-sm text-glow-text;
+  }
+
+  .financeiro-recent__valor {
+    @apply shrink-0 font-satoshi text-sm font-bold;
+  }
+
+  .financeiro-recent__valor--entrada {
+    @apply text-green-700;
+  }
+
+  .financeiro-recent__valor--saida {
+    @apply text-glow-error;
   }
 
   .financeiro-chart-card {
-    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+    @apply rounded-xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+  }
+
+  .financeiro-chart-card--empty {
+    @apply pb-4;
   }
 
   .financeiro-chart-card__header {
-    @apply mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between;
+    @apply mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .financeiro-chart-card__title-row {
+    @apply flex items-start gap-2;
+  }
+
+  .financeiro-chart-card__title-icon {
+    @apply mt-0.5 size-4 text-glow-text-subtle;
   }
 
   .financeiro-chart-card__subtitle {
@@ -3062,19 +3339,19 @@
   }
 
   .financeiro-chart-card__body {
-    @apply relative h-64;
+    @apply h-56;
   }
 
-  .financeiro-chart-card__empty {
-    @apply absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-glow-surface px-6 text-center backdrop-blur-[1px];
+  .financeiro-chart-card__empty-compact {
+    @apply rounded-lg border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-6 text-center;
   }
 
   .financeiro-chart-card__empty-title {
-    @apply font-satoshi text-base font-bold text-glow-text;
+    @apply font-satoshi text-sm font-bold text-glow-text;
   }
 
   .financeiro-chart-card__empty-desc {
-    @apply mt-2 max-w-md font-urbanist text-sm text-glow-text-subtle;
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
   }
 
   .financeiro-kpi-card__label {

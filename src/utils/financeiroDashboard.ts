@@ -29,3 +29,30 @@ export function isFinanceiroDashboardEmptyResponse(error: unknown): boolean {
 
   return status === 404 && code === 'CAIXA_NEGOCIO_NAO_ENCONTRADO'
 }
+
+export function getPreviousPeriodFilter(
+  filtro: FinanceiroPeriodoFiltro,
+): FinanceiroPeriodoFiltro | null {
+  if (!filtro.inicio || !filtro.fim) return null
+
+  const inicio = new Date(filtro.inicio)
+  const fim = new Date(filtro.fim)
+  if (Number.isNaN(inicio.getTime()) || Number.isNaN(fim.getTime())) return null
+
+  const duration = fim.getTime() - inicio.getTime()
+  const prevFim = new Date(inicio.getTime() - 1)
+  const prevInicio = new Date(prevFim.getTime() - duration)
+
+  return {
+    inicio: prevInicio.toISOString(),
+    fim: prevFim.toISOString(),
+  }
+}
+
+export function calcularVariacaoPercentual(atual: number, anterior: number): number | null {
+  if (anterior === 0) {
+    if (atual === 0) return null
+    return 100
+  }
+  return ((atual - anterior) / Math.abs(anterior)) * 100
+}

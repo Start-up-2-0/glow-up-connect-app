@@ -4,13 +4,15 @@ import { useRouter } from 'vue-router'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import FinanceiroPageHeader from '@/components/financeiro/FinanceiroPageHeader.vue'
 import FinanceiroQuickFilters from '@/components/financeiro/FinanceiroQuickFilters.vue'
 import FinanceiroPeriodoFiltro from '@/components/financeiro/FinanceiroPeriodoFiltro.vue'
+import FinanceiroSummaryBar from '@/components/financeiro/FinanceiroSummaryBar.vue'
 import FinanceiroDashboardHero from '@/components/financeiro/FinanceiroDashboardHero.vue'
-import FinanceiroKpiCard from '@/components/financeiro/FinanceiroKpiCard.vue'
+import FinanceiroMetricStrip from '@/components/financeiro/FinanceiroMetricStrip.vue'
+import FinanceiroDashboardEmpty from '@/components/financeiro/FinanceiroDashboardEmpty.vue'
 import FinanceiroChartEntradasSaidas from '@/components/financeiro/FinanceiroChartEntradasSaidas.vue'
-import FinanceiroEmptyState from '@/components/financeiro/FinanceiroEmptyState.vue'
+import FinanceiroQuickActions from '@/components/financeiro/FinanceiroQuickActions.vue'
+import FinanceiroRecentMovimentos from '@/components/financeiro/FinanceiroRecentMovimentos.vue'
 import MovimentoFormModal from '@/components/financeiro/MovimentoFormModal.vue'
 import { FINANCEIRO_PAGE_CLASS } from '@/constants/designTokens'
 import { ROUTE_PATHS } from '@/constants/routes'
@@ -21,12 +23,14 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { financeiroService } from '@/services/financeiroService'
 import {
+  calcularVariacaoPercentual,
   createEmptyFinanceiroDashboard,
+  getPreviousPeriodFilter,
   isFinanceiroDashboardEmptyResponse,
   isFinanceiroDashboardSemMovimentacao,
 } from '@/utils/financeiroDashboard'
 import type { FinanceiroDashboard } from '@/types/negocio/financeiro.types'
-import type { CriarMovimentoPayload, MovimentoDirecao } from '@/types/negocio/financeiro.types'
+import type { CriarMovimentoPayload, MovimentoDirecao, MovimentoFinanceiro } from '@/types/negocio/financeiro.types'
 import { formatCurrency } from '@/utils/formatters'
 
 const router = useRouter()
@@ -39,6 +43,8 @@ const { resolveError } = useApiError()
 const { periodPreset, inicioCustom, fimCustom, apiFiltro, resetPagina } = useFinanceiroFiltros('mes')
 
 const dashboard = ref<FinanceiroDashboard | null>(null)
+const dashboardAnterior = ref<FinanceiroDashboard | null>(null)
+const movimentosRecentes = ref<MovimentoFinanceiro[]>([])
 const loading = ref(false)
 const actionLoading = ref(false)
 const formOpen = ref(false)
@@ -52,18 +58,84 @@ const semMovimentacao = computed(() =>
 
 const lucroPositivo = computed(() => (dashboard.value?.lucroLiquido ?? 0) >= 0)
 
+const entradasTrend = computed(() =>
+  dashboard.value && dashboardAnterior.value
+    ? calcularVariacaoPercentual(dashboard.value.totalEntradas, dashboardAnterior.value.totalEntradas)
+    : null,
+)
+
+const saidasTrend = computed(() =>
+  dashboard.value && dashboardAnterior.value
+    ? calcularVariacaoPercentual(dashboard.value.totalSaidas, dashboardAnterior.value.totalSaidas)
+    : null,
+)
+
+const lucroTrend = computed(() =>
+  dashboard.value && dashboardAnterior.value
+    ? calcularVariacaoPercentual(dashboard.value.lucroLiquido, dashboardAnterior.value.lucroLiquido)
+    : null,
+)
+
+const acoesRapidas = computed(() => {
+  const items = [
+    { id: 'entrada', label: 'Nova venda', icon: 'venda' as const },
+    { id: 'saida', label: 'Nova despesa', icon: 'despesa' as const },
+    { id: 'relatorios', label: 'Ver relatórios', icon: 'relatorio' as const },
+    { id: 'entradas', label: 'Fluxo de caixa', icon: 'grafico' as const },
+  ]
+  return items
+})
+
+async function carregarMovimentosRecentes(filtro: { inicio?: string; fim?: string }) {
+  if (!estabelecimentoId.value) return []
+
+  try {
+    const params = {
+      inicio: filtro.inicio,
+      fim: filtro.fim,
+      pagina: 1,
+      tamanhoPagina: 5,
+    }
+
+    const [entradas, saidas] = await Promise.all([
+      financeiroService.listarEntradas(estabelecimentoId.value, params),
+      financeiroService.listarSaidas(estabelecimentoId.value, params),
+    ])
+
+    return [...entradas.itens, ...saidas.itens]
+      .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+      .slice(0, 5)
+  } catch {
+    return []
+  }
+}
+
 async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
   try {
     const filtro = { inicio: apiFiltro.value.inicio, fim: apiFiltro.value.fim }
-    dashboard.value = await financeiroService.obterDashboard(estabelecimentoId.value, filtro)
+    const filtroAnterior = getPreviousPeriodFilter(filtro)
+
+    const [dash, dashAnterior, recentes] = await Promise.all([
+      financeiroService.obterDashboard(estabelecimentoId.value, filtro),
+      filtroAnterior
+        ? financeiroService.obterDashboard(estabelecimentoId.value, filtroAnterior)
+        : Promise.resolve(null),
+      carregarMovimentosRecentes(filtro),
+    ])
+
+    dashboard.value = dash
+    dashboardAnterior.value = dashAnterior
+    movimentosRecentes.value = recentes
   } catch (err) {
     if (isFinanceiroDashboardEmptyResponse(err)) {
       dashboard.value = createEmptyFinanceiroDashboard({
         inicio: apiFiltro.value.inicio,
         fim: apiFiltro.value.fim,
       })
+      dashboardAnterior.value = null
+      movimentosRecentes.value = []
       return
     }
     notifications.push('error', resolveError(err))
@@ -80,6 +152,13 @@ function onPresetChange() {
 function abrirForm(direcao: MovimentoDirecao) {
   formDirecao.value = direcao
   formOpen.value = true
+}
+
+function onAcaoRapida(id: string) {
+  if (id === 'entrada') abrirForm('entrada')
+  else if (id === 'saida') abrirForm('saida')
+  else if (id === 'relatorios') router.push(ROUTE_PATHS.FINANCEIRO_RELATORIOS)
+  else if (id === 'entradas') router.push(ROUTE_PATHS.FINANCEIRO_ENTRADAS)
 }
 
 async function onCriar(payload: CriarMovimentoPayload) {
@@ -109,17 +188,19 @@ watch(ready, (isReady) => {
 
 <template>
   <div :class="FINANCEIRO_PAGE_CLASS">
-    <FinanceiroPageHeader
-      title="Financeiro"
-      subtitle="Visão geral do seu negócio."
-    >
-      <template v-if="podeGerenciar()" #actions>
-        <div class="flex flex-wrap gap-2">
+    <header class="financeiro-dashboard-header">
+      <div class="financeiro-dashboard-header__top">
+        <div>
+          <h1 class="financeiro-page__title">Financeiro</h1>
+          <p class="financeiro-page__subtitle">Visão geral do seu negócio.</p>
+        </div>
+        <div v-if="podeGerenciar()" class="financeiro-dashboard-header__actions">
           <BaseButton variant="secondary" @click="abrirForm('saida')">+ Nova saída</BaseButton>
           <BaseButton @click="abrirForm('entrada')">+ Nova entrada</BaseButton>
         </div>
-      </template>
-      <template #filters>
+      </div>
+
+      <div class="financeiro-dashboard-header__toolbar">
         <FinanceiroQuickFilters v-model="periodPreset" @aplicar="onPresetChange" />
         <FinanceiroPeriodoFiltro
           v-if="periodPreset === 'custom'"
@@ -127,81 +208,66 @@ watch(ready, (isReady) => {
           v-model:fim="fimCustom"
           @aplicar="load"
         />
-      </template>
-    </FinanceiroPageHeader>
+      </div>
+    </header>
 
     <ContentAlert v-if="contextError" variant="error" :message="contextError" />
     <LoadingSpinner v-else-if="contextLoading || loading" />
 
     <template v-else-if="dashboard">
-      <FinanceiroEmptyState
+      <FinanceiroSummaryBar
+        :entradas="formatCurrency(dashboard.totalEntradas)"
+        :saidas="formatCurrency(dashboard.totalSaidas)"
+        :lucro="formatCurrency(dashboard.lucroLiquido)"
+        :lucro-positivo="lucroPositivo"
+      />
+
+      <FinanceiroDashboardHero
+        :saldo="formatCurrency(dashboard.saldoAtual)"
+        :entradas="formatCurrency(dashboard.totalEntradas)"
+        :saidas="formatCurrency(dashboard.totalSaidas)"
+        :lucro="formatCurrency(dashboard.lucroLiquido)"
+        :lucro-positivo="lucroPositivo"
+        :lucro-trend="lucroTrend"
+        :entradas-trend="entradasTrend"
+        :saidas-trend="saidasTrend"
+        trend-label="vs período anterior"
+      />
+
+      <FinanceiroMetricStrip
+        :lucro="formatCurrency(dashboard.lucroLiquido)"
+        :lucro-positivo="lucroPositivo"
+        :lucro-trend="lucroTrend"
+        :contas="formatCurrency(dashboard.contasEmAberto)"
+        :contas-hint="`${dashboard.quantidadeContasEmAberto} título(s)`"
+        :comissoes="formatCurrency(dashboard.comissoesPeriodo)"
+        @contas="router.push({ path: ROUTE_PATHS.FINANCEIRO_ENTRADAS, query: { status: 'pendente' } })"
+        @comissoes="router.push(ROUTE_PATHS.FINANCEIRO_COMISSOES)"
+      />
+
+      <FinanceiroDashboardEmpty
         v-if="semMovimentacao"
-        title="Nenhuma movimentação neste período"
-        description="Seu dashboard está pronto. Registre entradas e saídas para acompanhar saldo, lucro e estatísticas do negócio."
-      >
-        <template v-if="podeGerenciar()" #action>
-          <div class="flex flex-wrap justify-center gap-2">
-            <BaseButton @click="abrirForm('entrada')">+ Nova entrada</BaseButton>
-            <BaseButton variant="secondary" @click="abrirForm('saida')">+ Nova saída</BaseButton>
-          </div>
-        </template>
-      </FinanceiroEmptyState>
+        :show-actions="podeGerenciar()"
+        @nova-entrada="abrirForm('entrada')"
+        @nova-saida="abrirForm('saida')"
+      />
 
-      <div class="financeiro-dashboard-grid">
-        <FinanceiroDashboardHero
-          class="financeiro-dashboard-grid__hero"
-          :saldo="formatCurrency(dashboard.saldoAtual)"
-          :lucro-liquido="formatCurrency(dashboard.lucroLiquido)"
-          :lucro-positivo="lucroPositivo"
-        />
-
-        <FinanceiroKpiCard
-          class="financeiro-dashboard-grid__entrada"
-          label="Entradas"
-          accent="green"
-          :value="formatCurrency(dashboard.totalEntradas)"
-          variant="positive"
-        />
-        <FinanceiroKpiCard
-          class="financeiro-dashboard-grid__saida"
-          label="Saídas"
-          accent="red"
-          :value="formatCurrency(dashboard.totalSaidas)"
-          variant="negative"
-        />
-
-        <FinanceiroKpiCard
-          label="Lucro líquido"
-          accent="gold"
-          :value="formatCurrency(dashboard.lucroLiquido)"
-          :variant="lucroPositivo ? 'positive' : 'negative'"
-        />
-        <button
-          type="button"
-          class="text-left"
-          @click="router.push({ path: ROUTE_PATHS.FINANCEIRO_ENTRADAS, query: { status: 'pendente' } })"
-        >
-          <FinanceiroKpiCard
-            label="Contas em aberto"
-            accent="blue"
-            :value="formatCurrency(dashboard.contasEmAberto)"
-            :hint="`${dashboard.quantidadeContasEmAberto} título(s)`"
-          />
-        </button>
-        <button type="button" class="text-left" @click="router.push(ROUTE_PATHS.FINANCEIRO_COMISSOES)">
-          <FinanceiroKpiCard
-            label="Comissões (período)"
-            accent="neutral"
-            :value="formatCurrency(dashboard.comissoesPeriodo)"
-          />
-        </button>
-      </div>
+      <FinanceiroQuickActions
+        v-if="podeGerenciar()"
+        :actions="acoesRapidas"
+        @action="onAcaoRapida"
+      />
 
       <FinanceiroChartEntradasSaidas
-        class="mt-6"
         :entradas="dashboard.totalEntradas"
         :saidas="dashboard.totalSaidas"
         :empty="semMovimentacao"
+      />
+
+      <FinanceiroRecentMovimentos
+        :itens="movimentosRecentes"
+        :loading="loading"
+        @ver-todas="router.push(ROUTE_PATHS.FINANCEIRO_ENTRADAS)"
       />
     </template>
 

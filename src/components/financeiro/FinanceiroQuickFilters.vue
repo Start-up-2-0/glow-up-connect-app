@@ -14,7 +14,7 @@ const emit = defineEmits<{
 const presets = [
   { value: 'hoje', label: 'Hoje' },
   { value: '7d', label: '7 dias' },
-  { value: 'mes', label: 'Este mês' },
+  { value: 'mes', label: 'Mês' },
   { value: 'custom', label: 'Personalizado' },
 ] as const
 
@@ -29,13 +29,13 @@ function select(value: string) {
 </script>
 
 <template>
-  <div class="financeiro-quick-filters" role="group" aria-label="Período">
+  <div class="financeiro-segmented" role="group" aria-label="Período">
     <button
       v-for="preset in visiblePresets"
       :key="preset.value"
       type="button"
-      class="financeiro-quick-filters__btn"
-      :class="{ 'financeiro-quick-filters__btn--active': modelValue === preset.value }"
+      class="financeiro-segmented__btn"
+      :class="{ 'financeiro-segmented__btn--active': modelValue === preset.value }"
       @click="select(preset.value)"
     >
       {{ preset.label }}
