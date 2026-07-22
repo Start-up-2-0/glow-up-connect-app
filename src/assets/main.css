@@ -645,17 +645,9 @@
     @apply border-glow-border-accent bg-glow-hover-surface;
   }
 
-  /* Logo sidebar — tamanho e legibilidade no dark (texto escuro da PNG) */
+  /* Logo sidebar */
   .app-logo--sidebar {
     @apply h-[64px] w-full max-w-[186px] min-w-0;
-  }
-
-  .dark .app-logo--sidebar {
-    filter: drop-shadow(0 0 1px rgba(235, 231, 247, 0.85))
-      drop-shadow(0 0 10px rgba(207, 176, 218, 0.35))
-      brightness(2.35)
-      contrast(1.02)
-      saturate(1.08);
   }
 
   /* Sidebar nav — rolagem funcional sem barra visível */
