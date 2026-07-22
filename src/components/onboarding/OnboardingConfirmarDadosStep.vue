@@ -28,7 +28,7 @@ const emit = defineEmits<{
   <div class="mx-auto w-full space-y-4">
     <article :class="ONBOARDING_CONTRATAR_CARD_CLASS">
       <p class="font-urbanist text-sm font-bold text-glow-text">Plano escolhido</p>
-      <p class="mt-2 font-urbanist text-base font-black text-[#e3ac09]">{{ plano.nome }}</p>
+      <p class="mt-2 font-urbanist text-base font-black text-glow-gold-cta">{{ plano.nome }}</p>
       <p class="mt-2 font-urbanist text-sm text-glow-text-muted">{{ plano.descricao }}</p>
       <p class="mt-3 font-urbanist text-base font-black text-glow-text">
         {{ formatBRL(plano.preco) }}

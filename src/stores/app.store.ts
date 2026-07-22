@@ -7,7 +7,7 @@ function isTheme(value: string | null): value is Theme {
   return value === 'light' || value === 'dark'
 }
 
-const DEFAULT_THEME: Theme = 'light'
+const DEFAULT_THEME: Theme = 'dark'
 
 function applyThemeToDocument(theme: Theme) {
   if (typeof document === 'undefined') return
@@ -26,7 +26,7 @@ export const useAppStore = defineStore('app', () => {
   const sidebarOpen = ref(false)
   /** Sidebar desktop recolhida (ícones only) */
   const sidebarCollapsed = ref(false)
-  const theme = ref<Theme>('light')
+  const theme = ref<Theme>('dark')
   const upgradeModal = ref<UpgradeModalState>({ open: false })
 
   const isDark = computed(() => theme.value === 'dark')

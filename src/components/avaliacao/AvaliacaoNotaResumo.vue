@@ -91,11 +91,11 @@ const contagemLabel = computed(() => {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-  color: var(--glow-gold-cta, #e6ad01);
+  color: var(--glow-gold-cta);
 }
 
 .avaliacao-nota-resumo__value {
   font-weight: 700;
-  color: var(--glow-text, #282828);
+  color: var(--glow-text);
 }
 </style>

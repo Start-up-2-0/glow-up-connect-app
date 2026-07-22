@@ -465,7 +465,7 @@ watch(
 }
 
 .dev-servicos-preview__nav-btn--active {
-  border-color: #ffbf00;
+  border-color: var(--glow-gold);
   background: rgba(255, 191, 0, 0.15);
   font-weight: 600;
 }

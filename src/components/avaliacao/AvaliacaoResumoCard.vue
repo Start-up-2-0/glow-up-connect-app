@@ -59,14 +59,14 @@ function barWidth(quantidade: number): string {
   font-family: var(--font-satoshi, sans-serif);
   font-size: 2rem;
   font-weight: 700;
-  color: var(--glow-gold-cta, #d4a017);
+  color: var(--glow-gold-cta);
   line-height: 1;
 }
 
 .avaliacao-resumo-card__meta {
   font-family: var(--font-urbanist, sans-serif);
   font-size: 0.875rem;
-  color: var(--glow-text-subtle, #6b7280);
+  color: var(--glow-text-subtle);
 }
 
 .avaliacao-resumo-card__bar-row {
@@ -75,20 +75,20 @@ function barWidth(quantidade: number): string {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.75rem;
-  color: var(--glow-text-subtle, #6b7280);
+  color: var(--glow-text-subtle);
 }
 
 .avaliacao-resumo-card__bar-track {
   height: 0.4rem;
   border-radius: 999px;
-  background: var(--glow-border-soft, #e5e7eb);
+  background: var(--glow-border-soft);
   overflow: hidden;
 }
 
 .avaliacao-resumo-card__bar-fill {
   height: 100%;
   border-radius: inherit;
-  background: var(--glow-gold-cta, #d4a017);
+  background: var(--glow-gold-cta);
 }
 
 .avaliacao-resumo-card__bar-count {

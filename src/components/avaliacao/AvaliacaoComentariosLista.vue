@@ -33,7 +33,7 @@ defineProps<{
 
 .avaliacao-comentarios-lista__item {
   padding: 0.75rem 0;
-  border-bottom: 1px solid var(--glow-border-soft, #e5e7eb);
+  border-bottom: 1px solid var(--glow-border-soft);
 }
 
 .avaliacao-comentarios-lista__header {
@@ -46,18 +46,18 @@ defineProps<{
 
 .avaliacao-comentarios-lista__nota {
   font-weight: 700;
-  color: var(--glow-gold-cta, #d4a017);
+  color: var(--glow-gold-cta);
 }
 
 .avaliacao-comentarios-lista__meta {
   font-size: 0.8rem;
-  color: var(--glow-text-subtle, #6b7280);
+  color: var(--glow-text-subtle);
 }
 
 .avaliacao-comentarios-lista__texto {
   margin: 0;
   font-size: 0.9rem;
-  color: var(--glow-text, #111827);
+  color: var(--glow-text);
   line-height: 1.45;
 }
 </style>

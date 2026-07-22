@@ -2,12 +2,14 @@
  * Tokens extraídos do Figma MCP — nó 637:1555 (Explorar lojas)
  * Fonte: Aw8s774w1D9yQjD2aBHQM4
  */
+import { GLOW_COLORS } from './designTokens'
+
 export const FIGMA_EXPLORAR = {
   title: {
     fontFamily: 'Satoshi',
     fontSize: '24px',
     fontWeight: 700,
-    color: '#282828',
+    color: GLOW_COLORS.text,
     lineHeight: '32px',
   },
   subtitle: {
@@ -33,14 +35,14 @@ export const FIGMA_EXPLORAR = {
     width: '195px',
     height: '34px',
     borderRadius: '12px',
-    background: '#f3f3f3',
+    background: GLOW_COLORS.surface,
     border: '0.5px solid rgba(40, 40, 40, 0.25)',
     gap: '10px',
     iconSize: '20px',
     fontFamily: 'Urbanist',
     fontSize: '14px',
     fontWeight: 400,
-    color: '#282828',
+    color: GLOW_COLORS.text,
   },
   grid: {
     gap: '10px',
@@ -57,7 +59,7 @@ export const FIGMA_EXPLORAR = {
       fontFamily: 'Urbanist',
       fontSize: '16px',
       fontWeight: 700,
-      color: '#282828',
+      color: GLOW_COLORS.text,
     },
     distancia: {
       gap: '4px',
@@ -69,14 +71,14 @@ export const FIGMA_EXPLORAR = {
       gap: '6px',
       iconSize: '16px',
       fontSize: '12px',
-      valueColor: '#282828',
+      valueColor: GLOW_COLORS.text,
       countColor: 'rgba(40, 40, 40, 0.6)',
     },
     endereco: {
       gap: '10px',
       iconSize: '14px',
       fontSize: '14px',
-      color: '#282828',
+      color: GLOW_COLORS.text,
     },
   },
 } as const

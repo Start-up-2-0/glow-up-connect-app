@@ -59,7 +59,7 @@ function select(nota: number) {
   margin-bottom: 0.5rem;
   font-family: var(--font-urbanist, sans-serif);
   font-size: 0.875rem;
-  color: var(--glow-text-subtle, #6b7280);
+  color: var(--glow-text-subtle);
 }
 
 .avaliacao-star-rating__row {
@@ -74,23 +74,23 @@ function select(nota: number) {
   align-items: center;
   gap: 0.15rem;
   padding: 0.35rem 0.45rem;
-  border: 1px solid var(--glow-border-soft, #e5e7eb);
+  border: 1px solid var(--glow-border-soft);
   border-radius: 0.5rem;
   background: transparent;
-  color: var(--glow-text-subtle, #9ca3af);
+  color: var(--glow-text-subtle);
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
 .avaliacao-star-rating__btn:not(:disabled):hover {
-  border-color: var(--glow-gold-cta, #d4a017);
-  color: var(--glow-gold-cta, #d4a017);
+  border-color: var(--glow-gold-cta);
+  color: var(--glow-gold-cta);
 }
 
 .avaliacao-star-rating__btn--active {
-  border-color: var(--glow-gold-cta, #d4a017);
-  background: color-mix(in srgb, var(--glow-gold-cta, #d4a017) 12%, transparent);
-  color: var(--glow-gold-cta, #d4a017);
+  border-color: var(--glow-gold-cta);
+  background: color-mix(in srgb, var(--glow-gold-cta) 12%, transparent);
+  color: var(--glow-gold-cta);
 }
 
 .avaliacao-star-rating__btn:disabled {

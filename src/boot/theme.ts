@@ -1,5 +1,5 @@
 const THEME_STORAGE_KEY = 'guc_theme'
-const DEFAULT_THEME = 'light'
+const DEFAULT_THEME = 'dark'
 
 function applyTheme(): void {
   const saved = localStorage.getItem(THEME_STORAGE_KEY)

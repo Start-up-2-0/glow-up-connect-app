@@ -153,7 +153,7 @@ function goToChangeEmail() {
       <h1 :class="GLOW_RECOVERY_TITLE_CLASS">Verifique o seu e-mail</h1>
       <p :class="[GLOW_RECOVERY_SUBTITLE_CLASS, 'mt-2']">
         Insira o código que foi enviado para<br />
-        <span class="font-semibold text-[#e4ac04]">{{ maskedEmail }}</span>
+        <span class="font-semibold text-glow-gold-cta">{{ maskedEmail }}</span>
       </p>
     </header>
 

@@ -1,12 +1,34 @@
-/** Design tokens extraídos do Figma — Glow Up Connect */
+/** Design tokens semânticos — Glow Up Connect */
 export const GLOW_COLORS = {
+  /** Marca */
   gold: '#ffbf00',
   goldDark: '#c59400',
+  goldCta: '#e6ad01',
+  primary: '#3c5ccf',
+  secondary: '#a38a2d',
+
+  /** Texto (light) */
   text: '#282828',
   textMuted: 'rgba(40, 40, 40, 0.4)',
   textSoft: 'rgba(40, 40, 40, 0.8)',
-  primary: '#3c5ccf',
-  secondary: '#a38a2d',
+  surface: '#f3f3f3',
+
+  /** Elevação dark premium */
+  darkBase: '#0c0a08',
+  darkSurface: '#1a1714',
+  darkElevated: '#2a2520',
+  darkHighlight: '#3d3528',
+  darkText: '#f5f2eb',
+
+  /** Status */
+  success: '#54804e',
+  successBg: '#c4f2cc',
+  successAction: '#4bc281',
+  error: '#cf3f3f',
+  neutral: '#7a7b7a',
+  warning: '#aa682d',
+
+  /** Gradientes decorativos */
   gradientFrom: 'rgba(163, 138, 45, 0.2)',
   gradientTo: 'rgba(60, 92, 207, 0.2)',
 } as const
@@ -74,13 +96,13 @@ export const GLOW_RECOVERY_BTN_SECONDARY_CLASS =
   'flex h-[53px] w-full items-center justify-center rounded border-[0.5px] border-glow-text/60 bg-white font-inter text-base font-medium text-glow-text transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60'
 
 export const GLOW_RECOVERY_BTN_LOCKED_CLASS =
-  'flex h-[53px] w-full items-center justify-center gap-2.5 rounded border-[0.5px] border-[#a3a3a3] bg-white font-inter text-base font-medium text-[#a3a3a3] cursor-not-allowed'
+  'flex h-[53px] w-full items-center justify-center gap-2.5 rounded border-[0.5px] border-glow-disabled bg-white font-inter text-base font-medium text-glow-disabled cursor-not-allowed'
 
 export const GLOW_RECOVERY_BACK_LINK_CLASS =
   'inline-flex items-center gap-2.5 py-2.5 font-inter text-xs font-normal text-glow-text/60 transition hover:text-glow-text'
 
 export const GLOW_RECOVERY_ALERT_CLASS =
-  'flex w-full items-center gap-2.5 rounded bg-[rgba(207,63,63,0.1)] px-2.5 py-2.5 font-inter text-xs font-medium text-[#cf3f3f]'
+  'flex w-full items-center gap-2.5 rounded bg-glow-error-bg px-2.5 py-2.5 font-inter text-xs font-medium text-glow-error'
 
 /** Link público de agendamento — shell fixo light (Figma Fluxo Agendamento Público) */
 export const AGENDAR_WIZARD_CONTENT_CLASS = 'mx-auto w-full max-w-[695px]'
@@ -92,20 +114,20 @@ export const AGENDAR_BTN_OUTLINE_CLASS =
   'inline-flex h-[34px] items-center justify-center gap-2 rounded-xl border-[0.5px] border-glow-text/40 px-4 font-inter text-sm text-glow-text transition hover:bg-zinc-50'
 
 export const AGENDAR_BTN_CONTINUE_CLASS =
-  'flex h-10 w-full items-center justify-center rounded bg-glow-gold px-2.5 font-satoshi text-base font-bold text-glow-text transition hover:brightness-95 disabled:cursor-not-allowed disabled:bg-[rgba(163,163,163,0.1)] disabled:text-[#a3a3a3]'
+  'flex h-10 w-full items-center justify-center rounded bg-glow-gold px-2.5 font-satoshi text-base font-bold text-glow-text transition hover:brightness-95 disabled:cursor-not-allowed disabled:bg-glow-neutral-bg disabled:text-glow-disabled'
 
 export const AGENDAR_BTN_CONTINUE_MUTED_CLASS =
-  'flex h-10 w-full items-center justify-center rounded bg-[rgba(163,163,163,0.1)] px-2.5 font-satoshi text-base font-bold text-[#a3a3a3] disabled:cursor-not-allowed'
+  'flex h-10 w-full items-center justify-center rounded bg-glow-neutral-bg px-2.5 font-satoshi text-base font-bold text-glow-disabled disabled:cursor-not-allowed'
 
 export const AGENDAR_PRICE_PILL_CLASS =
-  'inline-flex shrink-0 items-center justify-center rounded-full bg-[rgba(84,128,78,0.2)] px-4 py-1 font-urbanist text-base font-bold text-[#54804e]'
+  'inline-flex shrink-0 items-center justify-center rounded-full bg-glow-success-bg px-4 py-1 font-urbanist text-base font-bold text-glow-success-dark'
 
 /** Card central do wizard Contratar Plano (dashboard — segue tema light/dark) */
 export const ONBOARDING_CONTRATAR_PAGE_CLASS =
   '-mx-4 -mt-4 min-h-full bg-glow-canvas px-4 pb-8 pt-9 lg:-mx-6 lg:-mt-6 lg:px-8'
 
 export const ONBOARDING_CONTRATAR_CARD_CLASS =
-  'rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-6 py-8 shadow-sm sm:px-10 sm:py-10'
+  'rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-6 py-8 shadow-glow-sm sm:px-10 sm:py-10'
 
 export const ONBOARDING_CONTRATAR_FORM_CLASS = 'flex w-full flex-col gap-6'
 
@@ -169,3 +191,10 @@ export const EQUIPE_PAGE_CLASS = 'equipe-page'
 
 /** Módulo Financeiro (dashboard) */
 export const FINANCEIRO_PAGE_CLASS = 'financeiro-page'
+
+/** Sidebar nav — item ativo com accent premium */
+export const SIDEBAR_NAV_ITEM_CLASS =
+  'group flex h-11 w-full items-center gap-3 rounded-lg py-2 pl-2 pr-2 transition-colors hover:bg-glow-surface-tint'
+
+export const SIDEBAR_NAV_ITEM_ACTIVE_CLASS =
+  'bg-glow-gold-selected pl-4 font-medium shadow-[inset_2px_0_0_var(--glow-gold-cta)]'

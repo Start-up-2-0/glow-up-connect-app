@@ -66,7 +66,7 @@ const fillWidth = computed(() => {
   width: 384px;
   max-width: calc(100% - 76px);
   height: 12px;
-  border: 1px solid #ffbf00;
+  border: 1px solid var(--glow-gold);
   box-sizing: border-box;
   pointer-events: none;
   z-index: 0;
@@ -78,7 +78,7 @@ const fillWidth = computed(() => {
   left: 50px;
   top: 23px;
   height: 5px;
-  background-color: #ffbf00;
+  background-color: var(--glow-gold);
   transition: width 0.3s ease;
   pointer-events: none;
   z-index: 1;
@@ -94,7 +94,7 @@ const fillWidth = computed(() => {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background-color: #ffbf00;
+  background-color: var(--glow-gold);
   z-index: 2;
 }
 
@@ -119,7 +119,7 @@ const fillWidth = computed(() => {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background-color: #ffbf00;
+  background-color: var(--glow-gold);
   filter: blur(10px);
   z-index: -1;
 }
@@ -130,7 +130,7 @@ const fillWidth = computed(() => {
   font-family: Inter, system-ui, sans-serif;
   font-size: 20px;
   font-weight: 800;
-  color: #fff;
+  color: white;
   line-height: 1;
   user-select: none;
 }

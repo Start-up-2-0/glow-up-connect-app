@@ -4,6 +4,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import type { NavChildItem } from '@/constants/navigation'
 import type { NavIconName } from '@/types/navIcon.types'
 import { resolveNavIcon } from '@/utils/navIcon'
+import { SIDEBAR_NAV_ITEM_ACTIVE_CLASS, SIDEBAR_NAV_ITEM_CLASS } from '@/constants/designTokens'
 import SidebarNavIcon from './icons/SidebarNavIcon.vue'
 import IconNavCaret from './icons/IconNavCaret.vue'
 
@@ -59,12 +60,10 @@ function onNavigate() {
   <div class="w-full">
     <button
       type="button"
-      class="group flex h-11 w-full items-center gap-3 rounded-lg py-2 pl-2 pr-2 transition-colors"
       :class="[
+        SIDEBAR_NAV_ITEM_CLASS,
         collapsed ? 'w-[60px] justify-center px-2' : '',
-        expanded && !collapsed
-          ? 'bg-glow-gold-selected pl-4'
-          : 'hover:bg-black/[0.03]',
+        expanded && !collapsed ? SIDEBAR_NAV_ITEM_ACTIVE_CLASS : '',
       ]"
       :aria-expanded="collapsed ? undefined : expanded"
       @click="toggleExpanded"
@@ -96,7 +95,7 @@ function onNavigate() {
         :key="child.id"
         :to="child.to"
         type="button"
-        class="group flex h-11 items-center rounded-lg py-2 transition-colors hover:bg-black/[0.03]"
+        class="group flex h-11 items-center rounded-lg py-2 transition-colors hover:bg-glow-surface-tint"
         :class="isChildActive(child) ? 'gap-2.5 px-6' : 'px-5'"
         @click="onNavigate"
       >
