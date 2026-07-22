@@ -26,8 +26,8 @@ const emit = defineEmits<{
           Cancelar assinatura?
         </h2>
         <p class="mb-6 text-sm text-glow-text-subtle">
-          Você perderá o acesso aos módulos operacionais ao final do período atual.
-          Esta ação não pode ser desfeita facilmente.
+          Você continuará com acesso completo ao plano até o fim do período já contratado.
+          Após essa data, a assinatura será encerrada automaticamente.
         </p>
         <div class="flex justify-end gap-2">
           <BaseButton variant="ghost" :disabled="loading" @click="emit('cancel')">

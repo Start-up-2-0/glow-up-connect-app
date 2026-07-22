@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import BaseButton from '@/components/ui/BaseButton.vue'
@@ -13,19 +14,23 @@ import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useTrocarEstabelecimento } from '@/composables/useTrocarEstabelecimento'
 import { useAssinaturaStore } from '@/stores/assinatura.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
+import { useUserStore } from '@/stores/user.store'
 import { useApiError } from '@/composables/useApiError'
 import { assinaturaService } from '@/services/assinaturaService'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { redirectToLandingPlanos } from '@/utils/landingUrl'
+import { formatDate } from '@/utils/formatters'
 import type { AssinaturaOnboardingContexto } from '@/types/assinaturaOnboarding.types'
 import type { EstabelecimentoOnboarding } from '@/types/assinatura.types'
 import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
 
+const router = useRouter()
 const { assinaturaId, planoNome, estabelecimentoAtivo, ensureContext } = useNegocioContext()
 const { trocarEstabelecimento } = useTrocarEstabelecimento()
 const assinaturaStore = useAssinaturaStore()
 const { assinatura, loading } = storeToRefs(assinaturaStore)
 const notifications = useNotificationsStore()
+const userStore = useUserStore()
 const { resolveError } = useApiError()
 
 const dialogAberto = ref(false)
@@ -55,10 +60,20 @@ async function confirmarCancelamento() {
   if (!assinaturaId.value) return
   cancelando.value = true
   try {
-    await assinaturaStore.cancelar(assinaturaId.value)
-    notifications.push('success', 'Assinatura cancelada.')
+    const resultado = await assinaturaStore.cancelar(assinaturaId.value)
     dialogAberto.value = false
-    redirectToLandingPlanos()
+
+    if (resultado.status === 'CancelamentoAgendado') {
+      notifications.push(
+        'success',
+        `Cancelamento agendado. Você mantém acesso até ${formatDate(resultado.fim ?? resultado.proximaDataVencimento)}.`,
+      )
+      return
+    }
+
+    await userStore.fetchMe(true)
+    notifications.push('success', 'Assinatura encerrada.')
+    await router.push(ROUTE_PATHS.ASSINATURA_DESPEDIDA)
   } catch (err) {
     notifications.push('error', resolveError(err))
   } finally {
@@ -106,6 +121,17 @@ function concluirPagamento() {
       :dias-trial="assinatura.diasTrial"
       :proxima-data-vencimento="assinatura.proximaDataVencimento"
     />
+
+    <BaseCard
+      v-if="assinatura?.status === 'CancelamentoAgendado'"
+      title="Cancelamento agendado"
+    >
+      <p class="text-sm text-glow-text-subtle">
+        Sua assinatura permanece ativa até
+        <strong>{{ formatDate(assinatura.fim ?? assinatura.proximaDataVencimento) }}</strong>.
+        Depois disso, o acesso ao plano será encerrado automaticamente.
+      </p>
+    </BaseCard>
 
     <BaseCard
       v-if="assinatura?.status === 'PendentePagamento'"
@@ -166,7 +192,7 @@ function concluirPagamento() {
       >
         <BaseButton variant="secondary">Painel da rede</BaseButton>
       </RouterLink>
-      <BaseButton variant="danger" @click="dialogAberto = true">
+      <BaseButton variant="danger" :disabled="assinatura?.status === 'CancelamentoAgendado'" @click="dialogAberto = true">
         Cancelar assinatura
       </BaseButton>
     </div>

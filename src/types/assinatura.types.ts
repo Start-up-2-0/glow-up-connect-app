@@ -8,6 +8,7 @@ export type StatusAssinatura =
   | 'Cancelada'
   | 'Suspensa'
   | 'Expirada'
+  | 'CancelamentoAgendado'
 
 export type StatusCobranca =
   | 'Pendente'
@@ -78,6 +79,7 @@ export interface Assinatura {
   gateway: string
   inicio: string
   fim: string | null
+  canceladoEm?: string | null
   dataReferenciaCiclo: string
   proximaDataVencimento: string
   proximaDataGeracaoCobranca: string

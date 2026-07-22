@@ -31,6 +31,7 @@ const { roleExibicao } = useDashboardRole()
 const {
   estabelecimentoAtivo,
   assinaturaAtiva,
+  assinaturaStatus,
   emTrial,
   diasTrial,
   proximaDataVencimento,
@@ -132,13 +133,37 @@ watch(
     />
 
     <div
-      v-if="estabelecimentoAtivo && !assinaturaAtiva"
+      v-if="estabelecimentoAtivo && assinaturaStatus === 'PendentePagamento'"
       class="dashboard-alert"
     >
-      <p class="dashboard-alert__title">Assinatura pendente</p>
+      <p class="dashboard-alert__title">Pagamento pendente</p>
       <p class="dashboard-alert__desc">Conclua o pagamento para liberar todos os módulos.</p>
       <RouterLink :to="ROUTE_PATHS.CONFIG_ASSINATURA">
         <BaseButton variant="primary" size="sm">Gerenciar assinatura</BaseButton>
+      </RouterLink>
+    </div>
+
+    <div
+      v-else-if="estabelecimentoAtivo && assinaturaStatus === 'CancelamentoAgendado'"
+      class="dashboard-alert dashboard-alert--info"
+    >
+      <p class="dashboard-alert__title">Cancelamento agendado</p>
+      <p class="dashboard-alert__desc">
+        Você mantém acesso ao plano até o fim do período contratado.
+      </p>
+      <RouterLink :to="ROUTE_PATHS.CONFIG_ASSINATURA">
+        <BaseButton variant="secondary" size="sm">Ver detalhes</BaseButton>
+      </RouterLink>
+    </div>
+
+    <div
+      v-else-if="estabelecimentoAtivo && !assinaturaAtiva"
+      class="dashboard-alert"
+    >
+      <p class="dashboard-alert__title">Assinatura inativa</p>
+      <p class="dashboard-alert__desc">Reative sua assinatura para voltar a usar todos os recursos.</p>
+      <RouterLink :to="ROUTE_PATHS.ASSINATURA_DESPEDIDA">
+        <BaseButton variant="primary" size="sm">Reativar assinatura</BaseButton>
       </RouterLink>
     </div>
 

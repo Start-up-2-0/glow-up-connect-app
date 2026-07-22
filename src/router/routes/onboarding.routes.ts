@@ -45,6 +45,17 @@ export const onboardingRoutes: RouteRecordRaw[] = [
     }),
   },
   {
+    path: ROUTE_PATHS.ASSINATURA_DESPEDIDA,
+    name: ROUTE_NAMES.ASSINATURA_DESPEDIDA,
+    component: () => import('@/views/assinatura/AssinaturaDespedidaView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      skipNegocioGuard: true,
+      title: 'Até breve',
+    },
+  },
+  {
     path: ROUTE_PATHS.ASSINATURA_PAGAMENTO_SUCESSO,
     name: ROUTE_NAMES.ASSINATURA_PAGAMENTO_SUCESSO,
     component: () => import('@/views/assinatura/AssinaturaPagamentoRetornoView.vue'),

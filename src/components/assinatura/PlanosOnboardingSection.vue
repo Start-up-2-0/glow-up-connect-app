@@ -6,6 +6,7 @@ import EmptyState from '@/components/feedback/EmptyState.vue'
 import PlanoCard from '@/components/assinatura/PlanoCard.vue'
 import PromocaoLancamentoBanner from '@/components/assinatura/PromocaoLancamentoBanner.vue'
 import { usePlanosStore } from '@/stores/planos.store'
+import { useNegocioStore } from '@/stores/negocio.store'
 import { useApiError } from '@/composables/useApiError'
 
 withDefaults(
@@ -20,12 +21,18 @@ withDefaults(
 )
 
 const planosStore = usePlanosStore()
+const negocioStore = useNegocioStore()
 const { planos, promocao, loading } = storeToRefs(planosStore)
 const { resolveError } = useApiError()
 const erro = ref<string | null>(null)
 const comparativaAberta = ref(false)
 
 const planoEssencial = computed(() => planos.value.find((p) => p.nome === 'Essencial'))
+const exibirPromocaoTrial = computed(() => {
+  if (!promocao.value?.disponivel) return false
+  const jaTeveAssinatura = negocioStore.estabelecimentos.some((e) => Boolean(e.assinaturaId))
+  return !jaTeveAssinatura
+})
 
 onMounted(async () => {
   try {
@@ -38,7 +45,7 @@ onMounted(async () => {
 
 <template>
   <div>
-    <PromocaoLancamentoBanner v-if="promocao?.disponivel" :promocao="promocao" />
+    <PromocaoLancamentoBanner v-if="exibirPromocaoTrial" :promocao="promocao!" />
 
     <LoadingSpinner v-if="loading" />
     <p v-else-if="erro" class="text-center text-sm text-red-600">{{ erro }}</p>

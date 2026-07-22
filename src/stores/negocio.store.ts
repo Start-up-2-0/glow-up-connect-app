@@ -39,6 +39,7 @@ export const useNegocioStore = defineStore('negocio', () => {
   const modulos = computed(() => estabelecimentoAtivo.value?.modulos ?? [])
   const permissoes = computed(() => estabelecimentoAtivo.value?.permissoes ?? [])
   const assinaturaAtiva = computed(() => estabelecimentoAtivo.value?.assinaturaAtiva ?? false)
+  const assinaturaStatus = computed(() => estabelecimentoAtivo.value?.assinaturaStatus ?? null)
   const assinaturaId = computed(() => estabelecimentoAtivo.value?.assinaturaId ?? null)
   const planoId = computed(() => estabelecimentoAtivo.value?.planoId ?? null)
   const planoNome = computed(() => estabelecimentoAtivo.value?.planoNome ?? null)
@@ -192,6 +193,7 @@ export const useNegocioStore = defineStore('negocio', () => {
     modulos,
     permissoes,
     assinaturaAtiva,
+    assinaturaStatus,
     assinaturaId,
     planoId,
     planoNome,

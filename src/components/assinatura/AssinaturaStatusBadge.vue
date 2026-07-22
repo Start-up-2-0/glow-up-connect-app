@@ -15,6 +15,7 @@ const config = computed(() => {
     Cancelada: { label: 'Cancelada', className: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
     Suspensa: { label: 'Suspensa', className: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200' },
     Expirada: { label: 'Expirada', className: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200' },
+    CancelamentoAgendado: { label: 'Cancelamento agendado', className: 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200' },
     Pendente: { label: 'Aguardando pagamento', className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200' },
     Pago: { label: 'Pago', className: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' },
     Recusado: { label: 'Recusado', className: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200' },

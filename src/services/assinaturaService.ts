@@ -1,5 +1,5 @@
 import api from './api'
-import type { ApiSuccessResponse, ApiSuccessResponseVoid } from '@/types/api.types'
+import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
   Assinatura,
   AdicionarEstabelecimentoPayload,
@@ -33,8 +33,8 @@ export const assinaturaService = {
 
   cancelar(assinaturaId: number) {
     return api
-      .post<ApiSuccessResponseVoid>(`/assinaturas/${assinaturaId}/cancelar`)
-      .then((response) => response.data)
+      .post<ApiSuccessResponse<Assinatura>>(`/assinaturas/${assinaturaId}/cancelar`)
+      .then(unwrap)
   },
 
   listarCobrancas(assinaturaId: number) {

@@ -89,6 +89,13 @@ export const negocioGuard: NavigationGuard = async (to) => {
     !ignoraAssinaturaAtiva &&
     negocioStore.estabelecimentos.length > 0
   ) {
+    const status = negocioStore.assinaturaStatus
+    const encerrada = status === 'Cancelada' || status === 'Expirada' || status === 'Suspensa'
+
+    if (encerrada && to.path !== ROUTE_PATHS.ASSINATURA_DESPEDIDA) {
+      return { path: ROUTE_PATHS.ASSINATURA_DESPEDIDA }
+    }
+
     if (roleLoja === 'Profissional') {
       useNotificationsStore().push(
         'warning',
