@@ -3066,7 +3066,7 @@
   }
 
   .financeiro-chart-card__empty {
-    @apply absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-glow-surface/90 px-6 text-center backdrop-blur-[1px];
+    @apply absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-glow-surface px-6 text-center backdrop-blur-[1px];
   }
 
   .financeiro-chart-card__empty-title {
