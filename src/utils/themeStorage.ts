@@ -2,7 +2,7 @@ import { STORAGE_KEYS } from '@/constants/storageKeys'
 import type { Theme } from '@/types/theme.types'
 
 /** Incrementar quando a identidade visual exigir reaplicar o tema padrão. */
-export const CURRENT_THEME_VERSION = '2'
+export const CURRENT_THEME_VERSION = '3'
 
 export function isTheme(value: string | null): value is Theme {
   return value === 'light' || value === 'dark'

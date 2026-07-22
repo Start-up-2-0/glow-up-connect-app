@@ -10,148 +10,163 @@
 
 @layer base {
   :root {
-    /* Marca — valores fixos */
-    --brand-gold: #ffbf00;
-    --brand-gold-dark: #c59400;
-    --brand-blue: #3c5ccf;
-    --brand-purple: #6c63ff;
-    --brand-purple-soft: #4f47d2;
-    --brand-secondary: #a38a2d;
+    /* Paleta oficial — identidade premium roxa/lilás */
+    --palette-purple-black: #0d0825;
+    --palette-lilac-white: #ebe7f7;
+    --palette-purple-dark: #2c154b;
+    --palette-gray-purple: #61526b;
+    --palette-purple-medium: #522e5f;
+    --palette-lilac-medium: #92679b;
+    --palette-gray-lilac: #9e94aa;
+    --palette-purple-light: #755e8a;
+    --palette-lilac-light: #cfb0da;
+    --palette-lavender: #b4a5ca;
+    --palette-burnt-rose: #995d5f;
+    --palette-wine-brown: #4e2c30;
 
     /*
-     * Hierarquia premium — tema claro (Glow Up)
-     * Mapeamento da referência roxa: base → surface → elevated → highlight
+     * Tema claro — seções lavanda da referência
+     * base (#EBE7F7) → surface → elevated → highlight
      */
-    --glow-bg-base: #d9d2c8;
-    --glow-bg-surface: #e8e2d9;
-    --glow-bg-elevated: #f5f1ea;
-    --glow-bg-highlight: #cfc6b8;
+    --glow-bg-base: var(--palette-lilac-white);
+    --glow-bg-surface: #f3f0f8;
+    --glow-bg-elevated: #faf9fd;
+    --glow-bg-highlight: #e3ddee;
 
     --glow-canvas: var(--glow-bg-base);
     --glow-surface: var(--glow-bg-surface);
     --glow-hover-surface: var(--glow-bg-highlight);
-    --glow-surface-tint: rgba(197, 148, 0, 0.06);
+    --glow-surface-tint: rgba(146, 103, 155, 0.06);
 
-    /* Texto — quente, alto contraste */
-    --glow-text: #1a1612;
-    --glow-text-muted: rgba(26, 22, 18, 0.45);
-    --glow-text-soft: rgba(26, 22, 18, 0.82);
-    --glow-text-subtle: rgba(26, 22, 18, 0.58);
-    --glow-text-hover: rgba(26, 22, 18, 0.72);
-    --glow-placeholder: rgba(26, 22, 18, 0.42);
+    /* Texto */
+    --glow-text: var(--palette-purple-black);
+    --glow-text-muted: var(--palette-gray-purple);
+    --glow-text-soft: #3d2a5c;
+    --glow-text-subtle: var(--palette-purple-light);
+    --glow-text-hover: var(--palette-purple-medium);
+    --glow-placeholder: var(--palette-gray-lilac);
 
-    /* Bordas discretas */
-    --glow-border-soft: rgba(26, 22, 18, 0.09);
-    --glow-border-sidebar: rgba(26, 22, 18, 0.11);
-    --glow-border-accent: rgba(197, 148, 0, 0.42);
+    /* Bordas */
+    --glow-border-soft: rgba(44, 21, 75, 0.1);
+    --glow-border-sidebar: rgba(44, 21, 75, 0.14);
+    --glow-border-accent: rgba(146, 103, 155, 0.45);
 
-    /* Accent — ouro usado com parcimônia (≈ lilás médio da referência) */
-    --glow-gold: var(--brand-gold);
-    --glow-gold-dark: var(--brand-gold-dark);
-    --glow-gold-cta: #c59400;
-    --glow-accent: var(--brand-gold-dark);
-    --glow-accent-glow: rgba(197, 148, 0, 0.16);
+    /* Accent — lilás médio (botões, nav ativo, ícones) */
+    --glow-accent: var(--palette-lilac-medium);
+    --glow-accent-glow: rgba(207, 176, 218, 0.45);
+    --glow-gold: var(--palette-lilac-light);
+    --glow-gold-dark: var(--palette-lilac-medium);
+    --glow-gold-cta: var(--palette-lilac-medium);
     --glow-gold-soft: var(--glow-accent-glow);
-    --glow-gold-selected: rgba(197, 148, 0, 0.1);
+    --glow-gold-selected: rgba(146, 103, 155, 0.14);
+
+    /* Aliases de marca */
+    --brand-gold: var(--palette-lilac-light);
+    --brand-gold-dark: var(--palette-lilac-medium);
+    --brand-blue: #5b7fd4;
+    --brand-purple: var(--palette-purple-medium);
+    --brand-purple-soft: var(--palette-lavender);
+    --brand-secondary: var(--palette-burnt-rose);
     --glow-primary: var(--brand-blue);
-    --glow-purple: var(--brand-purple);
-    --glow-purple-soft: var(--brand-purple-soft);
-    --glow-secondary: var(--brand-secondary);
-    --glow-avatar-bg: #2a2520;
+    --glow-purple: var(--palette-purple-medium);
+    --glow-purple-soft: var(--palette-lavender);
+    --glow-secondary: var(--palette-burnt-rose);
+    --glow-avatar-bg: var(--palette-purple-dark);
 
-    /* Auxiliares de profundidade (≈ cinzas arroxeados da referência) */
-    --glow-neutral-warm: #6b6358;
-    --glow-neutral-soft: #9e9490;
-    --glow-accent-muted: #b8a078;
+    /* Auxiliares */
+    --glow-neutral-warm: var(--palette-gray-purple);
+    --glow-neutral-soft: var(--palette-gray-lilac);
+    --glow-accent-muted: var(--palette-lavender);
 
-    /* Status semânticos */
-    --glow-success: #3d6b38;
-    --glow-success-bg: rgba(75, 194, 129, 0.14);
+    /* Status */
+    --glow-success: #4a9e6e;
+    --glow-success-bg: rgba(74, 158, 110, 0.14);
     --glow-success-action: #4bc281;
-    --glow-success-dark: #2f5a2b;
-    --glow-error: #b83838;
-    --glow-error-bg: rgba(207, 63, 63, 0.12);
-    --glow-neutral: #6b6358;
-    --glow-neutral-bg: rgba(107, 99, 88, 0.1);
-    --glow-warning: #8a5a28;
-    --glow-warning-bg: rgba(170, 104, 45, 0.12);
+    --glow-success-dark: #2f6b48;
+    --glow-error: var(--palette-burnt-rose);
+    --glow-error-bg: rgba(153, 93, 95, 0.14);
+    --glow-neutral: var(--palette-gray-purple);
+    --glow-neutral-bg: rgba(97, 82, 107, 0.1);
+    --glow-warning: var(--palette-burnt-rose);
+    --glow-warning-bg: rgba(153, 93, 95, 0.12);
     --glow-info: var(--brand-blue);
-    --glow-info-bg: rgba(60, 92, 207, 0.12);
-    --glow-disabled: #9e9490;
-    --glow-placeholder-surface: #c4bdb3;
-    --glow-promo-border: #b8940a;
-    --glow-promo-bg: #f0e4b8;
-    --glow-promo-bg-soft: rgba(197, 148, 0, 0.12);
-    --glow-promo-bg-dashboard: rgba(197, 148, 0, 0.1);
-    --glow-promo-bg-dark: #3d3520;
-    --glow-promo-text: #524917;
-    --glow-promo-accent: #8a6910;
-    --glow-inverse-surface: #1a1612;
+    --glow-info-bg: rgba(91, 127, 212, 0.12);
+    --glow-disabled: var(--palette-gray-lilac);
+    --glow-placeholder-surface: #d5cfe0;
+    --glow-promo-border: var(--palette-lilac-medium);
+    --glow-promo-bg: rgba(207, 176, 218, 0.35);
+    --glow-promo-bg-soft: rgba(207, 176, 218, 0.25);
+    --glow-promo-bg-dashboard: rgba(146, 103, 155, 0.1);
+    --glow-promo-bg-dark: var(--palette-purple-dark);
+    --glow-promo-text: var(--palette-purple-black);
+    --glow-promo-accent: var(--palette-lilac-medium);
+    --glow-inverse-surface: var(--palette-purple-black);
 
-    /* Sombras — profundidade sutil */
-    --glow-shadow-sm: 0 1px 2px rgba(26, 22, 18, 0.05), 0 0 0 1px rgba(26, 22, 18, 0.05);
-    --glow-shadow-md: 0 8px 24px rgba(26, 22, 18, 0.08), 0 0 0 1px rgba(26, 22, 18, 0.04);
-    --glow-shadow-lg: 0 16px 40px rgba(26, 22, 18, 0.1);
-    --glow-shadow-card: 0 2px 8px rgba(26, 22, 18, 0.06), 0 0 0 1px rgba(26, 22, 18, 0.06);
+    /* Sombras com matiz roxa */
+    --glow-shadow-sm: 0 1px 2px rgba(13, 8, 37, 0.06), 0 0 0 1px rgba(44, 21, 75, 0.06);
+    --glow-shadow-md: 0 8px 24px rgba(13, 8, 37, 0.1), 0 0 0 1px rgba(44, 21, 75, 0.05);
+    --glow-shadow-lg: 0 16px 40px rgba(13, 8, 37, 0.14);
+    --glow-shadow-card: 0 2px 12px rgba(13, 8, 37, 0.08), 0 0 0 1px rgba(44, 21, 75, 0.07);
   }
 
   .dark {
     /*
-     * Hierarquia premium — tema escuro (Glow Up)
-     * Mesma lógica da referência #0D0825 → #2C154B → #522E5F
+     * Tema escuro — hierarquia exata da referência
+     * #0D0825 → #2C154B → #522E5F → #755E8A
      */
-    --glow-bg-base: #0a0806;
-    --glow-bg-surface: #1a1612;
-    --glow-bg-elevated: #2c2620;
-    --glow-bg-highlight: #3f382e;
+    --glow-bg-base: var(--palette-purple-black);
+    --glow-bg-surface: var(--palette-purple-dark);
+    --glow-bg-elevated: var(--palette-purple-medium);
+    --glow-bg-highlight: var(--palette-purple-light);
 
     --glow-canvas: var(--glow-bg-base);
     --glow-surface: var(--glow-bg-surface);
     --glow-hover-surface: var(--glow-bg-highlight);
-    --glow-surface-tint: rgba(245, 240, 232, 0.04);
+    --glow-surface-tint: rgba(235, 231, 247, 0.04);
 
-    /* Texto — off-white quente (≈ #EBE7F7) */
-    --glow-text: #f5f0e8;
-    --glow-text-muted: rgba(245, 240, 232, 0.45);
-    --glow-text-soft: rgba(245, 240, 232, 0.82);
-    --glow-text-subtle: rgba(245, 240, 232, 0.58);
-    --glow-text-hover: rgba(245, 240, 232, 0.72);
-    --glow-placeholder: rgba(245, 240, 232, 0.38);
+    /* Texto — branco lilás */
+    --glow-text: var(--palette-lilac-white);
+    --glow-text-muted: var(--palette-gray-lilac);
+    --glow-text-soft: rgba(235, 231, 247, 0.88);
+    --glow-text-subtle: var(--palette-gray-purple);
+    --glow-text-hover: var(--palette-lilac-light);
+    --glow-placeholder: var(--palette-gray-lilac);
 
-    /* Bordas quase invisíveis */
-    --glow-border-soft: rgba(245, 240, 232, 0.07);
-    --glow-border-sidebar: rgba(245, 240, 232, 0.09);
-    --glow-border-accent: rgba(230, 173, 1, 0.38);
+    /* Bordas discretas */
+    --glow-border-soft: rgba(235, 231, 247, 0.08);
+    --glow-border-sidebar: rgba(235, 231, 247, 0.1);
+    --glow-border-accent: rgba(207, 176, 218, 0.35);
 
-    /* Accent — ouro/lilás equivalente */
-    --glow-gold-cta: #e6ad01;
-    --glow-accent-glow: rgba(255, 191, 0, 0.2);
+    /* Accent */
+    --glow-accent: var(--palette-lilac-medium);
+    --glow-accent-glow: rgba(207, 176, 218, 0.2);
+    --glow-gold-cta: var(--palette-lilac-medium);
     --glow-gold-soft: var(--glow-accent-glow);
-    --glow-gold-selected: rgba(230, 173, 1, 0.1);
+    --glow-gold-selected: rgba(146, 103, 155, 0.22);
 
-    --glow-avatar-bg: #141210;
-    --glow-neutral-warm: #6b6560;
-    --glow-neutral-soft: #9e9490;
-    --glow-accent-muted: #b8a078;
+    --glow-avatar-bg: #1a0f35;
+    --glow-neutral-warm: var(--palette-gray-purple);
+    --glow-neutral-soft: var(--palette-gray-lilac);
+    --glow-accent-muted: var(--palette-lavender);
 
-    /* Status — adaptados ao dark */
+    /* Status dark */
     --glow-success: #6ee7b7;
-    --glow-success-bg: rgba(16, 185, 129, 0.14);
+    --glow-success-bg: rgba(74, 158, 110, 0.16);
     --glow-success-dark: #6ee7b7;
-    --glow-error: #f87171;
-    --glow-error-bg: rgba(207, 63, 63, 0.16);
-    --glow-neutral-bg: rgba(158, 148, 144, 0.12);
-    --glow-info: #93b4ff;
-    --glow-info-bg: rgba(60, 92, 207, 0.2);
-    --glow-warning-bg: rgba(170, 104, 45, 0.18);
-    --glow-promo-bg-soft: rgba(230, 173, 1, 0.1);
-    --glow-promo-bg-dashboard: rgba(230, 173, 1, 0.08);
+    --glow-error: #e8a0a2;
+    --glow-error-bg: rgba(153, 93, 95, 0.2);
+    --glow-neutral-bg: rgba(97, 82, 107, 0.2);
+    --glow-info: #a8c0f0;
+    --glow-info-bg: rgba(91, 127, 212, 0.2);
+    --glow-warning-bg: rgba(153, 93, 95, 0.18);
+    --glow-promo-bg-soft: rgba(146, 103, 155, 0.15);
+    --glow-promo-bg-dashboard: rgba(82, 46, 95, 0.45);
 
-    /* Sombras monocromáticas */
-    --glow-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.04);
-    --glow-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(255, 255, 255, 0.05);
-    --glow-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.52);
-    --glow-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    /* Sombras */
+    --glow-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(207, 176, 218, 0.05);
+    --glow-shadow-md: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(207, 176, 218, 0.06);
+    --glow-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
+    --glow-shadow-card: 0 2px 16px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(207, 176, 218, 0.07);
   }
 
   html {
@@ -170,35 +185,41 @@
 }
 
 @layer components {
-  /* Auth (login, cadastro, recuperação): sempre light conforme Figma, independente do tema global */
+  /* Auth — light lavanda alinhado à identidade */
   .auth-light-shell {
-    --glow-text: #282828;
-    --glow-text-muted: rgba(40, 40, 40, 0.4);
-    --glow-text-soft: rgba(40, 40, 40, 0.8);
-    --glow-text-subtle: rgba(40, 40, 40, 0.5);
-    --glow-text-hover: rgba(40, 40, 40, 0.6);
-    --glow-border-soft: rgba(40, 40, 40, 0.25);
-    --glow-surface: #f3f3f3;
-    --glow-canvas: #ffffff;
-    --glow-placeholder: rgba(99, 99, 99, 0.6);
-    --glow-hover-surface: #ffffff;
+    --glow-bg-base: #ebe7f7;
+    --glow-bg-surface: #f3f0f8;
+    --glow-bg-elevated: #faf9fd;
+    --glow-canvas: #ebe7f7;
+    --glow-surface: #f3f0f8;
+    --glow-hover-surface: #faf9fd;
+    --glow-text: #0d0825;
+    --glow-text-muted: #61526b;
+    --glow-text-soft: #3d2a5c;
+    --glow-text-subtle: #755e8a;
+    --glow-text-hover: #522e5f;
+    --glow-border-soft: rgba(44, 21, 75, 0.12);
+    --glow-placeholder: #9e94aa;
     color-scheme: light;
-    @apply min-h-screen bg-white text-glow-text;
+    @apply min-h-screen bg-glow-bg-base text-glow-text;
   }
 
-  /* Agendamento público — Figma Fluxo Agendamento Público (node 200:345) */
+  /* Agendamento público */
   .agendar-publico-shell {
-    --glow-text: #282828;
-    --glow-text-muted: rgba(40, 40, 40, 0.4);
-    --glow-text-soft: rgba(40, 40, 40, 0.8);
-    --glow-text-subtle: rgba(40, 40, 40, 0.6);
-    --glow-border-soft: rgba(40, 40, 40, 0.25);
-    --glow-surface: #f3f3f3;
-    --glow-canvas: #ffffff;
-    --glow-placeholder: rgba(99, 99, 99, 0.6);
-    --glow-hover-surface: #ffffff;
+    --glow-bg-base: #ebe7f7;
+    --glow-bg-surface: #f3f0f8;
+    --glow-bg-elevated: #faf9fd;
+    --glow-canvas: #ebe7f7;
+    --glow-surface: #f3f0f8;
+    --glow-hover-surface: #faf9fd;
+    --glow-text: #0d0825;
+    --glow-text-muted: #61526b;
+    --glow-text-soft: #3d2a5c;
+    --glow-text-subtle: #755e8a;
+    --glow-border-soft: rgba(44, 21, 75, 0.12);
+    --glow-placeholder: #9e94aa;
     color-scheme: light;
-    @apply relative min-h-screen bg-white pb-16 text-glow-text;
+    @apply relative min-h-screen bg-glow-bg-base pb-16 text-glow-text;
   }
 
   .agendar-publico-header {
@@ -222,7 +243,7 @@
   }
 
   .agendar-wizard-stepper__back {
-    @apply flex size-8 shrink-0 items-center justify-center rounded-full border border-glow-border-soft text-glow-text transition hover:bg-zinc-50;
+    @apply flex size-8 shrink-0 items-center justify-center rounded-full border border-glow-border-soft text-glow-text transition hover:bg-glow-hover-surface;
   }
 
   .agendar-wizard-stepper__meta {
@@ -272,7 +293,7 @@
   }
 
   .agendar-review-card {
-    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-white px-[22px] py-5;
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-bg-elevated px-[22px] py-5;
   }
 
   .agendar-review-card__title {
@@ -325,7 +346,7 @@
   }
 
   .agendar-slot-btn {
-    @apply flex h-[50px] min-w-0 items-center justify-center rounded-xl border-[0.5px] border-glow-text-muted font-satoshi text-base text-glow-text transition hover:bg-zinc-50;
+    @apply flex h-[50px] min-w-0 items-center justify-center rounded-xl border-[0.5px] border-glow-text-muted font-satoshi text-base text-glow-text transition hover:bg-glow-hover-surface;
   }
 
   .agendar-slot-btn--selected {
@@ -435,7 +456,7 @@
   }
 
   .agendar-success__card {
-    @apply mt-8 w-full rounded-xl border-[0.5px] border-glow-border-soft bg-white p-5 text-left;
+    @apply mt-8 w-full rounded-xl border-[0.5px] border-glow-border-soft bg-glow-bg-elevated p-5 text-left;
   }
 
   .agendar-success__card-header {
@@ -467,7 +488,7 @@
   }
 
   .agendar-success__btn-secondary {
-    @apply flex h-10 w-full items-center justify-center rounded border-[0.5px] border-glow-border-soft bg-white px-2.5 font-satoshi text-base font-bold text-glow-text transition hover:bg-zinc-50;
+    @apply flex h-10 w-full items-center justify-center rounded border-[0.5px] border-glow-border-soft bg-glow-bg-elevated px-2.5 font-satoshi text-base font-bold text-glow-text transition hover:bg-glow-hover-surface;
   }
 
   .checkout-shell {
@@ -1969,7 +1990,7 @@
   }
 
   .servico-prof-rating {
-    @apply inline-flex h-[22px] items-center gap-1.5 rounded-full bg-[rgba(255,191,0,0.15)] px-3.5 font-urbanist text-sm font-bold text-glow-text;
+    @apply inline-flex h-[22px] items-center gap-1.5 rounded-full bg-glow-gold-selected px-3.5 font-urbanist text-sm font-bold text-glow-text;
   }
 
   .servico-prof-rating--compact {
@@ -2536,7 +2557,7 @@
   }
 
   .horario-field__input--editable {
-    @apply cursor-pointer border-glow-gold-dark bg-white focus:border-glow-gold focus:ring-2 focus:ring-glow-gold-soft dark:bg-glow-canvas;
+    @apply cursor-pointer border-glow-gold-dark bg-glow-bg-elevated focus:border-glow-gold focus:ring-2 focus:ring-glow-gold-soft dark:bg-glow-canvas;
   }
 
   .horario-field__value {
@@ -2646,7 +2667,7 @@
   }
 
   .horarios-prof-chip--selected {
-    @apply border-glow-gold bg-[rgba(255,191,0,0.12)];
+    @apply border-glow-gold bg-glow-gold-selected;
   }
 
   .horarios-panel__fields {
