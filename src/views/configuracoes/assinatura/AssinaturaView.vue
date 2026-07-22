@@ -120,6 +120,7 @@ function concluirPagamento() {
       v-if="assinatura?.emTrial && assinatura.proximaDataVencimento"
       :dias-trial="assinatura.diasTrial"
       :proxima-data-vencimento="assinatura.proximaDataVencimento"
+      :inicio="assinatura.inicio"
     />
 
     <BaseCard

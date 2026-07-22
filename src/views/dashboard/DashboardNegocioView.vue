@@ -130,6 +130,7 @@ watch(
       :plano-nome="planoNome ?? undefined"
       :dias-trial="assinatura?.diasTrial ?? diasTrial ?? 30"
       :proxima-data-vencimento="assinatura?.proximaDataVencimento ?? proximaDataVencimento ?? ''"
+      :inicio="assinatura?.inicio"
     />
 
     <div

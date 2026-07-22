@@ -399,6 +399,46 @@ export function addDaysToDateOnly(isoDate: string, days: number): string {
   return toDateOnlyString(date)
 }
 
+function parseIsoToDateOnlyParts(iso: string): string {
+  return iso.includes('T') ? toDateOnlyFromIsoUtc(iso) : iso.slice(0, 10)
+}
+
+function dateOnlyToLocalDate(isoDate: string): Date {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+function startOfTodayLocal(): Date {
+  const now = new Date()
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate())
+}
+
+function calendarDaysBetween(from: Date, to: Date): number {
+  return Math.floor((to.getTime() - from.getTime()) / 86_400_000)
+}
+
+/** Dias restantes do trial (30 no 1º dia), alinhado ao DiasTrial da API. */
+export function calcularDiasRestantesTrial(options: {
+  diasTrial: number
+  proximaDataVencimento: string
+  inicio?: string | null
+}): number {
+  const hoje = startOfTodayLocal()
+
+  if (options.inicio) {
+    const inicio = dateOnlyToLocalDate(parseIsoToDateOnlyParts(options.inicio))
+    const diasDecorridos = calendarDaysBetween(inicio, hoje)
+    return Math.max(0, options.diasTrial - diasDecorridos)
+  }
+
+  const fimTrialDateOnly = addDaysToDateOnly(
+    parseIsoToDateOnlyParts(options.proximaDataVencimento),
+    -1,
+  )
+  const fimTrial = dateOnlyToLocalDate(fimTrialDateOnly)
+  return Math.max(0, calendarDaysBetween(hoje, fimTrial))
+}
+
 export function toTimeOnlyString(date: Date): string {
   return date.toTimeString().slice(0, 8)
 }

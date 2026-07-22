@@ -2,21 +2,23 @@
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { ROUTE_PATHS } from '@/constants/routes'
-import { formatDate } from '@/utils/formatters'
+import { calcularDiasRestantesTrial, formatDate } from '@/utils/formatters'
 
 const props = defineProps<{
   diasTrial: number
   proximaDataVencimento: string
+  inicio?: string | null
   compact?: boolean
   planoNome?: string
 }>()
 
-const diasRestantes = computed(() => {
-  const fim = new Date(props.proximaDataVencimento)
-  const hoje = new Date()
-  const diff = Math.ceil((fim.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24))
-  return Math.max(0, diff)
-})
+const diasRestantes = computed(() =>
+  calcularDiasRestantesTrial({
+    diasTrial: props.diasTrial,
+    proximaDataVencimento: props.proximaDataVencimento,
+    inicio: props.inicio,
+  }),
+)
 </script>
 
 <template>
