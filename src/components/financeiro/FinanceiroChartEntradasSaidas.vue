@@ -16,6 +16,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 const props = defineProps<{
   entradas: number
   saidas: number
+  empty?: boolean
 }>()
 
 const chartData = computed(() => ({
@@ -41,8 +42,32 @@ const options = {
 </script>
 
 <template>
-  <div class="financeiro-kpi-card h-64">
-    <p class="financeiro-kpi-card__label mb-2">Entradas vs saídas</p>
-    <Bar :data="chartData" :options="options" />
+  <div class="financeiro-chart-card">
+    <div class="financeiro-chart-card__header">
+      <div>
+        <p class="financeiro-kpi-card__label">Estatísticas</p>
+        <p class="financeiro-chart-card__subtitle">Entradas vs saídas no período</p>
+      </div>
+      <div class="financeiro-chart-card__legend">
+        <span class="financeiro-chart-card__legend-item">
+          <span class="financeiro-chart-card__dot financeiro-chart-card__dot--entrada" />
+          Entradas
+        </span>
+        <span class="financeiro-chart-card__legend-item">
+          <span class="financeiro-chart-card__dot financeiro-chart-card__dot--saida" />
+          Saídas
+        </span>
+      </div>
+    </div>
+
+    <div class="financeiro-chart-card__body">
+      <Bar :data="chartData" :options="options" />
+      <div v-if="empty" class="financeiro-chart-card__empty">
+        <p class="financeiro-chart-card__empty-title">Nenhuma movimentação</p>
+        <p class="financeiro-chart-card__empty-desc">
+          Ainda não há entradas ou saídas neste período. Registre a primeira movimentação para acompanhar aqui.
+        </p>
+      </div>
+    </div>
   </div>
 </template>

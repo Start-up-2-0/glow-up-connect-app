@@ -4,12 +4,21 @@ defineProps<{
   value: string
   hint?: string
   variant?: 'default' | 'positive' | 'negative'
+  accent?: 'green' | 'red' | 'blue' | 'gold' | 'neutral'
 }>()
 </script>
 
 <template>
   <div class="financeiro-kpi-card">
-    <p class="financeiro-kpi-card__label">{{ label }}</p>
+    <div class="financeiro-kpi-card__header">
+      <span
+        v-if="accent"
+        class="financeiro-kpi-card__accent"
+        :class="`financeiro-kpi-card__accent--${accent}`"
+        aria-hidden="true"
+      />
+      <p class="financeiro-kpi-card__label">{{ label }}</p>
+    </div>
     <p
       class="financeiro-kpi-card__value"
       :class="{

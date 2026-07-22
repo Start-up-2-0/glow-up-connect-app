@@ -2957,6 +2957,126 @@
     @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
   }
 
+  .financeiro-kpi-card__header {
+    @apply flex items-center gap-2;
+  }
+
+  .financeiro-kpi-card__accent {
+    @apply size-2.5 shrink-0 rounded-full;
+  }
+
+  .financeiro-kpi-card__accent--green {
+    @apply bg-green-600;
+  }
+
+  .financeiro-kpi-card__accent--red {
+    @apply bg-glow-error;
+  }
+
+  .financeiro-kpi-card__accent--blue {
+    @apply bg-blue-600;
+  }
+
+  .financeiro-kpi-card__accent--gold {
+    @apply bg-glow-gold-cta;
+  }
+
+  .financeiro-kpi-card__accent--neutral {
+    @apply bg-glow-text-subtle;
+  }
+
+  .financeiro-dashboard-grid {
+    @apply grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-12;
+  }
+
+  .financeiro-dashboard-grid__hero {
+    @apply xl:col-span-6;
+  }
+
+  .financeiro-dashboard-grid__entrada {
+    @apply xl:col-span-3;
+  }
+
+  .financeiro-dashboard-grid__saida {
+    @apply xl:col-span-3;
+  }
+
+  .financeiro-dashboard-hero {
+    @apply flex h-full flex-col justify-between gap-4 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm lg:flex-row lg:items-end;
+  }
+
+  .financeiro-dashboard-hero__label {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .financeiro-dashboard-hero__value {
+    @apply mt-2 font-satoshi text-4xl font-bold tracking-tight text-glow-text;
+  }
+
+  .financeiro-dashboard-hero__trend {
+    @apply mt-2 font-urbanist text-sm;
+  }
+
+  .financeiro-dashboard-hero__trend--positive {
+    @apply text-green-700;
+  }
+
+  .financeiro-dashboard-hero__trend--neutral {
+    @apply text-glow-text-subtle;
+  }
+
+  .financeiro-dashboard-hero__actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .financeiro-chart-card {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+  }
+
+  .financeiro-chart-card__header {
+    @apply mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .financeiro-chart-card__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-chart-card__legend {
+    @apply flex flex-wrap items-center gap-4 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-chart-card__legend-item {
+    @apply inline-flex items-center gap-1.5;
+  }
+
+  .financeiro-chart-card__dot {
+    @apply size-2 rounded-full;
+  }
+
+  .financeiro-chart-card__dot--entrada {
+    @apply bg-green-600;
+  }
+
+  .financeiro-chart-card__dot--saida {
+    @apply bg-glow-error;
+  }
+
+  .financeiro-chart-card__body {
+    @apply relative h-64;
+  }
+
+  .financeiro-chart-card__empty {
+    @apply absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-glow-surface/90 px-6 text-center backdrop-blur-[1px];
+  }
+
+  .financeiro-chart-card__empty-title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .financeiro-chart-card__empty-desc {
+    @apply mt-2 max-w-md font-urbanist text-sm text-glow-text-subtle;
+  }
+
   .financeiro-kpi-card__label {
     @apply font-urbanist text-sm text-glow-text-subtle;
   }
