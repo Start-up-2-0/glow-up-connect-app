@@ -52,9 +52,13 @@ import {
 } from '@/utils/financeiroDashboard'
 import { formatCurrency, formatDate } from '@/utils/formatters'
 
-const props = defineProps<{
-  direcao: MovimentoDirecao
-}>()
+const props = withDefaults(
+  defineProps<{
+    direcao: MovimentoDirecao
+    embedded?: boolean
+  }>(),
+  { embedded: false },
+)
 
 const route = useRoute()
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
@@ -360,11 +364,27 @@ watch(ready, (isReady) => {
 }, { immediate: true })
 
 watch(pagina, () => void load())
+
+watch(
+  () => route.query.status,
+  (status) => {
+    const next = (status as string) || ''
+    if (statusFilter.value === next) return
+    statusFilter.value = next
+    resetPagina()
+    void load()
+  },
+)
 </script>
 
 <template>
-  <div :class="FINANCEIRO_PAGE_CLASS">
-    <FinanceiroPageHeader :title="titulo" :subtitle="subtitulo" :back-to="ROUTE_PATHS.FINANCEIRO">
+  <div :class="embedded ? 'financeiro-movimentos-embedded' : FINANCEIRO_PAGE_CLASS">
+    <FinanceiroPageHeader
+      v-if="!embedded"
+      :title="titulo"
+      :subtitle="subtitulo"
+      :back-to="ROUTE_PATHS.FINANCEIRO"
+    >
       <template v-if="podeGerenciar" #actions>
         <ExportarDropdown class="financeiro-no-print" @export="exportar" @print="imprimir" />
         <BaseButton @click="formOpen = true">
@@ -374,7 +394,7 @@ watch(pagina, () => void load())
     </FinanceiroPageHeader>
 
     <MovimentosListKpiStrip
-      class="mt-6"
+      :class="embedded ? 'mt-0' : 'mt-6'"
       :recebido-hoje="kpiRecebidoHoje"
       :recebido-periodo="kpiRecebidoPeriodo"
       :total-registros="String(total)"

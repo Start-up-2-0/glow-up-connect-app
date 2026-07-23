@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, nextTick, ref, watch } from 'vue'
+import { useRoute, useRouter, type LocationQueryValue } from 'vue-router'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
@@ -12,7 +12,7 @@ import FinanceiroMetricStrip from '@/components/financeiro/FinanceiroMetricStrip
 import FinanceiroDashboardEmpty from '@/components/financeiro/FinanceiroDashboardEmpty.vue'
 import FinanceiroChartEntradasSaidas from '@/components/financeiro/FinanceiroChartEntradasSaidas.vue'
 import FinanceiroQuickActions from '@/components/financeiro/FinanceiroQuickActions.vue'
-import FinanceiroRecentMovimentos from '@/components/financeiro/FinanceiroRecentMovimentos.vue'
+import MovimentosListPage from '@/components/financeiro/MovimentosListPage.vue'
 import ExportarDropdown from '@/components/financeiro/ExportarDropdown.vue'
 import MovimentoFormModal from '@/components/financeiro/MovimentoFormModal.vue'
 import { FINANCEIRO_PAGE_CLASS } from '@/constants/designTokens'
@@ -32,11 +32,12 @@ import {
   isFinanceiroDashboardSemMovimentacao,
 } from '@/utils/financeiroDashboard'
 import type { FinanceiroDashboard } from '@/types/negocio/financeiro.types'
-import type { CriarMovimentoPayload, MovimentoDirecao, MovimentoFinanceiro } from '@/types/negocio/financeiro.types'
+import type { CriarMovimentoPayload, MovimentoDirecao } from '@/types/negocio/financeiro.types'
 import type { ExportFormato } from '@/types/negocio/caixa.types'
 import { formatCurrency } from '@/utils/formatters'
 
 const router = useRouter()
+const route = useRoute()
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
 const { possuiPermissao } = useNegocioContext()
@@ -47,11 +48,17 @@ const { periodPreset, inicioCustom, fimCustom, apiFiltro, resetPagina } = useFin
 
 const dashboard = ref<FinanceiroDashboard | null>(null)
 const dashboardAnterior = ref<FinanceiroDashboard | null>(null)
-const movimentosRecentes = ref<MovimentoFinanceiro[]>([])
 const loading = ref(false)
 const actionLoading = ref(false)
 const formOpen = ref(false)
 const formDirecao = ref<MovimentoDirecao>('entrada')
+
+function resolveAbaFromQuery(aba?: LocationQueryValue | LocationQueryValue[]): MovimentoDirecao {
+  const value = Array.isArray(aba) ? aba[0] : aba
+  return value === 'saidas' ? 'saida' : 'entrada'
+}
+
+const abaMovimentos = ref<MovimentoDirecao>(resolveAbaFromQuery(route.query.aba))
 
 const podeGerenciar = () => possuiPermissao('CaixaGerenciar')
 
@@ -83,34 +90,10 @@ const acoesRapidas = computed(() => {
   const items = [
     { id: 'entrada', label: 'Nova venda', icon: 'venda' as const },
     { id: 'saida', label: 'Nova despesa', icon: 'despesa' as const },
-    { id: 'entradas', label: 'Fluxo de caixa', icon: 'grafico' as const },
+    { id: 'movimentos', label: 'Ver movimentações', icon: 'grafico' as const },
   ]
   return items
 })
-
-async function carregarMovimentosRecentes(filtro: { inicio?: string; fim?: string }) {
-  if (!estabelecimentoId.value) return []
-
-  try {
-    const params = {
-      inicio: filtro.inicio,
-      fim: filtro.fim,
-      pagina: 1,
-      tamanhoPagina: 5,
-    }
-
-    const [entradas, saidas] = await Promise.all([
-      financeiroService.listarEntradas(estabelecimentoId.value, params),
-      financeiroService.listarSaidas(estabelecimentoId.value, params),
-    ])
-
-    return [...entradas.itens, ...saidas.itens]
-      .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
-      .slice(0, 5)
-  } catch {
-    return []
-  }
-}
 
 async function load() {
   if (!estabelecimentoId.value) return
@@ -119,17 +102,15 @@ async function load() {
     const filtro = { inicio: apiFiltro.value.inicio, fim: apiFiltro.value.fim }
     const filtroAnterior = getPreviousPeriodFilter(filtro)
 
-    const [dash, dashAnterior, recentes] = await Promise.all([
+    const [dash, dashAnterior] = await Promise.all([
       financeiroService.obterDashboard(estabelecimentoId.value, filtro),
       filtroAnterior
         ? financeiroService.obterDashboard(estabelecimentoId.value, filtroAnterior)
         : Promise.resolve(null),
-      carregarMovimentosRecentes(filtro),
     ])
 
     dashboard.value = dash
     dashboardAnterior.value = dashAnterior
-    movimentosRecentes.value = recentes
   } catch (err) {
     if (isFinanceiroDashboardEmptyResponse(err)) {
       dashboard.value = createEmptyFinanceiroDashboard({
@@ -137,7 +118,6 @@ async function load() {
         fim: apiFiltro.value.fim,
       })
       dashboardAnterior.value = null
-      movimentosRecentes.value = []
       return
     }
     notifications.push('error', resolveError(err))
@@ -156,10 +136,31 @@ function abrirForm(direcao: MovimentoDirecao) {
   formOpen.value = true
 }
 
+function irParaMovimentos(opts?: { aba?: MovimentoDirecao; status?: string }) {
+  if (opts?.aba) abaMovimentos.value = opts.aba
+
+  const query: Record<string, string> = {
+    aba: abaMovimentos.value === 'entrada' ? 'entradas' : 'saidas',
+  }
+  if (opts?.status) query.status = opts.status
+  else if (typeof route.query.status === 'string') query.status = route.query.status
+
+  void router.replace({ path: ROUTE_PATHS.FINANCEIRO, query })
+  void nextTick(() => {
+    document.getElementById('financeiro-movimentos')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
+}
+
+function setAbaMovimentos(aba: MovimentoDirecao) {
+  abaMovimentos.value = aba
+  const query = { ...route.query, aba: aba === 'entrada' ? 'entradas' : 'saidas' }
+  void router.replace({ path: ROUTE_PATHS.FINANCEIRO, query })
+}
+
 function onAcaoRapida(id: string) {
   if (id === 'entrada') abrirForm('entrada')
   else if (id === 'saida') abrirForm('saida')
-  else if (id === 'entradas') router.push(ROUTE_PATHS.FINANCEIRO_ENTRADAS)
+  else if (id === 'movimentos') irParaMovimentos()
 }
 
 async function exportar(formato: ExportFormato) {
@@ -209,6 +210,13 @@ async function onCriar(payload: CriarMovimentoPayload) {
 watch(ready, (isReady) => {
   if (isReady) void load()
 }, { immediate: true })
+
+watch(
+  () => route.query.aba,
+  (aba) => {
+    abaMovimentos.value = resolveAbaFromQuery(aba)
+  },
+)
 </script>
 
 <template>
@@ -274,7 +282,7 @@ watch(ready, (isReady) => {
         :contas="formatCurrency(dashboard.contasEmAberto)"
         :contas-hint="`${dashboard.quantidadeContasEmAberto} título(s)`"
         :comissoes="formatCurrency(dashboard.comissoesPeriodo)"
-        @contas="router.push({ path: ROUTE_PATHS.FINANCEIRO_ENTRADAS, query: { status: 'pendente' } })"
+        @contas="irParaMovimentos({ aba: 'entrada', status: 'pendente' })"
         @comissoes="router.push(ROUTE_PATHS.FINANCEIRO_COMISSOES)"
       />
 
@@ -297,11 +305,44 @@ watch(ready, (isReady) => {
         :empty="semMovimentacao"
       />
 
-      <FinanceiroRecentMovimentos
-        :itens="movimentosRecentes"
-        :loading="loading"
-        @ver-todas="router.push(ROUTE_PATHS.FINANCEIRO_ENTRADAS)"
-      />
+      <section id="financeiro-movimentos" class="financeiro-movimentos-panel">
+        <div class="financeiro-movimentos-panel__header">
+          <div>
+            <h2 class="financeiro-movimentos-panel__title">Movimentações</h2>
+            <p class="financeiro-movimentos-panel__subtitle">
+              Entradas e saídas do período, com filtros e exportação.
+            </p>
+          </div>
+          <div class="financeiro-movimentos-panel__tabs financeiro-no-print" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              class="financeiro-movimentos-panel__tab"
+              :class="{ 'financeiro-movimentos-panel__tab--active': abaMovimentos === 'entrada' }"
+              :aria-selected="abaMovimentos === 'entrada'"
+              @click="setAbaMovimentos('entrada')"
+            >
+              Entradas
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="financeiro-movimentos-panel__tab"
+              :class="{ 'financeiro-movimentos-panel__tab--active': abaMovimentos === 'saida' }"
+              :aria-selected="abaMovimentos === 'saida'"
+              @click="setAbaMovimentos('saida')"
+            >
+              Saídas
+            </button>
+          </div>
+        </div>
+
+        <MovimentosListPage
+          :key="abaMovimentos"
+          :direcao="abaMovimentos"
+          embedded
+        />
+      </section>
     </template>
 
     <MovimentoFormModal

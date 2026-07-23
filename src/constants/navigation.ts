@@ -48,22 +48,6 @@ const financeiroNavChildren: NavChildItem[] = [
     requerPermissao: 'CaixaVisualizar',
   },
   {
-    id: 'financeiro-entradas',
-    label: 'Entradas',
-    to: ROUTE_PATHS.FINANCEIRO_ENTRADAS,
-    icon: 'finance',
-    requerModulo: 'Financeiro',
-    requerPermissao: 'CaixaVisualizar',
-  },
-  {
-    id: 'financeiro-saidas',
-    label: 'Saídas',
-    to: ROUTE_PATHS.FINANCEIRO_SAIDAS,
-    icon: 'finance',
-    requerModulo: 'Financeiro',
-    requerPermissao: 'CaixaVisualizar',
-  },
-  {
     id: 'financeiro-comissoes',
     label: 'Comissões',
     to: ROUTE_PATHS.FINANCEIRO_COMISSOES,

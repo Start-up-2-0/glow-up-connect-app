@@ -127,44 +127,34 @@ export const modulosRoutes: RouteRecordRaw[] = [
   {
     path: ROUTE_PATHS.FINANCEIRO_ENTRADAS,
     name: ROUTE_NAMES.FINANCEIRO_ENTRADAS,
-    component: () => import('@/views/modulos/financeiro/EntradasView.vue'),
-    meta: {
-      layout: 'dashboard',
-      requiresAuth: true,
-      businessOnly: true,
-      requerModulos: ['Caixa', 'Financeiro'],
-      requerPermissao: 'CaixaVisualizar',
-      title: 'Entradas',
-    },
+    redirect: (to) => ({
+      path: ROUTE_PATHS.FINANCEIRO,
+      query: { ...to.query, aba: 'entradas' },
+    }),
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_SAIDAS,
     name: ROUTE_NAMES.FINANCEIRO_SAIDAS,
-    component: () => import('@/views/modulos/financeiro/SaidasView.vue'),
-    meta: {
-      layout: 'dashboard',
-      requiresAuth: true,
-      businessOnly: true,
-      requerModulos: ['Caixa', 'Financeiro'],
-      requerPermissao: 'CaixaVisualizar',
-      title: 'Saídas',
-    },
+    redirect: (to) => ({
+      path: ROUTE_PATHS.FINANCEIRO,
+      query: { ...to.query, aba: 'saidas' },
+    }),
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_CAIXA,
-    redirect: ROUTE_PATHS.FINANCEIRO_ENTRADAS,
+    redirect: ROUTE_PATHS.FINANCEIRO,
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_MOVIMENTACOES,
-    redirect: ROUTE_PATHS.FINANCEIRO_ENTRADAS,
+    redirect: ROUTE_PATHS.FINANCEIRO,
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_CONTAS,
     redirect: (to) => {
       if (to.query.aba === 'pagar') {
-        return { path: ROUTE_PATHS.FINANCEIRO_SAIDAS, query: { status: 'pendente' } }
+        return { path: ROUTE_PATHS.FINANCEIRO, query: { aba: 'saidas', status: 'pendente' } }
       }
-      return { path: ROUTE_PATHS.FINANCEIRO_ENTRADAS, query: { status: 'pendente' } }
+      return { path: ROUTE_PATHS.FINANCEIRO, query: { aba: 'entradas', status: 'pendente' } }
     },
   },
   {
@@ -216,11 +206,11 @@ export const modulosRoutes: RouteRecordRaw[] = [
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_CONTAS_RECEBER,
-    redirect: { path: ROUTE_PATHS.FINANCEIRO_ENTRADAS, query: { status: 'pendente' } },
+    redirect: { path: ROUTE_PATHS.FINANCEIRO, query: { aba: 'entradas', status: 'pendente' } },
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_CONTAS_PAGAR,
-    redirect: { path: ROUTE_PATHS.FINANCEIRO_SAIDAS, query: { status: 'pendente' } },
+    redirect: { path: ROUTE_PATHS.FINANCEIRO, query: { aba: 'saidas', status: 'pendente' } },
   },
   {
     path: ROUTE_PATHS.CONFIG_EQUIPE,

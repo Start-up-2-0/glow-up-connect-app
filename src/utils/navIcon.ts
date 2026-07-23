@@ -23,8 +23,6 @@ const NAV_ICON_BY_ID: Record<string, NavIconName> = {
   'cliente-conta': 'user',
   'minha-loja': 'building',
   'financeiro-resumo': 'dashboard',
-  'financeiro-entradas': 'finance',
-  'financeiro-saidas': 'finance',
   'financeiro-comissoes': 'finance',
   privacidade: 'user',
   'meu-trabalho': 'calendar',

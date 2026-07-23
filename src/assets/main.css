@@ -3494,6 +3494,38 @@
     @apply grid gap-3 sm:grid-cols-2 xl:grid-cols-4;
   }
 
+  .financeiro-movimentos-panel {
+    @apply mt-8 rounded-2xl border border-glow-border-soft bg-glow-bg-elevated p-4 shadow-glow-sm sm:p-5;
+  }
+
+  .financeiro-movimentos-panel__header {
+    @apply mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between;
+  }
+
+  .financeiro-movimentos-panel__title {
+    @apply font-urbanist text-lg font-semibold text-glow-text;
+  }
+
+  .financeiro-movimentos-panel__subtitle {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .financeiro-movimentos-panel__tabs {
+    @apply inline-flex rounded-xl border border-glow-border-soft bg-glow-bg-surface p-1;
+  }
+
+  .financeiro-movimentos-panel__tab {
+    @apply rounded-lg px-4 py-2 font-urbanist text-sm font-medium text-glow-text-subtle transition-colors hover:text-glow-text;
+  }
+
+  .financeiro-movimentos-panel__tab--active {
+    @apply bg-glow-bg-elevated text-glow-text shadow-glow-sm;
+  }
+
+  .financeiro-movimentos-embedded .financeiro-movimentos-toolbar {
+    @apply mt-4 border-0 bg-transparent p-0 shadow-none;
+  }
+
   .financeiro-movimentos-kpis__item {
     @apply flex flex-col;
   }
