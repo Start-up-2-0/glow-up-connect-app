@@ -3459,7 +3459,195 @@
   }
 
   .financeiro-badge--estornada {
-    @apply bg-amber-50 text-amber-800;
+    @apply bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-200;
+  }
+
+  .financeiro-badge--recebida {
+    @apply bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-300;
+  }
+
+  .financeiro-badge--pendente {
+    @apply bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-200;
+  }
+
+  .financeiro-badge--cancelada {
+    @apply bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-300;
+  }
+
+  .financeiro-badge__dot {
+    @apply mr-1.5 size-1.5 shrink-0 rounded-full bg-current opacity-80;
+  }
+
+  .financeiro-movimentos-kpis {
+    @apply grid gap-3 sm:grid-cols-2 xl:grid-cols-4;
+  }
+
+  .financeiro-movimentos-kpis__item {
+    @apply flex flex-col;
+  }
+
+  .financeiro-movimentos-toolbar {
+    @apply mt-6 space-y-3 rounded-xl border border-glow-border-soft bg-glow-bg-elevated p-4 shadow-glow-sm;
+  }
+
+  .financeiro-movimentos-toolbar__search {
+    @apply w-full;
+  }
+
+  .financeiro-movimentos-toolbar__row {
+    @apply flex flex-wrap items-center gap-3;
+  }
+
+  .financeiro-movimentos-toolbar__filters {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .financeiro-movimentos-select {
+    @apply h-10 min-w-[9rem] rounded-lg border border-glow-border-soft bg-glow-surface px-3 font-urbanist text-sm text-glow-text outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold;
+  }
+
+  .financeiro-movimentos-layout {
+    @apply grid gap-6 xl:grid-cols-[minmax(0,1fr)_260px];
+  }
+
+  .financeiro-movimentos-layout__main {
+    @apply min-w-0;
+  }
+
+  .financeiro-movimento-cell {
+    @apply flex items-start gap-3;
+  }
+
+  .financeiro-movimento-cell__icon {
+    @apply mt-1 size-2.5 shrink-0 rounded-full;
+  }
+
+  .financeiro-movimento-cell__icon--entrada {
+    @apply bg-green-500;
+  }
+
+  .financeiro-movimento-cell__icon--saida {
+    @apply bg-glow-error;
+  }
+
+  .financeiro-movimento-cell__title {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .financeiro-movimento-cell__meta {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-pagamento-pill {
+    @apply inline-flex rounded-full border border-glow-border-soft bg-glow-hover-surface px-2.5 py-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-valor-assinado {
+    @apply font-satoshi text-sm font-bold tabular-nums;
+  }
+
+  .financeiro-valor-assinado--entrada {
+    @apply text-green-700 dark:text-green-400;
+  }
+
+  .financeiro-valor-assinado--saida {
+    @apply text-glow-error;
+  }
+
+  .financeiro-table--rich tbody tr.financeiro-table__row--interactive {
+    @apply transition hover:bg-glow-hover-surface;
+  }
+
+  .financeiro-movimento-card {
+    @apply rounded-xl border border-glow-border-soft bg-glow-bg-elevated p-4 shadow-glow-sm;
+  }
+
+  .financeiro-movimento-card__head {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  .financeiro-movimento-card__foot {
+    @apply mt-3 flex items-center justify-between gap-2;
+  }
+
+  .financeiro-movimentos-summary {
+    @apply h-fit rounded-xl border border-glow-border-soft bg-glow-bg-elevated p-5 shadow-glow-sm;
+  }
+
+  .financeiro-movimentos-summary__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .financeiro-movimentos-summary__block {
+    @apply mt-4 border-t border-glow-border-soft pt-4 first:mt-3 first:border-t-0 first:pt-0;
+  }
+
+  .financeiro-movimentos-summary__label {
+    @apply font-urbanist text-xs uppercase tracking-wide text-glow-text-subtle;
+  }
+
+  .financeiro-movimentos-summary__value {
+    @apply mt-1 font-satoshi text-xl font-bold text-glow-text;
+  }
+
+  .financeiro-movimentos-summary__value--positive {
+    @apply text-green-700 dark:text-green-400;
+  }
+
+  .financeiro-movimentos-summary__list {
+    @apply mt-2 space-y-2;
+  }
+
+  .financeiro-movimentos-summary__list-item {
+    @apply flex items-center justify-between gap-2 font-urbanist text-sm text-glow-text;
+  }
+
+  .financeiro-movimentos-summary__pct {
+    @apply font-semibold text-glow-text-subtle;
+  }
+
+  .financeiro-movimentos-summary__updated {
+    @apply mt-4 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-movimentos-chart {
+    @apply rounded-xl border border-glow-border-soft bg-glow-bg-elevated p-5 shadow-glow-sm;
+  }
+
+  .financeiro-movimentos-chart__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .financeiro-movimentos-chart__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-movimentos-chart__body {
+    @apply mt-3 h-44;
+  }
+
+  .financeiro-pagination {
+    @apply flex flex-wrap items-center justify-between gap-3 rounded-xl border border-glow-border-soft bg-glow-bg-elevated px-4 py-3;
+  }
+
+  .financeiro-pagination__info {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .financeiro-pagination__controls {
+    @apply flex items-center gap-1;
+  }
+
+  .financeiro-pagination__nav {
+    @apply min-w-[2.25rem] px-2;
+  }
+
+  .financeiro-pagination__page {
+    @apply flex size-9 items-center justify-center rounded-lg font-urbanist text-sm text-glow-text-subtle transition hover:bg-glow-hover-surface;
+  }
+
+  .financeiro-pagination__page--active {
+    @apply bg-glow-gold-selected font-semibold text-glow-text;
   }
 
   .financeiro-empty {
