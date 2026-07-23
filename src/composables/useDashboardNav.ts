@@ -1,15 +1,16 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import {
-  businessNavItems,
-  clienteNavItems,
+  businessNavSections,
+  clienteNavSections,
   NAV_SEARCH_PLACEHOLDER_BUSINESS,
   NAV_SEARCH_PLACEHOLDER_CLIENTE,
   NAV_SEARCH_PLACEHOLDER_PROFISSIONAL,
-  profissionalNavItems,
+  profissionalNavSections,
   type NavItem,
+  type NavSection,
 } from '@/constants/navigation'
-import { filterNavItems } from '@/utils/filterNavItems'
+import { filterNavSections } from '@/utils/filterNavItems'
 import { useUserStore } from '@/stores/user.store'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
@@ -24,6 +25,23 @@ function dedupeNavById(items: NavItem[]): NavItem[] {
   })
 }
 
+function mergeNavSections(...groups: NavSection[][]): NavSection[] {
+  const map = new Map<string, NavSection>()
+
+  for (const sections of groups) {
+    for (const section of sections) {
+      const existing = map.get(section.id)
+      if (existing) {
+        existing.items = dedupeNavById([...existing.items, ...section.items])
+      } else {
+        map.set(section.id, { ...section, items: [...section.items] })
+      }
+    }
+  }
+
+  return Array.from(map.values())
+}
+
 function clienteNavSemAbrirLoja(items: NavItem[]): NavItem[] {
   return items
     .map((item) => {
@@ -33,6 +51,15 @@ function clienteNavSemAbrirLoja(items: NavItem[]): NavItem[] {
       return { ...item, children }
     })
     .filter((item): item is NavItem => item !== null)
+}
+
+function clienteNavSemAbrirLojaSections(sections: NavSection[]): NavSection[] {
+  return sections
+    .map((section) => ({
+      ...section,
+      items: clienteNavSemAbrirLoja(section.items),
+    }))
+    .filter((section) => section.items.length > 0)
 }
 
 export function useDashboardNav() {
@@ -46,7 +73,7 @@ export function useDashboardNav() {
     possuiEstabelecimentoProprio,
   } = useAcessoUsuario()
 
-  const navItems = computed(() => {
+  const navSections = computed(() => {
     const filterCtx = {
       assinaturaAtiva: assinaturaAtiva.value,
       possuiModulo: negocioStore.possuiModulo,
@@ -57,27 +84,37 @@ export function useDashboardNav() {
 
     const ocultarAbrirLoja =
       ehProfissionalOperacional.value || possuiEstabelecimentoProprio.value
-    const clienteNav = ocultarAbrirLoja ? clienteNavSemAbrirLoja(clienteNavItems) : clienteNavItems
+    const clienteSections = ocultarAbrirLoja
+      ? clienteNavSemAbrirLojaSections(clienteNavSections)
+      : clienteNavSections
 
     if (ehProfissionalOperacional.value) {
-      const operacao = filterNavItems(profissionalNavItems, filterCtx)
-      return dedupeNavById([...clienteNav, ...operacao])
+      const operacao = filterNavSections(profissionalNavSections, filterCtx)
+      return mergeNavSections(
+        filterNavSections(clienteSections, filterCtx),
+        operacao,
+      )
     }
 
     if (temVinculoNegocio.value) {
-      const business = filterNavItems(
-        businessNavItems.filter((item) => item.id !== 'dashboard'),
+      const business = filterNavSections(
+        businessNavSections.filter((section) => section.id !== 'sec-inicio'),
         filterCtx,
       )
-      return dedupeNavById([...clienteNav, ...business])
+      return mergeNavSections(
+        filterNavSections(clienteSections, filterCtx),
+        business,
+      )
     }
 
     if (!isClienteRole(profile.value?.role)) {
-      return filterNavItems(businessNavItems, filterCtx)
+      return filterNavSections(businessNavSections, filterCtx)
     }
 
-    return clienteNavItems
+    return filterNavSections(clienteSections, filterCtx)
   })
+
+  const navItems = computed(() => navSections.value.flatMap((section) => section.items))
 
   const searchPlaceholder = computed(() => {
     if (ehProfissionalOperacional.value) {
@@ -91,5 +128,5 @@ export function useDashboardNav() {
       : NAV_SEARCH_PLACEHOLDER_BUSINESS
   })
 
-  return { navItems, searchPlaceholder }
+  return { navSections, navItems, searchPlaceholder }
 }

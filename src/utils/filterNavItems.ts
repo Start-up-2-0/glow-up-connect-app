@@ -1,4 +1,4 @@
-import type { NavChildItem, NavItem } from '@/constants/navigation'
+import type { NavChildItem, NavItem, NavSection } from '@/constants/navigation'
 
 export interface NavFilterContext {
   assinaturaAtiva: boolean
@@ -68,4 +68,16 @@ export function filterNavItems(navItems: NavItem[], context: NavFilterContext): 
       return itemPermitido(item, context) ? item : null
     })
     .filter((item): item is NavItem => item !== null)
+}
+
+export function filterNavSections(
+  sections: NavSection[],
+  context: NavFilterContext,
+): NavSection[] {
+  return sections
+    .map((section) => ({
+      ...section,
+      items: filterNavItems(section.items, context),
+    }))
+    .filter((section) => section.items.length > 0)
 }

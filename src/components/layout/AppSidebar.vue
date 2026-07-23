@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { ROUTE_PATHS } from '@/constants/routes'
 import { useDashboardNav } from '@/composables/useDashboardNav'
 import { useAppStore } from '@/stores/app.store'
 import SidebarHeader from './SidebarHeader.vue'
-import SidebarNavItem from './SidebarNavItem.vue'
-import SidebarNavGroup from './SidebarNavGroup.vue'
+import SidebarNavSection from './SidebarNavSection.vue'
 import SidebarFooter from './SidebarFooter.vue'
 
 const props = withDefaults(
@@ -16,9 +13,8 @@ const props = withDefaults(
   { mobile: false },
 )
 
-const route = useRoute()
 const appStore = useAppStore()
-const { navItems } = useDashboardNav()
+const { navSections } = useDashboardNav()
 
 const collapsed = computed(() => !props.mobile && appStore.sidebarCollapsed)
 
@@ -32,12 +28,6 @@ const innerPaddingClass = computed(() => {
   if (props.mobile) return 'px-5 pt-5'
   return 'px-[23px] pt-[23px]'
 })
-
-function isItemActive(to?: string) {
-  if (!to) return false
-  if (to === ROUTE_PATHS.DASHBOARD) return route.path === to
-  return route.path === to || route.path.startsWith(`${to}/`)
-}
 
 function onNavigate() {
   appStore.closeSidebarOnMobile()
@@ -69,30 +59,17 @@ function onToggleCollapsed() {
       />
 
       <nav
-        class="sidebar-nav-scroll flex min-h-0 w-full flex-1 flex-col gap-1.5 overflow-y-auto overscroll-y-contain"
+        class="sidebar-nav-scroll flex min-h-0 w-full flex-1 flex-col gap-1 overflow-y-auto overscroll-y-contain"
         :class="collapsed ? 'pb-4' : 'pb-4'"
       >
-        <template v-for="item in navItems" :key="item.id">
-          <SidebarNavGroup
-            v-if="item.children?.length"
-            :id="item.id"
-            :label="item.label"
-            :icon="item.icon"
-            :children="item.children"
-            :collapsed="collapsed"
-            @navigate="onNavigate"
-          />
-          <SidebarNavItem
-            v-else
-            :id="item.id"
-            :label="item.label"
-            :icon="item.icon"
-            :to="item.to"
-            :collapsed="collapsed"
-            :selected="isItemActive(item.to)"
-            @navigate="onNavigate"
-          />
-        </template>
+        <SidebarNavSection
+          v-for="section in navSections"
+          :key="section.id"
+          :label="section.label"
+          :items="section.items"
+          :collapsed="collapsed"
+          @navigate="onNavigate"
+        />
       </nav>
     </div>
 
