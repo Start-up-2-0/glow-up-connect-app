@@ -59,7 +59,15 @@ const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
             <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">{{ plano.descricao }}</p>
           </div>
           <p class="shrink-0 font-satoshi text-base font-bold text-glow-text">
-            {{ formatBRL(plano.preco) }}
+            <template v-if="trialAtivo && percentualDesconto > 0">
+              <span class="mr-2 text-sm font-normal text-glow-text-muted line-through">
+                {{ formatBRL(plano.preco) }}
+              </span>
+              {{ formatBRL(precoComDesconto) }}
+            </template>
+            <template v-else>
+              {{ formatBRL(plano.preco) }}
+            </template>
             <span class="font-urbanist text-sm font-normal text-glow-text-muted">/mês</span>
           </p>
         </div>

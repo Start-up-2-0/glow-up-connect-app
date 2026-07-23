@@ -34,6 +34,10 @@ const exibirPromocaoTrial = computed(() => {
   return !jaTeveAssinatura
 })
 
+const percentualDescontoPromocao = computed(() =>
+  exibirPromocaoTrial.value ? promocao.value?.percentualDescontoMensalidade ?? null : null,
+)
+
 onMounted(async () => {
   try {
     await planosStore.fetchPlanos()
@@ -62,6 +66,7 @@ onMounted(async () => {
         :destacado="plano.id === planoEssencial?.id"
         :desabilitado="planos.length === 0"
         :modo-logado="modoLogado"
+        :percentual-desconto="percentualDescontoPromocao"
       />
     </div>
 
