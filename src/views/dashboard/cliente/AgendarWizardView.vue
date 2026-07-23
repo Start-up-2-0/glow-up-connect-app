@@ -492,7 +492,11 @@ async function handleConfirmar() {
         </div>
 
         <!-- Serviços -->
-        <div v-else-if="step === 'servicos'" class="space-y-5" :class="{ 'pb-36': showResumoFooter }">
+        <div
+          v-else-if="step === 'servicos'"
+          class="space-y-5"
+          :class="{ 'pb-36': showResumoFooter && !isModoInterno }"
+        >
           <AgendarProfissionalCard
             v-if="profissionalSelecionadoNome !== '—'"
             :nome="profissionalSelecionadoNome"
@@ -529,6 +533,8 @@ async function handleConfirmar() {
             :duracao-total="duracaoTotal"
             :valor-total="valorEstimado"
             :loading="loading"
+            :variant="isModoInterno ? 'inline' : 'fixed'"
+            :wide="isModoInterno"
             @continuar="handleNextFromServicos"
           />
         </div>

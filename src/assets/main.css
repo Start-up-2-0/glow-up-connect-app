@@ -167,6 +167,7 @@
     --glow-promo-bg-dark: #3d3520;
     --glow-promo-text: #f5f0e8;
     --glow-promo-accent: #e6ad01;
+    --glow-inverse-surface: #1a1612;
 
     /* Sombras monocromáticas */
     --glow-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.04);
@@ -270,7 +271,7 @@
 
   .agendar-wizard-stepper__bar {
     @apply h-1 flex-1 rounded-full;
-    background-color: rgba(40, 40, 40, 0.2);
+    background-color: color-mix(in srgb, var(--glow-text) 16%, transparent);
   }
 
   .agendar-wizard-stepper__bar--active {
@@ -356,11 +357,34 @@
   }
 
   .agendar-slot-btn--selected {
-    @apply border-glow-gold-cta bg-[rgba(40,40,40,0.08)];
+    @apply border-glow-gold-cta;
+    background-color: var(--glow-gold-selected);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--glow-gold-cta) 45%, transparent);
   }
 
   .agendar-servico-card {
-    @apply min-h-[105px];
+    @apply min-h-[105px] transition-[background-color,box-shadow,border-color];
+  }
+
+  .agendar-servico-card:hover {
+    @apply bg-glow-hover-surface;
+  }
+
+  .agendar-servico-card--selected {
+    @apply bg-glow-gold-selected ring-1 ring-glow-gold-cta;
+  }
+
+  .agendar-servico-card__radio {
+    @apply mt-1 flex size-3.5 shrink-0 items-center justify-center rounded-full border bg-glow-bg-elevated transition-colors;
+    border-color: color-mix(in srgb, var(--glow-text) 40%, transparent);
+  }
+
+  .agendar-servico-card__radio--selected {
+    @apply border-glow-gold-cta bg-glow-gold-cta;
+  }
+
+  .agendar-servico-card__radio-dot {
+    @apply size-1.5 rounded-full bg-glow-bg-base;
   }
 
   .agendar-opcao-card {
@@ -375,12 +399,28 @@
     @apply fixed inset-x-0 bottom-0 z-20 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2;
   }
 
+  .agendar-resumo-footer--inline {
+    @apply relative inset-x-auto bottom-auto z-auto mt-6 px-0 pb-0 pt-0;
+  }
+
   .agendar-resumo-footer__panel {
-    @apply mx-auto w-full max-w-[695px] rounded-xl bg-glow-inverse-surface px-5 pb-4 pt-5;
+    @apply mx-auto w-full max-w-[695px] rounded-xl bg-glow-inverse-surface px-5 pb-4 pt-5 shadow-glow-md;
+  }
+
+  .agendar-resumo-footer--wide .agendar-resumo-footer__panel {
+    @apply max-w-[926px];
+  }
+
+  .dark .agendar-resumo-footer__panel {
+    @apply border border-glow-border-soft bg-glow-bg-elevated;
   }
 
   .agendar-resumo-footer__summary {
     @apply mb-3 flex flex-wrap items-center justify-between gap-3 font-urbanist text-sm text-white;
+  }
+
+  .dark .agendar-resumo-footer__summary {
+    @apply text-glow-text;
   }
 
   .agendar-resumo-footer__meta {
@@ -391,8 +431,16 @@
     @apply size-1.5 shrink-0 rounded-full bg-white/70;
   }
 
+  .dark .agendar-resumo-footer__dot {
+    @apply bg-glow-text-subtle;
+  }
+
   .agendar-resumo-footer__total {
     @apply font-urbanist text-xl font-bold text-white;
+  }
+
+  .dark .agendar-resumo-footer__total {
+    @apply text-glow-text;
   }
 
   .agendar-calendar-day {

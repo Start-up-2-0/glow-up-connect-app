@@ -1,22 +1,38 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { formatCurrency } from '@/utils/formatters'
 import { AGENDAR_BTN_CONTINUE_CLASS } from '@/constants/designTokens'
 
-defineProps<{
-  servicosCount: number
-  duracaoTotal: number
-  valorTotal: number
-  disabled?: boolean
-  loading?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    servicosCount: number
+    duracaoTotal: number
+    valorTotal: number
+    disabled?: boolean
+    loading?: boolean
+    /** fixed = barra fixa na base (fluxo público); inline = alinhada ao conteúdo (dashboard) */
+    variant?: 'fixed' | 'inline'
+    wide?: boolean
+  }>(),
+  {
+    variant: 'fixed',
+    wide: false,
+  },
+)
 
 const emit = defineEmits<{
   continuar: []
 }>()
+
+const rootClass = computed(() => [
+  'agendar-resumo-footer',
+  props.variant === 'inline' ? 'agendar-resumo-footer--inline' : '',
+  props.wide ? 'agendar-resumo-footer--wide' : '',
+])
 </script>
 
 <template>
-  <div class="agendar-resumo-footer">
+  <div :class="rootClass">
     <div class="agendar-resumo-footer__panel">
       <div class="agendar-resumo-footer__summary">
         <div class="agendar-resumo-footer__meta">
