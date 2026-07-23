@@ -551,7 +551,7 @@ async function handleConfirmar() {
             v-else-if="datasAtendimento.length === 0"
             class="font-urbanist text-sm text-glow-text-subtle"
           >
-            Não há dias de atendimento disponíveis com os serviços selecionados.
+            {{ error ?? 'Não há dias de atendimento disponíveis com os serviços selecionados.' }}
           </p>
 
           <AgendarCalendario
