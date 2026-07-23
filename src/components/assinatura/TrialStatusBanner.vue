@@ -2,12 +2,14 @@
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { ROUTE_PATHS } from '@/constants/routes'
-import { calcularDiasRestantesTrial, formatDate } from '@/utils/formatters'
+import { calcularDiasRestantesTrial, formatBRL, formatDate } from '@/utils/formatters'
 
 const props = defineProps<{
   diasTrial: number
   proximaDataVencimento: string
   inicio?: string | null
+  percentualDescontoPermanente?: number | null
+  valorMensalidadeComDesconto?: number | null
   compact?: boolean
   planoNome?: string
 }>()
@@ -33,6 +35,13 @@ const diasRestantes = computed(() =>
     </span>
     <span class="dashboard-trial-strip__divider" />
     <span class="dashboard-trial-strip__billing">
+      <template v-if="percentualDescontoPermanente">
+        {{ percentualDescontoPermanente }}% off para sempre
+        <template v-if="valorMensalidadeComDesconto != null">
+          · {{ formatBRL(valorMensalidadeComDesconto) }}/mês
+        </template>
+        ·
+      </template>
       Primeira cobrança: {{ formatDate(proximaDataVencimento) }}
     </span>
     <RouterLink
@@ -52,6 +61,10 @@ const diasRestantes = computed(() =>
       Período de teste — {{ diasRestantes }} dias restantes
     </p>
     <p class="mt-1 text-sm text-glow-text-subtle">
+      <template v-if="percentualDescontoPermanente && valorMensalidadeComDesconto != null">
+        Mensalidade com {{ percentualDescontoPermanente }}% de desconto vitalício:
+        {{ formatBRL(valorMensalidadeComDesconto) }}/mês.
+      </template>
       Primeira cobrança em {{ formatDate(proximaDataVencimento) }}.
       <RouterLink
         :to="ROUTE_PATHS.CONFIG_ASSINATURA_FATURAS"

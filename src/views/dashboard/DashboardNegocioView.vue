@@ -131,6 +131,7 @@ watch(
       :dias-trial="assinatura?.diasTrial ?? diasTrial ?? 30"
       :proxima-data-vencimento="assinatura?.proximaDataVencimento ?? proximaDataVencimento ?? ''"
       :inicio="assinatura?.inicio"
+      :percentual-desconto-permanente="assinatura?.percentualDescontoPermanente"
     />
 
     <div

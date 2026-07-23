@@ -121,6 +121,7 @@ function concluirPagamento() {
       :dias-trial="assinatura.diasTrial"
       :proxima-data-vencimento="assinatura.proximaDataVencimento"
       :inicio="assinatura.inicio"
+      :percentual-desconto-permanente="assinatura.percentualDescontoPermanente"
     />
 
     <BaseCard

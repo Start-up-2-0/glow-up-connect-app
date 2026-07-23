@@ -47,6 +47,7 @@ const trialAtivo = computed(
 )
 
 const diasTrialPromocao = computed(() => props.promocao?.diasTrial ?? 30)
+const descontoPromocao = computed(() => props.promocao?.percentualDescontoMensalidade ?? 0)
 
 const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
 
@@ -165,7 +166,7 @@ async function handleSubmit() {
               v-if="usarCheckoutPro && trialAtivo"
               class="onboarding-contratar-info-box"
             >
-              Você ganha {{ diasTrialPromocao }} dias grátis para testar todos os módulos.
+              Você ganha {{ diasTrialPromocao }} dias grátis e {{ descontoPromocao }}% de desconto vitalício na mensalidade.
               Não há cobrança hoje — a primeira fatura será gerada ao fim do período de teste, com link de pagamento por e-mail e WhatsApp.
             </div>
             <div
@@ -279,7 +280,7 @@ async function handleSubmit() {
               v-if="usarCheckoutPro && trialAtivo"
               class="rounded-xl border border-glow-border-soft bg-glow-surface/60 p-4 text-sm text-glow-text-subtle"
             >
-              Você ganha {{ diasTrialPromocao }} dias grátis para testar todos os módulos.
+              Você ganha {{ diasTrialPromocao }} dias grátis e {{ descontoPromocao }}% de desconto vitalício na mensalidade.
               Não há cobrança hoje — a primeira fatura será gerada ao fim do período de teste, com link de pagamento por e-mail e WhatsApp.
             </div>
             <div

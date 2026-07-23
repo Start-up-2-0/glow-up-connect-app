@@ -86,6 +86,7 @@ export interface Assinatura {
   proximaDataAlerta: string
   emTrial: boolean
   diasTrial: number
+  percentualDescontoPermanente?: number | null
   pagamentoInicial: PagamentoInicial | null
   requerConfirmacaoEmail?: boolean
 }

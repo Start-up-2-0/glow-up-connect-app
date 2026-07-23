@@ -223,6 +223,12 @@ export function formatCurrency(value: number): string {
 
 export const formatBRL = formatCurrency
 
+export function aplicarDescontoPercentual(preco: number, percentual: number): number {
+  if (percentual <= 0) return preco
+  if (percentual >= 100) return 0
+  return Math.round(preco * (1 - percentual / 100) * 100) / 100
+}
+
 /** Limite de centavos no input monetário (R$ 9.999.999,99). */
 export const CURRENCY_CENTS_MAX = 999_999_999
 
