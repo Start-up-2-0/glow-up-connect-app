@@ -20,7 +20,11 @@ import { useDashboardNegocioData } from '@/composables/useDashboardNegocioData'
 import { useDashboardRole } from '@/composables/useDashboardRole'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useAssinaturaStore } from '@/stores/assinatura.store'
-import { ROUTE_PATHS } from '@/constants/routes'
+import {
+  lojaAgendarPath,
+  ROUTE_PATHS,
+} from '@/constants/routes'
+import { useNotificationsStore } from '@/stores/notifications.store'
 import { formatCurrency } from '@/utils/formatters'
 
 const router = useRouter()
@@ -38,6 +42,24 @@ const {
   planoNome,
 } = storeToRefs(negocioStore)
 const { assinatura } = storeToRefs(assinaturaStore)
+const notifications = useNotificationsStore()
+
+const linkPublico = computed(() => {
+  if (!estabelecimentoAtivo.value?.publicGuid) return ''
+  const path = lojaAgendarPath(estabelecimentoAtivo.value.publicGuid)
+  return `${window.location.origin}${path}`
+})
+
+async function copiarLinkPublico() {
+  if (!linkPublico.value) return
+  try {
+    await navigator.clipboard.writeText(linkPublico.value)
+    notifications.push('success', 'Link copiado para a área de transferência!')
+  } catch (err) {
+    notifications.push('error', 'Não foi possível copiar o link.')
+  }
+}
+
 
 const {
   loading,
@@ -114,6 +136,10 @@ watch(
       :meta="headerMeta"
     >
       <template #actions>
+        <BaseButton variant="secondary" size="lg" @click="copiarLinkPublico">
+          <DashboardIcon name="share" class="dashboard-header-btn-icon" />
+          Compartilhar
+        </BaseButton>
         <BaseButton size="lg" @click="router.push(ROUTE_PATHS.AGENDA)">
           <DashboardIcon name="calendar" class="dashboard-header-btn-icon" />
           Ver agenda

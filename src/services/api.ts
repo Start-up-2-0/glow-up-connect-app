@@ -56,11 +56,23 @@ function shouldAttemptRefresh(error: AxiosError<ApiErrorResponse>, url?: string)
   return !code || code === 'TOKEN_EXPIRED' || code === 'INVALID_TOKEN' || code === 'UNAUTHORIZED'
 }
 
+function sanitizeRedirectPath(path: string): string {
+  // Garante que o caminho seja relativo e não comece com // ou @
+  if (!path.startsWith('/') || path.startsWith('//') || path.includes('@')) {
+    return '/'
+  }
+  // Remove caracteres potencialmente perigosos.
+  // Permitimos apenas caracteres alfanuméricos, /, ?, =, &, - e _
+  const sanitized = path.replace(/[^a-zA-Z0-9/?=&\-_]/g, '')
+  return sanitized || '/'
+}
+
 function redirectToLogin() {
   clearSessionStorage()
   const isAuthRoute = window.location.pathname.startsWith('/auth')
   if (!isAuthRoute) {
-    const redirect = encodeURIComponent(window.location.pathname + window.location.search)
+    const sanitizedPath = sanitizeRedirectPath(window.location.pathname + window.location.search)
+    const redirect = encodeURIComponent(sanitizedPath)
     window.location.href = `${ROUTE_PATHS.LOGIN}?redirect=${redirect}`
   }
 }
@@ -172,9 +184,12 @@ api.interceptors.response.use(
 
     if (error.response?.status === 429) {
       const code = error.response.data?.code
-      const message =
-        error.response.data?.message ??
-        'Muitas requisições. Aguarde alguns segundos e tente novamente.'
+      const defaultMessage = 'Muitas requisições. Por favor, tente novamente mais tarde.'
+
+      const message = code === 'IP_BLOCKED_24H'
+        ? defaultMessage
+        : error.response.data?.message ?? defaultMessage
+
       useNotificationsStore().push(
         code === 'IP_BLOCKED_24H' ? 'error' : 'warning',
         message,

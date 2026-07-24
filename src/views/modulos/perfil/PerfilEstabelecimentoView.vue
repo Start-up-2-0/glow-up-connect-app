@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { ROUTE_PATHS } from '@/constants/routes'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
@@ -53,6 +54,11 @@ const enderecoIncompleto = computed(
   () => perfil.value?.endereco != null && perfil.value.endereco.enderecoCompleto === false,
 )
 
+const linkPublico = computed(() => {
+  if (!estabelecimentoAtivo.value?.publicGuid) return ''
+  return `${window.location.origin}${ROUTE_PATHS.LOJA}/${estabelecimentoAtivo.value.publicGuid}/agendar`
+})
+
 const enderecoResumo = computed(() => {
   if (!perfil.value?.endereco) return 'Endereço não informado'
   const e = perfil.value.endereco
@@ -72,6 +78,15 @@ function sincronizarContextoNegocio(atualizado: EstabelecimentoPerfilCompleto) {
     nome: atualizado.nome,
     logo: atualizado.logo,
   })
+}
+
+async function copiarLinkPublico() {
+  try {
+    await navigator.clipboard.writeText(linkPublico.value)
+    notifications.push('success', 'Link copiado para a área de transferência!')
+  } catch (err) {
+    notifications.push('error', 'Não foi possível copiar o link.')
+  }
 }
 
 async function carregarPerfil() {
@@ -344,6 +359,23 @@ watch(
             </dd>
           </div>
         </dl>
+      </BaseCard>
+
+      <BaseCard title="Link Público de Agendamento">
+        <p class="font-urbanist text-sm text-glow-text-subtle">
+          Compartilhe este link para que seus clientes possam agendar diretamente com sua loja.
+        </p>
+        <div class="mt-4 space-y-3">
+          <BaseInput
+            id="link-publico"
+            :model-value="linkPublico"
+            readonly
+            label="URL do seu link público"
+          />
+          <BaseButton variant="secondary" @click="copiarLinkPublico">
+            Copiar link
+          </BaseButton>
+        </div>
       </BaseCard>
     </template>
   </div>
