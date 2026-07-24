@@ -137,7 +137,7 @@ watch(
     >
       <template #actions>
         <BaseButton variant="secondary" size="lg" @click="copiarLinkPublico">
-          <DashboardIcon name="share" class="dashboard-header-btn-icon" />
+          <DashboardIcon name="arrow-right" class="dashboard-header-btn-icon" />
           Compartilhar
         </BaseButton>
         <BaseButton size="lg" @click="router.push(ROUTE_PATHS.AGENDA)">
