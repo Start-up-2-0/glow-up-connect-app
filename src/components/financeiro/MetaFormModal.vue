@@ -121,7 +121,18 @@ function handleConfirm() {
                 <template v-if="tipoMeta === 'Atendimentos'">Quantidade de atendimentos</template>
                 <template v-else>Valor em R$</template>
               </div>
-              <CurrencyInput v-model="valorMeta" :label="tipoMeta === 'Atendimentos' ? 'Quantidade' : 'Valor'" />
+              <div v-if="tipoMeta === 'Atendimentos'" class="flex">
+                <span class="inline-flex h-11 shrink-0 items-center rounded-l-lg border border-r-0 border-glow-border-soft bg-glow-surface px-3.5 font-urbanist text-sm font-medium text-glow-text-subtle" aria-hidden="true">#</span>
+                <input
+                  v-model.number="valorMeta"
+                  type="number"
+                  min="0"
+                  step="1"
+                  class="h-11 w-full rounded-r-lg border border-glow-border-soft bg-glow-canvas px-3.5 font-urbanist text-sm text-glow-text outline-none transition placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold"
+                  placeholder="100"
+                />
+              </div>
+              <CurrencyInput v-else v-model="valorMeta" label="" />
             </div>
 
             <div class="space-y-1">
@@ -144,12 +155,14 @@ function handleConfirm() {
               />
             </div>
 
-            <label class="flex cursor-pointer items-center gap-3 py-1">
-              <input v-model="recorrente" type="checkbox" class="sr-only" />
+            <button
+              type="button"
+              class="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-glow-border-soft bg-glow-canvas px-3.5 py-3 text-left transition hover:bg-glow-surface"
+              @click="recorrente = !recorrente"
+            >
               <span
-                class="flex size-[18px] shrink-0 items-center justify-center rounded border border-glow-border-soft bg-white transition group-has-[:checked]:border-glow-gold"
-                :class="recorrente ? 'border-glow-gold bg-glow-gold' : ''"
-                aria-hidden="true"
+                class="flex size-[18px] shrink-0 items-center justify-center rounded border transition"
+                :class="recorrente ? 'border-glow-gold bg-glow-gold' : 'border-glow-border-soft bg-white'"
               >
                 <svg
                   v-if="recorrente"
@@ -162,11 +175,11 @@ function handleConfirm() {
                   <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </span>
-              <span class="font-urbanist text-sm text-glow-text">
-                Meta recorrente (repete todo mês)
-                <span class="text-glow-text-subtle">— desmarque para meta pontual</span>
-              </span>
-            </label>
+              <div class="flex flex-col">
+                <span class="font-urbanist text-sm font-medium text-glow-text">Meta recorrente</span>
+                <span class="font-urbanist text-xs text-glow-text-subtle">Repete todo mês automaticamente — desmarque para meta pontual</span>
+              </div>
+            </button>
           </div>
           <div class="financeiro-modal__footer">
             <BaseButton variant="secondary" size="sm" :disabled="loading" @click="close">

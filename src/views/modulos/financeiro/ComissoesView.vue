@@ -3,7 +3,6 @@ import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
-import SegmentedControl from '@/components/ui/SegmentedControl.vue'
 import FinanceiroPageHeader from '@/components/financeiro/FinanceiroPageHeader.vue'
 import FinanceiroKpiCard from '@/components/financeiro/FinanceiroKpiCard.vue'
 import FinanceiroEmptyState from '@/components/financeiro/FinanceiroEmptyState.vue'
@@ -434,13 +433,19 @@ watch(aba, () => void load())
 
     <!-- Tabs + Actions Row -->
     <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div class="flex flex-wrap items-center gap-2">
-        <SegmentedControl
-          v-if="abaOptions.length > 1"
-          v-model="aba"
-          :options="abaOptions"
-          aria-label="Visão de comissões"
-        />
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="financeiro-segmented">
+          <button
+            v-for="opt in abaOptions"
+            :key="opt.value"
+            type="button"
+            class="financeiro-segmented__btn whitespace-nowrap"
+            :class="{ 'financeiro-segmented__btn--active': aba === opt.value }"
+            @click="aba = opt.value"
+          >
+            {{ opt.label }}
+          </button>
+        </div>
         <FinanceiroPeriodoFiltro
           v-if="aba === 'extrato' || aba === 'historico'"
           v-model:inicio="filtroInicio"
