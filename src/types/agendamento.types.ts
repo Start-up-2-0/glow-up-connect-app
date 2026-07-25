@@ -113,7 +113,7 @@ export interface AgendamentoContextoPublico {
 }
 
 export interface CriarAgendamentoComCadastroPayload {
-  profissionalPublicGuid: string
+  profissionalPublicGuid?: string
   servicoIds: number[]
   data: string
   horarioInicio: string

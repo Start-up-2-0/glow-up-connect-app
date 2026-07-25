@@ -460,10 +460,6 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
 
   async function continuarDeProfissional() {
     if (modoProfissional.value === 'sem_preferencia') {
-      if (isVisitante.value && modoIdentidade.value === 'register') {
-        error.value = 'Para criar conta, escolha um profissional específico.'
-        return
-      }
       semPreferenciaProfissional.value = true
       activeProfissionalGuid.value = ''
       step.value = 'servicos'
@@ -678,16 +674,12 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
       }
 
       if (isVisitante.value && modoIdentidade.value === 'register') {
-        if (!profGuid) {
-          throw new Error('Escolha um profissional específico para criar conta e agendar.')
-        }
         if (!validarCadastro()) {
           throw new Error(error.value ?? 'Dados de cadastro inválidos.')
         }
 
         const criado = await publicoService.criarAgendamentoComCadastro(publicGuid, {
           ...payloadBase,
-          profissionalPublicGuid: profGuid,
           cadastro: {
             nome: clienteNome.value.trim(),
             email: clienteEmail.value.trim(),
