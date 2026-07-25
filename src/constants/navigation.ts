@@ -55,14 +55,6 @@ const financeiroNavChildren: NavChildItem[] = [
     requerModulo: 'ComissaoProfissionais',
     requerPermissao: 'CaixaVisualizar',
   },
-  {
-    id: 'financeiro-metas',
-    label: 'Metas',
-    to: ROUTE_PATHS.FINANCEIRO_METAS,
-    icon: 'target',
-    requerModulo: 'ComissaoProfissionais',
-    requerPermissao: 'CaixaVisualizar',
-  },
 ]
 
 const lojaNavItems: NavItem[] = [

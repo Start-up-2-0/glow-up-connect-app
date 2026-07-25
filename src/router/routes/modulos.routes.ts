@@ -172,16 +172,7 @@ export const modulosRoutes: RouteRecordRaw[] = [
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_METAS,
-    name: ROUTE_NAMES.FINANCEIRO_METAS,
-    component: () => import('@/views/modulos/financeiro/MetasView.vue'),
-    meta: {
-      layout: 'dashboard',
-      requiresAuth: true,
-      businessOnly: true,
-      requerModulo: 'ComissaoProfissionais',
-      requerPermissao: 'CaixaVisualizar',
-      title: 'Metas',
-    },
+    redirect: () => ({ path: ROUTE_PATHS.FINANCEIRO_COMISSOES, query: { aba: 'metas' } }),
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_RELATORIOS,
