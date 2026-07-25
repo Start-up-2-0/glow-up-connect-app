@@ -111,13 +111,6 @@ const proximoFechamento = computed(() => {
   return ultimoDia.toLocaleDateString('pt-BR')
 })
 
-const totalComissoesPeriodo = computed(() => {
-  let total = 0
-  for (const item of historico.value) {
-    if (item.tipo === 'ComissaoProfissional') total += item.valor
-  }
-  return formatCurrency(total)
-})
 
 const abaOptions = computed(() => {
   const opts: Array<{ value: string; label: string }> = []
@@ -266,11 +259,6 @@ async function confirmarPausar() {
   } finally {
     actionLoading.value = false
   }
-}
-
-function profissionalNome(profissionalEstabelecimentoId: number): string {
-  const p = profissionais.value.find((p) => p.id === profissionalEstabelecimentoId)
-  return p?.nomePublico ?? `Profissional #${profissionalEstabelecimentoId}`
 }
 
 // --- Handlers Metas ---

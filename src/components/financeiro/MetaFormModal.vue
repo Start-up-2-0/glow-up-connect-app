@@ -20,7 +20,7 @@ const tipoMeta = ref('Atendimentos')
 const valorMeta = ref(0)
 const percentualComissao = ref(10)
 const recorrente = ref(true)
-const profissionalEstabelecimentoId = ref<number | null>(null)
+const profissionalEstabelecimentoId = ref('')
 
 const tipoOptions = [
   { value: 'Atendimentos', label: 'Quantidade de atendimentos' },
@@ -50,14 +50,14 @@ watch(open, (isOpen) => {
     valorMeta.value = props.meta.valorMeta
     percentualComissao.value = props.meta.percentualComissao
     recorrente.value = props.meta.recorrente
-    profissionalEstabelecimentoId.value = props.meta.profissionalEstabelecimentoId ?? null
+    profissionalEstabelecimentoId.value = String(props.meta.profissionalEstabelecimentoId ?? '')
   } else {
     nome.value = ''
     tipoMeta.value = 'Atendimentos'
     valorMeta.value = 0
     percentualComissao.value = 10
     recorrente.value = true
-    profissionalEstabelecimentoId.value = null
+    profissionalEstabelecimentoId.value = ''
   }
 })
 
@@ -75,7 +75,7 @@ function handleConfirm() {
     recorrente: recorrente.value,
   }
   if (profissionalEstabelecimentoId.value) {
-    payload.profissionalEstabelecimentoId = profissionalEstabelecimentoId.value
+    payload.profissionalEstabelecimentoId = Number(profissionalEstabelecimentoId.value)
   }
   emit('confirm', payload)
 }
