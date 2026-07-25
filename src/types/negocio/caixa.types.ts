@@ -216,6 +216,8 @@ export interface Meta {
   valorMeta: number
   percentualComissao: number
   ativa: boolean
+  recorrente: boolean
+  profissionalEstabelecimentoId: number | null
   createAd: string
   updatedAt: string | null
 }
@@ -225,6 +227,8 @@ export interface CriarMetaPayload {
   tipoMeta: 'Atendimentos' | 'Faturamento' | 'Mista'
   valorMeta: number
   percentualComissao: number
+  recorrente: boolean
+  profissionalEstabelecimentoId?: number | null
 }
 
 export interface AtualizarMetaPayload {
@@ -233,6 +237,8 @@ export interface AtualizarMetaPayload {
   valorMeta: number
   percentualComissao: number
   ativa: boolean
+  recorrente: boolean
+  profissionalEstabelecimentoId?: number | null
 }
 
 export interface MetaProgressoProfissional {

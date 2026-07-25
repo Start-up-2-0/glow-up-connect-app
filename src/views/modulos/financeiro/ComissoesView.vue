@@ -149,7 +149,7 @@ async function load() {
     else if (aba.value === 'historico') await loadHistorico()
     else if (aba.value === 'metas') await loadMetas()
     else if (aba.value === 'progresso') await loadProgresso()
-    if (aba.value === 'regras' || aba.value === 'extrato') await loadProfissionais()
+    if (aba.value === 'regras' || aba.value === 'extrato' || aba.value === 'metas') await loadProfissionais()
   } catch (err) {
     notifications.push('error', resolveError(err))
   } finally {
@@ -217,6 +217,11 @@ async function confirmarPausar() {
   } finally {
     actionLoading.value = false
   }
+}
+
+function profissionalNome(profissionalEstabelecimentoId: number): string {
+  const p = profissionais.value.find((p) => p.id === profissionalEstabelecimentoId)
+  return p?.nomePublico ?? `Profissional #${profissionalEstabelecimentoId}`
 }
 
 // --- Handlers Metas ---
@@ -431,6 +436,11 @@ watch(aba, () => void load())
             <p class="font-urbanist text-sm font-semibold text-glow-text">{{ m.nome }}</p>
             <p class="font-urbanist text-xs text-glow-text-subtle">
               {{ formatTipoMeta(m.tipoMeta) }} · {{ formatValorMeta(m) }} · {{ m.percentualComissao }}% comissão
+            </p>
+            <p class="mt-0.5 flex items-center gap-2 font-urbanist text-xs text-glow-text-subtle">
+              <span>{{ m.recorrente ? '🔄 Mensal' : '📅 Pontual' }}</span>
+              <span>·</span>
+              <span>{{ m.profissionalEstabelecimentoId ? profissionalNome(m.profissionalEstabelecimentoId) : '👥 Todos os profissionais' }}</span>
             </p>
           </div>
           <div class="flex items-center gap-2">
@@ -688,6 +698,7 @@ watch(aba, () => void load())
       v-model="metaFormModalOpen"
       :loading="actionLoading"
       :meta="metaEditando"
+      :profissionais="profissionais.map((p) => ({ id: p.id, nomePublico: p.nomePublico }))"
       @confirm="salvarMeta"
     />
     <FinanceiroConfirmDialog
