@@ -206,7 +206,7 @@ export const modulosRoutes: RouteRecordRaw[] = [
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_MINHAS_COMISSOES,
-    redirect: { path: ROUTE_PATHS.FINANCEIRO_COMISSOES, query: { aba: 'extrato' } },
+    redirect: ROUTE_PATHS.FINANCEIRO_COMISSOES,
   },
   {
     path: ROUTE_PATHS.FINANCEIRO_CONTAS_RECEBER,

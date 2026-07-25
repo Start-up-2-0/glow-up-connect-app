@@ -354,8 +354,11 @@ export const caixaService = {
     )
   },
 
-  listarProgressoMetas(estabelecimentoId: number, metaId?: number) {
-    const params = metaId ? { metaId } : undefined
+  listarProgressoMetas(estabelecimentoId: number, metaId?: number, mes?: number, ano?: number) {
+    const params: Record<string, number> = {}
+    if (metaId !== undefined) params.metaId = metaId
+    if (mes !== undefined) params.mes = mes
+    if (ano !== undefined) params.ano = ano
     return api
       .get<ApiSuccessResponse<MetaProgressoProfissional[]>>(
         negocioPath(estabelecimentoId, '/financeiro/metas/progresso'),
