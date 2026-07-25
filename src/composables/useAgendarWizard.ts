@@ -494,13 +494,9 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
   function escolherIdentidade(modo: ModoIdentidadeAgendamento) {
     modoIdentidade.value = modo
     error.value = null
-    if (modo === 'guest') {
+    if (modo === 'guest' || modo === 'register') {
       step.value = 'contato'
       return
-    }
-    if (modo === 'register') {
-      step.value = initialProfissionalGuid ? 'servicos' : 'profissional'
-      if (initialProfissionalGuid) void loadServicos()
     }
   }
 
@@ -516,7 +512,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
   function voltarDeProfissional() {
     error.value = null
     if (isVisitante.value) {
-      if (modoIdentidade.value === 'guest') {
+      if (modoIdentidade.value === 'guest' || modoIdentidade.value === 'register') {
         step.value = 'contato'
         return
       }
@@ -530,7 +526,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
 
   function voltarDeServicos() {
     error.value = null
-    if (modoIdentidade.value === 'guest') {
+    if (modoIdentidade.value === 'guest' || modoIdentidade.value === 'register') {
       step.value = 'contato'
       return
     }
@@ -612,7 +608,8 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
   }
 
   function validarDadosContato(): boolean {
-    if (!isVisitante.value || modoIdentidade.value !== 'guest') return true
+    if (!isVisitante.value) return true
+    if (modoIdentidade.value !== 'guest' && modoIdentidade.value !== 'register') return true
 
     const nome = clienteNome.value.trim()
     const email = clienteEmail.value.trim()
@@ -751,7 +748,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
         return
       }
 
-      if (isVisitante.value && modoIdentidade.value === 'guest' && !contatoGuestPreenchido()) {
+      if (isVisitante.value && (modoIdentidade.value === 'guest' || modoIdentidade.value === 'register') && !contatoGuestPreenchido()) {
         step.value = 'contato'
         return
       }
@@ -773,7 +770,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
       return
     }
 
-    if (isVisitante.value && modoIdentidade.value === 'guest' && !contatoGuestPreenchido()) {
+    if (isVisitante.value && (modoIdentidade.value === 'guest' || modoIdentidade.value === 'register') && !contatoGuestPreenchido()) {
       step.value = 'contato'
       return
     }
