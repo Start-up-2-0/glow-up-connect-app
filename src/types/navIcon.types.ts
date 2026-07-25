@@ -13,3 +13,4 @@ export type NavIconName =
   | 'finance'
   | 'building'
   | 'subscription'
+  | 'target'

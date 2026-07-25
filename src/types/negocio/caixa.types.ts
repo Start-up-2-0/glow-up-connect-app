@@ -208,3 +208,43 @@ export interface AtualizarContaPagarPayload {
   vencimento: string
   recorrente: boolean
 }
+
+export interface Meta {
+  id: number
+  nome: string
+  tipoMeta: 'Atendimentos' | 'Faturamento' | 'Mista'
+  valorMeta: number
+  percentualComissao: number
+  ativa: boolean
+  createAd: string
+  updatedAt: string | null
+}
+
+export interface CriarMetaPayload {
+  nome: string
+  tipoMeta: 'Atendimentos' | 'Faturamento' | 'Mista'
+  valorMeta: number
+  percentualComissao: number
+}
+
+export interface AtualizarMetaPayload {
+  nome: string
+  tipoMeta: 'Atendimentos' | 'Faturamento' | 'Mista'
+  valorMeta: number
+  percentualComissao: number
+  ativa: boolean
+}
+
+export interface MetaProgressoProfissional {
+  profissionalEstabelecimentoId: number
+  profissionalId: number
+  nomePublico: string
+  metaNome: string
+  tipoMeta: string
+  valorMeta: number
+  percentualComissao: number
+  quantidadeRealizada: number | null
+  valorRealizado: number | null
+  percentualProgresso: number
+  atingida: boolean
+}
