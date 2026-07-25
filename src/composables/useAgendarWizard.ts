@@ -16,6 +16,7 @@ import {
   toAgendaTimeOnlyString,
   toDateOnlyFromIsoUtc,
   toDateOnlyString,
+  telefoneToApi,
 } from '@/utils/formatters'
 import {
   clearAgendarWizardDraft,
@@ -683,7 +684,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
           cadastro: {
             nome: clienteNome.value.trim(),
             email: clienteEmail.value.trim(),
-            telefone: clienteTelefone.value.trim(),
+            telefone: telefoneToApi(clienteTelefone.value),
             senha: cadastroSenha.value,
           },
         })
@@ -705,7 +706,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
           ...payloadBase,
           clienteNome: clienteNome.value.trim(),
           clienteEmail: clienteEmail.value.trim(),
-          clienteTelefone: clienteTelefone.value.trim(),
+          clienteTelefone: telefoneToApi(clienteTelefone.value),
         })
         agendamentoCriado.value = criado
         step.value = 'sucesso'

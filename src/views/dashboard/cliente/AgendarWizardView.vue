@@ -33,6 +33,7 @@ import {
   formatDateOnlyMedium,
   toDateOnlyFromIsoUtc,
 } from '@/utils/formatters'
+import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -375,17 +376,15 @@ async function handleConfirmar() {
                 :class="[GLOW_INPUT_CLASS, 'mt-2']"
               />
             </div>
-            <div>
-              <label :class="GLOW_LABEL_CLASS" for="agendar-telefone">Telefone</label>
-              <input
-                id="agendar-telefone"
-                v-model="clienteTelefone"
-                type="tel"
-                autocomplete="tel"
-                placeholder="(00) 0 0000-0000"
-                :class="[GLOW_INPUT_CLASS, 'mt-2']"
-              />
-            </div>
+            <TelefoneInput
+              id="agendar-telefone"
+              v-model="clienteTelefone"
+              label="Telefone"
+              variant="dashboard"
+              autocomplete="tel"
+              required
+              placeholder="(00) 0 0000-0000"
+            />
           </div>
 
           <button
