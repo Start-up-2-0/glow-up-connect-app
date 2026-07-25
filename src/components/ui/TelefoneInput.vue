@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import FieldMessage from '@/components/form/FieldMessage.vue'
 import {
-  GLOW_INPUT_CLASS,
   ONBOARDING_CONTRATAR_INPUT_CLASS,
   ONBOARDING_CONTRATAR_LABEL_CLASS,
   ONBOARDING_CONTRATAR_TELEFONE_PREFIX_CLASS,
