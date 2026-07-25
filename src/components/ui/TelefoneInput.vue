@@ -42,11 +42,15 @@ const displayValue = computed(() => {
   return maskTelefoneLocal(props.modelValue)
 })
 
+const AUTH_PREFIX_CLASS =
+  'inline-flex h-[54px] shrink-0 items-center rounded-l-xl border border-r-0 border-glow-border-soft bg-glow-bg-surface px-4 font-satoshi text-sm font-medium text-glow-text-subtle'
+
+const AUTH_INPUT_CLASS =
+  'h-[54px] w-full border border-glow-border-soft bg-glow-bg-surface px-4 font-satoshi text-[15px] text-glow-text placeholder:font-satoshi placeholder:text-[15px] placeholder:text-glow-placeholder outline-none transition-all duration-200 focus:border-glow-gold-dark focus:ring-2 focus:ring-glow-gold/20 disabled:cursor-not-allowed disabled:opacity-60'
+
 const prefixClass = computed(() => {
   if (props.variant === 'contratar') return ONBOARDING_CONTRATAR_TELEFONE_PREFIX_CLASS
-  if (props.variant === 'auth') {
-    return 'inline-flex h-[49px] shrink-0 items-center rounded-l-lg border-[0.3px] border-r-0 border-glow-text/40 bg-white px-4 font-satoshi text-sm font-medium text-glow-text-subtle'
-  }
+  if (props.variant === 'auth') return AUTH_PREFIX_CLASS
   return 'inline-flex h-11 shrink-0 items-center rounded-l-lg border border-r-0 border-glow-border-soft bg-glow-surface px-3.5 font-urbanist text-sm font-medium text-glow-text-subtle'
 })
 
@@ -57,18 +61,27 @@ const contratarInputClass = `${ONBOARDING_CONTRATAR_INPUT_CLASS} rounded-l-none`
 
 const inputClass = computed(() => {
   let base = dashboardInputClass
-  if (props.variant === 'auth') base = GLOW_INPUT_CLASS
+  if (props.variant === 'auth') base = AUTH_INPUT_CLASS
   if (props.variant === 'contratar') base = contratarInputClass
-  const shape = props.unified
-    ? `${base} rounded-lg`
-    : props.showDdiPrefix
-      ? `${base} rounded-r-lg`
-      : `${base} rounded-lg`
+
+  let shape: string
+  if (props.variant === 'auth') {
+    shape = props.showDdiPrefix && !props.unified
+      ? `${base} rounded-r-xl rounded-l-none`
+      : `${base} rounded-xl`
+  } else if (props.unified) {
+    shape = `${base} rounded-lg`
+  } else if (props.showDdiPrefix) {
+    shape = `${base} rounded-r-lg`
+  } else {
+    shape = `${base} rounded-lg`
+  }
+
   return props.error ? `${shape} field-input--error` : shape
 })
 
 const labelClass = computed(() => {
-  if (props.variant === 'auth') return 'font-satoshi text-sm font-normal text-zinc-800'
+  if (props.variant === 'auth') return 'font-satoshi text-sm font-medium text-glow-text'
   if (props.variant === 'contratar') return ONBOARDING_CONTRATAR_LABEL_CLASS
   return 'font-urbanist text-sm font-medium text-glow-text'
 })

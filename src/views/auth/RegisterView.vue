@@ -2,7 +2,8 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import registerCrest from '@/assets/logo/logo_original.png'
-import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
+import AuthSplashPanel from '@/components/auth/AuthSplashPanel.vue'
+import AuthMobileBrand from '@/components/auth/AuthMobileBrand.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import { userService } from '@/services/userService'
@@ -22,19 +23,6 @@ import {
 } from '@/utils/authRedirect'
 import { conviteService } from '@/services/conviteService'
 import { establishmentRoleLabel } from '@/constants/establishmentRoles'
-import {
-  GLOW_AUTH_FORM_GRID_CLASS,
-  GLOW_AUTH_LOGO_CLASS,
-  GLOW_AUTH_SUBTITLE_CLASS,
-  GLOW_AUTH_TITLE_CLASS,
-  GLOW_BODY_TEXT_CLASS,
-  GLOW_BUTTON_PRIMARY_CLASS,
-  GLOW_INPUT_CLASS,
-  GLOW_LABEL_CLASS,
-  GLOW_LINK_CLASS,
-  GLOW_LOGIN_CONTENT_CLASS,
-  GLOW_LOGIN_PAGE_CLASS,
-} from '@/constants/designTokens'
 import { useConsent } from '@/composables/useConsent'
 import { useCaptcha } from '@/composables/useCaptcha'
 import AuthRecaptcha from '@/components/auth/AuthRecaptcha.vue'
@@ -63,8 +51,6 @@ const confirmarEmail = ref('')
 const senha = ref('')
 const confirmarSenha = ref('')
 const avatarFile = ref<File | null>(null)
-const mostrarSenha = ref(false)
-const mostrarConfirmarSenha = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
 const fieldErrors = ref<Record<string, string[]>>({})
@@ -196,203 +182,291 @@ function onAvatarError(message: string) {
 </script>
 
 <template>
-  <div :class="[GLOW_LOGIN_PAGE_CLASS, 'overflow-y-auto']">
-    <div :class="[GLOW_LOGIN_CONTENT_CLASS, 'my-auto py-4']">
-      <img
-        :src="registerCrest"
-        alt="Glow Up Connect"
-        :class="GLOW_AUTH_LOGO_CLASS"
-        width="168"
-        height="168"
-      />
-
-      <header class="mb-10 w-full text-center">
-        <h1 :class="GLOW_AUTH_TITLE_CLASS">
-          {{ isAssinaturaFlow ? 'Crie sua conta para assinar' : 'Crie agora a sua conta!' }}
-        </h1>
-        <p :class="GLOW_AUTH_SUBTITLE_CLASS">
-          {{
-            isAssinaturaFlow
-              ? 'Cadastre-se para configurar seu estabelecimento e contratar o plano escolhido.'
-              : 'Insira seus dados corretamente para criar sua conta.'
-          }}
-        </p>
-      </header>
-
-      <p
-        v-if="conviteResumo"
-        class="mb-4 w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
-        role="status"
+  <div class="flex min-h-dvh flex-col bg-glow-bg-surface">
+    <!-- Área principal: centraliza o container splash + card -->
+    <div class="flex flex-1 items-start justify-center overflow-y-auto px-4 py-8 sm:px-6">
+      <!-- Container unificado — splash e card na mesma altura -->
+      <div
+        class="flex w-full max-w-[1000px] flex-col rounded-[24px] bg-white shadow-[0_15px_40px_rgba(0,0,0,0.08)] lg:flex-row lg:overflow-hidden"
       >
-        {{ conviteResumo }}
-      </p>
+        <!-- Painel esquerdo — imagem lifestyle (lg+) -->
+        <AuthSplashPanel />
 
-      <p
-        v-if="errorMessage"
-        class="mb-4 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        role="alert"
-      >
-        {{ errorMessage }}
-        <RouterLink v-if="emailJaCadastrado" :to="loginLink" :class="[GLOW_LINK_CLASS, 'ml-1 inline-block']">
-          Fazer login
-        </RouterLink>
-      </p>
+        <!-- Painel direito — formulário -->
+        <div class="flex w-full flex-col px-6 py-8 sm:px-8 sm:py-10 lg:w-[500px] lg:shrink-0">
+          <!-- Marca mobile -->
+          <div class="mb-6 text-center lg:hidden">
+            <AuthMobileBrand />
+          </div>
 
-      <form class="flex w-full flex-col gap-6" @submit.prevent="handleSubmit">
-        <div :class="GLOW_AUTH_FORM_GRID_CLASS">
-          <div class="flex flex-col gap-2">
-            <label for="nome" :class="GLOW_LABEL_CLASS">Nome completo</label>
-            <input
-              id="nome"
-              v-model="nome"
-              type="text"
-              autocomplete="name"
-              required
-              placeholder="Informe seu nome completo"
-              :class="GLOW_INPUT_CLASS"
+          <!-- Logo -->
+          <div class="mb-6 flex justify-center">
+            <img
+              :src="registerCrest"
+              alt="Glow Up Connect"
+              class="h-20 w-20 shrink-0 object-contain sm:h-24 sm:w-24"
             />
-            <p v-if="getFieldError(...FIELD_KEYS.nome)" class="text-sm text-red-600">
-              {{ getFieldError(...FIELD_KEYS.nome) }}
+          </div>
+
+          <!-- Título -->
+          <header class="mb-8 text-center">
+            <h1 class="font-satoshi text-[26px] font-bold leading-tight text-glow-text sm:text-[28px]">
+              {{ isAssinaturaFlow ? 'Crie sua conta para assinar' : 'Crie agora a sua conta!' }}
+            </h1>
+            <p class="mt-1.5 font-satoshi text-base leading-snug text-glow-text-muted">
+              {{
+                isAssinaturaFlow
+                  ? 'Cadastre-se para configurar seu estabelecimento e contratar o plano escolhido.'
+                  : 'Preencha seus dados para criar sua conta.'
+              }}
             </p>
-          </div>
+          </header>
 
-          <TelefoneInput
-            id="telefone"
-            v-model="telefone"
-            label="Telefone"
-            variant="auth"
-            autocomplete="tel"
-            required
-            placeholder="(00) 0 0000-0000"
-            :error="getFieldError(...FIELD_KEYS.telefone)"
-          />
-
-          <div class="flex flex-col gap-2">
-            <label for="email" :class="GLOW_LABEL_CLASS">E-mail</label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              autocomplete="email"
-              required
-              placeholder="ex: usuario01@exemplo.com"
-              :class="GLOW_INPUT_CLASS"
-            />
-            <p v-if="getFieldError(...FIELD_KEYS.email)" class="text-sm text-red-600">
-              {{ getFieldError(...FIELD_KEYS.email) }}
-            </p>
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <label for="confirmar-email" :class="GLOW_LABEL_CLASS">Confirmar E-mail</label>
-            <input
-              id="confirmar-email"
-              v-model="confirmarEmail"
-              type="email"
-              autocomplete="email"
-              required
-              placeholder="ex: usuario01@exemplo.com"
-              :class="GLOW_INPUT_CLASS"
-            />
-          </div>
-
-          <div class="relative flex flex-col gap-2">
-            <label for="senha" :class="GLOW_LABEL_CLASS">Senha</label>
-            <input
-              id="senha"
-              v-model="senha"
-              :type="mostrarSenha ? 'text' : 'password'"
-              autocomplete="new-password"
-              required
-              placeholder="Informe a sua senha"
-              :class="[GLOW_INPUT_CLASS, 'pr-12']"
-            />
-            <AuthPasswordToggle :pressed="mostrarSenha" @click="mostrarSenha = !mostrarSenha" />
-            <p v-if="getFieldError(...FIELD_KEYS.senha)" class="text-sm text-red-600">
-              {{ getFieldError(...FIELD_KEYS.senha) }}
-            </p>
-          </div>
-
-          <div class="relative flex flex-col gap-2">
-            <label for="confirmar-senha" :class="GLOW_LABEL_CLASS">Confirmar Senha</label>
-            <input
-              id="confirmar-senha"
-              v-model="confirmarSenha"
-              :type="mostrarConfirmarSenha ? 'text' : 'password'"
-              autocomplete="new-password"
-              required
-              placeholder="Confirme a sua senha"
-              :class="[GLOW_INPUT_CLASS, 'pr-12']"
-            />
-            <AuthPasswordToggle
-              :pressed="mostrarConfirmarSenha"
-              @click="mostrarConfirmarSenha = !mostrarConfirmarSenha"
-            />
-          </div>
-
-          <div class="sm:col-span-2">
-            <AuthAvatarUpload @change="onAvatarChange" @error="onAvatarError" />
-          </div>
-        </div>
-
-        <label class="group flex min-h-11 cursor-pointer items-start gap-3 py-1">
-          <input v-model="aceitoTermos" type="checkbox" class="sr-only" />
-          <span
-            class="mt-0.5 flex size-[22px] shrink-0 items-center justify-center rounded-[2px] border border-glow-text/20 bg-white transition group-has-[:checked]:border-glow-gold group-has-[:checked]:bg-glow-gold"
-            aria-hidden="true"
+          <!-- Convite resumo -->
+          <p
+            v-if="conviteResumo"
+            class="mb-5 w-full rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+            role="status"
           >
-            <svg
-              class="h-3 w-3 text-white opacity-0 transition group-has-[:checked]:opacity-100"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="3"
-              aria-hidden="true"
-            >
-              <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </span>
-          <span :class="GLOW_BODY_TEXT_CLASS">
-            Li e aceito os
-            <a
-              :href="legalUrl('termos-de-uso')"
-              target="_blank"
-              rel="noopener"
-              :class="GLOW_LINK_CLASS"
-            >
-              termos de uso
-            </a>
-            e a
-            <a
-              :href="legalUrl('politica-de-cookies')"
-              target="_blank"
-              rel="noopener"
-              :class="GLOW_LINK_CLASS"
-            >
-              política de cookies
-            </a>.
-          </span>
-        </label>
+            {{ conviteResumo }}
+          </p>
 
-        <AuthRecaptcha ref="captchaRef" :reset-nonce="captchaResetNonce" />
+          <!-- Mensagem de erro -->
+          <p
+            v-if="errorMessage"
+            class="mb-5 w-full rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            role="alert"
+          >
+            {{ errorMessage }}
+            <RouterLink v-if="emailJaCadastrado" :to="loginLink" class="ml-1 inline-block font-bold text-glow-gold-dark hover:underline">
+              Fazer login
+            </RouterLink>
+          </p>
 
-        <button
-          type="submit"
-          :disabled="loading"
-          :class="[GLOW_BUTTON_PRIMARY_CLASS, 'font-satoshi text-xl font-medium text-white']"
-        >
-          <span
-            v-if="loading"
-            class="mr-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
-          />
-          Criar conta
-        </button>
+          <!-- Formulário -->
+          <form class="flex w-full flex-col gap-[18px]" @submit.prevent="handleSubmit">
+            <div class="grid grid-cols-1 gap-[18px] sm:grid-cols-2 sm:gap-x-3">
+              <!-- Nome -->
+              <div class="flex flex-col gap-1.5">
+                <label for="nome" class="font-satoshi text-sm font-medium text-glow-text">
+                  Nome completo
+                </label>
+                <input
+                  id="nome"
+                  v-model="nome"
+                  type="text"
+                  autocomplete="name"
+                  required
+                  placeholder="Informe seu nome completo"
+                  class="h-[54px] w-full rounded-xl border border-glow-border-soft bg-glow-bg-surface px-4 font-satoshi text-[15px] text-glow-text placeholder:font-satoshi placeholder:text-[15px] placeholder:text-glow-placeholder outline-none transition-all duration-200 focus:border-glow-gold-dark focus:ring-2 focus:ring-glow-gold/20"
+                />
+                <p v-if="getFieldError(...FIELD_KEYS.nome)" class="text-sm text-red-600">
+                  {{ getFieldError(...FIELD_KEYS.nome) }}
+                </p>
+              </div>
 
-        <p :class="[GLOW_BODY_TEXT_CLASS, 'text-center']">
-          Já possui conta?
-          <RouterLink :to="loginLink" :class="GLOW_LINK_CLASS">Faça o login</RouterLink>
-        </p>
-      </form>
+              <!-- Telefone -->
+              <TelefoneInput
+                id="telefone"
+                v-model="telefone"
+                label="Telefone"
+                variant="auth"
+                autocomplete="tel"
+                required
+                placeholder="(00) 0 0000-0000"
+                :error="getFieldError(...FIELD_KEYS.telefone)"
+              />
+
+              <!-- Email -->
+              <div class="flex flex-col gap-1.5">
+                <label for="email" class="font-satoshi text-sm font-medium text-glow-text">
+                  E-mail
+                </label>
+                <input
+                  id="email"
+                  v-model="email"
+                  type="email"
+                  autocomplete="email"
+                  required
+                  placeholder="ex: usuario01@exemplo.com"
+                  class="h-[54px] w-full rounded-xl border border-glow-border-soft bg-glow-bg-surface px-4 font-satoshi text-[15px] text-glow-text placeholder:font-satoshi placeholder:text-[15px] placeholder:text-glow-placeholder outline-none transition-all duration-200 focus:border-glow-gold-dark focus:ring-2 focus:ring-glow-gold/20"
+                />
+                <p v-if="getFieldError(...FIELD_KEYS.email)" class="text-sm text-red-600">
+                  {{ getFieldError(...FIELD_KEYS.email) }}
+                </p>
+              </div>
+
+              <!-- Confirmar Email -->
+              <div class="flex flex-col gap-1.5">
+                <label for="confirmar-email" class="font-satoshi text-sm font-medium text-glow-text">
+                  Confirmar E-mail
+                </label>
+                <input
+                  id="confirmar-email"
+                  v-model="confirmarEmail"
+                  type="email"
+                  autocomplete="email"
+                  required
+                  placeholder="ex: usuario01@exemplo.com"
+                  class="h-[54px] w-full rounded-xl border border-glow-border-soft bg-glow-bg-surface px-4 font-satoshi text-[15px] text-glow-text placeholder:font-satoshi placeholder:text-[15px] placeholder:text-glow-placeholder outline-none transition-all duration-200 focus:border-glow-gold-dark focus:ring-2 focus:ring-glow-gold/20"
+                />
+              </div>
+
+              <!-- Senha -->
+              <div class="flex flex-col gap-1.5">
+                <label for="senha" class="font-satoshi text-sm font-medium text-glow-text">
+                  Senha
+                </label>
+                <div class="relative">
+                  <input
+                    id="senha"
+                    v-model="senha"
+                    type="password"
+                    autocomplete="new-password"
+                    required
+                    placeholder="Informe a sua senha"
+                    class="h-[54px] w-full rounded-xl border border-glow-border-soft bg-glow-bg-surface pl-4 pr-4 font-satoshi text-[15px] text-glow-text placeholder:font-satoshi placeholder:text-[15px] placeholder:text-glow-placeholder outline-none transition-all duration-200 focus:border-glow-gold-dark focus:ring-2 focus:ring-glow-gold/20"
+                  />
+                </div>
+                <p v-if="getFieldError(...FIELD_KEYS.senha)" class="text-sm text-red-600">
+                  {{ getFieldError(...FIELD_KEYS.senha) }}
+                </p>
+              </div>
+
+              <!-- Confirmar Senha -->
+              <div class="flex flex-col gap-1.5">
+                <label for="confirmar-senha" class="font-satoshi text-sm font-medium text-glow-text">
+                  Confirmar Senha
+                </label>
+                <div class="relative">
+                  <input
+                    id="confirmar-senha"
+                    v-model="confirmarSenha"
+                    type="password"
+                    autocomplete="new-password"
+                    required
+                    placeholder="Confirme a sua senha"
+                    class="h-[54px] w-full rounded-xl border border-glow-border-soft bg-glow-bg-surface pl-4 pr-4 font-satoshi text-[15px] text-glow-text placeholder:font-satoshi placeholder:text-[15px] placeholder:text-glow-placeholder outline-none transition-all duration-200 focus:border-glow-gold-dark focus:ring-2 focus:ring-glow-gold/20"
+                  />
+                </div>
+              </div>
+
+              <!-- Avatar -->
+              <div class="sm:col-span-2">
+                <AuthAvatarUpload @change="onAvatarChange" @error="onAvatarError" />
+              </div>
+            </div>
+
+            <!-- Termos -->
+            <label class="group flex min-h-11 cursor-pointer items-start gap-3 py-1">
+              <input v-model="aceitoTermos" type="checkbox" class="sr-only" />
+              <span
+                class="mt-0.5 flex size-[18px] shrink-0 items-center justify-center rounded border border-glow-text/20 bg-white transition-all duration-200 group-has-[:checked]:border-glow-gold-dark group-has-[:checked]:bg-glow-gold-dark"
+                aria-hidden="true"
+              >
+                <svg
+                  class="h-2.5 w-2.5 text-white opacity-0 transition-all duration-200 group-has-[:checked]:opacity-100"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3.5"
+                  aria-hidden="true"
+                >
+                  <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span class="font-satoshi text-sm text-glow-text">
+                Li e aceito os
+                <a
+                  :href="legalUrl('termos-de-uso')"
+                  target="_blank"
+                  rel="noopener"
+                  class="font-bold text-glow-gold-dark transition-all duration-200 hover:text-glow-gold hover:underline"
+                >
+                  termos de uso
+                </a>
+                e a
+                <a
+                  :href="legalUrl('politica-de-cookies')"
+                  target="_blank"
+                  rel="noopener"
+                  class="font-bold text-glow-gold-dark transition-all duration-200 hover:text-glow-gold hover:underline"
+                >
+                  política de cookies
+                </a>.
+              </span>
+            </label>
+
+            <!-- reCAPTCHA -->
+            <AuthRecaptcha ref="captchaRef" :reset-nonce="captchaResetNonce" />
+
+            <!-- Botão principal -->
+            <button
+              type="submit"
+              :disabled="loading"
+              class="group flex h-[54px] w-full items-center justify-center rounded-[14px] bg-glow-gold-cta px-[10px] text-base font-bold text-white shadow-[0_4px_14px_rgba(146,103,155,0.35)] transition-all duration-200 hover:-translate-y-px hover:shadow-[0_6px_20px_rgba(146,103,155,0.45)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-[0_4px_14px_rgba(146,103,155,0.35)]"
+            >
+              <span
+                v-if="loading"
+                class="mr-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
+              />
+              <span class="inline-flex items-center gap-2">
+                Criar conta
+              </span>
+            </button>
+
+            <!-- Login link -->
+            <p class="text-center font-satoshi text-sm text-glow-text-muted">
+              Já possui conta?
+              <RouterLink
+                :to="loginLink"
+                class="font-bold text-glow-gold-dark transition-all duration-200 hover:text-glow-gold hover:underline"
+              >
+                Faça o login
+              </RouterLink>
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer (lg+) -->
+    <div class="hidden shrink-0 pb-4 text-center lg:block">
+      <div class="flex items-center justify-center gap-6">
+        <a
+          href="#"
+          class="font-satoshi text-xs text-glow-text-muted/45 transition-all duration-200 hover:text-glow-text-muted"
+        >Termos</a>
+        <span class="text-glow-text-muted/25">·</span>
+        <a
+          href="#"
+          class="font-satoshi text-xs text-glow-text-muted/45 transition-all duration-200 hover:text-glow-text-muted"
+        >Privacidade</a>
+        <span class="text-glow-text-muted/25">·</span>
+        <a
+          href="#"
+          class="font-satoshi text-xs text-glow-text-muted/45 transition-all duration-200 hover:text-glow-text-muted"
+        >Contato</a>
+        <span class="text-glow-text-muted/25">·</span>
+        <span class="font-satoshi text-xs text-glow-text-muted/30">© 2026 Glow Up Connect</span>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-slide-up {
+  animation: fade-slide-up 0.6s ease-out;
+}
+</style>

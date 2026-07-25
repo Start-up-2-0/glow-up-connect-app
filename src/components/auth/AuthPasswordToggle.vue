@@ -3,10 +3,12 @@ withDefaults(
   defineProps<{
     label?: string
     pressed?: boolean
+    labeled?: boolean
   }>(),
   {
     label: 'Alternar visibilidade da senha',
     pressed: false,
+    labeled: false,
   },
 )
 
@@ -14,16 +16,62 @@ defineEmits<{ click: [] }>()
 </script>
 
 <template>
-  <button
-    type="button"
-    class="absolute bottom-2 right-1 flex size-11 items-center justify-center rounded-lg"
-    :aria-label="label"
+  <span
+    role="button"
+    tabindex="0"
+    :class="[
+      'absolute bottom-1 right-1 flex cursor-pointer items-center justify-center rounded-lg bg-glow-bg-elevated select-none transition hover:bg-glow-bg-highlight',
+      labeled ? 'gap-1.5 px-2.5 py-1.5' : 'size-10',
+    ]"
+    :aria-label="labeled ? (pressed ? 'Ocultar senha' : 'Mostrar senha') : label"
     @click="$emit('click')"
+    @keydown.enter="$emit('click')"
+    @keydown.space.prevent="$emit('click')"
   >
-    <svg class="size-6 text-glow-gold" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <!-- Olho aberto — senha oculta, clique para mostrar -->
+    <svg
+      v-if="!pressed"
+      :class="['shrink-0 text-glow-gold', labeled ? 'size-5' : 'size-5']"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      aria-hidden="true"
+    >
       <path
-        d="M12 9C11.2044 9 10.4413 9.31607 9.87868 9.87868C9.31607 10.4413 9 11.2044 9 12C9 12.7956 9.31607 13.5587 9.87868 14.1213C10.4413 14.6839 11.2044 15 12 15C12.7956 15 13.5587 14.6839 14.1213 14.1213C14.6839 13.5587 15 12.7956 15 12C15 11.2044 14.6839 10.4413 14.1213 9.87868C13.5587 9.31607 12.7956 9 12 9ZM12 17C10.6739 17 9.40215 16.4732 8.46447 15.5355C7.52678 14.5979 7 13.3261 7 12C7 10.6739 7.52678 9.40215 8.46447 8.46447C9.40215 7.52678 10.6739 7 12 7C13.3261 7 14.5979 7.52678 15.5355 8.46447C16.4732 9.40215 17 10.6739 17 12C17 13.3261 16.4732 14.5979 15.5355 15.5355C14.5979 16.4732 13.3261 17 12 17ZM12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5Z"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+      />
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
       />
     </svg>
-  </button>
+
+    <!-- Olho fechado (com risco) — senha visível, clique para ocultar -->
+    <svg
+      v-else
+      :class="['shrink-0 text-glow-gold', labeled ? 'size-5' : 'size-5']"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      aria-hidden="true"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+      />
+    </svg>
+
+    <span
+      v-if="labeled"
+      class="font-satoshi text-xs font-medium text-glow-gold select-none"
+    >
+      {{ pressed ? 'Ocultar' : 'Mostrar' }}
+    </span>
+  </span>
 </template>
