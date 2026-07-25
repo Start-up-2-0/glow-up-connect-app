@@ -369,14 +369,6 @@ function formatRestante(p: MetaProgressoProfissional): string {
   return `Faltam ${formatCurrency(resto)}`
 }
 
-function percentualInfo(p: MetaProgressoProfissional): { valor: number; classe: string } {
-  const val = p.percentualProgresso
-  return {
-    valor: val,
-    classe: val >= 100 ? 'text-green-700' : val >= 80 ? 'text-yellow-700' : 'text-glow-text',
-  }
-}
-
 watch(ready, (isReady) => {
   if (isReady) {
     void load()
@@ -796,8 +788,8 @@ watch(aba, () => void load())
       :loading="actionLoading"
       :profissional="profissionalDetalhe"
       :meta="metaDetalhe"
-      @edit="profissionalDetalhe ? abrirEditarMeta(metaDetalhe ?? null) : undefined"
-      @cancel="profissionalDetalhe ? abrirDesativarMeta(metaDetalhe?.id ?? 0) : undefined"
+      @edit="metaDetalhe ? abrirEditarMeta(metaDetalhe) : undefined"
+      @cancel="metaDetalhe ? abrirDesativarMeta(metaDetalhe.id) : undefined"
     />
   </div>
 </template>

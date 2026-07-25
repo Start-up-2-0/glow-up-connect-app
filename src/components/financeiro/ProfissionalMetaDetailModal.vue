@@ -175,7 +175,7 @@ function close() {
               Fechar
             </BaseButton>
             <template v-if="meta?.ativa">
-              <BaseButton variant="outline" size="sm" :disabled="loading" @click="emit('edit')">
+              <BaseButton variant="secondary" size="sm" :disabled="loading" @click="emit('edit')">
                 Editar meta
               </BaseButton>
               <BaseButton
