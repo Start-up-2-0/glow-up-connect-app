@@ -68,7 +68,7 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
       ? profissionais.value.map((p) => ({
           profissionalId: p.profissionalId,
           nomePublico: p.nomePublico,
-          avatarUrl: null,
+          avatarUrl: p.foto ?? null,
         }))
       : profissionaisVitrine.value,
   )

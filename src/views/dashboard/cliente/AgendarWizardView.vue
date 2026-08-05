@@ -11,6 +11,7 @@ import AgendarCalendario from '@/components/agendar/AgendarCalendario.vue'
 import AgendarRevisaoStep from '@/components/agendar/AgendarRevisaoStep.vue'
 import AgendarSucessoConfirmacao from '@/components/agendar/AgendarSucessoConfirmacao.vue'
 import ClientePageHeader from '@/components/cliente/ClientePageHeader.vue'
+import UserAvatar from '@/components/layout/UserAvatar.vue'
 import { useAgendarWizard } from '@/composables/useAgendarWizard'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
@@ -61,6 +62,7 @@ const {
   isModoInterno,
   profissionais,
   profissionalSelecionadoNome,
+  profissionalSelecionadoFoto,
   estabelecimentoNome,
   activeProfissionalGuid,
   servicos,
@@ -178,13 +180,6 @@ const revisaoValorTotalLabel = computed(() => formatCurrency(valorEstimado.value
 const showRevisaoCliente = computed(
   () => isVisitante.value && (modoIdentidade.value === 'guest' || modoIdentidade.value === 'register'),
 )
-
-function profissionalIniciais(nome: string): string {
-  const parts = nome.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return '?'
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
-}
 
 onMounted(async () => {
   try {
@@ -460,12 +455,11 @@ async function handleConfirmar() {
               :class="{ 'agendar-prof-pick-card--selected': activeProfissionalGuid === prof.publicGuid }"
               @click="selecionarProfissional(prof.publicGuid)"
             >
-              <div
-                class="flex size-10 shrink-0 items-center justify-center rounded-full bg-glow-text/10 font-urbanist text-sm font-semibold text-glow-text"
-                aria-hidden="true"
-              >
-                {{ profissionalIniciais(prof.nomePublico) }}
-              </div>
+              <UserAvatar
+                :src="prof.foto"
+                :name="prof.nomePublico"
+                size="md"
+              />
               <span class="font-urbanist text-sm font-medium text-glow-text">{{ prof.nomePublico }}</span>
             </button>
           </div>
@@ -496,6 +490,7 @@ async function handleConfirmar() {
           <AgendarProfissionalCard
             v-if="profissionalSelecionadoNome !== '—'"
             :nome="profissionalSelecionadoNome"
+            :foto="profissionalSelecionadoFoto"
             :estabelecimento-nome="estabelecimentoNome"
           />
 
@@ -603,6 +598,7 @@ async function handleConfirmar() {
           :cliente-email="clienteEmail"
           :cliente-telefone="clienteTelefone"
           :profissional-nome="profissionalSelecionadoNome"
+          :profissional-foto="profissionalSelecionadoFoto"
           :estabelecimento-nome="estabelecimentoNome"
           :servicos="selectedServicos"
           :data-label="revisaoDataLabel"

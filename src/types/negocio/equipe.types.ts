@@ -28,6 +28,8 @@ export interface ProfissionalEquipe {
   ativo: boolean
   notaMedia?: number | null
   totalAvaliacoes?: number
+  /** Foto de apresentação do profissional (não é o avatar da conta). */
+  foto?: string | null
 }
 
 export interface CadastrarUsuarioEquipePayload {
@@ -42,6 +44,57 @@ export interface ConvidarProfissionalEquipePayload {
   telefone?: string
   nomePublico?: string
   podeReceberAgendamento?: boolean
+  /** Foto de apresentação (data URI). Independente do avatar da conta. */
+  foto?: string
+  fotoContentType?: string
+}
+
+export interface AtualizarProfissionalEquipePayload {
+  nomePublico?: string
+  biografia?: string
+  foto?: string
+  fotoContentType?: string
+  removerFoto?: boolean
+}
+
+export interface EquipeMembrosFiltro {
+  busca?: string
+  cargo?: string
+  status?: string
+  pagina?: number
+  tamanhoPagina?: number
+}
+
+export interface EquipeMembrosResumo {
+  totalMembros: number
+  administradores: number
+  profissionais: number
+  recepcionistas: number
+  convidados: number
+}
+
+export interface MembroEquipeApiItem {
+  id: string
+  tipo: 'usuario' | 'profissional' | 'convite'
+  nome: string
+  cargo: string
+  role: string
+  email?: string | null
+  telefone?: string | null
+  ativo: boolean
+  usuarioId?: number | null
+  profissionalId?: number | null
+  podeReceberAgendamento?: boolean | null
+  foto?: string | null
+  conviteEm?: string | null
+}
+
+export interface EquipeMembrosPaginado {
+  total: number
+  pagina: number
+  tamanhoPagina: number
+  itens: MembroEquipeApiItem[]
+  resumo: EquipeMembrosResumo
 }
 
 /** Convite por e-mail (fluxo com token e aceite). */
@@ -106,4 +159,6 @@ export interface MembroEquipeItem {
   usuarioId: number
   profissionalId?: number
   podeReceberAgendamento?: boolean
+  /** Foto do profissional (só quando tipo profissional / vínculo com foto). */
+  foto?: string | null
 }

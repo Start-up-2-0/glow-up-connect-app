@@ -61,6 +61,12 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
     return prof?.nomePublico ?? contexto.value?.profissional?.nomePublico ?? '—'
   })
 
+  const profissionalSelecionadoFoto = computed(() => {
+    if (semPreferenciaProfissional.value) return null
+    const prof = profissionais.value.find((p) => p.publicGuid === activeProfissionalGuid.value)
+    return prof?.foto ?? contexto.value?.profissional?.foto ?? null
+  })
+
   const estabelecimentoNome = computed(
     () =>
       contexto.value?.estabelecimento?.nome
@@ -787,6 +793,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
     profissionalVinculado,
     profissionais,
     profissionalSelecionadoNome,
+    profissionalSelecionadoFoto,
     estabelecimentoNome,
     servicos,
     slots,

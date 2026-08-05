@@ -90,9 +90,9 @@ export const MOCK_USUARIOS_EQUIPE: UsuarioEquipe[] = [
 ]
 
 export const MOCK_PROFISSIONAIS: ProfissionalEquipe[] = [
-  { id: 101, estabelecimentoId: 1, profissionalId: 101, usuarioId: 11, nomePublico: 'Marina Alves', email: 'marina@glowup.com.br', telefone: '(79) 99811-2233', podeReceberAgendamento: true, ativo: true, notaMedia: 4.9, totalAvaliacoes: 32 },
-  { id: 102, estabelecimentoId: 1, profissionalId: 102, usuarioId: 21, nomePublico: 'Carlos Mendes', email: 'carlos@glowup.com.br', telefone: '(79) 99877-8899', podeReceberAgendamento: true, ativo: true, notaMedia: 4.7, totalAvaliacoes: 21 },
-  { id: 103, estabelecimentoId: 1, profissionalId: 103, usuarioId: 22, nomePublico: 'Patrícia Rocha', email: 'patricia@glowup.com.br', telefone: '(79) 99900-1122', podeReceberAgendamento: true, ativo: true, notaMedia: 4.8, totalAvaliacoes: 15 },
+  { id: 101, estabelecimentoId: 1, profissionalId: 101, usuarioId: 11, nomePublico: 'Marina Alves', email: 'marina@glowup.com.br', telefone: '(79) 99811-2233', podeReceberAgendamento: true, ativo: true, notaMedia: 4.9, totalAvaliacoes: 32, foto: null },
+  { id: 102, estabelecimentoId: 1, profissionalId: 102, usuarioId: 21, nomePublico: 'Carlos Mendes', email: 'carlos@glowup.com.br', telefone: '(79) 99877-8899', podeReceberAgendamento: true, ativo: true, notaMedia: 4.7, totalAvaliacoes: 21, foto: null },
+  { id: 103, estabelecimentoId: 1, profissionalId: 103, usuarioId: 22, nomePublico: 'Patrícia Rocha', email: 'patricia@glowup.com.br', telefone: '(79) 99900-1122', podeReceberAgendamento: true, ativo: true, notaMedia: 4.8, totalAvaliacoes: 15, foto: null },
 ]
 
 export const MOCK_CLIENTES = [

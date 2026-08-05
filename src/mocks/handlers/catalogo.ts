@@ -14,6 +14,99 @@ import type { Servico } from '@/types/negocio/servico.types'
 export function registerCatalogoRoutes(router: MockRouter) {
   const base = '/estabelecimentos/:estabelecimentoId'
 
+  /* ---------- Equipe: membros (paginado) ---------- */
+  router.on('get', `${base}/equipe/membros`, (req: MockRequest) => {
+    const pagina = Number(req.query?.pagina ?? 1) || 1
+    const tamanhoPagina = Number(req.query?.tamanhoPagina ?? 6) || 6
+    const busca = String(req.query?.busca ?? '').trim().toLowerCase()
+    const cargo = String(req.query?.cargo ?? '').trim()
+    const status = String(req.query?.status ?? '').trim().toLowerCase()
+
+    const membros = [
+      ...MOCK_USUARIOS_EQUIPE.map((u) => {
+        const prof = MOCK_PROFISSIONAIS.find((p) => p.usuarioId === u.usuarioId)
+        return {
+          id: `usuario-${u.id}`,
+          tipo: 'usuario' as const,
+          nome: u.nome,
+          cargo: u.role === 'Owner' ? 'Dono' : u.role === 'Admin' ? 'Administrador' : u.role === 'Receptionist' ? 'Recepcionista' : u.role,
+          role: u.role,
+          email: u.email,
+          telefone: u.telefone,
+          ativo: u.ativo,
+          usuarioId: u.usuarioId,
+          profissionalId: prof?.profissionalId ?? null,
+          podeReceberAgendamento: prof?.podeReceberAgendamento ?? null,
+          foto: prof?.foto ?? null,
+          conviteEm: null,
+        }
+      }),
+      ...MOCK_PROFISSIONAIS
+        .filter((p) => !MOCK_USUARIOS_EQUIPE.some((u) => u.usuarioId === p.usuarioId))
+        .map((p) => ({
+          id: `profissional-${p.id}`,
+          tipo: 'profissional' as const,
+          nome: p.nomePublico,
+          cargo: 'Profissional',
+          role: 'Profissional',
+          email: p.email,
+          telefone: p.telefone,
+          ativo: p.ativo,
+          usuarioId: p.usuarioId,
+          profissionalId: p.profissionalId,
+          podeReceberAgendamento: p.podeReceberAgendamento,
+          foto: p.foto ?? null,
+          conviteEm: null,
+        })),
+      ...MOCK_CONVITES
+        .filter((c) => c.status === 'Pendente')
+        .map((c) => ({
+          id: `convite-${c.id}`,
+          tipo: 'convite' as const,
+          nome: c.email.split('@')[0] || c.email,
+          cargo: 'Convidado',
+          role: 'Convidado',
+          email: c.email,
+          telefone: null as string | null,
+          ativo: false,
+          usuarioId: null as number | null,
+          profissionalId: null as number | null,
+          podeReceberAgendamento: null as boolean | null,
+          foto: null as string | null,
+          conviteEm: '05/08/2026',
+        })),
+    ]
+
+    const filtrados = membros.filter((m) => {
+      if (cargo && m.role !== cargo) return false
+      if (status) {
+        const s = m.tipo === 'convite' ? 'pendente' : m.ativo ? 'ativo' : 'inativo'
+        if (s !== status) return false
+      }
+      if (busca) {
+        const hay = [m.nome, m.cargo, m.email ?? ''].join(' ').toLowerCase()
+        if (!hay.includes(busca)) return false
+      }
+      return true
+    })
+
+    const start = (pagina - 1) * tamanhoPagina
+    const itens = filtrados.slice(start, start + tamanhoPagina)
+    return ok({
+      total: filtrados.length,
+      pagina,
+      tamanhoPagina,
+      itens,
+      resumo: {
+        totalMembros: membros.filter((m) => m.tipo !== 'convite' && m.ativo).length,
+        administradores: membros.filter((m) => m.ativo && (m.role === 'Owner' || m.role === 'Admin')).length,
+        profissionais: membros.filter((m) => m.ativo && m.role === 'Profissional').length,
+        recepcionistas: membros.filter((m) => m.ativo && m.role === 'Receptionist').length,
+        convidados: MOCK_CONVITES.filter((c) => c.status === 'Pendente').length,
+      },
+    })
+  })
+
   /* ---------- Equipe: usuários ---------- */
   router.on('get', `${base}/equipe/usuarios`, () => ok(MOCK_USUARIOS_EQUIPE))
   router.on('post', `${base}/equipe/usuarios`, (req: MockRequest) => {
@@ -38,6 +131,20 @@ export function registerCatalogoRoutes(router: MockRouter) {
   router.on('patch', `${base}/equipe/profissionais/:profissionalId/status`, (req: MockRequest) => {
     const body = (req.body ?? {}) as { ativo?: boolean; podeReceberAgendamento?: boolean }
     return ok({ ...MOCK_PROFISSIONAIS[0], id: Number(req.params.profissionalId), ativo: body.ativo ?? true, podeReceberAgendamento: body.podeReceberAgendamento ?? true })
+  })
+  router.on('patch', `${base}/equipe/profissionais/:profissionalId`, (req: MockRequest) => {
+    const body = (req.body ?? {}) as {
+      nomePublico?: string
+      foto?: string | null
+      removerFoto?: boolean
+    }
+    const baseProf = MOCK_PROFISSIONAIS.find((p) => p.profissionalId === Number(req.params.profissionalId))
+      ?? MOCK_PROFISSIONAIS[0]!
+    return ok({
+      ...baseProf,
+      nomePublico: body.nomePublico ?? baseProf.nomePublico,
+      foto: body.removerFoto ? null : (body.foto ?? baseProf.foto ?? null),
+    })
   })
   router.on('get', `${base}/equipe/profissionais/:profissionalId/agendamentos-futuros`, () => ok([]))
   router.on('post', `${base}/equipe/profissionais/:profissionalId/agendamentos-futuros/cancelar`, () => ok({ quantidadeCancelada: 0 }))

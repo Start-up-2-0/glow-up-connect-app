@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import EquipeIcons from '@/components/equipe/EquipeIcons.vue'
+import ProfileAvatarEditor from '@/components/cliente/ProfileAvatarEditor.vue'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import {
@@ -23,6 +24,7 @@ import {
 import { agendaDetalhePath } from '@/constants/routes'
 import { equipeService } from '@/services/equipeService'
 import type { AgendamentoFuturoEquipe, EstablishmentUserRole, MembroEquipeItem } from '@/types/negocio/equipe.types'
+import { readFileAsDataUrl } from '@/utils/avatarFile'
 import { formatDateTime } from '@/utils/formatters'
 import { iniciaisNome } from '@/utils/servicoFormatters'
 
@@ -46,6 +48,9 @@ const { resolveError } = useApiError()
 const role = ref<EstablishmentUserRole>('Receptionist')
 const ativo = ref(true)
 const podeReceberAgendamento = ref(true)
+const fotoFile = ref<File | null>(null)
+const removerFoto = ref(false)
+const fotoError = ref<string | undefined>()
 const saving = ref(false)
 const removendo = ref(false)
 const cancelandoAgendamentos = ref(false)
@@ -57,6 +62,9 @@ const motivoCancelamento = ref('')
 
 const ehUsuario = computed(() => props.membro?.tipo === 'usuario')
 const ehProfissional = computed(() => props.membro?.tipo === 'profissional')
+const temFotoProfissional = computed(
+  () => props.membro?.profissionalId != null && props.podeGerenciarProfissional,
+)
 const ehDono = computed(() => props.membro?.role === 'Owner')
 const ehProprioUsuario = computed(
   () =>
@@ -109,14 +117,16 @@ const statusLabel = computed(() => (ativo.value ? 'Ativo' : 'Inativo'))
 
 const dirty = computed(() => {
   if (!props.membro) return false
+  const fotoMudou = temFotoProfissional.value && (fotoFile.value != null || removerFoto.value)
   if (ehUsuario.value) {
     const roleMudou =
       props.membro.role !== 'Profissional' && role.value !== props.membro.role
-    return roleMudou || ativo.value !== props.membro.ativo
+    return roleMudou || ativo.value !== props.membro.ativo || fotoMudou
   }
   return (
     ativo.value !== props.membro.ativo ||
-    podeReceberAgendamento.value !== (props.membro.podeReceberAgendamento ?? true)
+    podeReceberAgendamento.value !== (props.membro.podeReceberAgendamento ?? true) ||
+    fotoMudou
   )
 })
 
@@ -127,7 +137,26 @@ function syncForm() {
     m.role === 'Profissional' ? 'Profissional' : (m.role as EstablishmentUserRole)
   ativo.value = m.ativo
   podeReceberAgendamento.value = m.podeReceberAgendamento ?? true
+  fotoFile.value = null
+  removerFoto.value = false
+  fotoError.value = undefined
   formError.value = null
+}
+
+function onFotoChange(file: File) {
+  fotoFile.value = file
+  removerFoto.value = false
+  fotoError.value = undefined
+}
+
+function onFotoRemove() {
+  fotoFile.value = null
+  removerFoto.value = true
+  fotoError.value = undefined
+}
+
+function onFotoError(message: string) {
+  fotoError.value = message
 }
 
 function close() {
@@ -299,6 +328,23 @@ async function salvar() {
       )
     }
 
+    if (temFotoProfissional.value && props.membro.profissionalId != null) {
+      if (removerFoto.value) {
+        await equipeService.atualizarProfissional(
+          props.estabelecimentoId,
+          props.membro.profissionalId,
+          { removerFoto: true },
+        )
+      } else if (fotoFile.value) {
+        const foto = await readFileAsDataUrl(fotoFile.value)
+        await equipeService.atualizarProfissional(
+          props.estabelecimentoId,
+          props.membro.profissionalId,
+          { foto, fotoContentType: fotoFile.value.type },
+        )
+      }
+    }
+
     notifications.push('success', 'Membro atualizado.')
     emit('atualizado')
     close()
@@ -353,18 +399,49 @@ async function salvar() {
 
             <div class="equipe-modal__body equipe-membro-detalhe">
               <div class="equipe-membro-detalhe__profile">
-                <span class="equipe-member-card__avatar">{{ iniciaisNome(membro.nome) }}</span>
-                <div class="min-w-0">
-                  <p class="equipe-membro-detalhe__nome">{{ membro.nome }}</p>
-                  <div class="equipe-membro-detalhe__badges">
-                    <span class="equipe-member-card__role">{{ membro.cargo }}</span>
-                    <span
-                      v-if="!membro.ativo"
-                      class="equipe-membro-detalhe__status-badge equipe-membro-detalhe__status-badge--inactive"
-                    >
-                      Inativo
-                    </span>
+                <template v-if="temFotoProfissional">
+                  <div class="w-full space-y-2">
+                    <p class="equipe-form-label">Foto do profissional</p>
+                    <ProfileAvatarEditor
+                      :current-src="removerFoto ? null : membro.foto"
+                      :name="membro.nome"
+                      @change="onFotoChange"
+                      @remove="onFotoRemove"
+                      @error="onFotoError"
+                    />
+                    <p class="equipe-form-field__hint">
+                      Aparece para clientes na agenda e listagens. Não altera o avatar da conta.
+                    </p>
+                    <p v-if="fotoError" class="equipe-form-field__error">{{ fotoError }}</p>
                   </div>
+                </template>
+                <template v-else>
+                  <span class="equipe-member-card__avatar">{{ iniciaisNome(membro.nome) }}</span>
+                  <div class="min-w-0">
+                    <p class="equipe-membro-detalhe__nome">{{ membro.nome }}</p>
+                    <div class="equipe-membro-detalhe__badges">
+                      <span class="equipe-member-card__role">{{ membro.cargo }}</span>
+                      <span
+                        v-if="!membro.ativo"
+                        class="equipe-membro-detalhe__status-badge equipe-membro-detalhe__status-badge--inactive"
+                      >
+                        Inativo
+                      </span>
+                    </div>
+                  </div>
+                </template>
+              </div>
+
+              <div v-if="temFotoProfissional" class="min-w-0">
+                <p class="equipe-membro-detalhe__nome">{{ membro.nome }}</p>
+                <div class="equipe-membro-detalhe__badges">
+                  <span class="equipe-member-card__role">{{ membro.cargo }}</span>
+                  <span
+                    v-if="!membro.ativo"
+                    class="equipe-membro-detalhe__status-badge equipe-membro-detalhe__status-badge--inactive"
+                  >
+                    Inativo
+                  </span>
                 </div>
               </div>
 

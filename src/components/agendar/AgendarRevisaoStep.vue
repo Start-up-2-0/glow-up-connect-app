@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import UserAvatar from '@/components/layout/UserAvatar.vue'
 import type { ServicoPublico } from '@/types/agendamento.types'
 import {
   AGENDAR_BTN_CONTINUE_CLASS,
@@ -9,12 +9,13 @@ import {
 } from '@/constants/designTokens'
 import { formatPrecoRange, formatTelefone } from '@/utils/formatters'
 
-const props = defineProps<{
+defineProps<{
   showCliente: boolean
   clienteNome: string
   clienteEmail: string
   clienteTelefone: string
   profissionalNome: string
+  profissionalFoto?: string | null
   estabelecimentoNome: string
   servicos: ServicoPublico[]
   dataLabel: string
@@ -31,13 +32,6 @@ const observacao = defineModel<string>('observacao', { default: '' })
 const emit = defineEmits<{
   confirm: []
 }>()
-
-const profissionalIniciais = computed(() => {
-  const parts = props.profissionalNome.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return '?'
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
-})
 </script>
 
 <template>
@@ -63,9 +57,7 @@ const profissionalIniciais = computed(() => {
     <section class="agendar-review-card">
       <h2 class="agendar-review-card__title">Profissional</h2>
       <div class="agendar-review-profissional-body">
-        <div class="agendar-review-avatar" aria-hidden="true">
-          {{ profissionalIniciais }}
-        </div>
+        <UserAvatar :src="profissionalFoto" :name="profissionalNome" size="md" class="!size-12" />
         <div class="min-w-0">
           <p class="font-urbanist text-base font-semibold text-glow-text">{{ profissionalNome }}</p>
           <p

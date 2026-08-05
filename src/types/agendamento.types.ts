@@ -165,6 +165,8 @@ export interface ServicoPublico {
 export interface ProfissionalPublico {
   publicGuid: string
   nomePublico: string
+  /** Foto de apresentação do profissional. */
+  foto?: string | null
 }
 
 export interface SlotDisponivel {

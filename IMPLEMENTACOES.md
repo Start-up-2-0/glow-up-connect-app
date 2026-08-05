@@ -164,18 +164,39 @@ Reconstrução visual de `ComissoesView` (`src/components/financeiro/comissoes/*
 - Cards de progresso por profissional, tip dismissível, export CSV.
 - Mantém modais e fluxos existentes de metas/regras.
 
-## 19. Tela de Planos (onboarding)
+## 18. Tela de Equipe (redesign)
 
-Redesign de `/onboarding/planos` (`PlanosView` + `src/components/assinatura/planos/*`):
+Reconstrução de `EquipeView` (`src/components/equipe/page/*`):
 
-- Header limpo, banner de promoção único e cards Básico / Plus / Premium.
-- Recursos incrementais (“Tudo do X +”) e labels humanizadas.
-- CTA em hierarquia (Plus em destaque) e barra de confiança.
-- Removidos: tabela comparativa densa e listas cruas de módulos.
+- KPIs (membros, admins, profissionais, recepcionistas, convidados).
+- Busca, filtros por cargo/status e alternância grade/lista (tabela).
+- Cards premium com badge de cargo, status e rodapé de permissão.
+- Convites pendentes exibidos na lista; paginação client-side.
+
+## 19. Foto do profissional (separada do avatar da conta)
+
+Separação explícita entre **avatar do usuário** (`Usuario.AvatarBase64`) e **foto de apresentação do profissional** (`Profissional.Logo`, exposta como `foto` na API de equipe/agendamento).
+
+### Backend
+- Reuso da coluna `Profissionais.Logo` (já `longtext`) — sem migration nova.
+- Listagem/vínculo de equipe expõe `foto`; create/update valida via `IAvatarBase64Decoder`.
+- Removido fallback automático `usuario.AvatarBase64 → Logo` no vínculo.
+- `PATCH .../equipe/profissionais/{id}` para atualizar/remover foto e dados públicos.
+- Agendamento público inclui `foto` em `ProfissionalPublicoResponseDto`.
+
+### Frontend
+- Upload no cadastro manual (`AuthAvatarUpload`) e edição no detalhe (`ProfileAvatarEditor`).
+- Cards/tabela da equipe, horários e fluxo de agendar priorizam a foto do profissional; sem foto, avatar padrão (iniciais).
+
+## 20. Listagem paginada de membros da equipe
+
+- Novo endpoint `GET /api/estabelecimentos/{id}/equipe/membros` com `pagina`, `tamanhoPagina`, `busca`, `cargo`, `status`.
+- Resposta: `total`, `pagina`, `tamanhoPagina`, `itens` (usuários + profissionais + convites) e `resumo` (KPIs).
+- Frontend (`EquipeView`) consome paginação server-side (6 por página); endpoints antigos de usuários/profissionais permanecem para outros módulos.
 
 ---
 
 ## Resumo de arquivos (referência)
 
-- **Frontend** (`glow-up-connect-app`): `src/mocks/*`, `src/components/shell/*`, `src/components/sidebar/*`, `src/components/loading/*`, `src/components/dashboard/*`, `src/components/assinatura/page/*`, `src/components/assinatura/faturas/*`, `src/components/financeiro/comissoes/*`, `src/components/financeiro/dashboard/*`, `src/views/dashboard/*`, `src/views/configuracoes/assinatura/*`, `src/views/modulos/financeiro/*`, `src/layouts/DashboardLayout.vue`, `src/constants/{navigation,pageChrome}.ts`, `src/stores/{app,loading}.store.ts`, `src/composables/{useLoading,useDashboardNav,usePageChrome}.ts`, `src/types/*`, `src/services/*`.
+- **Frontend** (`glow-up-connect-app`): `src/mocks/*`, `src/components/shell/*`, `src/components/sidebar/*`, `src/components/loading/*`, `src/components/dashboard/*`, `src/components/assinatura/page/*`, `src/components/assinatura/faturas/*`, `src/components/financeiro/comissoes/*`, `src/components/financeiro/dashboard/*`, `src/components/equipe/page/*`, `src/views/dashboard/*`, `src/views/configuracoes/assinatura/*`, `src/views/modulos/financeiro/*`, `src/views/modulos/equipe/*`, `src/layouts/DashboardLayout.vue`, `src/constants/{navigation,pageChrome}.ts`, `src/stores/{app,loading}.store.ts`, `src/composables/{useLoading,useDashboardNav,usePageChrome}.ts`, `src/types/*`, `src/services/*`.
 - **Backend** (`glow-up-connect-api`): `src/GLOWAPI.Domain/Entities/{Estabelecimento,Usuario,CategoriaEstabelecimento}.cs`, `src/GLOWAPI.Domain/Enums/Sexo.cs`, `src/GLOWAPI.Infrastructure/Configurations/*`, `src/GLOWAPI.Infrastructure/Migrations/*`, `src/GLOWAPI.Application/DTOs/*`, `src/GLOWAPI.Application/Services/*`, `src/GLOWAPI.Application/Interfaces/*`, `src/GLOWAPI.Infrastructure/Repositories/*`, `src/GLOWAPI.API/Controllers/*`.

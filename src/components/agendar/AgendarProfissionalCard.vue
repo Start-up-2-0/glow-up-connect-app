@@ -1,19 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import UserAvatar from '@/components/layout/UserAvatar.vue'
 import { AGENDAR_CARD_CLASS } from '@/constants/designTokens'
 
-const props = defineProps<{
+defineProps<{
   nome: string
+  foto?: string | null
   estabelecimentoNome?: string
   compact?: boolean
 }>()
-
-const iniciais = computed(() => {
-  const parts = props.nome.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return '?'
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
-})
 </script>
 
 <template>
@@ -22,12 +16,7 @@ const iniciais = computed(() => {
       Profissional
     </p>
     <div class="flex items-center gap-4">
-      <div
-        class="flex size-12 shrink-0 items-center justify-center rounded-full bg-glow-text/10 font-urbanist text-sm font-semibold text-glow-text"
-        aria-hidden="true"
-      >
-        {{ iniciais }}
-      </div>
+      <UserAvatar :src="foto" :name="nome" size="md" class="!size-12" />
       <div class="min-w-0 flex-1">
         <p class="font-urbanist text-base font-semibold text-glow-text">{{ nome }}</p>
         <p

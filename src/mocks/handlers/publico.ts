@@ -11,7 +11,7 @@ const MARKETPLACE_ITENS = [
   { publicGuid: PUBLIC_GUID, nome: 'Studio Glow Up', logo: '', descricao: 'Salão completo de beleza.', distanciaKm: 0.8, endereco: ENDERECO, destaqueMarketplace: true, notaMedia: 4.8, totalAvaliacoes: 68, categoriaId: 2, categoria: 'Salão de Beleza' },
   { publicGuid: 'bbbb-cccc-dddd', nome: 'Barbearia do Zé', logo: '', descricao: 'Corte e barba para o dia a dia.', distanciaKm: 1.4, endereco: { logradouro: 'Rua da Barba, 12', bairro: 'Centro', cidade: 'Aracaju', estado: 'SE' }, destaqueMarketplace: false, notaMedia: 4.7, totalAvaliacoes: 33, categoriaId: 1, categoria: 'Barbearia' },
   { publicGuid: 'eeee-ffff-gggg', nome: 'Cabeleleila Leila', logo: '', descricao: 'Especializada em cabelos.', distanciaKm: 3.1, endereco: { logradouro: 'Av. Central, 500', bairro: 'Centro', cidade: 'Aracaju', estado: 'SE' }, notaMedia: 4.4, totalAvaliacoes: 22, categoriaId: 2, categoria: 'Salão de Beleza' },
-  { publicGuid: 'abcd-1111-2222', nome: 'Nail Studio Prime', logo: '', descricao: 'Esmaltação e design de unhas.', distanciaKm: 4.2, endereco: { logradouro: 'Rua das Unhas, 7', bairro: 'Jardins', cidade: 'Aracaju', estado: 'SE' }, notaMedia: 4.5, totalAvaliacoes: 18, categoriaId: 4, categoria: 'Esmalteria' },
+  { publicGuid: 'abcd-1111-2222', nome: 'Nail Studio Prime', logo: '', descricao: 'Esmaltação e design de unhas.', distanciaKm: 4.2, endereco: { logradouro: 'Rua das Unhas, 7', bairro: 'Jardins', cidade: 'Aracaju', estado: 'SE' }, notaMedia: 4.5, totalAvaliacoes: 18, categoriaId: 2, categoria: 'Salão de Beleza' },
 ]
 
 function hoje(plusDays = 0): string {
@@ -92,7 +92,11 @@ export function registerPublicoRoutes(router: MockRouter) {
   })
 
   router.on('get', '/publico/agendar/loja/:publicGuid/profissionais', () => {
-    return ok(MOCK_PROFISSIONAIS.filter((p) => p.podeReceberAgendamento).map((p) => ({ publicGuid: `prof-${p.profissionalId}`, nomePublico: p.nomePublico })))
+    return ok(MOCK_PROFISSIONAIS.filter((p) => p.podeReceberAgendamento).map((p) => ({
+      publicGuid: `prof-${p.profissionalId}`,
+      nomePublico: p.nomePublico,
+      foto: p.foto ?? null,
+    })))
   })
 
   router.on('get', '/publico/estabelecimentos/:publicGuid/profissionais-vitrine', () => {

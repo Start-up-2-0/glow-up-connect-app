@@ -7,15 +7,35 @@ import type {
   AtualizarRoleUsuarioEquipePayload,
   AtualizarStatusProfissionalEquipePayload,
   AtualizarStatusUsuarioEquipePayload,
+  AtualizarProfissionalEquipePayload,
   CadastrarUsuarioEquipePayload,
   CancelarAgendamentosFuturosProfissionalEquipePayload,
   CancelarAgendamentosFuturosProfissionalEquipeResult,
   ConvidarProfissionalEquipePayload,
+  EquipeMembrosFiltro,
+  EquipeMembrosPaginado,
   ProfissionalEquipe,
   UsuarioEquipe,
 } from '@/types/negocio/equipe.types'
 
 export const equipeService = {
+  listarMembros(estabelecimentoId: number, filtro: EquipeMembrosFiltro = {}) {
+    return api
+      .get<ApiSuccessResponse<EquipeMembrosPaginado>>(
+        negocioPath(estabelecimentoId, '/equipe/membros'),
+        {
+          params: {
+            busca: filtro.busca || undefined,
+            cargo: filtro.cargo || undefined,
+            status: filtro.status || undefined,
+            pagina: filtro.pagina ?? 1,
+            tamanhoPagina: filtro.tamanhoPagina ?? 6,
+          },
+        },
+      )
+      .then(unwrapApi)
+  },
+
   listarUsuarios(estabelecimentoId: number) {
     return api
       .get<ApiSuccessResponse<UsuarioEquipe[]>>(negocioPath(estabelecimentoId, '/equipe/usuarios'))
@@ -44,6 +64,19 @@ export const equipeService = {
     return api
       .post<ApiSuccessResponse<ProfissionalEquipe>>(
         negocioPath(estabelecimentoId, '/equipe/profissionais'),
+        payload,
+      )
+      .then(unwrapApi)
+  },
+
+  atualizarProfissional(
+    estabelecimentoId: number,
+    profissionalId: number,
+    payload: AtualizarProfissionalEquipePayload,
+  ) {
+    return api
+      .patch<ApiSuccessResponse<ProfissionalEquipe>>(
+        negocioPath(estabelecimentoId, `/equipe/profissionais/${profissionalId}`),
         payload,
       )
       .then(unwrapApi)
