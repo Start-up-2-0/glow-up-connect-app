@@ -126,7 +126,7 @@ export const MOCK_PERFIL_ESTABELECIMENTO: EstabelecimentoPerfilCompleto = {
 
 export const MOCK_ASSINATURA: Assinatura = {
   id: 1,
-  planoId: 1,
+  planoId: 3,
   estabelecimentoId: 1,
   status: 'Ativa',
   gateway: 'MercadoPago',
@@ -145,8 +145,8 @@ export const MOCK_ASSINATURA: Assinatura = {
 }
 
 export const MOCK_COBRANCAS: CobrancaAssinatura[] = [
-  { id: 1, valor: 79.9, status: 'Pago', moeda: 'BRL', tipoCobranca: 'Mensalidade', numeroCiclo: 3, dataVencimento: iso(-30), dataGeracao: iso(-32), cicloInicio: iso(-30), cicloFim: iso(0), gatewayPaymentId: 'PAY-0001', pagoEm: iso(-30) },
-  { id: 2, valor: 79.9, status: 'Pago', moeda: 'BRL', tipoCobranca: 'Mensalidade', numeroCiclo: 2, dataVencimento: iso(-60), dataGeracao: iso(-62), cicloInicio: iso(-60), cicloFim: iso(-30), gatewayPaymentId: 'PAY-0002', pagoEm: iso(-59) },
+  { id: 1, valor: 159.9, status: 'Pago', moeda: 'BRL', tipoCobranca: 'Mensalidade', numeroCiclo: 3, dataVencimento: iso(-30), dataGeracao: iso(-32), cicloInicio: iso(-30), cicloFim: iso(0), gatewayPaymentId: 'PAY-0001', pagoEm: iso(-30) },
+  { id: 2, valor: 159.9, status: 'Pago', moeda: 'BRL', tipoCobranca: 'Mensalidade', numeroCiclo: 2, dataVencimento: iso(-60), dataGeracao: iso(-62), cicloInicio: iso(-60), cicloFim: iso(-30), gatewayPaymentId: 'PAY-0002', pagoEm: iso(-59) },
 ]
 
 /* ---------- Convites ---------- */

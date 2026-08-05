@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { RouterLink } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter, RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
-import AssinaturaResumoCard from '@/components/assinatura/AssinaturaResumoCard.vue'
 import CancelarAssinaturaDialog from '@/components/assinatura/CancelarAssinaturaDialog.vue'
 import TrialStatusBanner from '@/components/assinatura/TrialStatusBanner.vue'
 import AdicionarUnidadePanel from '@/components/assinatura/AdicionarUnidadePanel.vue'
+import AssinaturaPageHeader from '@/components/assinatura/page/AssinaturaPageHeader.vue'
+import AssinaturaPlanoHero from '@/components/assinatura/page/AssinaturaPlanoHero.vue'
+import AssinaturaDetalhesCard from '@/components/assinatura/page/AssinaturaDetalhesCard.vue'
+import AssinaturaBeneficiosCard from '@/components/assinatura/page/AssinaturaBeneficiosCard.vue'
+import AssinaturaComparacaoPlanos from '@/components/assinatura/page/AssinaturaComparacaoPlanos.vue'
+import AssinaturaSegurancaBanner from '@/components/assinatura/page/AssinaturaSegurancaBanner.vue'
 import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useTrocarEstabelecimento } from '@/composables/useTrocarEstabelecimento'
 import { useAssinaturaStore } from '@/stores/assinatura.store'
+import { usePlanosStore } from '@/stores/planos.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useUserStore } from '@/stores/user.store'
 import { useApiError } from '@/composables/useApiError'
@@ -23,12 +27,21 @@ import { formatDate } from '@/utils/formatters'
 import type { AssinaturaOnboardingContexto } from '@/types/assinaturaOnboarding.types'
 import type { EstabelecimentoOnboarding } from '@/types/assinatura.types'
 import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
+import '@/components/assinatura/page/assinaturaPage.css'
 
 const router = useRouter()
-const { assinaturaId, planoNome, estabelecimentoAtivo, ensureContext } = useNegocioContext()
+const {
+  assinaturaId,
+  planoId,
+  planoNome,
+  estabelecimentoAtivo,
+  ensureContext,
+} = useNegocioContext()
 const { trocarEstabelecimento } = useTrocarEstabelecimento()
 const assinaturaStore = useAssinaturaStore()
+const planosStore = usePlanosStore()
 const { assinatura, loading } = storeToRefs(assinaturaStore)
+const { planos, loading: planosLoading } = storeToRefs(planosStore)
 const notifications = useNotificationsStore()
 const userStore = useUserStore()
 const { resolveError } = useApiError()
@@ -40,15 +53,26 @@ const exibirFormUnidade = ref(false)
 const adicionandoUnidade = ref(false)
 const erroUnidade = ref<string | null>(null)
 
+const planoAtual = computed(() => {
+  const id = assinatura.value?.planoId ?? planoId.value
+  if (id == null) return null
+  return planosStore.getPlanoById(id) ?? null
+})
+
+const paginaPronta = computed(() => !loading.value && !planosLoading.value)
+
 onMounted(async () => {
   await ensureContext()
   if (!estabelecimentoAtivo.value) {
     redirectToLandingPlanos()
     return
   }
-  if (assinaturaId.value) {
-    await assinaturaStore.fetchAtual(estabelecimentoAtivo.value.estabelecimentoId)
-  }
+  await Promise.all([
+    assinaturaId.value
+      ? assinaturaStore.fetchAtual(estabelecimentoAtivo.value.estabelecimentoId)
+      : Promise.resolve(),
+    planosStore.fetchPlanos(),
+  ])
   try {
     contextoOnboarding.value = await assinaturaService.obterContextoOnboarding()
   } catch {
@@ -101,20 +125,38 @@ async function adicionarUnidade(estabelecimento: EstabelecimentoOnboarding) {
 
 function concluirPagamento() {
   const url = assinatura.value?.pagamentoInicial?.checkoutUrl
-  if (url) {
-    redirectToThirdPartyUrl(url)
-  }
+  if (url) redirectToThirdPartyUrl(url)
+}
+
+function irTrocarPlano() {
+  void router.push(ROUTE_PATHS.CONFIG_ASSINATURA_UPGRADE)
+}
+
+function irUpgrade(planoAlvoId: number) {
+  void router.push({
+    path: ROUTE_PATHS.CONFIG_ASSINATURA_UPGRADE,
+    query: { planoId: String(planoAlvoId) },
+  })
+}
+
+function scrollComparacao() {
+  document.getElementById('assinatura-comparacao')?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  })
+}
+
+function abrirPolitica() {
+  notifications.push(
+    'info',
+    'Pagamentos processados pelo Mercado Pago. O cancelamento preserva o acesso até o fim do ciclo vigente.',
+  )
 }
 </script>
 
 <template>
-  <div class="mx-auto max-w-3xl space-y-6">
-    <div class="flex flex-wrap items-center justify-between gap-4">
-      <h1 class="font-satoshi text-xl font-bold text-glow-text lg:text-2xl">Assinatura</h1>
-      <RouterLink :to="ROUTE_PATHS.CONFIG_ASSINATURA_FATURAS">
-        <BaseButton variant="secondary">Ver faturas</BaseButton>
-      </RouterLink>
-    </div>
+  <div class="assinatura-page flex w-full flex-col gap-5 pb-8">
+    <AssinaturaPageHeader />
 
     <TrialStatusBanner
       v-if="assinatura?.emTrial && assinatura.proximaDataVencimento"
@@ -135,10 +177,7 @@ function concluirPagamento() {
       </p>
     </BaseCard>
 
-    <BaseCard
-      v-if="assinatura?.status === 'PendentePagamento'"
-      title="Pagamento pendente"
-    >
+    <BaseCard v-if="assinatura?.status === 'PendentePagamento'" title="Pagamento pendente">
       <p class="mb-4 text-sm text-glow-text-subtle">
         Conclua o pagamento para liberar os módulos operacionais.
       </p>
@@ -161,15 +200,21 @@ function concluirPagamento() {
         {{ contextoOnboarding.limiteLojas ?? '—' }}
         unidades em uso.
       </p>
-      <BaseButton
-        v-if="!exibirFormUnidade"
-        variant="primary"
-        @click="exibirFormUnidade = true"
-      >
-        Adicionar unidade
-      </BaseButton>
+      <div class="flex flex-wrap gap-2">
+        <BaseButton
+          v-if="!exibirFormUnidade"
+          variant="primary"
+          @click="exibirFormUnidade = true"
+        >
+          Adicionar unidade
+        </BaseButton>
+        <RouterLink :to="ROUTE_PATHS.FINANCEIRO_REDE">
+          <BaseButton variant="secondary">Painel da rede</BaseButton>
+        </RouterLink>
+      </div>
       <AdicionarUnidadePanel
-        v-else
+        v-if="exibirFormUnidade"
+        class="mt-4"
         :loading="adicionandoUnidade"
         :error-message="erroUnidade"
         @submit="adicionarUnidade"
@@ -177,27 +222,48 @@ function concluirPagamento() {
       />
     </BaseCard>
 
-    <LoadingSpinner v-if="loading" />
-    <AssinaturaResumoCard
-      v-else
-      :plano-nome="planoNome"
-      :assinatura="assinatura"
-    />
+    <template v-if="paginaPronta && assinatura">
+      <AssinaturaPlanoHero
+        :plano-nome="planoNome"
+        :plano="planoAtual"
+        :assinatura="assinatura"
+      />
 
-    <div class="flex flex-wrap gap-3">
-      <RouterLink :to="ROUTE_PATHS.CONFIG_ASSINATURA_UPGRADE">
-        <BaseButton variant="primary">Trocar plano</BaseButton>
-      </RouterLink>
-      <RouterLink
-        v-if="contextoOnboarding?.podeAdicionarLoja"
-        :to="ROUTE_PATHS.FINANCEIRO_REDE"
-      >
-        <BaseButton variant="secondary">Painel da rede</BaseButton>
-      </RouterLink>
-      <BaseButton variant="danger" :disabled="assinatura?.status === 'CancelamentoAgendado'" @click="dialogAberto = true">
-        Cancelar assinatura
-      </BaseButton>
-    </div>
+      <div class="grid gap-5 lg:grid-cols-5 lg:items-stretch">
+        <AssinaturaDetalhesCard
+          class="lg:col-span-3"
+          :plano-nome="planoNome"
+          :plano="planoAtual"
+          :assinatura="assinatura"
+          :pode-cancelar="assinatura.status !== 'CancelamentoAgendado'"
+          @trocar-plano="irTrocarPlano"
+          @cancelar="dialogAberto = true"
+        />
+        <AssinaturaBeneficiosCard
+          class="lg:col-span-2"
+          :plano="planoAtual"
+          :plano-nome="planoNome"
+          @ver-beneficios="scrollComparacao"
+        />
+      </div>
+
+      <AssinaturaComparacaoPlanos
+        id="assinatura-comparacao"
+        :planos="planos"
+        :plano-atual-id="assinatura.planoId ?? planoId"
+        @upgrade="irUpgrade"
+        @ver-planos="irTrocarPlano"
+      />
+
+      <AssinaturaSegurancaBanner @saiba-mais="abrirPolitica" />
+    </template>
+
+    <BaseCard v-else-if="paginaPronta" title="Nenhuma assinatura ativa">
+      <p class="mb-4 text-sm text-glow-text-subtle">
+        Contrate um plano para liberar a operação completa da sua loja.
+      </p>
+      <BaseButton variant="primary" @click="irTrocarPlano">Ver planos</BaseButton>
+    </BaseCard>
 
     <CancelarAssinaturaDialog
       :open="dialogAberto"
