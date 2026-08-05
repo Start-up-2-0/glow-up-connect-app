@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNotificationsStore } from '@/stores/notifications.store'
@@ -47,16 +46,17 @@ watch(ready, (isReady) => {
     </div>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
-    <LoadingSpinner v-else-if="contextLoading || (loading && registros.length === 0)" />
 
-    <BaseCard v-else-if="registros.length === 0">
+    <BaseCard
+      v-if="!contextError && !contextLoading && !loading && registros.length === 0"
+    >
       <EmptyState
         title="Nenhum registro"
         description="As ações operacionais aparecerão aqui conforme forem realizadas."
       />
     </BaseCard>
 
-    <div v-else class="space-y-2">
+    <div v-else-if="registros.length > 0" class="space-y-2">
       <div
         v-for="registro in registros"
         :key="registro.id"

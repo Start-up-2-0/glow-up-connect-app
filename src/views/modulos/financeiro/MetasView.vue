@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import FinanceiroPageHeader from '@/components/financeiro/FinanceiroPageHeader.vue'
 import FinanceiroEmptyState from '@/components/financeiro/FinanceiroEmptyState.vue'
@@ -302,9 +301,8 @@ watch([mes, ano], () => void load())
     </FinanceiroPageHeader>
 
     <ContentAlert v-if="contextError" variant="error">{{ contextError }}</ContentAlert>
-    <LoadingSpinner v-if="contextLoading || loading" />
 
-    <template v-else>
+    <template v-if="!contextLoading && !loading">
       <FinanceiroEmptyState
         v-if="lista.length === 0"
         title="Nenhuma meta neste mês"

@@ -2,7 +2,6 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import AgendamentoStatusBadge from '@/components/cliente/AgendamentoStatusBadge.vue'
 import CancelarAgendamentoModal from '@/components/cliente/CancelarAgendamentoModal.vue'
 import AgendamentoDetailHeader from '@/components/agenda/detail/AgendamentoDetailHeader.vue'
@@ -383,9 +382,8 @@ watch(
     />
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
-    <LoadingSpinner v-if="loading" />
 
-    <template v-else-if="agendamento">
+    <template v-if="!loading && agendamento">
       <div class="agendamento-detail-grid">
         <div class="agendamento-detail-column">
           <AgendamentoDetailSection title="Resumo">
@@ -535,7 +533,7 @@ watch(
       </div>
     </template>
 
-    <BaseAlert v-else variant="error">Agendamento não encontrado.</BaseAlert>
+    <BaseAlert v-else-if="!loading" variant="error">Agendamento não encontrado.</BaseAlert>
 
     <CancelarAgendamentoModal v-model="cancelModalOpen" @confirm="handleCancelar" />
 

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import OnboardingAssinaturaShell from '@/components/onboarding/OnboardingAssinaturaShell.vue'
 import OnboardingUsuarioStep from '@/components/onboarding/OnboardingUsuarioStep.vue'
 import OnboardingConfirmarEmailStep from '@/components/onboarding/OnboardingConfirmarEmailStep.vue'
@@ -71,9 +70,7 @@ function handlePublicBack() {
     :public-show-back="publicStep.showBack"
     @back="handlePublicBack"
   >
-    <LoadingSpinner v-if="loading && !plano" />
-
-    <template v-else-if="plano">
+    <template v-if="plano">
       <OnboardingUsuarioStep
         v-if="step === 'conta'"
         :initial="draft.usuario"

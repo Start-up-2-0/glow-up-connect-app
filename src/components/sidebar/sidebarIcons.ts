@@ -64,6 +64,8 @@ const ICON_MAP: Record<string, Component> = {
   'abrir-loja': Store,
   store: Store,
   assinatura: CreditCard,
+  'assinatura-plano': CreditCard,
+  'assinatura-faturas': FileText,
   subscription: CreditCard,
   auditoria: FileText,
   privacidade: Shield,

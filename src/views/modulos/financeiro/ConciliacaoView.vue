@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import FinanceiroPageHeader from '@/components/financeiro/FinanceiroPageHeader.vue'
 import FinanceiroEmptyState from '@/components/financeiro/FinanceiroEmptyState.vue'
@@ -84,9 +83,8 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
     </div>
 
     <ContentAlert v-if="contextError" variant="error">{{ contextError }}</ContentAlert>
-    <LoadingSpinner v-if="contextLoading || loading" />
 
-    <template v-else>
+    <template v-if="!contextLoading && !loading">
       <FinanceiroEmptyState
         v-if="itens.length === 0"
         title="Nenhum item de conciliação"

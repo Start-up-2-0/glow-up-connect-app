@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import AgendaPageHeader from '@/components/agenda/AgendaPageHeader.vue'
 import AgendaFigmaFilter from '@/components/agenda/AgendaFigmaFilter.vue'
@@ -124,15 +123,13 @@ watch([statusFilter, periodFilter, customDateRange, sortFilter], () => {
       </template>
     </AgendaPageHeader>
 
-    <LoadingSpinner v-if="loading && itens.length === 0" />
-
     <EmptyState
-      v-else-if="itens.length === 0"
+      v-if="itens.length === 0 && !loading"
       title="Nenhum agendamento"
       description="Quando você agendar em uma loja, seus horários aparecerão aqui."
     />
 
-    <template v-else>
+    <template v-else-if="itens.length > 0">
       <div class="agenda-cards-grid">
         <AgendamentoCard
           v-for="item in itens"

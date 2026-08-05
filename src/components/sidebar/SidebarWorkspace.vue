@@ -71,30 +71,30 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
       v-else
       ref="triggerEl"
       type="button"
-      class="sb-workspace group flex w-full items-center gap-3 rounded-2xl border border-glow-border-soft bg-glow-surface p-3 text-left transition-all duration-200 hover:border-glow-gold-cta/40 hover:shadow-glow-sm"
+      class="sb-workspace group flex w-full items-center gap-2.5 rounded-md border border-glow-border-soft bg-glow-canvas p-2 text-left transition-colors hover:border-glow-gold-cta/40"
       :aria-expanded="open"
       :aria-label="`Empresa ${estabelecimentoAtivo?.nome ?? ''} — trocar`"
       @click.stop="toggle"
     >
-      <span class="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-glow-canvas">
+      <span class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-glow-surface">
         <UserAvatar
           :src="estabelecimentoAtivo?.logo || null"
           :name="estabelecimentoAtivo?.nome"
-          size="sm"
+          size="xs"
           aria-hidden="true"
         />
       </span>
       <span class="min-w-0 flex-1">
-        <span class="block truncate font-urbanist text-sm font-semibold text-glow-text">
+        <span class="block truncate font-urbanist text-[13px] font-medium text-glow-text">
           {{ estabelecimentoAtivo?.nome ?? 'Selecione a loja' }}
         </span>
-        <span class="flex items-center gap-1 font-urbanist text-xs font-medium text-glow-gold-cta">
+        <span class="flex items-center gap-1 font-urbanist text-[11px] font-normal text-glow-gold-cta">
           <span class="size-1.5 rounded-full bg-glow-success" aria-hidden="true" />
           {{ planoLabel }}
         </span>
       </span>
       <ChevronDown
-        :size="16"
+        :size="14"
         class="shrink-0 text-glow-text-subtle transition-transform duration-200"
         :class="open ? 'rotate-180' : ''"
       />
@@ -112,7 +112,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
       >
         <div
           v-if="open"
-          class="fixed z-[60] min-w-[240px] overflow-hidden rounded-2xl border border-glow-border-soft bg-glow-surface p-1.5 shadow-glow-sm"
+          class="fixed z-[60] min-w-[240px] overflow-hidden rounded-lg border border-glow-border-soft bg-glow-surface p-1.5 shadow-lg"
           :style="popoverStyle"
           role="menu"
           @click.stop

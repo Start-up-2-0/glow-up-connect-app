@@ -2,7 +2,6 @@
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ServicoCard from '@/components/servicos/ServicoCard.vue'
 import ServicoEmptyState from '@/components/servicos/ServicoEmptyState.vue'
 import ServicoIcons from '@/components/servicos/ServicoIcons.vue'
@@ -183,10 +182,8 @@ watch(
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
 
-    <LoadingSpinner v-if="contextLoading || (loading && servicos.length === 0)" />
-
     <ServicoEmptyState
-      v-else-if="servicos.length === 0"
+      v-if="!contextLoading && !loading && servicos.length === 0"
       :title="emptyTitle"
       :description="emptyDescription"
       :show-action="podeGerenciar"
@@ -195,7 +192,7 @@ watch(
       @action="irNovo"
     />
 
-    <template v-else>
+    <template v-else-if="servicos.length > 0">
       <div class="servicos-cards-grid">
         <ServicoCard
           v-for="servico in servicosPaginados"

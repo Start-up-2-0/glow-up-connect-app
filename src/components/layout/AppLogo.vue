@@ -23,16 +23,21 @@ const logoUrl = computed(() => {
   if (props.light) return logoLight
   return isDark.value ? logoDark : logoLight
 })
+
+/** Se logoClass define o tamanho, não aplica defaults que conflitam. */
+const sizeClass = computed(() => {
+  if (props.logoClass) return ''
+  if (props.compact) return 'h-10 w-10'
+  if (props.sidebar) return 'app-logo--sidebar'
+  if (props.mobile) return 'h-[136px] w-[190px]'
+  return 'h-[128px] w-[168px]'
+})
 </script>
 
 <template>
   <img
     :src="logoUrl"
     alt="Glow Up Connect"
-    :class="[
-      'object-contain object-left',
-      compact ? 'h-10 w-10' : sidebar ? 'app-logo--sidebar' : mobile ? 'h-[136px] w-[190px]' : 'h-[128px] w-[168px]',
-      logoClass,
-    ]"
+    :class="['object-contain object-left', sizeClass, logoClass]"
   />
 </template>

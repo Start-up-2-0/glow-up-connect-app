@@ -4,12 +4,12 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import { conviteService } from '@/services/conviteService'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUserStore } from '@/stores/user.store'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useTrocarEstabelecimento } from '@/composables/useTrocarEstabelecimento'
+import { useLoading } from '@/composables/useLoading'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { ROUTE_PATHS, conviteResponderPath } from '@/constants/routes'
@@ -24,6 +24,7 @@ const userStore = useUserStore()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
 const { trocarEstabelecimento } = useTrocarEstabelecimento()
+const globalLoading = useLoading()
 
 const token = computed(() => String(route.params.token))
 const redirectPath = computed(() => conviteResponderPath(token.value))
@@ -33,7 +34,6 @@ const registerLink = computed(() => authRouteWithRedirect(ROUTE_PATHS.REGISTER, 
 const previewLoading = ref(true)
 const preview = ref<ConvitePreview | null>(null)
 const previewError = ref<string | null>(null)
-const actionLoading = ref(false)
 const actionError = ref<string | null>(null)
 const success = ref<string | null>(null)
 
@@ -64,7 +64,9 @@ async function carregarPreview() {
 }
 
 async function responder(acao: 'aceitar' | 'rejeitar') {
-  actionLoading.value = true
+  globalLoading.open({
+    message: acao === 'aceitar' ? 'Aceitando convite...' : 'Rejeitando convite...',
+  })
   actionError.value = null
   try {
     if (acao === 'aceitar') {
@@ -88,7 +90,7 @@ async function responder(acao: 'aceitar' | 'rejeitar') {
   } catch (err) {
     actionError.value = resolveError(err, 'Não foi possível responder ao convite.')
   } finally {
-    actionLoading.value = false
+    globalLoading.close()
   }
 }
 
@@ -108,10 +110,9 @@ onMounted(async () => {
   <div class="mx-auto max-w-lg space-y-4 py-4">
     <h1 class="font-satoshi text-xl font-bold text-glow-text">Convite para equipe</h1>
 
-    <LoadingSpinner v-if="previewLoading" />
-    <BaseAlert v-else-if="previewError" variant="error">{{ previewError }}</BaseAlert>
+    <BaseAlert v-if="!previewLoading && previewError" variant="error">{{ previewError }}</BaseAlert>
 
-    <template v-else-if="preview">
+    <template v-else-if="!previewLoading && preview">
       <BaseCard title="Resumo do convite">
         <dl class="space-y-2 font-urbanist text-sm">
           <div class="flex justify-between gap-4">
@@ -163,8 +164,7 @@ onMounted(async () => {
           Confirme com a conta <strong class="text-glow-text">{{ userStore.profile?.email }}</strong>.
         </p>
         <BaseCard>
-          <LoadingSpinner v-if="actionLoading" />
-          <div v-else class="flex flex-col gap-3 sm:flex-row">
+          <div class="flex flex-col gap-3 sm:flex-row">
             <BaseButton class="flex-1" @click="responder('aceitar')">Aceitar convite</BaseButton>
             <BaseButton class="flex-1" variant="secondary" @click="responder('rejeitar')">
               Rejeitar

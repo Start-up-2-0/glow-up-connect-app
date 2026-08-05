@@ -2,7 +2,6 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import EquipeAdicionarModal from '@/components/equipe/EquipeAdicionarModal.vue'
 import EquipeEmptySlotCard from '@/components/equipe/EquipeEmptySlotCard.vue'
@@ -233,9 +232,10 @@ watch(ready, (isReady) => {
       {{ loadError }}
     </ContentAlert>
 
-    <LoadingSpinner v-if="contextLoading || loading" />
-
-    <div v-else-if="membros.length === 0" class="equipe-empty-state">
+    <div
+      v-if="!contextLoading && !loading && membros.length === 0"
+      class="equipe-empty-state"
+    >
       <h2 class="equipe-empty-state__title">Ninguém na equipe ainda</h2>
       <p class="equipe-empty-state__description">
         Adicione quem faz parte do negócio para começar a organizar a operação.

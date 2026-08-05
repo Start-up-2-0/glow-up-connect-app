@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import MercadoPagoCardForm from '@/components/assinatura/MercadoPagoCardForm.vue'
 import PlanoUpgradeModal from '@/components/assinatura/PlanoUpgradeModal.vue'
 import { usePlanosStore } from '@/stores/planos.store'
@@ -75,8 +74,7 @@ async function executarTroca() {
       </p>
     </BaseCard>
 
-    <LoadingSpinner v-if="planosLoading" />
-    <div v-else class="space-y-3">
+    <div v-if="!planosLoading" class="space-y-3">
       <BaseCard
         v-for="plano in planos"
         :key="plano.id"

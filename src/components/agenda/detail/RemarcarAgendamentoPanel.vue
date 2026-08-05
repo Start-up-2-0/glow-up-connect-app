@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, useId } from 'vue'
 import AgendarCalendario from '@/components/agendar/AgendarCalendario.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import type { SlotDisponivel } from '@/types/agendamento.types'
 import { formatAgendaTime } from '@/utils/formatters'
 
@@ -80,17 +79,15 @@ function onSelectDate(value: string) {
             Escolha uma nova data
           </p>
 
-          <LoadingSpinner v-if="datasLoading && datasAtendimento.length === 0" />
-
           <p
-            v-else-if="datasAtendimento.length === 0"
+            v-if="!datasLoading && datasAtendimento.length === 0"
             class="remarcar-agendamento__slots-empty"
           >
             {{ mensagemIndisponibilidade ?? 'Não há dias de atendimento disponíveis para os serviços deste agendamento.' }}
           </p>
 
           <AgendarCalendario
-            v-else
+            v-else-if="datasAtendimento.length > 0"
             embedded
             :selected-date="date"
             :datas-permitidas="datasAtendimento"
@@ -104,16 +101,14 @@ function onSelectDate(value: string) {
             Escolha o novo horário
           </p>
 
-          <LoadingSpinner v-if="slotsLoading" />
-
           <p
-            v-else-if="slots.length === 0"
+            v-if="!slotsLoading && slots.length === 0"
             class="remarcar-agendamento__slots-empty"
           >
             {{ slotsMessage }}
           </p>
 
-          <div v-else class="remarcar-agendamento__slot-grid" role="listbox" aria-label="Horários disponíveis">
+          <div v-else-if="slots.length > 0" class="remarcar-agendamento__slot-grid" role="listbox" aria-label="Horários disponíveis">
             <button
               v-for="(slot, index) in slots"
               :key="`${slot.inicio}-${index}`"

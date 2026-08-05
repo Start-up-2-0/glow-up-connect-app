@@ -6,7 +6,6 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import EnderecoForm from '@/components/form/EnderecoForm.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
@@ -258,9 +257,7 @@ watch(
       Complete seu endereço para aparecer na busca por proximidade dos clientes.
     </ContentAlert>
 
-    <LoadingSpinner v-if="(loading && !ready) || loadingPerfil" />
-
-    <template v-else-if="estabelecimentoAtivo">
+    <template v-if="!((loading && !ready) || loadingPerfil) && estabelecimentoAtivo">
       <BaseCard title="Informações da loja">
         <template v-if="!editingBasico">
           <div class="flex gap-4">

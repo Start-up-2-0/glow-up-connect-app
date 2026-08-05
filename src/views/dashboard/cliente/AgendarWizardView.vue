@@ -2,7 +2,6 @@
 import { computed, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import AgendarWizardStepper from '@/components/agendar/AgendarWizardStepper.vue'
 import AgendarProfissionalCard from '@/components/agendar/AgendarProfissionalCard.vue'
 import AgendarOpcaoCard from '@/components/agendar/AgendarOpcaoCard.vue'
@@ -281,9 +280,7 @@ async function handleConfirmar() {
 
       <BaseAlert v-else-if="error" variant="error" class="mb-6">{{ error }}</BaseAlert>
 
-      <LoadingSpinner v-if="loading && step === 'profissional' && profissionais.length === 0" />
-
-      <template v-else-if="wizardAtivo">
+      <template v-if="wizardAtivo">
         <AgendarWizardStepper
           v-if="figmaStep.showStepper"
           :step-index="figmaStep.index"
@@ -502,29 +499,25 @@ async function handleConfirmar() {
             :estabelecimento-nome="estabelecimentoNome"
           />
 
-          <LoadingSpinner v-if="loading" />
+          <h2 class="agendar-section-title">Selecione os serviços</h2>
 
-          <template v-else>
-            <h2 class="agendar-section-title">Selecione os serviços</h2>
+          <p v-if="servicos.length === 0" class="font-urbanist text-sm text-glow-text-subtle">
+            Nenhum serviço disponível no momento.
+          </p>
 
-            <p v-if="servicos.length === 0" class="font-urbanist text-sm text-glow-text-subtle">
-              Nenhum serviço disponível no momento.
-            </p>
-
-            <div class="max-h-[420px] space-y-3 overflow-y-auto pr-1">
-              <AgendarServicoCard
-                v-for="servico in servicos"
-                :key="servico.id"
-                :nome="servico.nome"
-                :descricao="servico.descricao"
-                :duracao-minutos="servico.duracaoMinutosEstimada"
-                :preco-minimo="servico.precoMinimo"
-                :preco-maximo="servico.precoMaximo"
-                :selected="selectedServicoIds.includes(servico.id)"
-                @toggle="toggleServico(servico.id)"
-              />
-            </div>
-          </template>
+          <div class="max-h-[420px] space-y-3 overflow-y-auto pr-1">
+            <AgendarServicoCard
+              v-for="servico in servicos"
+              :key="servico.id"
+              :nome="servico.nome"
+              :descricao="servico.descricao"
+              :duracao-minutos="servico.duracaoMinutosEstimada"
+              :preco-minimo="servico.precoMinimo"
+              :preco-maximo="servico.precoMaximo"
+              :selected="selectedServicoIds.includes(servico.id)"
+              @toggle="toggleServico(servico.id)"
+            />
+          </div>
 
           <AgendarResumoFooter
             v-if="showResumoFooter"
@@ -544,17 +537,15 @@ async function handleConfirmar() {
             Selecione um dia disponível para seu atendimento.
           </h2>
 
-          <LoadingSpinner v-if="loading" />
-
           <p
-            v-else-if="datasAtendimento.length === 0"
+            v-if="!loading && datasAtendimento.length === 0"
             class="font-urbanist text-sm text-glow-text-subtle"
           >
             {{ error ?? 'Não há dias de atendimento disponíveis com os serviços selecionados.' }}
           </p>
 
           <AgendarCalendario
-            v-else
+            v-else-if="datasAtendimento.length > 0"
             :selected-date="selectedDate"
             :datas-permitidas="datasAtendimento"
             :min-date="minSelectableDate"
@@ -574,16 +565,14 @@ async function handleConfirmar() {
             </p>
           </div>
 
-          <LoadingSpinner v-if="loading" />
-
           <p
-            v-else-if="slotsDoDia.length === 0"
+            v-if="!loading && slotsDoDia.length === 0"
             class="font-urbanist text-sm text-glow-text-subtle"
           >
             Nenhum horário livre nesta data. Escolha outro dia disponível.
           </p>
 
-          <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <div v-else-if="slotsDoDia.length > 0" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             <button
               v-for="(slot, index) in slotsDoDia"
               :key="`${slot.inicio}-${index}`"

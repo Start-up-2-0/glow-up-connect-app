@@ -2,7 +2,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ClientePageHeader from '@/components/cliente/ClientePageHeader.vue'
 import LojaResumoPanel from '@/components/cliente/LojaResumoPanel.vue'
 import LojaServicoCard from '@/components/cliente/LojaServicoCard.vue'
@@ -54,9 +53,7 @@ onMounted(async () => {
 
 <template>
   <div class="cliente-loja-detalhe-page">
-    <LoadingSpinner v-if="loading" />
-
-    <template v-else-if="loja">
+    <template v-if="loja">
       <ClientePageHeader :back-to="ROUTE_PATHS.EXPLORAR" back-label="Voltar para explorar lojas" />
 
       <div class="cliente-loja-detalhe-layout">
@@ -92,6 +89,6 @@ onMounted(async () => {
       </section>
     </template>
 
-    <BaseAlert v-else variant="error">{{ error ?? 'Loja não encontrada.' }}</BaseAlert>
+    <BaseAlert v-else-if="!loading" variant="error">{{ error ?? 'Loja não encontrada.' }}</BaseAlert>
   </div>
 </template>

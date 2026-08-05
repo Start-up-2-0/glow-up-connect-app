@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ServicoIcons from '@/components/servicos/ServicoIcons.vue'
 import ServicoPageHeader from '@/components/servicos/ServicoPageHeader.vue'
 import ServicoProfissionalSelectModal from '@/components/servicos/ServicoProfissionalSelectModal.vue'
@@ -215,9 +214,7 @@ watch(
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
 
-    <LoadingSpinner v-if="contextLoading || loading" />
-
-    <div v-else-if="notFound" class="servicos-form-panel">
+    <div v-if="!contextLoading && !loading && notFound" class="servicos-form-panel">
       <h2 class="servicos-page__title">Serviço não encontrado</h2>
       <p class="servicos-page__subtitle">
         O serviço solicitado não existe ou foi removido.
@@ -229,7 +226,7 @@ watch(
       </div>
     </div>
 
-    <template v-else-if="servico">
+    <template v-else-if="!contextLoading && !loading && servico">
       <div class="servicos-prof-toolbar">
         <button
           type="button"

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import OnboardingAssinaturaShell from '@/components/onboarding/OnboardingAssinaturaShell.vue'
 import OnboardingInformacoesBasicasStep from '@/components/onboarding/OnboardingInformacoesBasicasStep.vue'
 import OnboardingEnderecoStep from '@/components/onboarding/OnboardingEnderecoStep.vue'
@@ -71,9 +70,7 @@ function voltarDeInformacoesBasicas() {
     :step-subtitle="isCheckoutStep ? '' : stepSubtitle"
     @back="onShellBack"
   >
-    <LoadingSpinner v-if="loading && !plano" />
-
-    <template v-else-if="plano">
+    <template v-if="plano">
       <OnboardingInformacoesBasicasStep
         v-if="step === 'informacoes-basicas'"
         :initial="draft.estabelecimento"

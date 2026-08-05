@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useWhatsAppConfirmacao } from '@/composables/useWhatsAppConfirmacao'
 import { useApiError } from '@/composables/useApiError'
@@ -117,9 +116,7 @@ async function handleOptInChange(event: Event) {
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
     <p v-if="perfilError" class="font-urbanist text-sm text-red-600">{{ perfilError }}</p>
-    <LoadingSpinner v-if="(loading && !ready) || carregandoPerfil" class="mx-auto py-12" />
-
-    <section v-else-if="ready && perfil" :class="CARD_CLASS">
+    <section v-if="ready && perfil && !((loading && !ready) || carregandoPerfil)" :class="CARD_CLASS">
       <div :class="CARD_HEADER_CLASS">
         <div class="flex items-start gap-3">
           <div

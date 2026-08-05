@@ -98,14 +98,7 @@ export function useDashboardNav() {
     }
 
     if (temVinculoNegocio.value) {
-      const business = filterNavSections(
-        businessNavSections.filter((section) => section.id !== 'sec-inicio'),
-        filterCtx,
-      )
-      return mergeNavSections(
-        filterNavSections(clienteSections, filterCtx),
-        business,
-      )
+      return filterNavSections(businessNavSections, filterCtx)
     }
 
     if (!isClienteRole(profile.value?.role)) {

@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import PlanoCard from '@/components/assinatura/PlanoCard.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import { usePlanosStore } from '@/stores/planos.store'
 import { getUpgradeInfo } from '@/constants/upgradeMessages'
 import { LANDING_PLANOS_URL } from '@/constants/routes'
@@ -38,8 +37,7 @@ onMounted(() => planosStore.fetchPlanos())
       </a>
     </BaseCard>
 
-    <LoadingSpinner v-if="planosStore.loading" />
-    <div v-else class="grid gap-6 md:grid-cols-2">
+    <div v-if="!planosStore.loading" class="grid gap-6 md:grid-cols-2">
       <PlanoCard
         v-for="plano in planosStore.planos"
         :key="plano.id"

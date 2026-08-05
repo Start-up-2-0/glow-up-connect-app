@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import EquipePageHeader from '@/components/equipe/EquipePageHeader.vue'
 import { EQUIPE_PAGE_CLASS } from '@/constants/designTokens'
@@ -87,9 +86,7 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
       {{ contextError }}
     </ContentAlert>
 
-    <LoadingSpinner v-if="loading" />
-
-    <div v-else-if="ready && convites.length === 0" class="equipe-empty-state">
+    <div v-if="!loading && ready && convites.length === 0" class="equipe-empty-state">
       <h2 class="equipe-empty-state__title">Nenhum convite pendente</h2>
       <p class="equipe-empty-state__description">
         Envie um convite pela equipe para ver a listagem aqui.

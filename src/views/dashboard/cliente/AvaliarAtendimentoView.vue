@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import StarRating from '@/components/avaliacao/StarRating.vue'
 import { avaliacaoService } from '@/services/avaliacaoService'
 import { useApiError } from '@/composables/useApiError'
@@ -105,9 +104,8 @@ onMounted(load)
     <h1 class="font-satoshi text-xl font-bold text-glow-text">Avaliar atendimento</h1>
 
     <BaseAlert v-if="error" variant="error">{{ error }}</BaseAlert>
-    <LoadingSpinner v-if="loading" />
 
-    <template v-else-if="contexto">
+    <template v-if="contexto">
       <BaseCard>
         <div class="flex items-center gap-3">
           <img

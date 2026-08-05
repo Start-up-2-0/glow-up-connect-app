@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import EstabelecimentoCard from '@/components/cliente/EstabelecimentoCard.vue'
 import { publicoService } from '@/services/publicoService'
@@ -212,10 +211,8 @@ onMounted(async () => {
 
     <BaseAlert v-if="error" variant="error" class="mt-6">{{ error }}</BaseAlert>
 
-    <LoadingSpinner v-if="loading || (geoLoading && itens.length === 0)" class="mt-6" />
-
     <div
-      v-else-if="itens.length === 0 && !errorMessage"
+      v-if="itens.length === 0 && !errorMessage && !loading && !geoLoading"
       class="cliente-empty-panel mt-6"
     >
       <EmptyState

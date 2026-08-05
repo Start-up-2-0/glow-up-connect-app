@@ -18,26 +18,23 @@ const emit = defineEmits<{ toggle: [] }>()
   >
     <div
       v-if="collapsed"
-      class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-glow-gold-cta/10 text-glow-gold-cta"
+      class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-glow-gold-cta/10 text-glow-gold-cta"
     >
-      <AppLogo compact logo-class="size-7 rounded-lg object-contain" />
+      <AppLogo compact logo-class="size-6 rounded-md object-contain" />
     </div>
 
-    <div v-else class="flex min-w-0 items-center gap-3">
-      <AppLogo compact logo-class="size-10 shrink-0 rounded-xl object-contain" />
+    <div v-else class="flex min-w-0 items-center gap-2.5">
+      <AppLogo compact logo-class="size-8 shrink-0 rounded-lg object-contain" />
       <div class="min-w-0">
-        <p class="truncate font-urbanist text-[15px] font-bold leading-tight text-glow-text">
+        <p class="truncate font-urbanist text-base font-bold leading-tight text-glow-text">
           {{ APP_NAME }}
-        </p>
-        <p class="truncate font-urbanist text-xs font-medium text-glow-text-subtle">
-          Gestão da sua loja
         </p>
       </div>
     </div>
 
     <button
       type="button"
-      class="sb-header-toggle flex size-9 shrink-0 items-center justify-center rounded-xl text-glow-text-subtle transition-all duration-200 hover:bg-glow-surface-tint hover:text-glow-text"
+      class="sb-header-toggle flex size-8 shrink-0 items-center justify-center rounded-lg text-glow-text-subtle transition-colors hover:bg-glow-hover-surface hover:text-glow-text"
       :aria-label="mobile ? 'Fechar sidebar' : collapsed ? 'Expandir sidebar' : 'Recolher sidebar'"
       @click="emit('toggle')"
     >

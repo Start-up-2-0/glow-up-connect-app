@@ -5,12 +5,13 @@ import { ROUTE_PATHS } from '@/constants/routes'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
+import { useLoading } from '@/composables/useLoading'
 
 const route = useRoute()
 const router = useRouter()
 const negocioStore = useNegocioStore()
 const notifications = useNotificationsStore()
+const globalLoading = useLoading()
 
 const aguardando = ref(true)
 const tentativas = ref(0)
@@ -38,14 +39,21 @@ const descricao = computed(() => {
   return 'Estamos confirmando seu pagamento e preparando o acesso ao painel.'
 })
 
-async function tentarAtivar() {
+function finishWaiting() {
+  aguardando.value = false
+  globalLoading.close()
+}
+
+async function tentarAtivar(): Promise<boolean> {
   tentativas.value += 1
   await negocioStore.fetchEstabelecimentos(true)
   if (negocioStore.assinaturaAtiva) {
-    aguardando.value = false
+    finishWaiting()
     notifications.push('success', 'Assinatura ativa! Bem-vindo ao Glow Up Connect.')
     await router.replace(ROUTE_PATHS.DASHBOARD)
+    return true
   }
+  return false
 }
 
 onMounted(async () => {
@@ -54,23 +62,28 @@ onMounted(async () => {
     return
   }
 
-  await tentarAtivar()
-  if (!negocioStore.assinaturaAtiva) {
+  globalLoading.open({ message: 'Confirmando pagamento...' })
+  try {
+    const ativado = await tentarAtivar()
+    if (ativado) return
+
     const interval = window.setInterval(async () => {
-      if (tentativas.value >= maxTentativas || negocioStore.assinaturaAtiva) {
+      if (tentativas.value >= maxTentativas) {
         window.clearInterval(interval)
-        aguardando.value = false
+        finishWaiting()
         return
       }
-      await tentarAtivar()
+      const ok = await tentarAtivar()
+      if (ok) window.clearInterval(interval)
     }, 2000)
+  } catch {
+    finishWaiting()
   }
 })
 </script>
 
 <template>
   <div class="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center gap-6 px-4 text-center">
-    <LoadingSpinner v-if="aguardando && variante !== 'falha'" />
     <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ titulo }}</h1>
     <p class="text-sm text-gray-600 dark:text-gray-300">{{ descricao }}</p>
     <div v-if="!aguardando && variante !== 'sucesso'" class="flex flex-col gap-3">

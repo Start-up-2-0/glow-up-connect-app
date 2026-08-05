@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import AgendaPageHeader from '@/components/agenda/AgendaPageHeader.vue'
 import AgendaFigmaFilter from '@/components/agenda/AgendaFigmaFilter.vue'
@@ -338,15 +337,13 @@ watch([statusFilter, periodFilter, customDateRange, sortFilter], () => {
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
 
-    <LoadingSpinner v-if="contextLoading || (loading && itens.length === 0)" />
-
     <EmptyState
-      v-else-if="itens.length === 0"
+      v-if="!contextLoading && !loading && itens.length === 0"
       title="Nenhum agendamento"
       description="Não há horários para o período e filtros selecionados."
     />
 
-    <template v-else>
+    <template v-else-if="itens.length > 0">
       <div class="agenda-cards-grid">
         <AgendamentoCard
           v-for="item in itens"

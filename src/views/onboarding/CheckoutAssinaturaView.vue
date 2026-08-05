@@ -5,7 +5,6 @@ import { storeToRefs } from 'pinia'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import MercadoPagoCardForm from '@/components/assinatura/MercadoPagoCardForm.vue'
 import PromocaoLancamentoBanner from '@/components/assinatura/PromocaoLancamentoBanner.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
@@ -16,6 +15,7 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useUserStore } from '@/stores/user.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
+import { useLoading } from '@/composables/useLoading'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { redirectToLandingPlanos } from '@/utils/landingUrl'
 import { formatBRL, telefoneToApi } from '@/utils/formatters'
@@ -30,6 +30,7 @@ const negocioStore = useNegocioStore()
 const userStore = useUserStore()
 const notifications = useNotificationsStore()
 const { resolveError, resolveErrorCode } = useApiError()
+const globalLoading = useLoading()
 
 const { promocao, loading: planosLoading } = storeToRefs(planosStore)
 const { loading: submitting } = storeToRefs(assinaturaStore)
@@ -80,22 +81,26 @@ onMounted(async () => {
 
 async function aguardarAtivacao() {
   aguardandoPagamento.value = true
-  const maxTentativas = 30
-  for (let i = 0; i < maxTentativas; i++) {
-    await new Promise((r) => setTimeout(r, 2000))
-    await negocioStore.fetchEstabelecimentos(true)
-    if (negocioStore.assinaturaAtiva) {
-      aguardandoPagamento.value = false
-      notifications.push('success', 'Pagamento confirmado! Bem-vindo ao dashboard.')
-      await router.push(ROUTE_PATHS.DASHBOARD)
-      return
+  globalLoading.open({ message: 'Processando pagamento...' })
+  try {
+    const maxTentativas = 30
+    for (let i = 0; i < maxTentativas; i++) {
+      await new Promise((r) => setTimeout(r, 2000))
+      await negocioStore.fetchEstabelecimentos(true)
+      if (negocioStore.assinaturaAtiva) {
+        notifications.push('success', 'Pagamento confirmado! Bem-vindo ao dashboard.')
+        await router.push(ROUTE_PATHS.DASHBOARD)
+        return
+      }
     }
+    notifications.push(
+      'info',
+      'Pagamento em processamento. Atualize a página em alguns instantes.',
+    )
+  } finally {
+    aguardandoPagamento.value = false
+    globalLoading.close()
   }
-  aguardandoPagamento.value = false
-  notifications.push(
-    'info',
-    'Pagamento em processamento. Atualize a página em alguns instantes.',
-  )
 }
 
 async function finalizarCheckout() {
@@ -213,9 +218,7 @@ function onLogoError(message: string) {
 
     <PromocaoLancamentoBanner v-if="promocao?.disponivel" :promocao="promocao" />
 
-    <LoadingSpinner v-if="planosLoading" />
-
-    <template v-else-if="plano">
+    <template v-if="!planosLoading && plano">
       <BaseCard title="Dados do negócio">
         <div class="space-y-4">
           <BaseInput v-model="nome" :label="isAutonomo ? 'Nome público' : 'Nome'" />

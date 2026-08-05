@@ -78,7 +78,7 @@ export const useAppStore = defineStore('app', () => {
   }
 
   function closeSidebarOnMobile() {
-    if (window.innerWidth < 1024) {
+    if (window.innerWidth < 768) {
       sidebarOpen.value = false
     }
   }

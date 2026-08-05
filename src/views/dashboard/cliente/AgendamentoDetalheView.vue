@@ -2,7 +2,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import AgendamentoStatusBadge from '@/components/cliente/AgendamentoStatusBadge.vue'
 import CancelarAgendamentoModal from '@/components/cliente/CancelarAgendamentoModal.vue'
 import AgendamentoDetailHeader from '@/components/agenda/detail/AgendamentoDetailHeader.vue'
@@ -181,8 +180,7 @@ onMounted(load)
       :back-to="ROUTE_PATHS.MEUS_AGENDAMENTOS"
     />
 
-    <LoadingSpinner v-if="loading" />
-    <BaseAlert v-else-if="error && !agendamento" variant="error">{{ error }}</BaseAlert>
+    <BaseAlert v-if="!loading && error && !agendamento" variant="error">{{ error }}</BaseAlert>
 
     <template v-else-if="agendamento">
       <BaseAlert v-if="error" variant="error" class="mb-0">{{ error }}</BaseAlert>

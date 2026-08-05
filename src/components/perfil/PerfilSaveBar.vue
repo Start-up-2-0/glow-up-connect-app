@@ -13,7 +13,7 @@ defineEmits<{
 <template>
   <Transition name="perfil-save-bar">
     <div v-if="visible" class="perfil-save-bar" role="region" aria-label="Alterações pendentes">
-      <p class="perfil-save-bar__text">Existem alterações não salvas.</p>
+      <p class="perfil-save-bar__text">Alterações não salvas</p>
       <div class="perfil-save-bar__actions">
         <button type="button" class="perfil-save-bar__cancel" @click="$emit('cancel')">
           Cancelar

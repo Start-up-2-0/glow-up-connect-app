@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
@@ -67,16 +66,17 @@ watch(ready, (isReady) => {
     </div>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
-    <LoadingSpinner v-if="contextLoading || (loading && clientes.length === 0)" />
 
-    <BaseCard v-else-if="clientes.length === 0">
+    <BaseCard
+      v-if="!contextLoading && !loading && clientes.length === 0"
+    >
       <EmptyState
         title="Nenhum cliente"
         description="Os clientes aparecerão aqui conforme os agendamentos forem registrados."
       />
     </BaseCard>
 
-    <div v-else class="space-y-2">
+    <div v-else-if="clientes.length > 0" class="space-y-2">
       <div
         v-for="(c, idx) in clientes"
         :key="`${c.nome}-${idx}`"

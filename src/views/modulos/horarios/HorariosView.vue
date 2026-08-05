@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import HorarioDiaLojaCard from '@/components/horarios/HorarioDiaLojaCard.vue'
 import HorarioDiaProfissionaisModal from '@/components/horarios/HorarioDiaProfissionaisModal.vue'
 import HorariosPageHeader from '@/components/horarios/HorariosPageHeader.vue'
@@ -93,9 +92,7 @@ function horarioProprioComoLoja(dia: DiaSemanaValue): HorarioFuncionamento | nul
 
     <p v-if="contextError" class="horarios-page__error">{{ contextError }}</p>
 
-    <LoadingSpinner v-if="contextLoading || loading" />
-
-    <template v-else>
+    <template v-if="!contextLoading && !loading">
       <section v-if="podeGerenciarLoja" class="horarios-loja">
         <h2 class="horarios-section-title">Horários da loja</h2>
         <div class="horarios-loja-grid">

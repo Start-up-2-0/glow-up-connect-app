@@ -6,7 +6,6 @@ import BaseInput from '@/components/ui/BaseInput.vue'
 import SegmentedControl from '@/components/ui/SegmentedControl.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
 import PerfilStatusCard from '@/components/perfil/PerfilStatusCard.vue'
 import PerfilSidebar from '@/components/perfil/PerfilSidebar.vue'
@@ -83,7 +82,7 @@ const {
   toggleOptIn,
 } = useWhatsAppConfirmacao()
 
-const { execute: loadProfile, loading } = useFetchOnce('cliente-perfil')
+const { execute: loadProfile } = useFetchOnce('cliente-perfil')
 
 const whatsAppState = computed(() => {
   if (!profile.value?.telefone) return 'sem-telefone' as const
@@ -258,9 +257,7 @@ async function handleSolicitarWhatsApp() {
       </div>
     </header>
 
-    <LoadingSpinner v-if="loading && !profile" class="mx-auto py-12" />
-
-    <template v-else-if="profile">
+    <template v-if="profile">
       <PerfilTabNav :tabs="TABS" :active-id="activeTab" @select="selectTab" />
 
       <PerfilStatusCard

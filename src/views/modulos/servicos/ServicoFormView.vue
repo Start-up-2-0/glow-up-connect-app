@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import CurrencyInput from '@/components/ui/CurrencyInput.vue'
 import ServicoIcons from '@/components/servicos/ServicoIcons.vue'
 import ServicoPageHeader from '@/components/servicos/ServicoPageHeader.vue'
@@ -213,9 +212,7 @@ watch(
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
 
-    <LoadingSpinner v-if="contextLoading || loading" />
-
-    <div v-else-if="notFound" class="servicos-form-panel">
+    <div v-if="!contextLoading && !loading && notFound" class="servicos-form-panel">
       <h2 class="servicos-page__title">Serviço não encontrado</h2>
       <p class="servicos-page__subtitle">
         O serviço solicitado não existe ou foi removido.
@@ -227,7 +224,7 @@ watch(
       </div>
     </div>
 
-    <form v-else class="servicos-form-panel" @submit.prevent="handleSubmit">
+    <form v-else-if="!contextLoading && !loading" class="servicos-form-panel" @submit.prevent="handleSubmit">
       <div class="servicos-form-panel__fields">
         <div class="servicos-form-field">
           <label class="servicos-form-label" for="servico-nome">Serviço</label>
