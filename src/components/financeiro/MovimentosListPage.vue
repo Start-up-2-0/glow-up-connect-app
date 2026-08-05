@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import FinanceiroPageHeader from '@/components/financeiro/FinanceiroPageHeader.vue'
@@ -448,9 +447,8 @@ watch(
     </section>
 
     <ContentAlert v-if="contextError" variant="error" :message="contextError" />
-    <LoadingSpinner v-else-if="contextLoading || loading" class="mt-6" />
 
-    <template v-else>
+    <template v-if="!contextError && !contextLoading && !loading">
       <FinanceiroEmptyState
         v-if="itensFiltrados.length === 0"
         :title="isEntrada ? 'Nenhuma entrada encontrada' : 'Nenhuma saída encontrada'"

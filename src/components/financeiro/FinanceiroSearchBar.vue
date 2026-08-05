@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Search, X } from 'lucide-vue-next'
+
 const model = defineModel<string>({ default: '' })
 
 defineProps<{
@@ -12,24 +14,33 @@ function onInput(event: Event) {
   model.value = value
   emit('search', value)
 }
+
+function limpar() {
+  model.value = ''
+  emit('search', '')
+}
 </script>
 
 <template>
   <label class="financeiro-search">
-    <svg class="size-4 shrink-0 text-glow-text-subtle" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path
-        d="M9 3.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11Z"
-        stroke="currentColor"
-        stroke-width="1.5"
-      />
-      <path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-    </svg>
+    <Search class="financeiro-search__icon" aria-hidden="true" />
     <input
       :value="model"
       type="search"
       class="financeiro-search__input"
       :placeholder="placeholder ?? 'Buscar movimentações, contas...'"
+      autocomplete="off"
+      spellcheck="false"
       @input="onInput"
     />
+    <button
+      v-if="model"
+      type="button"
+      class="financeiro-search__clear"
+      aria-label="Limpar busca"
+      @click="limpar"
+    >
+      <X class="size-3.5" aria-hidden="true" />
+    </button>
   </label>
 </template>
