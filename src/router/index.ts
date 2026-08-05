@@ -26,28 +26,31 @@ const router = createRouter({
     ...clienteRoutes,
     ...notFoundRoutes,
   ],
-  scrollBehavior(to, _from, savedPosition) {
+  scrollBehavior(to, from, savedPosition) {
     if (savedPosition) return savedPosition
     if (to.hash) {
       return { el: to.hash, top: 88, behavior: 'smooth' }
     }
+    // Troca só de query/hash na mesma rota não deve jogar o usuário para o topo.
+    if (from.matched.length && to.path === from.path) return false
     return { top: 0, left: 0 }
   },
 })
 
 // Loading global de navegação: mostra ao iniciar e esconde quando resolver (ou errar).
-router.beforeEach(() => {
+router.beforeEach((to, from) => {
+  if (from.matched.length && to.path === from.path) return true
   useLoadingStore().navigationStart('Preparando sua experiência...')
   return true
 })
 router.beforeEach(authGuard)
 router.beforeEach(negocioGuard)
 
-router.afterEach((to) => {
+router.afterEach((to, from) => {
   useLoadingStore().navigationEnd()
   const title = to.meta.title as string | undefined
   document.title = title ? `${title} | ${APP_NAME}` : APP_NAME
-  if (!to.hash) {
+  if (!to.hash && to.path !== from.path) {
     window.scrollTo(0, 0)
   }
 })
