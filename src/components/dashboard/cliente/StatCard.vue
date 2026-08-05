@@ -12,26 +12,28 @@ defineProps<{
 </script>
 
 <template>
-  <div class="cliente-stat-card group">
-    <div class="flex w-full items-start justify-between">
+  <div class="cliente-stat-card">
+    <div class="flex w-full items-start justify-between gap-2">
       <span
         class="cliente-stat-card__icon"
         :class="iconClass ?? 'bg-glow-gold-cta/15 text-glow-gold-cta'"
       >
-        <component :is="icon" :size="20" :stroke-width="1.75" />
+        <component :is="icon" :size="18" :stroke-width="1.75" />
       </span>
       <span
         v-if="hint"
-        class="inline-flex items-center gap-0.5 rounded-full bg-glow-success-bg px-2 py-0.5 font-urbanist text-[11px] font-semibold text-glow-success-dark"
+        class="inline-flex items-center rounded-full bg-glow-success-bg px-1.5 py-0.5 font-urbanist text-[10px] font-semibold text-glow-success-dark"
       >
-        ↗ {{ hint }}
+        {{ hint }}
       </span>
     </div>
 
     <div v-if="loading" class="cliente-stat-card__skeleton" />
-    <div v-else class="mt-3 flex flex-col gap-0.5">
-      <p class="font-urbanist text-[26px] font-bold leading-none text-glow-text">{{ value }}</p>
-      <p class="font-urbanist text-[13px] font-medium text-glow-text-subtle">{{ label }}</p>
+    <div v-else class="mt-auto pt-3">
+      <p class="font-urbanist text-[22px] font-bold leading-none tracking-tight text-glow-text sm:text-[24px]">
+        {{ value }}
+      </p>
+      <p class="mt-1 font-urbanist text-[12px] font-medium text-glow-text-subtle">{{ label }}</p>
     </div>
   </div>
 </template>
@@ -40,36 +42,34 @@ defineProps<{
 .cliente-stat-card {
   display: flex;
   flex-direction: column;
-  min-height: 138px;
+  min-height: 112px;
   width: 100%;
-  padding: 18px;
-  border-radius: 20px;
+  padding: 14px;
+  border-radius: 16px;
   border: 1px solid var(--glow-border-soft);
   background: var(--glow-surface);
-  box-shadow: 0 8px 24px -12px rgba(82, 46, 95, 0.12);
+  box-shadow: var(--glow-shadow-sm);
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
+    transform 0.15s ease,
+    border-color 0.15s ease;
 }
 .cliente-stat-card:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--glow-gold-cta) 40%, transparent);
-  box-shadow: 0 14px 32px -16px rgba(82, 46, 95, 0.22);
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--glow-gold-cta) 35%, transparent);
 }
 .cliente-stat-card__icon {
   display: inline-flex;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: 10px;
 }
 .cliente-stat-card__skeleton {
   margin-top: auto;
-  width: 100%;
-  height: 52px;
-  border-radius: 10px;
+  width: 70%;
+  height: 40px;
+  border-radius: 8px;
   background: linear-gradient(
     90deg,
     color-mix(in srgb, var(--glow-text) 6%, transparent),

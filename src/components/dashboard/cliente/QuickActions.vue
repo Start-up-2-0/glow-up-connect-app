@@ -56,48 +56,34 @@ const emit = defineEmits<{ action: [id: string] }>()
   border-radius: 20px;
   border: 1px solid var(--glow-border-soft);
   background: var(--glow-surface);
-  box-shadow: 0 8px 24px -12px rgba(82, 46, 95, 0.1);
+  box-shadow: var(--glow-shadow-sm);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
     border-color 0.2s ease;
 }
 .cliente-quick:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--glow-gold-cta) 40%, transparent);
-  box-shadow: 0 16px 36px -16px rgba(82, 46, 95, 0.24);
-}
-.cliente-quick:focus-visible {
-  outline: 2px solid var(--glow-gold-cta);
-  outline-offset: 2px;
 }
 .cliente-quick__icon {
   display: inline-flex;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   align-items: center;
   justify-content: center;
-  border-radius: 13px;
-  background: color-mix(in srgb, var(--glow-gold-cta) 14%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--glow-gold-cta) 12%, transparent);
   color: var(--glow-gold-cta);
-  transition: transform 0.2s ease;
-}
-.cliente-quick:hover .cliente-quick__icon {
-  transform: scale(1.06);
 }
 .cliente-quick__arrow {
   position: absolute;
-  right: 16px;
   top: 16px;
-  color: var(--glow-text-soft);
-  opacity: 0;
-  transform: translate(-4px, 4px);
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
+  right: 16px;
+  color: var(--glow-text-muted);
+  transition: color 0.15s ease;
 }
 .cliente-quick:hover .cliente-quick__arrow {
-  opacity: 1;
-  transform: translate(0, 0);
+  color: var(--glow-gold-cta);
 }
 </style>
