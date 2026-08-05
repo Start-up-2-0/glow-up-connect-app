@@ -109,7 +109,7 @@ export function recursosIncrementais(plano: Plano, anterior: Plano | null): stri
   return [...new Set([...extras, ...novasFuncs, ...novosModulos])]
 }
 
-export function herancaLabel(plano: Plano, anterior: Plano | null): string | null {
+export function herancaLabel(anterior: Plano | null): string | null {
   if (!anterior) return null
   return `Tudo do ${anterior.nome} +`
 }

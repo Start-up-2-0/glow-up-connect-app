@@ -40,7 +40,7 @@ const anterior = computed(() => {
 })
 
 const badge = computed(() => badgePlano(props.plano, props.planosOrdenados))
-const heranca = computed(() => herancaLabel(props.plano, anterior.value))
+const heranca = computed(() => herancaLabel(anterior.value))
 const limites = computed(() => limitesComoItens(props.plano))
 const extras = computed(() => recursosIncrementais(props.plano, anterior.value))
 

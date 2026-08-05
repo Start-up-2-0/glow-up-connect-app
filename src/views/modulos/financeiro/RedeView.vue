@@ -21,7 +21,7 @@ const props = defineProps<{
   embedded?: boolean
 }>()
 
-const { ready, error: contextError, loading: contextLoading } = useEstabelecimentoView()
+const { ready, error: contextError } = useEstabelecimentoView()
 const { assinaturaId } = useNegocioContext()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()

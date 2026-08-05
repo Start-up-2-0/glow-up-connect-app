@@ -21,7 +21,6 @@ import ComissoesTipBanner from '@/components/financeiro/comissoes/ComissoesTipBa
 import ComissoesProfissionalCard from '@/components/financeiro/comissoes/ComissoesProfissionalCard.vue'
 import ComissoesAvisoBanner from '@/components/financeiro/comissoes/ComissoesAvisoBanner.vue'
 import StatsGrid, { type ClienteStat } from '@/components/dashboard/cliente/StatsGrid.vue'
-import { ROUTE_PATHS } from '@/constants/routes'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useNotificationsStore } from '@/stores/notifications.store'
