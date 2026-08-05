@@ -101,7 +101,9 @@ const categoriaId = ref<string>(props.initial.categoriaId ? String(props.initial
 const categoriaError = ref<string | null>(null)
 
 const categoriaOptions = computed(() =>
-  categorias.value.map((c) => ({ value: String(c.id), label: c.nome })),
+  categorias.value
+    .filter((c) => c.id === 1 || c.id === 2)
+    .map((c) => ({ value: String(c.id), label: c.nome })),
 )
 
 onMounted(async () => {

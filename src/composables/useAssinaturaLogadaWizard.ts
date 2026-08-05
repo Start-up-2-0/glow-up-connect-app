@@ -52,6 +52,7 @@ function emptyEstabelecimento(): OnboardingEstabelecimentoDraft {
     estado: '',
     complemento: '',
     logoDataUrl: null,
+    categoriaId: undefined,
   }
 }
 
@@ -100,6 +101,7 @@ function mapEstabelecimentoExistente(
     estado: endereco?.estado ?? '',
     complemento: endereco?.complemento ?? '',
     logoDataUrl: perfil?.logo ?? estabelecimento.logo,
+    categoriaId: perfil?.categoriaId ?? undefined,
   }
 }
 
@@ -282,6 +284,10 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       erro.value = 'Informe o nome do estabelecimento.'
       return
     }
+    if (!estabelecimento.categoriaId) {
+      erro.value = 'Selecione a categoria do estabelecimento.'
+      return
+    }
     if (!estabelecimento.logoDataUrl) {
       erro.value = 'Envie a logo do estabelecimento.'
       return
@@ -302,6 +308,7 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       telefone: telefoneToApi(estabelecimento.telefone),
       email: estabelecimento.email,
       logoDataUrl: estabelecimento.logoDataUrl,
+      categoriaId: estabelecimento.categoriaId,
     }
     draft.value.estabelecimentoId = null
     step.value = 'endereco'
@@ -445,6 +452,7 @@ export function useAssinaturaLogadaWizard(planoId: number) {
                 logo: draft.value.estabelecimento.logoDataUrl!,
                 telefone: telefoneToApi(draft.value.estabelecimento.telefone),
                 email: draft.value.estabelecimento.email.trim(),
+                categoriaId: draft.value.estabelecimento.categoriaId,
                 endereco: draftEnderecoToApi(draft.value.estabelecimento),
               },
             },

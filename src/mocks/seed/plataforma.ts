@@ -87,8 +87,6 @@ export const MOCK_PLANOS_RESPONSE: PlanosResponse = {
 export const MOCK_CATEGORIAS_ESTABELECIMENTO = [
   { id: 1, nome: 'Barbearia', slug: 'barbearia' },
   { id: 2, nome: 'Salão de Beleza', slug: 'salao-de-beleza' },
-  { id: 3, nome: 'Clínica de Estética', slug: 'clinica-de-estetica' },
-  { id: 4, nome: 'Esmalteria', slug: 'esmalteria' },
 ] as const
 
 export function mockCategoriasEstabelecimento() {
