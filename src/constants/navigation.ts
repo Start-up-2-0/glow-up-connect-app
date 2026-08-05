@@ -18,6 +18,8 @@ export interface NavChildItem extends NavGateMeta {
   label: string
   to?: string
   icon?: NavIconName
+  /** Badge/indicador exibido no item (ex.: 'Novo', contador). */
+  badge?: string
 }
 
 export interface NavItem extends NavGateMeta {
@@ -25,6 +27,7 @@ export interface NavItem extends NavGateMeta {
   label: string
   to?: string
   icon?: NavIconName
+  badge?: string
   children?: NavChildItem[]
 }
 
@@ -137,8 +140,8 @@ function childToNavItem(child: NavChildItem): NavItem {
 /** Menu operacional — roles de negócio (não Cliente), agrupado por seção */
 export const businessNavSections: NavSection[] = [
   {
-    id: 'sec-inicio',
-    label: 'Início',
+    id: 'sec-principal',
+    label: 'Principal',
     items: [
       {
         id: 'dashboard',
@@ -147,12 +150,6 @@ export const businessNavSections: NavSection[] = [
         icon: 'dashboard',
         requerAssinatura: false,
       },
-    ],
-  },
-  {
-    id: 'sec-agenda',
-    label: 'Agenda',
-    items: [
       {
         id: 'agenda',
         label: 'Agenda',
@@ -166,25 +163,39 @@ export const businessNavSections: NavSection[] = [
         label: 'Clientes',
         to: ROUTE_PATHS.CONFIG_CLIENTES,
         icon: 'team',
+        badge: 'Novo',
         requerModulo: 'Clientes',
         requerPermissao: 'ClienteVisualizarGeral',
       },
+      lojaNavItems.find((item) => item.id === 'servicos')!,
+      lojaNavItems.find((item) => item.id === 'profissionais-vitrine')!,
     ],
-  },
-  {
-    id: 'sec-loja',
-    label: 'Loja',
-    items: lojaNavItems,
   },
   {
     id: 'sec-financeiro',
     label: 'Financeiro',
-    items: financeiroNavChildren.map(childToNavItem),
+    items: [
+      ...financeiroNavChildren.map(childToNavItem),
+      lojaNavItems.find((item) => item.id === 'assinatura')!,
+      {
+        id: 'faturas',
+        label: 'Faturas',
+        to: ROUTE_PATHS.CONFIG_ASSINATURA_FATURAS,
+        icon: 'subscription',
+        requerModulo: 'Assinatura',
+        requerPermissao: 'NegocioEditar',
+        requerAssinatura: false,
+      },
+    ],
   },
   {
-    id: 'sec-conta',
-    label: 'Conta',
+    id: 'sec-configuracoes',
+    label: 'Configurações',
     items: [
+      lojaNavItems.find((item) => item.id === 'perfil-estabelecimento')!,
+      lojaNavItems.find((item) => item.id === 'equipe')!,
+      lojaNavItems.find((item) => item.id === 'horarios')!,
+      lojaNavItems.find((item) => item.id === 'whatsapp')!,
       {
         id: 'auditoria',
         label: 'Auditoria',
@@ -223,29 +234,22 @@ export const clienteNavSections: NavSection[] = [
     label: 'Agenda',
     items: [
       {
-        id: 'cliente-agenda',
-        label: 'Agendar e explorar',
+        id: 'inicio',
+        label: 'Início',
+        to: ROUTE_PATHS.DASHBOARD,
+        icon: 'home',
+      },
+      {
+        id: 'explorar',
+        label: 'Explorar lojas',
+        to: ROUTE_PATHS.EXPLORAR,
         icon: 'explore',
-        children: [
-          {
-            id: 'inicio',
-            label: 'Início',
-            to: ROUTE_PATHS.DASHBOARD,
-            icon: 'home',
-          },
-          {
-            id: 'explorar',
-            label: 'Explorar lojas',
-            to: ROUTE_PATHS.EXPLORAR,
-            icon: 'explore',
-          },
-          {
-            id: 'meus-agendamentos',
-            label: 'Meus agendamentos',
-            to: ROUTE_PATHS.MEUS_AGENDAMENTOS,
-            icon: 'calendar',
-          },
-        ],
+      },
+      {
+        id: 'meus-agendamentos',
+        label: 'Meus agendamentos',
+        to: ROUTE_PATHS.MEUS_AGENDAMENTOS,
+        icon: 'calendar',
       },
     ],
   },
@@ -254,23 +258,16 @@ export const clienteNavSections: NavSection[] = [
     label: 'Conta',
     items: [
       {
-        id: 'cliente-conta',
-        label: 'Minha conta',
+        id: 'perfil',
+        label: 'Meu perfil',
+        to: ROUTE_PATHS.PERFIL,
         icon: 'user',
-        children: [
-          {
-            id: 'perfil',
-            label: 'Meu perfil',
-            to: ROUTE_PATHS.PERFIL,
-            icon: 'user',
-          },
-          {
-            id: 'abrir-loja',
-            label: 'Abrir minha loja',
-            to: ROUTE_PATHS.ONBOARDING_PLANOS,
-            icon: 'store-open',
-          },
-        ],
+      },
+      {
+        id: 'abrir-loja',
+        label: 'Abrir minha loja',
+        to: ROUTE_PATHS.ONBOARDING_PLANOS,
+        icon: 'store-open',
       },
     ],
   },

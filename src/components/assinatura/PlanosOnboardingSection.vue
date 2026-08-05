@@ -27,7 +27,7 @@ const { resolveError } = useApiError()
 const erro = ref<string | null>(null)
 const comparativaAberta = ref(false)
 
-const planoEssencial = computed(() => planos.value.find((p) => p.nome === 'Essencial'))
+const planoBasico = computed(() => planos.value.find((p) => p.nome === 'Básico'))
 const exibirPromocaoTrial = computed(() => {
   if (!promocao.value?.disponivel) return false
   const jaTeveAssinatura = negocioStore.estabelecimentos.some((e) => Boolean(e.assinaturaId))
@@ -63,7 +63,7 @@ onMounted(async () => {
         v-for="plano in planos"
         :key="plano.id"
         :plano="plano"
-        :destacado="plano.id === planoEssencial?.id"
+        :destacado="plano.id === planoBasico?.id"
         :desabilitado="planos.length === 0"
         :modo-logado="modoLogado"
         :percentual-desconto="percentualDescontoPromocao"

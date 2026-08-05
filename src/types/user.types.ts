@@ -28,6 +28,8 @@ export function isClienteRole(role: UserRole | string | number | undefined): boo
   return normalizeUserRole(role) === USER_ROLE.CLIENTE
 }
 
+export type Sexo = 'Masculino' | 'Feminino'
+
 export interface User {
   id: number
   nome: string
@@ -39,6 +41,7 @@ export interface User {
   whatsAppConfirmado?: boolean
   whatsAppOptIn?: boolean
   whatsAppPendenteConfirmacao?: boolean
+  sexo?: Sexo | null
   createdAt?: string
   updatedAt?: string | null
 }
@@ -56,6 +59,7 @@ export interface CadastroPayload {
   email: string
   telefone: string
   senha: string
+  sexo?: Sexo | null
   avatarBase64?: string
   avatarContentType?: string
   captchaToken?: string
@@ -74,6 +78,7 @@ export interface CadastroResponse {
 export interface UpdateProfilePayload {
   nome?: string
   telefone?: string
+  sexo?: Sexo | null
   avatarBase64?: string | null
   avatarContentType?: string
 }

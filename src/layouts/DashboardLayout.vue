@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAppStore } from '@/stores/app.store'
-import AppSidebar from '@/components/layout/AppSidebar.vue'
+import Sidebar from '@/components/sidebar/Sidebar.vue'
 import UpgradeModal from '@/components/access/UpgradeModal.vue'
 
 const appStore = useAppStore()
@@ -8,7 +8,7 @@ const appStore = useAppStore()
 
 <template>
   <div class="dashboard-shell flex h-dvh min-h-0 overflow-hidden bg-glow-canvas">
-    <AppSidebar class="hidden h-dvh min-h-0 shrink-0 lg:flex" />
+    <Sidebar class="hidden h-dvh min-h-0 shrink-0 lg:flex" />
 
     <Transition
       enter-active-class="transition-opacity duration-200"
@@ -30,7 +30,7 @@ const appStore = useAppStore()
       enter-from-class="-translate-x-full"
       leave-to-class="-translate-x-full"
     >
-      <AppSidebar
+      <Sidebar
         v-if="appStore.sidebarOpen"
         mobile
         class="fixed inset-y-0 left-0 z-50 lg:hidden"

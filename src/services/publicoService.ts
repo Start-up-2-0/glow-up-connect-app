@@ -12,6 +12,7 @@ import type {
   ServicoPublico,
 } from '@/types/agendamento.types'
 import type {
+  EstabelecimentoCategoria,
   EstabelecimentoPublico,
   EstabelecimentosProximosResponse,
   ListarProximosParams,
@@ -46,6 +47,14 @@ export const publicoService = {
       .get<ApiSuccessResponse<EstabelecimentosProximosResponse>>(
         '/publico/estabelecimentos/proximos',
         { params },
+      )
+      .then(unwrap)
+  },
+
+  listarCategorias() {
+    return api
+      .get<ApiSuccessResponse<EstabelecimentoCategoria[]>>(
+        '/publico/estabelecimentos/categorias',
       )
       .then(unwrap)
   },

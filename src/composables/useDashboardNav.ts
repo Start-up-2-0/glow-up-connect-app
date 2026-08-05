@@ -44,6 +44,7 @@ function mergeNavSections(...groups: NavSection[][]): NavSection[] {
 
 function clienteNavSemAbrirLoja(items: NavItem[]): NavItem[] {
   return items
+    .filter((item) => item.id !== 'abrir-loja')
     .map((item) => {
       if (item.id !== 'cliente-conta' || !item.children?.length) return item
       const children = item.children.filter((child) => child.id !== 'abrir-loja')

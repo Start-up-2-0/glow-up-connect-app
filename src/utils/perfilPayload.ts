@@ -26,6 +26,7 @@ export function buildAtualizarPerfilPayload(
     telefone: patch.telefone ?? perfil.telefone,
     email: patch.email ?? perfil.email,
     logo: patch.logo ?? perfil.logo,
+    categoriaId: patch.categoriaId ?? perfil.categoriaId,
     endereco:
       patch.endereco ??
       (perfil.endereco ? enderecoPerfilToApi(perfil.endereco) : undefined),

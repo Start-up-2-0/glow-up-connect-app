@@ -6,6 +6,7 @@ export const STORAGE_KEYS = {
   THEME: 'guc_theme',
   THEME_VERSION: 'guc_theme_version',
   ESTABELECIMENTO_ID: 'guc_estabelecimento_id',
+  SIDEBAR_COLLAPSED: 'guc_sidebar_collapsed',
 } as const
 
 export const TOKEN_HEADER =

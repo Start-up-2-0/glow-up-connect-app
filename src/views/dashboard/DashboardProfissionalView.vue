@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import BaseButton from '@/components/ui/BaseButton.vue'
-import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader.vue'
-import DashboardKpiCard from '@/components/dashboard/DashboardKpiCard.vue'
-import DashboardQuickActions from '@/components/dashboard/DashboardQuickActions.vue'
-import DashboardPanel from '@/components/dashboard/DashboardPanel.vue'
+import { Calendar, CalendarCheck, Clock, Copy, Star } from 'lucide-vue-next'
+import DashboardGreeting from '@/components/dashboard/DashboardGreeting.vue'
+import StatsGrid, { type ClienteStat } from '@/components/dashboard/cliente/StatsGrid.vue'
+import QuickActions, { type ClienteQuickAction } from '@/components/dashboard/cliente/QuickActions.vue'
 import { useDashboardProfissionalData } from '@/composables/useDashboardProfissionalData'
 import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
 import { useNotificationsStore } from '@/stores/notifications.store'
@@ -36,11 +35,36 @@ const {
   load,
 } = useDashboardProfissionalData()
 
-const acoes = [
-  { id: 'agenda', label: 'Minha agenda', description: 'Horários marcados com você', icon: 'calendar' as const },
-  { id: 'horarios', label: 'Meus horários', description: 'Configure sua disponibilidade', icon: 'clock' as const },
-  { id: 'link', label: 'Copiar link', description: 'Compartilhe seu agendamento', icon: 'user' as const },
-]
+const primeiroNome = computed(() => profile.value?.nome?.split(' ')[0] ?? 'Profissional')
+const saudacao = computed(() => {
+  const hora = new Date().getHours()
+  return hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite'
+})
+
+const stats = computed<ClienteStat[]>(() => [
+  {
+    id: 'atendimentos',
+    label: 'Atendimentos no mês',
+    value: String(totalAtendimentos.value),
+    icon: CalendarCheck,
+    iconClass: 'bg-glow-gold-cta/15 text-glow-gold-cta',
+    hint: null,
+  },
+  {
+    id: 'nota',
+    label: 'Nota média',
+    value: notaMedia.value != null ? notaMedia.value.toFixed(1) : '—',
+    icon: Star,
+    iconClass: 'bg-amber-100 text-amber-600',
+    hint: totalAvaliacoes.value ? `${totalAvaliacoes.value} avaliações` : null,
+  },
+])
+
+const acoes = computed<ClienteQuickAction[]>(() => [
+  { id: 'agenda', label: 'Minha agenda', description: 'Horários marcados com você', icon: Calendar },
+  { id: 'horarios', label: 'Meus horários', description: 'Configure sua disponibilidade', icon: Clock },
+  { id: 'link', label: 'Copiar link', description: 'Compartilhe seu agendamento', icon: Copy },
+])
 
 async function carregar() {
   const ativo = estabelecimentoAtivo.value
@@ -67,109 +91,111 @@ async function copiarLink() {
 }
 
 onMounted(() => void carregar())
-
-watch(
-  () => estabelecimentoAtivo.value?.estabelecimentoId,
-  () => void carregar(),
-)
+watch(() => estabelecimentoAtivo.value?.estabelecimentoId, () => void carregar())
 </script>
 
 <template>
-  <div class="dashboard-page">
-    <DashboardPageHeader
-      title="Seu painel profissional"
+  <div class="mx-auto max-w-[1200px]">
+    <DashboardGreeting
+      :title="`${saudacao}, ${primeiroNome}`"
       :subtitle="`Acompanhe sua rotina em ${estabelecimentoAtivo?.nome ?? 'sua loja'}`"
+      eyebrow="Painel profissional"
+      :loading="loading"
     >
       <template #actions>
-        <BaseButton variant="secondary" @click="router.push(ROUTE_PATHS.AGENDA)">
+        <button type="button" class="cliente-btn-cta" @click="router.push(ROUTE_PATHS.AGENDA)">
           Minha agenda
-        </BaseButton>
+        </button>
       </template>
-    </DashboardPageHeader>
+    </DashboardGreeting>
 
-    <div class="dashboard-kpi-grid dashboard-kpi-grid--hero">
-      <DashboardKpiCard
-        class="dashboard-kpi-grid__main"
-        label="Atendimentos no mês"
-        :value="String(totalAtendimentos)"
-        hint="Total realizado no período"
-        icon="calendar"
-        variant="gold"
-        :loading="loading"
-      />
-      <DashboardKpiCard
-        label="Nota média"
-        :value="notaMedia != null ? notaMedia.toFixed(1) : '—'"
-        :hint="totalAvaliacoes ? `${totalAvaliacoes} avaliação(ões)` : 'Sem avaliações'"
-        icon="star"
-        :loading="loading"
-      />
+    <div class="mt-6">
+      <StatsGrid :items="stats" :loading="loading" />
     </div>
 
-    <DashboardQuickActions title="Ações rápidas" :actions="acoes" @action="onAcao" />
+    <div class="mt-6">
+      <QuickActions :actions="acoes" @action="onAcao" />
+    </div>
 
-    <div v-if="linkAgendamentoPublico" class="dashboard-link-card">
-      <p class="dashboard-link-card__label">Link de agendamento</p>
-      <p class="dashboard-link-card__url">{{ linkAgendamentoPublico }}</p>
-      <BaseButton variant="secondary" size="sm" @click="copiarLink">
+    <div v-if="linkAgendamentoPublico" class="mt-6 flex flex-col items-start gap-3 rounded-2xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm sm:flex-row sm:items-center sm:justify-between">
+      <div class="min-w-0">
+        <p class="font-urbanist text-[11px] font-semibold uppercase tracking-wider text-glow-text-soft">Link de agendamento</p>
+        <p class="truncate font-urbanist text-[13px] text-glow-text-subtle">{{ linkAgendamentoPublico }}</p>
+      </div>
+      <button type="button" class="cliente-btn-outline shrink-0" @click="copiarLink">
         {{ linkCopiado ? 'Copiado!' : 'Copiar link' }}
-      </BaseButton>
+      </button>
     </div>
 
-    <div class="dashboard-two-col">
-      <DashboardPanel
-        title="Últimos atendimentos"
-        subtitle="Sua rotina recente"
-        link-label="Ver agenda"
-        :loading="loading"
-        :empty="!loading && ultimosAtendimentos.length === 0"
-        empty-title="Nenhum atendimento recente"
-        empty-description="Seus atendimentos aparecerão aqui conforme forem realizados."
-        @link="router.push(ROUTE_PATHS.AGENDA)"
-      >
-        <ul class="dashboard-activity-list">
-          <li
-            v-for="item in ultimosAtendimentos"
-            :key="item.agendamentoItemId"
-            class="dashboard-activity-list__row"
-          >
-            <div class="dashboard-activity-list__main">
-              <p class="dashboard-activity-list__title">{{ item.clienteNome }}</p>
-              <p class="dashboard-activity-list__meta">
-                {{ item.servicoNome }} · {{ formatDate(item.inicio) }} {{ formatTime(item.inicio) }}
-              </p>
-            </div>
-            <AgendamentoStatusBadge :status="item.status" />
-          </li>
-        </ul>
-      </DashboardPanel>
+    <div class="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-12">
+      <div class="lg:col-span-6">
+        <section class="biz-list">
+          <div class="mb-3 flex items-center justify-between">
+            <h2 class="font-urbanist text-[16px] font-bold text-glow-text">Últimos atendimentos</h2>
+            <button type="button" class="font-urbanist text-[13px] font-semibold text-glow-gold-cta hover:underline" @click="router.push(ROUTE_PATHS.AGENDA)">Ver agenda</button>
+          </div>
+          <div v-if="loading" class="flex flex-col gap-2">
+            <span v-for="i in 3" :key="i" class="h-12 animate-pulse rounded-xl bg-glow-canvas" />
+          </div>
+          <p v-else-if="ultimosAtendimentos.length === 0" class="py-6 text-center font-urbanist text-[13px] text-glow-text-subtle">
+            Seus atendimentos aparecerão aqui conforme forem realizados.
+          </p>
+          <ul v-else class="flex flex-col gap-1">
+            <li v-for="item in ultimosAtendimentos" :key="item.agendamentoItemId" class="biz-row">
+              <div class="min-w-0 flex-1">
+                <p class="truncate font-urbanist text-[13px] font-semibold text-glow-text">{{ item.clienteNome }}</p>
+                <p class="truncate font-urbanist text-[12px] text-glow-text-subtle">
+                  {{ item.servicoNome }} · {{ formatDate(item.inicio) }} {{ formatTime(item.inicio) }}
+                </p>
+              </div>
+              <AgendamentoStatusBadge :status="item.status" />
+            </li>
+          </ul>
+        </section>
+      </div>
 
-      <DashboardPanel
-        title="Últimas avaliações"
-        subtitle="Feedback dos seus clientes"
-        :loading="loading"
-        :empty="!loading && ultimasAvaliacoes.length === 0"
-        empty-title="Nenhuma avaliação ainda"
-        empty-description="As avaliações recebidas aparecerão aqui."
-      >
-        <ul class="dashboard-activity-list">
-          <li
-            v-for="av in ultimasAvaliacoes"
-            :key="av.id"
-            class="dashboard-activity-list__row dashboard-activity-list__row--stacked"
-          >
-            <div class="dashboard-activity-list__main">
-              <p class="dashboard-activity-list__title">
-                ★ {{ av.notaProfissional }} · {{ av.clienteNome }}
-              </p>
-              <p v-if="av.comentarioProfissional" class="dashboard-activity-list__meta">
-                {{ av.comentarioProfissional }}
-              </p>
-              <p class="dashboard-activity-list__meta">{{ formatDate(av.avaliadoEm) }}</p>
-            </div>
-          </li>
-        </ul>
-      </DashboardPanel>
+      <div class="lg:col-span-6">
+        <section class="biz-list">
+          <h2 class="mb-3 font-urbanist text-[16px] font-bold text-glow-text">Últimas avaliações</h2>
+          <div v-if="loading" class="flex flex-col gap-2">
+            <span v-for="i in 3" :key="i" class="h-12 animate-pulse rounded-xl bg-glow-canvas" />
+          </div>
+          <p v-else-if="ultimasAvaliacoes.length === 0" class="py-6 text-center font-urbanist text-[13px] text-glow-text-subtle">
+            As avaliações recebidas aparecerão aqui.
+          </p>
+          <ul v-else class="flex flex-col gap-1">
+            <li v-for="av in ultimasAvaliacoes" :key="av.id" class="biz-row biz-row--stacked">
+              <p class="font-urbanist text-[13px] font-semibold text-glow-text">★ {{ av.notaProfissional }} · {{ av.clienteNome }}</p>
+              <p v-if="av.comentarioProfissional" class="font-urbanist text-[12px] text-glow-text-subtle">{{ av.comentarioProfissional }}</p>
+              <p class="font-urbanist text-[11px] text-glow-text-soft">{{ formatDate(av.avaliadoEm) }}</p>
+            </li>
+          </ul>
+        </section>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.biz-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid var(--glow-border-soft);
+  background: var(--glow-surface);
+  box-shadow: 0 8px 24px -14px rgba(82, 46, 95, 0.14);
+}
+.biz-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 14px;
+  transition: background 0.2s ease;
+}
+.biz-row:hover {
+  background: color-mix(in srgb, var(--glow-text) 5%, transparent);
+}
+</style>

@@ -35,6 +35,8 @@ export interface EstabelecimentoOnboarding {
   logo: string
   telefone?: string
   email?: string
+  /** Categoria do estabelecimento (id do catálogo de categorias). */
+  categoriaId?: number
   endereco: EnderecoOnboarding
 }
 

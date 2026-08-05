@@ -10,12 +10,14 @@ import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useNegocioStore } from '@/stores/negocio.store'
+import { publicoService } from '@/services/publicoService'
 import { estabelecimentoPerfilService } from '@/services/estabelecimentoPerfilService'
 import type { EnderecoFormFields } from '@/types/endereco.types'
-import type { EstabelecimentoPerfilCompleto } from '@/types/estabelecimento.types'
+import type { EstabelecimentoCategoria, EstabelecimentoPerfilCompleto } from '@/types/estabelecimento.types'
 import { emptyEnderecoFormFields } from '@/types/endereco.types'
 import { labelModulos } from '@/utils/moduloLabels'
 import { formatEnderecoOnboarding, telefoneLocalFromApi } from '@/utils/formatters'
@@ -41,6 +43,17 @@ const basicoError = ref<string | null>(null)
 const nomeDraft = ref('')
 const logoDraft = ref<string | null>(null)
 const logoError = ref<string | null>(null)
+const categorias = ref<EstabelecimentoCategoria[]>([])
+const categoriaIdDraft = ref('')
+const categoriaOptions = computed(() => categorias.value.map((c) => ({ value: String(c.id), label: c.nome })))
+
+async function carregarCategorias() {
+  try {
+    categorias.value = await publicoService.listarCategorias()
+  } catch {
+    categorias.value = []
+  }
+}
 
 const editingEndereco = ref(false)
 const savingEndereco = ref(false)
@@ -84,12 +97,13 @@ async function copiarLinkPublico() {
   try {
     await navigator.clipboard.writeText(linkPublico.value)
     notifications.push('success', 'Link copiado para a área de transferência!')
-  } catch (err) {
+  } catch {
     notifications.push('error', 'Não foi possível copiar o link.')
   }
 }
 
 async function carregarPerfil() {
+  void carregarCategorias()
   if (!estabelecimentoId.value) return
   loadingPerfil.value = true
   loadError.value = null
@@ -105,6 +119,7 @@ async function carregarPerfil() {
 function iniciarEdicaoBasico() {
   nomeDraft.value = nomeExibido.value
   logoDraft.value = perfil.value?.logo ?? estabelecimentoAtivo.value?.logo ?? null
+  categoriaIdDraft.value = perfil.value?.categoriaId ? String(perfil.value.categoriaId) : ''
   logoError.value = null
   basicoError.value = null
   editingBasico.value = true
@@ -149,6 +164,7 @@ async function salvarBasico() {
       buildAtualizarPerfilPayload(perfil.value, {
         nome,
         logo: logoDraft.value,
+        categoriaId: categoriaIdDraft.value ? Number(categoriaIdDraft.value) : undefined,
       }),
     )
     perfil.value = atualizado
@@ -292,6 +308,12 @@ watch(
               label="Nome da loja"
               placeholder="Ex.: Studio Glow Beauty"
               autocomplete="organization"
+            />
+            <BaseSelect
+              v-model="categoriaIdDraft"
+              label="Categoria do estabelecimento"
+              :options="categoriaOptions"
+              placeholder="Selecione a categoria"
             />
           </div>
 

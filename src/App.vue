@@ -10,6 +10,7 @@ import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import PublicLayout from '@/layouts/PublicLayout.vue'
 import AgendarPublicoLayout from '@/layouts/AgendarPublicoLayout.vue'
 import ToastContainer from '@/components/feedback/ToastContainer.vue'
+import GlobalLoader from '@/components/loading/GlobalLoader.vue'
 import CookieConsentBanner from '@/components/legal/CookieConsentBanner.vue'
 import CookiePreferencesModal from '@/components/legal/CookiePreferencesModal.vue'
 import { useConsent } from '@/composables/useConsent'
@@ -54,6 +55,7 @@ const routerViewKey = computed(() => {
     <router-view :key="routerViewKey" />
   </component>
   <ToastContainer />
+  <GlobalLoader />
   <CookieConsentBanner v-if="showBanner" />
   <CookiePreferencesModal />
 </template>

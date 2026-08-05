@@ -6,6 +6,7 @@ export interface OnboardingUsuarioDraft {
   email: string
   contaCriada: boolean
   emailConfirmado: boolean
+  sexo?: '' | 'Masculino' | 'Feminino'
 }
 
 export interface OnboardingEstabelecimentoDraft {
@@ -21,6 +22,8 @@ export interface OnboardingEstabelecimentoDraft {
   estado: string
   complemento: string
   logoDataUrl: string | null
+  /** Categoria do estabelecimento (id do catálogo). Obrigatória antes de avançar. */
+  categoriaId?: number
 }
 
 export interface OnboardingAssinaturaDraft {

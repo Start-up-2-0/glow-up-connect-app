@@ -5,6 +5,13 @@ export interface EnderecoResumo {
   estado: string
 }
 
+/** Catálogo de categorias de estabelecimento (extensível). */
+export interface EstabelecimentoCategoria {
+  id: number
+  nome: string
+  slug?: string
+}
+
 export interface EstabelecimentoProximo {
   publicGuid: string
   nome: string
@@ -15,6 +22,8 @@ export interface EstabelecimentoProximo {
   destaqueMarketplace?: boolean
   notaMedia?: number
   totalAvaliacoes?: number
+  categoriaId?: number
+  categoria?: string
 }
 
 export interface EstabelecimentosProximosResponse {
@@ -37,6 +46,8 @@ export interface EstabelecimentoPublico {
   abertoAgora?: boolean
   horarioAbertura?: string
   horarioFechamento?: string
+  categoriaId?: number
+  categoria?: string
 }
 
 export interface ListarProximosParams {
@@ -45,6 +56,8 @@ export interface ListarProximosParams {
   raioKm?: number
   pagina?: number
   tamanhoPagina?: number
+  /** Filtro por categoria de estabelecimento. */
+  categoriaId?: number
 }
 
 export interface EnderecoPerfil {
@@ -69,6 +82,8 @@ export interface EstabelecimentoPerfilCompleto {
   whatsAppConfirmado?: boolean
   whatsAppOptIn?: boolean
   whatsAppPendenteConfirmacao?: boolean
+  categoriaId?: number
+  categoria?: string
   endereco: EnderecoPerfil | null
 }
 
@@ -78,6 +93,7 @@ export interface AtualizarEstabelecimentoPerfilPayload {
   descricao?: string
   telefone?: string
   email?: string
+  categoriaId?: number
   endereco?: {
     cep: string
     logradouro: string

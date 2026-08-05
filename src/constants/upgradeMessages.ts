@@ -5,11 +5,11 @@ export interface UpgradeInfo {
 
 export const UPGRADE_BY_MODULO: Record<string, UpgradeInfo> = {
   Profissionais: {
-    planoMinimo: 'Essencial',
+    planoMinimo: 'Básico',
     mensagem: 'Convide sua equipe com o plano Essencial',
   },
   WhatsApp: {
-    planoMinimo: 'Essencial',
+    planoMinimo: 'Básico',
     mensagem: 'Alertas automáticos no WhatsApp',
   },
   Clientes: {
@@ -33,7 +33,7 @@ export const UPGRADE_BY_MODULO: Record<string, UpgradeInfo> = {
 export function getUpgradeInfo(modulo: string): UpgradeInfo {
   return (
     UPGRADE_BY_MODULO[modulo] ?? {
-      planoMinimo: 'Essencial',
+      planoMinimo: 'Básico',
       mensagem: 'Este recurso não está disponível no seu plano atual.',
     }
   )

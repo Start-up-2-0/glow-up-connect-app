@@ -1,0 +1,151 @@
+<script setup lang="ts">
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { ChevronDown, ChevronsUpDown, Store } from 'lucide-vue-next'
+import { useNegocioStore } from '@/stores/negocio.store'
+import { useTrocarEstabelecimento } from '@/composables/useTrocarEstabelecimento'
+import UserAvatar from '@/components/layout/UserAvatar.vue'
+import SidebarTooltip from './SidebarTooltip.vue'
+
+defineProps<{ collapsed?: boolean }>()
+
+const negocioStore = useNegocioStore()
+const { trocarEstabelecimento, trocandoEstabelecimento } = useTrocarEstabelecimento()
+const { estabelecimentos, estabelecimentoAtivo, loading } = storeToRefs(negocioStore)
+
+const open = ref(false)
+const triggerEl = ref<HTMLElement | null>(null)
+const popoverStyle = ref({ left: '0px', top: '0px', width: '0px' })
+
+const planoLabel = computed(() => estabelecimentoAtivo.value?.planoNome ?? 'Plano Profissional')
+
+function toggle() {
+  if (!open.value && triggerEl.value) {
+    const r = triggerEl.value.getBoundingClientRect()
+    popoverStyle.value = {
+      left: `${r.left}px`,
+      top: `${r.bottom + 8}px`,
+      width: `${r.width}px`,
+    }
+  }
+  open.value = !open.value
+}
+
+async function select(id: number) {
+  open.value = false
+  await trocarEstabelecimento(id)
+}
+
+function onDocumentClick(event: MouseEvent) {
+  const target = event.target as Node
+  if (triggerEl.value?.contains(target)) return
+  open.value = false
+}
+
+onMounted(() => document.addEventListener('click', onDocumentClick))
+onUnmounted(() => document.removeEventListener('click', onDocumentClick))
+</script>
+
+<template>
+  <div class="relative">
+    <!-- Recolhida: apenas avatar + tooltip -->
+    <button
+      v-if="collapsed"
+      ref="triggerEl"
+      type="button"
+      class="group relative flex size-11 items-center justify-center rounded-xl border border-glow-border-soft bg-glow-surface transition-all duration-200 hover:border-glow-gold-cta/40"
+      :aria-label="estabelecimentoAtivo?.nome ?? 'Empresa'"
+      @click.stop="toggle"
+    >
+      <UserAvatar
+        :src="estabelecimentoAtivo?.logo || null"
+        :name="estabelecimentoAtivo?.nome"
+        size="sm"
+        aria-hidden="true"
+      />
+      <SidebarTooltip :label="estabelecimentoAtivo?.nome ?? 'Empresa'" />
+    </button>
+
+    <!-- Expandida: card -->
+    <button
+      v-else
+      ref="triggerEl"
+      type="button"
+      class="sb-workspace group flex w-full items-center gap-3 rounded-2xl border border-glow-border-soft bg-glow-surface p-3 text-left transition-all duration-200 hover:border-glow-gold-cta/40 hover:shadow-glow-sm"
+      :aria-expanded="open"
+      :aria-label="`Empresa ${estabelecimentoAtivo?.nome ?? ''} — trocar`"
+      @click.stop="toggle"
+    >
+      <span class="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-glow-canvas">
+        <UserAvatar
+          :src="estabelecimentoAtivo?.logo || null"
+          :name="estabelecimentoAtivo?.nome"
+          size="sm"
+          aria-hidden="true"
+        />
+      </span>
+      <span class="min-w-0 flex-1">
+        <span class="block truncate font-urbanist text-sm font-semibold text-glow-text">
+          {{ estabelecimentoAtivo?.nome ?? 'Selecione a loja' }}
+        </span>
+        <span class="flex items-center gap-1 font-urbanist text-xs font-medium text-glow-gold-cta">
+          <span class="size-1.5 rounded-full bg-glow-success" aria-hidden="true" />
+          {{ planoLabel }}
+        </span>
+      </span>
+      <ChevronDown
+        :size="16"
+        class="shrink-0 text-glow-text-subtle transition-transform duration-200"
+        :class="open ? 'rotate-180' : ''"
+      />
+    </button>
+
+    <!-- Popover (Teleport para fora do overflow-hidden da sidebar) -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition-all duration-200 ease-out"
+        enter-from-class="opacity-0 -translate-y-1"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition-all duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-1"
+      >
+        <div
+          v-if="open"
+          class="fixed z-[60] min-w-[240px] overflow-hidden rounded-2xl border border-glow-border-soft bg-glow-surface p-1.5 shadow-glow-sm"
+          :style="popoverStyle"
+          role="menu"
+          @click.stop
+        >
+          <p class="px-3 py-2 font-urbanist text-[11px] font-semibold uppercase tracking-wider text-glow-text-soft">
+            Trocar empresa
+          </p>
+          <button
+            v-for="est in estabelecimentos"
+            :key="est.estabelecimentoId"
+            type="button"
+            class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left font-urbanist text-sm transition-colors hover:bg-glow-surface-tint"
+            :class="est.estabelecimentoId === estabelecimentoAtivo?.estabelecimentoId ? 'text-glow-text font-semibold' : 'text-glow-text-subtle'"
+            role="menuitem"
+            :disabled="trocandoEstabelecimento || loading"
+            @click="select(est.estabelecimentoId)"
+          >
+            <UserAvatar :src="est.logo || null" :name="est.nome" size="xs" aria-hidden="true" />
+            <span class="min-w-0 flex-1 truncate">{{ est.nome }}</span>
+            <ChevronsUpDown v-if="est.estabelecimentoId === estabelecimentoAtivo?.estabelecimentoId" :size="14" class="shrink-0 text-glow-gold-cta" />
+          </button>
+          <p v-if="estabelecimentos.length === 0" class="px-3 py-2 font-urbanist text-xs text-glow-text-subtle">
+            <Store :size="14" class="mr-1 inline" /> Nenhuma loja disponível.
+          </p>
+        </div>
+      </Transition>
+    </Teleport>
+  </div>
+</template>
+
+<style scoped>
+.sb-workspace:focus-visible {
+  outline: 2px solid var(--glow-gold-cta);
+  outline-offset: 2px;
+}
+</style>

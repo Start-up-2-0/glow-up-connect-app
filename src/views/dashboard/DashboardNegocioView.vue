@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia'
 import { RouterLink } from 'vue-router'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import TrialStatusBanner from '@/components/assinatura/TrialStatusBanner.vue'
-import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader.vue'
+import DashboardGreeting from '@/components/dashboard/DashboardGreeting.vue'
 import DashboardKpiCard from '@/components/dashboard/DashboardKpiCard.vue'
 import DashboardQuickActions from '@/components/dashboard/DashboardQuickActions.vue'
 import DashboardPanel from '@/components/dashboard/DashboardPanel.vue'
@@ -55,7 +55,7 @@ async function copiarLinkPublico() {
   try {
     await navigator.clipboard.writeText(linkPublico.value)
     notifications.push('success', 'Link copiado para a área de transferência!')
-  } catch (err) {
+  } catch {
     notifications.push('error', 'Não foi possível copiar o link.')
   }
 }
@@ -89,6 +89,11 @@ const headerMeta = computed(() => {
   const parts = [roleExibicao.value]
   if (planoNome.value) parts.unshift(planoNome.value)
   return parts.join(' · ')
+})
+
+const saudacao = computed(() => {
+  const hora = new Date().getHours()
+  return hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite'
 })
 
 const acoes = computed(() => [
@@ -130,10 +135,11 @@ watch(
 
 <template>
   <div class="dashboard-page dashboard-page--negocio">
-    <DashboardPageHeader
-      compact
-      :title="estabelecimentoAtivo?.nome ?? 'Painel do negócio'"
-      :meta="headerMeta"
+    <DashboardGreeting
+      :title="`${saudacao} em ${estabelecimentoAtivo?.nome ?? 'sua loja'}`"
+      subtitle="Visão geral do desempenho da sua loja hoje."
+      :eyebrow="headerMeta"
+      :loading="loading"
     >
       <template #actions>
         <BaseButton variant="secondary" size="lg" @click="copiarLinkPublico">
@@ -145,7 +151,7 @@ watch(
           Ver agenda
         </BaseButton>
       </template>
-    </DashboardPageHeader>
+    </DashboardGreeting>
 
     <TrialStatusBanner
       v-if="

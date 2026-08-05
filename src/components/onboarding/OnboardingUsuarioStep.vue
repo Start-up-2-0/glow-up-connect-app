@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import AuthRecaptcha from '@/components/auth/AuthRecaptcha.vue'
+import SegmentedControl from '@/components/ui/SegmentedControl.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import {
   AGENDAR_BTN_CONTINUE_CLASS,
@@ -32,6 +33,7 @@ const emit = defineEmits<{
       confirmarEmail: string
       senha: string
       confirmarSenha: string
+      sexo?: 'Masculino' | 'Feminino'
       avatarBase64?: string
       avatarContentType?: string
       captchaToken?: string
@@ -51,7 +53,13 @@ const confirmarSenha = ref('')
 const mostrarSenha = ref(false)
 const mostrarConfirmarSenha = ref(false)
 const avatarFile = ref<File | null>(null)
+const sexo = ref<'' | 'Masculino' | 'Feminino'>('')
 const captchaError = ref('')
+
+const SEXO_OPTIONS = [
+  { value: 'Masculino', label: 'Masculino' },
+  { value: 'Feminino', label: 'Feminino' },
+]
 
 const FIELD_KEYS = {
   nome: ['Nome', 'nome'],
@@ -92,6 +100,7 @@ async function handleSubmit() {
     confirmarEmail: confirmarEmail.value,
     senha: senha.value,
     confirmarSenha: confirmarSenha.value,
+    sexo: sexo.value || undefined,
   } as {
     nome: string
     telefone: string
@@ -99,6 +108,7 @@ async function handleSubmit() {
     confirmarEmail: string
     senha: string
     confirmarSenha: string
+    sexo?: 'Masculino' | 'Feminino'
     avatarBase64?: string
     avatarContentType?: string
     captchaToken?: string
@@ -148,6 +158,11 @@ async function handleSubmit() {
           <p v-if="getFieldError(...FIELD_KEYS.nome)" class="text-sm text-red-600">
             {{ getFieldError(...FIELD_KEYS.nome) }}
           </p>
+        </div>
+
+        <div class="flex flex-col gap-2 sm:col-span-2">
+          <span :class="GLOW_LABEL_CLASS">Sexo</span>
+          <SegmentedControl v-model="sexo" :options="SEXO_OPTIONS" aria-label="Sexo" />
         </div>
 
         <TelefoneInput

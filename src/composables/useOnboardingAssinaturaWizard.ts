@@ -48,6 +48,7 @@ function emptyEstabelecimento(): OnboardingEstabelecimentoDraft {
     estado: '',
     complemento: '',
     logoDataUrl: null,
+    categoriaId: undefined,
   }
 }
 
@@ -181,6 +182,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     confirmarEmail: string
     senha: string
     confirmarSenha: string
+    sexo?: 'Masculino' | 'Feminino'
     avatarBase64?: string
     avatarContentType?: string
     captchaToken?: string
@@ -230,6 +232,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
         email: payload.email.trim(),
         telefone: telefoneApi,
         senha: payload.senha,
+        sexo: payload.sexo ?? null,
         avatarBase64: payload.avatarBase64,
         avatarContentType: payload.avatarContentType,
         captchaToken: payload.captchaToken,
@@ -386,6 +389,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
           logo: negocio.logoDataUrl!,
           telefone: telefoneToApi(negocio.telefone),
           email: negocio.email.trim(),
+          categoriaId: negocio.categoriaId ?? undefined,
           endereco,
         },
         gateway: 'MercadoPago',

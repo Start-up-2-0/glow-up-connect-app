@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
@@ -11,9 +11,14 @@ import {
   CLIENTE_BTN_OUTLINE_CLASS,
   CLIENTE_PAGE_DIVIDER_CLASS,
 } from '@/constants/designTokens'
-import type { EstabelecimentoProximo } from '@/types/estabelecimento.types'
+import type {
+  EstabelecimentoCategoria,
+  EstabelecimentoProximo,
+} from '@/types/estabelecimento.types'
 
 const RAIO_KM = 10
+/** Chave de persistência dos filtros do Explorar (estrutura extensível p/ futuros filtros). */
+const FILTROS_KEY = 'guc_explorar_filtros'
 
 const { coords, loading: geoLoading, errorMessage, request } = useGeolocation()
 const { resolveError } = useApiError()
@@ -26,6 +31,14 @@ const pagina = ref(1)
 const loading = ref(false)
 const loadingMore = ref(false)
 const error = ref<string | null>(null)
+
+const categorias = ref<EstabelecimentoCategoria[]>([])
+const categoriaSelecionada = ref<string>('')
+
+const categoriaOptions = computed(() => [
+  { value: '', label: 'Todas' },
+  ...categorias.value.map((c) => ({ value: String(c.id), label: c.nome })),
+])
 
 const subtituloLocal = computed(() => {
   if (cidade.value && estado.value) return `Estabelecimentos em ${cidade.value}, ${estado.value}`
@@ -54,6 +67,9 @@ async function carregar(reset = false) {
       raioKm: RAIO_KM,
       pagina: pagina.value,
       tamanhoPagina: 20,
+      categoriaId: categoriaSelecionada.value
+        ? Number(categoriaSelecionada.value)
+        : undefined,
     })
     cidade.value = data.cidade
     estado.value = data.estado
@@ -79,7 +95,46 @@ async function handleLoadMore() {
 
 const hasMore = () => itens.value.length < total.value
 
+async function carregarCategorias() {
+  try {
+    categorias.value = await publicoService.listarCategorias()
+  } catch {
+    categorias.value = []
+  }
+}
+
+function lerFiltroPersistido() {
+  try {
+    const raw = localStorage.getItem(FILTROS_KEY)
+    const parsed = raw ? (JSON.parse(raw) as Record<string, string>) : {}
+    categoriaSelecionada.value = String(parsed.categoriaId ?? '')
+  } catch {
+    categoriaSelecionada.value = ''
+  }
+}
+
+function persistirFiltro() {
+  const filtros: Record<string, string> = {
+    ...(JSON.parse(localStorage.getItem(FILTROS_KEY) ?? '{}') as Record<string, string>),
+    categoriaId: categoriaSelecionada.value,
+  }
+  localStorage.setItem(FILTROS_KEY, JSON.stringify(filtros))
+}
+
+// Troca de filtro → persiste e recarrega do topo.
+watch(categoriaSelecionada, () => {
+  persistirFiltro()
+  void carregar(true)
+})
+
+function selecionarCategoria(value: string) {
+  if (categoriaSelecionada.value === value) return
+  categoriaSelecionada.value = value
+}
+
 onMounted(async () => {
+  lerFiltroPersistido()
+  void carregarCategorias()
   await carregar(true)
 })
 </script>
@@ -124,6 +179,22 @@ onMounted(async () => {
         </button>
       </div>
     </header>
+
+    <!-- Filtro por categoria (extensível p/ outros filtros) -->
+    <div class="mt-5 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filtrar por categoria">
+      <button
+        v-for="opt in categoriaOptions"
+        :key="opt.value"
+        type="button"
+        role="tab"
+        :aria-selected="categoriaSelecionada === opt.value"
+        class="explorar-chip"
+        :class="categoriaSelecionada === opt.value ? 'explorar-chip--active' : ''"
+        @click="selecionarCategoria(opt.value)"
+      >
+        {{ opt.label }}
+      </button>
+    </div>
 
     <div
       :class="CLIENTE_PAGE_DIVIDER_CLASS"
@@ -176,3 +247,36 @@ onMounted(async () => {
     </template>
   </div>
 </template>
+
+<style scoped>
+.explorar-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border-radius: 9999px;
+  border: 1px solid var(--glow-border-soft);
+  background: var(--glow-surface);
+  color: var(--glow-text-subtle);
+  font-family: 'Urbanist', ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.explorar-chip:hover {
+  background: var(--glow-surface-tint);
+  color: var(--glow-text);
+}
+.explorar-chip:focus-visible {
+  outline: 2px solid var(--glow-gold-cta);
+  outline-offset: 2px;
+}
+.explorar-chip--active {
+  background: var(--glow-gold-cta);
+  border-color: var(--glow-gold-cta);
+  color: #fff;
+  box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--glow-gold-cta) 55%, transparent);
+}
+</style>

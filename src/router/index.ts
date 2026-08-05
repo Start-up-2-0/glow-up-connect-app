@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { APP_NAME } from '@/constants/storageKeys'
+import { useLoadingStore } from '@/stores/loading.store'
 import { authGuard } from './guards/auth.guard'
 import { negocioGuard } from './guards/negocio.guard'
 import { authRoutes } from './routes/auth.routes'
@@ -34,15 +35,25 @@ const router = createRouter({
   },
 })
 
+// Loading global de navegação: mostra ao iniciar e esconde quando resolver (ou errar).
+router.beforeEach(() => {
+  useLoadingStore().navigationStart('Preparando sua experiência...')
+  return true
+})
 router.beforeEach(authGuard)
 router.beforeEach(negocioGuard)
 
 router.afterEach((to) => {
+  useLoadingStore().navigationEnd()
   const title = to.meta.title as string | undefined
   document.title = title ? `${title} | ${APP_NAME}` : APP_NAME
   if (!to.hash) {
     window.scrollTo(0, 0)
   }
+})
+
+router.onError(() => {
+  useLoadingStore().navigationEnd()
 })
 
 export default router

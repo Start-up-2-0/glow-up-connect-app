@@ -2,6 +2,7 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUserStore } from '@/stores/user.store'
+import { useAppStore } from '@/stores/app.store'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { useNegocioStore } from '@/stores/negocio.store'
 import type { LoginPayload } from '@/types/auth.types'
@@ -22,6 +23,9 @@ export function useAuth() {
 
   async function logout() {
     await authStore.logout()
+    // O tema vale apenas enquanto o usuário está logado: no logout reseta p/ claro
+    // e remove a escolha do cache do navegador.
+    useAppStore().resetTheme()
     await router.push(ROUTE_PATHS.LOGIN)
   }
 

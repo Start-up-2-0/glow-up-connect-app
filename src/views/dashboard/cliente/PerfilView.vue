@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
+import SegmentedControl from '@/components/ui/SegmentedControl.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
@@ -48,7 +49,11 @@ const { resolveError } = useApiError()
 
 const activeTab = ref<PerfilTabId>('informacoes')
 
-const form = reactive({ nome: '', telefone: '' })
+const form = reactive({ nome: '', telefone: '', sexo: '' as '' | 'Masculino' | 'Feminino' })
+const SEXO_OPTIONS = [
+  { value: 'Masculino', label: 'Masculino' },
+  { value: 'Feminino', label: 'Feminino' },
+]
 const passwordForm = reactive({ senha: '', confirmarSenha: '' })
 const avatarFile = ref<File | null>(null)
 const avatarRemoved = ref(false)
@@ -99,7 +104,8 @@ const isProfileDirty = computed(() => {
   if (avatarFile.value || avatarRemoved.value) return true
   return (
     form.nome.trim() !== profile.value.nome ||
-    telefoneToApi(form.telefone) !== (profile.value.telefone ?? '')
+    telefoneToApi(form.telefone) !== (profile.value.telefone ?? '') ||
+    form.sexo !== (profile.value?.sexo ?? '')
   )
 })
 
@@ -134,6 +140,7 @@ function syncFormFromProfile() {
   if (!profile.value) return
   form.nome = profile.value.nome
   form.telefone = telefoneLocalFromApi(profile.value.telefone)
+  form.sexo = profile.value?.sexo ?? ''
   avatarFile.value = null
   avatarRemoved.value = false
   notificacoes.whatsapp = profile.value.whatsAppOptIn ?? true
@@ -168,6 +175,7 @@ async function handleSaveProfile() {
     const payload: UpdateProfilePayload = {
       nome: form.nome.trim(),
       telefone: telefoneToApi(form.telefone),
+      sexo: form.sexo || null,
     }
 
     if (avatarRemoved.value) {
@@ -346,6 +354,11 @@ async function handleSolicitarWhatsApp() {
                       :show-ddi-prefix="false"
                       hint="Formato: +55 (DDD) número"
                     />
+
+                    <div class="flex flex-col gap-1.5">
+                      <span class="text-sm font-medium text-glow-text">Sexo</span>
+                      <SegmentedControl v-model="form.sexo" :options="SEXO_OPTIONS" aria-label="Sexo" />
+                    </div>
 
                     <div class="perfil-email-field">
                       <label class="perfil-email-field__label">E-mail</label>

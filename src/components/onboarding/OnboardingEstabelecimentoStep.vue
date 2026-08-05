@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import EnderecoForm from '@/components/form/EnderecoForm.vue'
+import { publicoService } from '@/services/publicoService'
+import type { EstabelecimentoCategoria } from '@/types/estabelecimento.types'
 import OnboardingContratarFormActions from '@/components/onboarding/OnboardingContratarFormActions.vue'
 import {
   AGENDAR_BTN_CONTINUE_CLASS,
@@ -93,12 +96,28 @@ const logoDataUrl = ref<string | null>(props.initial.logoDataUrl)
 const logoError = ref<string | null>(null)
 const enderecoError = ref<string | null>(null)
 
+const categorias = ref<EstabelecimentoCategoria[]>([])
+const categoriaId = ref<string>(props.initial.categoriaId ? String(props.initial.categoriaId) : '')
+const categoriaError = ref<string | null>(null)
+
+const categoriaOptions = computed(() =>
+  categorias.value.map((c) => ({ value: String(c.id), label: c.nome })),
+)
+
+onMounted(async () => {
+  try {
+    categorias.value = await publicoService.listarCategorias()
+  } catch {
+    categorias.value = []
+  }
+})
+
 const shellClass = computed(() => {
   if (isContratar.value && !props.embedded) return ONBOARDING_CONTRATAR_CARD_CLASS
   return isPublic.value ? 'space-y-6' : ''
 })
 
-const alertMessage = computed(() => props.errorMessage || logoError.value || enderecoError.value)
+const alertMessage = computed(() => props.errorMessage || logoError.value || enderecoError.value || categoriaError.value)
 
 async function onLogoChange(file: File | null) {
   logoError.value = null
@@ -115,6 +134,7 @@ async function onLogoChange(file: File | null) {
 
 function handleSubmit() {
   enderecoError.value = null
+  categoriaError.value = null
 
   if (isContratar.value) {
     const validationError = validateEnderecoForSubmit(endereco.value)
@@ -122,6 +142,12 @@ function handleSubmit() {
       enderecoError.value = validationError
       return
     }
+  }
+
+  // Categoria do estabelecimento é obrigatória.
+  if (!categoriaId.value) {
+    categoriaError.value = 'Selecione a categoria do estabelecimento.'
+    return
   }
 
   emit('submit', {
@@ -137,6 +163,7 @@ function handleSubmit() {
     estado: estado.value,
     complemento: complemento.value,
     logoDataUrl: logoDataUrl.value,
+    categoriaId: Number(categoriaId.value),
   })
 }
 </script>
@@ -210,6 +237,20 @@ function handleSubmit() {
           />
         </div>
 
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label :for="`${fieldIdPrefix}-categoria`" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
+            Categoria do estabelecimento
+          </label>
+          <BaseSelect
+            :id="`${fieldIdPrefix}-categoria`"
+            v-model="categoriaId"
+            :options="categoriaOptions"
+            placeholder="Selecione a categoria"
+            :error="categoriaError ?? undefined"
+            required
+          />
+        </div>
+
         <AuthAvatarUpload
           label="Logo do estabelecimento"
           variant="contratar"
@@ -277,6 +318,18 @@ function handleSubmit() {
               type="text"
               placeholder="Opcional — breve apresentação do negócio"
               :class="GLOW_INPUT_CLASS"
+            />
+          </div>
+
+          <div class="flex flex-col gap-2 sm:col-span-2">
+            <label :for="`${fieldIdPrefix}-categoria`" :class="GLOW_LABEL_CLASS">Categoria do estabelecimento</label>
+            <BaseSelect
+              :id="`${fieldIdPrefix}-categoria`"
+              v-model="categoriaId"
+              :options="categoriaOptions"
+              placeholder="Selecione a categoria"
+              :error="categoriaError ?? undefined"
+              required
             />
           </div>
 

@@ -5,6 +5,7 @@ import registerCrest from '@/assets/logo/logo_original.png'
 import AuthSplashPanel from '@/components/auth/AuthSplashPanel.vue'
 import AuthMobileBrand from '@/components/auth/AuthMobileBrand.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
+import SegmentedControl from '@/components/ui/SegmentedControl.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import { userService } from '@/services/userService'
 import { useApiError } from '@/composables/useApiError'
@@ -46,6 +47,11 @@ const aceitoTermos = ref(false)
 
 const nome = ref('')
 const telefone = ref('')
+const sexo = ref<'' | 'Masculino' | 'Feminino'>('')
+const SEXO_OPTIONS = [
+  { value: 'Masculino', label: 'Masculino' },
+  { value: 'Feminino', label: 'Feminino' },
+]
 const email = ref('')
 const confirmarEmail = ref('')
 const senha = ref('')
@@ -131,6 +137,7 @@ async function handleSubmit() {
       email: string
       telefone: string
       senha: string
+      sexo?: 'Masculino' | 'Feminino'
       avatarBase64?: string
       avatarContentType?: string
       captchaToken?: string
@@ -139,6 +146,7 @@ async function handleSubmit() {
       email: email.value.trim(),
       telefone: telefoneToApi(telefone.value),
       senha: senha.value,
+      sexo: sexo.value || undefined,
     }
 
     if (avatarFile.value) {
@@ -263,6 +271,12 @@ function onAvatarError(message: string) {
                 <p v-if="getFieldError(...FIELD_KEYS.nome)" class="text-sm text-red-600">
                   {{ getFieldError(...FIELD_KEYS.nome) }}
                 </p>
+              </div>
+
+              <!-- Sexo -->
+              <div class="flex flex-col gap-1.5 sm:col-span-2">
+                <span class="font-satoshi text-sm font-medium text-glow-text">Sexo</span>
+                <SegmentedControl v-model="sexo" :options="SEXO_OPTIONS" aria-label="Sexo" />
               </div>
 
               <!-- Telefone -->
