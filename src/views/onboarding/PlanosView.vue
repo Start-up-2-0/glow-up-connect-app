@@ -33,15 +33,16 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
-    <div class="mb-8 text-center">
-      <h1 class="font-satoshi text-2xl font-bold text-glow-text lg:text-3xl">
+  <div class="mx-auto w-full max-w-6xl space-y-8 pb-4">
+    <header class="mx-auto max-w-2xl text-center">
+      <h1 class="font-satoshi text-3xl font-bold tracking-tight text-glow-text sm:text-4xl">
         Escolha o plano ideal
       </h1>
-      <p class="mt-2 text-glow-text-subtle">
-        Contrate a plataforma para o seu estabelecimento sem sair da sua conta.
+      <p class="mt-3 font-urbanist text-sm leading-relaxed text-glow-text-subtle sm:text-base">
+        Contrate a plataforma para o seu estabelecimento sem sair da sua conta. Comece grátis e
+        evolua quando precisar.
       </p>
-    </div>
+    </header>
 
     <PlanosOnboardingSection modo-logado />
   </div>
