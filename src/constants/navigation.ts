@@ -31,22 +31,22 @@ export interface NavItem extends NavGateMeta {
   children?: NavChildItem[]
 }
 
-/** Agrupamento visual da sidebar — ex.: Agenda, Loja, Financeiro, Conta */
+/** Agrupamento visual da sidebar — Gestão, Financeiro, Configurações, etc. */
 export interface NavSection {
   id: string
   label: string
   items: NavItem[]
 }
 
-export const SIDEBAR_WIDTH_EXPANDED = 272
-export const SIDEBAR_WIDTH_COLLAPSED = 99
+export const SIDEBAR_WIDTH_EXPANDED = 280
+export const SIDEBAR_WIDTH_COLLAPSED = 72
 
 const financeiroNavChildren: NavChildItem[] = [
   {
     id: 'financeiro-resumo',
-    label: 'Visão geral',
+    label: 'Dashboard',
     to: ROUTE_PATHS.FINANCEIRO,
-    icon: 'dashboard',
+    icon: 'finance',
     requerModulo: 'Financeiro',
     requerPermissao: 'CaixaVisualizar',
   },
@@ -60,61 +60,29 @@ const financeiroNavChildren: NavChildItem[] = [
   },
 ]
 
-const lojaNavItems: NavItem[] = [
+const financeiroNavItem: NavItem = {
+  id: 'financeiro',
+  label: 'Financeiro',
+  icon: 'finance',
+  requerModulos: ['Caixa', 'Financeiro'],
+  requerPermissao: 'CaixaVisualizar',
+  children: financeiroNavChildren,
+}
+
+const assinaturaNavChildren: NavChildItem[] = [
   {
-    id: 'perfil-estabelecimento',
-    label: 'Dados da loja',
-    to: ROUTE_PATHS.CONFIG_PERFIL,
-    icon: 'building',
-    requerModulo: 'Estabelecimento',
+    id: 'assinatura-plano',
+    label: 'Plano',
+    to: ROUTE_PATHS.CONFIG_ASSINATURA,
+    icon: 'subscription',
+    requerModulo: 'Assinatura',
     requerPermissao: 'NegocioEditar',
     requerAssinatura: false,
   },
   {
-    id: 'profissionais-vitrine',
-    label: 'Profissionais',
-    to: ROUTE_PATHS.CONFIG_PROFISSIONAIS_VITRINE,
-    icon: 'team',
-    requerModulo: 'HorariosAtendimento',
-    requerSemModulo: 'Profissionais',
-    requerPermissao: 'ProfissionalGerenciar',
-  },
-  {
-    id: 'equipe',
-    label: 'Equipe',
-    to: ROUTE_PATHS.CONFIG_EQUIPE,
-    icon: 'team',
-    requerModulo: 'Profissionais',
-    requerPermissao: 'EquipeGerenciar',
-  },
-  {
-    id: 'servicos',
-    label: 'Serviços',
-    to: ROUTE_PATHS.SERVICOS,
-    icon: 'services',
-    requerModulo: 'Servicos',
-    requerPermissoes: ['ServicoVisualizar', 'ServicoGerenciar'],
-  },
-  {
-    id: 'horarios',
-    label: 'Horários',
-    to: ROUTE_PATHS.CONFIG_HORARIOS,
-    icon: 'clock',
-    requerModulo: 'HorariosAtendimento',
-    requerPermissao: 'HorarioGerenciar',
-  },
-  {
-    id: 'whatsapp',
-    label: 'WhatsApp',
-    to: ROUTE_PATHS.CONFIG_WHATSAPP,
-    icon: 'whatsapp',
-    requerModulo: 'WhatsApp',
-    requerPermissao: 'NegocioEditar',
-  },
-  {
-    id: 'assinatura',
-    label: 'Planos e assinatura',
-    to: ROUTE_PATHS.CONFIG_ASSINATURA,
+    id: 'assinatura-faturas',
+    label: 'Faturas',
+    to: ROUTE_PATHS.CONFIG_ASSINATURA_FATURAS,
     icon: 'subscription',
     requerModulo: 'Assinatura',
     requerPermissao: 'NegocioEditar',
@@ -122,26 +90,21 @@ const lojaNavItems: NavItem[] = [
   },
 ]
 
-function childToNavItem(child: NavChildItem): NavItem {
-  return {
-    id: child.id,
-    label: child.label,
-    to: child.to,
-    icon: child.icon,
-    requerModulo: child.requerModulo,
-    requerModulos: child.requerModulos,
-    requerSemModulo: child.requerSemModulo,
-    requerPermissao: child.requerPermissao,
-    requerPermissoes: child.requerPermissoes,
-    requerAssinatura: child.requerAssinatura,
-  }
+const assinaturaNavItem: NavItem = {
+  id: 'assinatura',
+  label: 'Assinatura',
+  icon: 'subscription',
+  requerModulo: 'Assinatura',
+  requerPermissao: 'NegocioEditar',
+  requerAssinatura: false,
+  children: assinaturaNavChildren,
 }
 
-/** Menu operacional — roles de negócio (não Cliente), agrupado por seção */
+/** Menu operacional — loja / negócio */
 export const businessNavSections: NavSection[] = [
   {
-    id: 'sec-principal',
-    label: 'Principal',
+    id: 'sec-gestao',
+    label: 'Gestão',
     items: [
       {
         id: 'dashboard',
@@ -167,35 +130,78 @@ export const businessNavSections: NavSection[] = [
         requerModulo: 'Clientes',
         requerPermissao: 'ClienteVisualizarGeral',
       },
-      lojaNavItems.find((item) => item.id === 'servicos')!,
-      lojaNavItems.find((item) => item.id === 'profissionais-vitrine')!,
+      {
+        id: 'profissionais-vitrine',
+        label: 'Profissionais',
+        to: ROUTE_PATHS.CONFIG_PROFISSIONAIS_VITRINE,
+        icon: 'team',
+        requerModulo: 'HorariosAtendimento',
+        requerSemModulo: 'Profissionais',
+        requerPermissao: 'ProfissionalGerenciar',
+      },
+      {
+        id: 'servicos',
+        label: 'Serviços',
+        to: ROUTE_PATHS.SERVICOS,
+        icon: 'services',
+        requerModulo: 'Servicos',
+        requerPermissoes: ['ServicoVisualizar', 'ServicoGerenciar'],
+      },
     ],
   },
   {
     id: 'sec-financeiro',
     label: 'Financeiro',
     items: [
-      ...financeiroNavChildren.map(childToNavItem),
-      lojaNavItems.find((item) => item.id === 'assinatura')!,
-      {
-        id: 'faturas',
-        label: 'Faturas',
-        to: ROUTE_PATHS.CONFIG_ASSINATURA_FATURAS,
-        icon: 'subscription',
-        requerModulo: 'Assinatura',
-        requerPermissao: 'NegocioEditar',
-        requerAssinatura: false,
-      },
+      financeiroNavItem,
+      assinaturaNavItem,
     ],
   },
   {
     id: 'sec-configuracoes',
     label: 'Configurações',
     items: [
-      lojaNavItems.find((item) => item.id === 'perfil-estabelecimento')!,
-      lojaNavItems.find((item) => item.id === 'equipe')!,
-      lojaNavItems.find((item) => item.id === 'horarios')!,
-      lojaNavItems.find((item) => item.id === 'whatsapp')!,
+      {
+        id: 'perfil',
+        label: 'Perfil',
+        to: ROUTE_PATHS.PERFIL,
+        icon: 'user',
+        requerAssinatura: false,
+      },
+      {
+        id: 'perfil-estabelecimento',
+        label: 'Minha loja',
+        to: ROUTE_PATHS.CONFIG_PERFIL,
+        icon: 'building',
+        requerModulo: 'Estabelecimento',
+        requerPermissao: 'NegocioEditar',
+        requerAssinatura: false,
+      },
+      {
+        id: 'equipe',
+        label: 'Equipe',
+        to: ROUTE_PATHS.CONFIG_EQUIPE,
+        icon: 'team',
+        requerModulo: 'Profissionais',
+        requerPermissao: 'EquipeGerenciar',
+      },
+      {
+        id: 'horarios',
+        label: 'Horários',
+        to: ROUTE_PATHS.CONFIG_HORARIOS,
+        icon: 'clock',
+        requerModulo: 'HorariosAtendimento',
+        requerPermissao: 'HorarioGerenciar',
+      },
+      {
+        id: 'whatsapp',
+        label: 'Integrações',
+        to: ROUTE_PATHS.CONFIG_WHATSAPP,
+        icon: 'whatsapp',
+        badge: 'Beta',
+        requerModulo: 'WhatsApp',
+        requerPermissao: 'NegocioEditar',
+      },
       {
         id: 'auditoria',
         label: 'Auditoria',
@@ -206,7 +212,7 @@ export const businessNavSections: NavSection[] = [
       },
       {
         id: 'privacidade',
-        label: 'Privacidade e dados',
+        label: 'Preferências',
         to: ROUTE_PATHS.CONFIG_PRIVACIDADE,
         icon: 'user',
         requerAssinatura: false,
@@ -218,20 +224,11 @@ export const businessNavSections: NavSection[] = [
 /** @deprecated Lista plana derivada das seções — compatibilidade */
 export const businessNavItems: NavItem[] = businessNavSections.flatMap((section) => section.items)
 
-const financeiroNavItem: NavItem = {
-  id: 'financeiro',
-  label: 'Financeiro',
-  icon: 'finance',
-  requerModulos: ['Caixa', 'Financeiro'],
-  requerPermissao: 'CaixaVisualizar',
-  children: financeiroNavChildren,
-}
-
-/** Menu do cliente final — ver docs/acesso/cliente.md */
+/** Menu do cliente final */
 export const clienteNavSections: NavSection[] = [
   {
-    id: 'sec-agenda',
-    label: 'Agenda',
+    id: 'sec-explorar',
+    label: 'Agendar e explorar',
     items: [
       {
         id: 'inicio',
@@ -259,7 +256,7 @@ export const clienteNavSections: NavSection[] = [
     items: [
       {
         id: 'perfil',
-        label: 'Meu perfil',
+        label: 'Perfil',
         to: ROUTE_PATHS.PERFIL,
         icon: 'user',
       },
@@ -278,39 +275,32 @@ export const clienteNavItems: NavItem[] = clienteNavSections.flatMap((section) =
 /** Menu operacional exclusivo da role Profissional na loja */
 export const profissionalNavSections: NavSection[] = [
   {
-    id: 'sec-agenda',
-    label: 'Agenda',
+    id: 'sec-trabalho',
+    label: 'Trabalho',
     items: [
       {
-        id: 'meu-trabalho',
-        label: 'Meu trabalho',
+        id: 'agenda',
+        label: 'Minha agenda',
+        to: ROUTE_PATHS.AGENDA,
         icon: 'calendar',
-        children: [
-          {
-            id: 'agenda',
-            label: 'Minha agenda',
-            to: ROUTE_PATHS.AGENDA,
-            icon: 'calendar',
-            requerModulo: 'Agenda',
-            requerPermissao: 'AgendaVisualizarPropria',
-          },
-          {
-            id: 'meus-horarios',
-            label: 'Meus horários',
-            to: ROUTE_PATHS.CONFIG_HORARIOS,
-            icon: 'clock',
-            requerModulo: 'HorariosAtendimento',
-            requerPermissao: 'HorarioGerenciarProprio',
-          },
-          {
-            id: 'meus-servicos',
-            label: 'Meus serviços',
-            to: ROUTE_PATHS.SERVICOS,
-            icon: 'services',
-            requerModulo: 'Servicos',
-            requerPermissao: 'ServicoVisualizar',
-          },
-        ],
+        requerModulo: 'Agenda',
+        requerPermissao: 'AgendaVisualizarPropria',
+      },
+      {
+        id: 'meus-horarios',
+        label: 'Meus horários',
+        to: ROUTE_PATHS.CONFIG_HORARIOS,
+        icon: 'clock',
+        requerModulo: 'HorariosAtendimento',
+        requerPermissao: 'HorarioGerenciarProprio',
+      },
+      {
+        id: 'meus-servicos',
+        label: 'Meus serviços',
+        to: ROUTE_PATHS.SERVICOS,
+        icon: 'services',
+        requerModulo: 'Servicos',
+        requerPermissao: 'ServicoVisualizar',
       },
     ],
   },
@@ -318,13 +308,13 @@ export const profissionalNavSections: NavSection[] = [
 
 export const profissionalNavItems: NavItem[] = profissionalNavSections.flatMap((section) => section.items)
 
-export const NAV_SEARCH_PLACEHOLDER_PROFISSIONAL = 'Agenda, horários, serviços...'
+export const NAV_SEARCH_PLACEHOLDER_PROFISSIONAL = 'Buscar agenda, horários, serviços…'
 
 export const NAV_SEARCH_PLACEHOLDER_BUSINESS =
-  'Agenda, serviços, equipe, financeiro...'
+  'Buscar agenda, clientes, serviços, financeiro…'
 
 export const NAV_SEARCH_PLACEHOLDER_CLIENTE =
-  'Explorar lojas, agendamentos, perfil...'
+  'Buscar lojas, agendamentos, perfil…'
 
 /** @deprecated Use getNavSearchPlaceholder(role) */
 export const NAV_SEARCH_PLACEHOLDER = NAV_SEARCH_PLACEHOLDER_BUSINESS
@@ -337,5 +327,4 @@ export function getNavSearchPlaceholder(role: UserRole | string | number | undef
   return isClienteRole(role) ? NAV_SEARCH_PLACEHOLDER_CLIENTE : NAV_SEARCH_PLACEHOLDER_BUSINESS
 }
 
-// Referência para docs legados
 export { financeiroNavItem }
