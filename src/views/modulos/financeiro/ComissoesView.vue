@@ -1,16 +1,26 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
+import {
+  CalendarDays,
+  Download,
+  Plus,
+  Target,
+  Users,
+  Wallet,
+} from 'lucide-vue-next'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
-import FinanceiroPageHeader from '@/components/financeiro/FinanceiroPageHeader.vue'
-import FinanceiroKpiCard from '@/components/financeiro/FinanceiroKpiCard.vue'
 import FinanceiroEmptyState from '@/components/financeiro/FinanceiroEmptyState.vue'
 import FinanceiroConfirmDialog from '@/components/financeiro/FinanceiroConfirmDialog.vue'
 import ComissaoFormModal from '@/components/financeiro/ComissaoFormModal.vue'
 import MetaFormModal from '@/components/financeiro/MetaFormModal.vue'
 import ProfissionalMetaDetailModal from '@/components/financeiro/ProfissionalMetaDetailModal.vue'
-import { FINANCEIRO_PAGE_CLASS } from '@/constants/designTokens'
+import ComissoesPageHeader from '@/components/financeiro/comissoes/ComissoesPageHeader.vue'
+import ComissoesTabs from '@/components/financeiro/comissoes/ComissoesTabs.vue'
+import ComissoesTipBanner from '@/components/financeiro/comissoes/ComissoesTipBanner.vue'
+import ComissoesProfissionalCard from '@/components/financeiro/comissoes/ComissoesProfissionalCard.vue'
+import ComissoesAvisoBanner from '@/components/financeiro/comissoes/ComissoesAvisoBanner.vue'
+import StatsGrid, { type ClienteStat } from '@/components/dashboard/cliente/StatsGrid.vue'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
@@ -28,6 +38,7 @@ import type {
 } from '@/types/negocio/caixa.types'
 import type { ProfissionalEquipe } from '@/types/negocio/equipe.types'
 import { formatCurrency } from '@/utils/formatters'
+import '@/components/assinatura/page/assinaturaPage.css'
 
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
@@ -43,8 +54,9 @@ const abaInicial = (() => {
   return 'acompanhamento'
 })()
 const aba = ref(abaInicial)
+const tipAcompanhamentoVisivel = ref(true)
+const tipMetasVisivel = ref(true)
 
-// Comissões (Regras)
 const comissoes = ref<ComissaoProfissional[]>([])
 const profissionais = ref<ProfissionalEquipe[]>([])
 const formModalOpen = ref(false)
@@ -52,7 +64,6 @@ const confirmDesativarOpen = ref(false)
 const comissaoEditando = ref<ComissaoProfissional | null>(null)
 const comissaoDesativarId = ref<number | null>(null)
 
-// Metas
 const metas = ref<Meta[]>([])
 const progresso = ref<MetaProgressoProfissional[]>([])
 const metaFormModalOpen = ref(false)
@@ -62,8 +73,7 @@ const metaDesativarId = ref<number | null>(null)
 const metaFiltro = ref('todas')
 const metaBusca = ref('')
 
-// Acompanhamento
-const mesFiltro = ref(new Date().getMonth() + 1) // 1-12
+const mesFiltro = ref(new Date().getMonth() + 1)
 const anoFiltro = ref(new Date().getFullYear())
 const profissionalDetalhe = ref<MetaProgressoProfissional | null>(null)
 const metaDetalhe = ref<Meta | null>(null)
@@ -86,28 +96,58 @@ const metasFiltradas = computed(() => {
   return lista
 })
 
-// Indicadores
 const metasAtivasCount = computed(() => metas.value.filter((m) => m.ativa).length)
 const profissionaisCount = computed(() => {
   const unique = new Set(progresso.value.map((p) => p.profissionalEstabelecimentoId))
-  return unique.size
+  return unique.size || profissionais.value.filter((p) => p.ativo).length
 })
 
 const proximoFechamento = computed(() => {
-  const hoje = new Date()
-  const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0)
-  return ultimoDia.toLocaleDateString('pt-BR')
+  const base = new Date(anoFiltro.value, mesFiltro.value, 0)
+  return base.toLocaleDateString('pt-BR')
 })
 
-const abaOptions = computed(() => {
-  const opts: Array<{ value: string; label: string }> = []
-  opts.push({ value: 'acompanhamento', label: '📊 Acompanhamento' })
-  if (podeGerenciar.value) {
-    opts.push({ value: 'metas', label: `🎯 Metas (${metas.value.length})` })
-    opts.push({ value: 'regras', label: `💰 Regras (${comissoes.value.length})` })
-  }
-  return opts
-})
+const totalEstimado = computed(() =>
+  progresso.value.reduce((acc, p) => {
+    if (p.valorRealizado == null || p.valorRealizado <= 0) return acc
+    return acc + (p.valorRealizado * p.percentualComissao) / 100
+  }, 0),
+)
+
+const stats = computed<ClienteStat[]>(() => [
+  {
+    id: 'metas',
+    label: 'Metas ativas',
+    value: String(metasAtivasCount.value),
+    icon: Target,
+    iconClass: 'bg-glow-gold-cta/15 text-glow-gold-cta',
+    hint: 'Em andamento',
+  },
+  {
+    id: 'profissionais',
+    label: 'Profissionais',
+    value: String(profissionaisCount.value),
+    icon: Users,
+    iconClass: 'bg-glow-success-bg text-glow-success-dark',
+    hint: 'Com comissões ativas',
+  },
+  {
+    id: 'fechamento',
+    label: 'Próx. fechamento',
+    value: proximoFechamento.value,
+    icon: CalendarDays,
+    iconClass: 'bg-glow-info-bg text-glow-info',
+    hint: 'Fim do mês',
+  },
+  {
+    id: 'total',
+    label: 'Total a pagar (estimado)',
+    value: formatCurrency(totalEstimado.value),
+    icon: Wallet,
+    iconClass: 'bg-amber-100 text-amber-700',
+    hint: 'Este mês',
+  },
+])
 
 const filtroMetaOptions = [
   { value: 'todas', label: 'Todas' },
@@ -130,7 +170,11 @@ const mesOptions = [
   { value: 12, label: 'Dezembro' },
 ]
 
-// --- Loaders ---
+const tipAcompanhamento =
+  'As metas são verificadas automaticamente a cada recebimento. O progresso é calculado com base nos agendamentos concluídos do período selecionado.'
+
+const tipMetas =
+  'As metas são verificadas automaticamente a cada recebimento. Quando um profissional atingir o objetivo, a comissão considera a maior entre a regra normal e a comissão da meta.'
 
 async function loadRegras() {
   if (!estabelecimentoId.value || !podeGerenciar.value) return
@@ -173,9 +217,17 @@ async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
   try {
-    if (aba.value === 'regras') await loadRegras()
-    else if (aba.value === 'metas') await loadMetas()
-    else if (aba.value === 'acompanhamento') await loadProgresso()
+    if (aba.value === 'regras') {
+      await Promise.all([loadRegras(), loadMetas()])
+    } else if (aba.value === 'metas') {
+      await Promise.all([loadMetas(), loadRegras().catch(() => undefined)])
+    } else {
+      await Promise.all([
+        loadProgresso(),
+        loadMetas(),
+        podeGerenciar.value ? loadRegras() : Promise.resolve(),
+      ])
+    }
     await loadProfissionais()
   } catch (err) {
     notifications.push('error', resolveError(err))
@@ -183,8 +235,6 @@ async function load() {
     loading.value = false
   }
 }
-
-// --- Handlers Comissões ---
 
 function formatComissao(c: ComissaoProfissional): string {
   if (c.percentual !== null) return `${c.percentual}%`
@@ -246,13 +296,11 @@ async function confirmarPausar() {
   }
 }
 
-// --- Handlers Metas ---
-
 function formatTipoMeta(tipo: string): string {
   const labels: Record<string, string> = {
-    Atendimentos: '📋 Qtd. atendimentos',
-    Faturamento: '💰 Valor faturado',
-    Mista: '🎯 Mista',
+    Atendimentos: 'Qtd. atendimentos',
+    Faturamento: 'Valor faturado',
+    Mista: 'Meta mista',
   }
   return labels[tipo] ?? tipo
 }
@@ -262,21 +310,9 @@ function formatValorMeta(m: Meta): string {
   return formatCurrency(m.valorMeta)
 }
 
-function progressBarClass(percentual: number): string {
-  if (percentual >= 100) return 'bg-green-500'
-  if (percentual >= 80) return 'bg-yellow-500'
-  return 'bg-glow-gold'
-}
-
-function progressBarTextClass(percentual: number): string {
-  if (percentual >= 100) return 'text-green-700'
-  if (percentual >= 80) return 'text-yellow-700'
-  return 'text-glow-text'
-}
-
 function statusClass(ativa: boolean): string {
   return ativa
-    ? 'bg-green-100 text-green-800'
+    ? 'bg-glow-success-bg text-glow-success-dark'
     : 'bg-glow-canvas text-glow-text-subtle'
 }
 
@@ -334,247 +370,198 @@ async function confirmarDesativarMeta() {
   }
 }
 
-// --- Handlers Acompanhamento ---
-
 function abrirPosicaoFiltro() {
-  // month picker handler - recarrega progresso on change
   void loadProgresso()
 }
 
 function abrirDetalheProfissional(p: MetaProgressoProfissional) {
   profissionalDetalhe.value = p
-  metaDetalhe.value = metas.value.find(
-    (m) => m.nome === p.metaNome,
-  ) ?? null
+  metaDetalhe.value = metas.value.find((m) => m.nome === p.metaNome) ?? null
   detalheModalOpen.value = true
 }
 
-function formatRealizado(p: MetaProgressoProfissional): string {
-  if (p.tipoMeta === 'Atendimentos') return String(p.quantidadeRealizada ?? 0)
-  return formatCurrency(p.valorRealizado ?? 0)
-}
-
-function formatAlvo(p: MetaProgressoProfissional): string {
-  if (p.tipoMeta === 'Atendimentos') return String(p.valorMeta)
-  return formatCurrency(p.valorMeta)
-}
-
-function formatRestante(p: MetaProgressoProfissional): string {
-  if (p.atingida) return 'Meta concluída!'
-  if (p.tipoMeta === 'Atendimentos') {
-    const resto = Math.max(0, p.valorMeta - (p.quantidadeRealizada ?? 0))
-    return `Faltam ${resto} atendimento${resto !== 1 ? 's' : ''}`
+function exportarRelatorio() {
+  if (progresso.value.length === 0) {
+    notifications.push('info', 'Não há dados para exportar neste período.')
+    return
   }
-  const resto = Math.max(0, p.valorMeta - (p.valorRealizado ?? 0))
-  return `Faltam ${formatCurrency(resto)}`
+  const header = [
+    'Profissional',
+    'Meta',
+    'Tipo',
+    'Alvo',
+    'Realizado',
+    'Progresso%',
+    'Comissao%',
+    'Atingida',
+  ]
+  const rows = progresso.value.map((p) => {
+    const realizado =
+      p.tipoMeta === 'Atendimentos'
+        ? String(p.quantidadeRealizada ?? 0)
+        : String(p.valorRealizado ?? 0)
+    return [
+      p.nomePublico,
+      p.metaNome,
+      p.tipoMeta,
+      p.valorMeta,
+      realizado,
+      p.percentualProgresso,
+      p.percentualComissao,
+      p.atingida ? 'Sim' : 'Nao',
+    ]
+      .map((v) => `"${String(v).replaceAll('"', '""')}"`)
+      .join(',')
+  })
+  const blob = new Blob([[header.join(','), ...rows].join('\n')], {
+    type: 'text/csv;charset=utf-8;',
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `comissoes-${anoFiltro.value}-${String(mesFiltro.value).padStart(2, '0')}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+  notifications.push('success', 'Relatório exportado.')
 }
 
-watch(ready, (isReady) => {
-  if (isReady) {
-    void load()
-  }
-}, { immediate: true })
+watch(
+  ready,
+  (isReady) => {
+    if (isReady) void load()
+  },
+  { immediate: true },
+)
 
 watch(aba, () => void load())
 </script>
 
 <template>
-  <div :class="FINANCEIRO_PAGE_CLASS">
-    <!-- Header -->
-    <FinanceiroPageHeader
-      title="Comissões"
-      subtitle="Acompanhe o desempenho dos profissionais, gerencie metas e regras de comissão."
-      :back-to="ROUTE_PATHS.FINANCEIRO"
-    />
-
-    <!-- KPI Cards -->
-    <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-      <FinanceiroKpiCard
-        label="Metas ativas"
-        :value="String(metasAtivasCount)"
-        accent="gold"
-      />
-      <FinanceiroKpiCard
-        label="Profissionais"
-        :value="String(profissionaisCount)"
-        accent="blue"
-      />
-      <FinanceiroKpiCard
-        label="Próx. fechamento"
-        :value="proximoFechamento"
-        accent="neutral"
-        hint="Fim do mês"
-      />
-    </div>
-
-    <!-- Tabs + Actions Row -->
-    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div class="flex flex-wrap items-center gap-3">
-        <div class="financeiro-segmented">
-          <button
-            v-for="opt in abaOptions"
-            :key="opt.value"
-            type="button"
-            class="financeiro-segmented__btn whitespace-nowrap"
-            :class="{ 'financeiro-segmented__btn--active': aba === opt.value }"
-            @click="aba = opt.value"
-          >
-            {{ opt.label }}
-          </button>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <template v-if="podeGerenciar">
-          <button
-            v-if="aba === 'metas' && podeGerenciarMeta"
-            type="button"
-            class="financeiro-btn-primary flex items-center gap-1.5"
-            @click="abrirNovaMeta"
-          >
-            <span class="text-base leading-none">+</span>
-            Criar meta
-          </button>
-          <button
-            v-if="aba === 'regras'"
-            type="button"
-            class="financeiro-btn-primary flex items-center gap-1.5"
-            @click="abrirNovaComissao"
-          >
-            <span class="text-base leading-none">+</span>
-            Nova regra
-          </button>
-        </template>
-      </div>
-    </div>
+  <div class="comissoes-page flex w-full flex-col gap-5 pb-8">
+    <ComissoesPageHeader>
+      <template v-if="podeGerenciar" #actions>
+        <button
+          v-if="aba === 'metas' && podeGerenciarMeta"
+          type="button"
+          class="assinatura-btn-cta"
+          @click="abrirNovaMeta"
+        >
+          <Plus :size="16" :stroke-width="2" />
+          Criar meta
+        </button>
+        <button
+          v-if="aba === 'regras'"
+          type="button"
+          class="assinatura-btn-cta"
+          @click="abrirNovaComissao"
+        >
+          <Plus :size="16" :stroke-width="2" />
+          Nova regra
+        </button>
+      </template>
+    </ComissoesPageHeader>
 
     <ContentAlert v-if="contextError" variant="error">{{ contextError }}</ContentAlert>
-    <LoadingSpinner v-if="contextLoading || loading" />
 
-    <!-- ==================== ABA: ACOMPANHAMENTO ==================== -->
-    <template v-else-if="aba === 'acompanhamento'">
-      <!-- Filtro Mês/Ano -->
-      <div class="mb-4 flex flex-wrap items-end gap-3">
-        <label class="font-urbanist text-sm text-glow-text-subtle">
-          Mês
-          <select
-            v-model.number="mesFiltro"
-            class="mt-1 block rounded-lg border border-glow-border-soft bg-glow-canvas px-3 py-1.5 text-glow-text"
-            @change="abrirPosicaoFiltro"
-          >
-            <option
-              v-for="opt in mesOptions"
-              :key="opt.value"
-              :value="opt.value"
+    <StatsGrid :items="stats" :loading="contextLoading || loading" />
+
+    <ComissoesTabs
+      :aba="aba"
+      :metas-count="metas.length"
+      :regras-count="comissoes.length"
+      :pode-gerenciar="podeGerenciar"
+      @update:aba="aba = $event"
+    />
+
+    <template v-if="aba === 'acompanhamento'">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div class="flex flex-wrap items-end gap-3">
+          <label class="font-urbanist text-[12px] font-medium text-glow-text-subtle">
+            Mês
+            <select
+              v-model.number="mesFiltro"
+              class="mt-1 block rounded-xl border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-[13px] text-glow-text"
+              @change="abrirPosicaoFiltro"
             >
-              {{ opt.label }}
-            </option>
-          </select>
-        </label>
-        <label class="font-urbanist text-sm text-glow-text-subtle">
-          Ano
-          <input
-            v-model.number="anoFiltro"
-            type="number"
-            min="2024"
-            max="2030"
-            class="mt-1 block w-20 rounded-lg border border-glow-border-soft bg-glow-canvas px-3 py-1.5 text-glow-text"
-            @change="abrirPosicaoFiltro"
-          />
-        </label>
-      </div>
-
-      <!-- Banner explicativo -->
-      <div class="mb-4 rounded-xl border border-glow-border-soft bg-glow-surface p-4">
-        <div class="flex items-start gap-3">
-          <span class="text-xl leading-none">💡</span>
-          <div class="min-w-0 flex-1">
-            <p class="font-urbanist text-sm font-semibold text-glow-text">Como funciona?</p>
-            <p class="mt-0.5 font-urbanist text-xs leading-relaxed text-glow-text-subtle">
-              As metas são verificadas automaticamente a cada recebimento. O progresso é calculado
-              com base nos agendamentos concluídos do período selecionado.
-            </p>
-          </div>
+              <option v-for="opt in mesOptions" :key="opt.value" :value="opt.value">
+                {{ opt.label }}
+              </option>
+            </select>
+          </label>
+          <label class="font-urbanist text-[12px] font-medium text-glow-text-subtle">
+            Ano
+            <input
+              v-model.number="anoFiltro"
+              type="number"
+              min="2024"
+              max="2030"
+              class="mt-1 block w-24 rounded-xl border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-[13px] text-glow-text"
+              @change="abrirPosicaoFiltro"
+            />
+          </label>
         </div>
+        <button type="button" class="assinatura-btn-secondary" @click="exportarRelatorio">
+          <Download :size="16" :stroke-width="1.75" />
+          Exportar relatório
+        </button>
       </div>
 
-      <!-- Empty State -->
+      <ComissoesTipBanner
+        v-if="tipAcompanhamentoVisivel"
+        :texto="tipAcompanhamento"
+        @fechar="tipAcompanhamentoVisivel = false"
+      />
+
       <FinanceiroEmptyState
         v-if="progresso.length === 0"
         title="Nenhum progresso no período"
-        description="Nenhum profissional com meta ativa para o período selecionado. Crie metas na aba 'Metas' e aguarde os atendimentos serem concluídos."
+        description="Nenhum profissional com meta ativa para o período selecionado. Crie metas na aba Metas."
       />
 
-      <!-- Cards de profissionais com progresso -->
-      <div v-else class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <div
+      <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <ComissoesProfissionalCard
           v-for="(p, idx) in progresso"
           :key="`${p.profissionalEstabelecimentoId}-${p.metaNome}-${idx}`"
-          class="group relative cursor-pointer rounded-xl border border-glow-border-soft bg-glow-surface p-4 transition hover:shadow-glow-sm"
+          :item="p"
           @click="abrirDetalheProfissional(p)"
-        >
-          <!-- Cabeçalho -->
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0 flex-1">
-              <p class="font-urbanist text-sm font-semibold text-glow-text">{{ p.nomePublico }}</p>
-              <p class="mt-0.5 font-urbanist text-xs text-glow-text-subtle">
-                {{ formatTipoMeta(p.tipoMeta) }} · {{ p.metaNome }}
-              </p>
-            </div>
-            <span
-              class="inline-flex shrink-0 rounded-full px-2 py-0.5 font-urbanist text-xs font-medium"
-              :class="p.atingida ? 'bg-green-100 text-green-800' : 'bg-glow-canvas text-glow-text-subtle'"
-            >
-              {{ p.atingida ? '✅ Concluída' : '⏳ Em andamento' }}
-            </span>
-          </div>
-
-          <!-- Progresso -->
-          <div class="mt-3">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-medium" :class="progressBarTextClass(p.percentualProgresso)">
-                {{ formatRealizado(p) }} / {{ formatAlvo(p) }}
-              </span>
-              <span class="font-satoshi font-bold" :class="progressBarTextClass(p.percentualProgresso)">
-                {{ p.percentualProgresso }}%
-              </span>
-            </div>
-            <div class="mt-1.5 h-2.5 overflow-hidden rounded-full bg-glow-canvas">
-              <div
-                class="h-full rounded-full transition-all duration-500"
-                :class="progressBarClass(p.percentualProgresso)"
-                :style="{ width: Math.min(p.percentualProgresso, 100) + '%' }"
-              />
-            </div>
-          </div>
-
-          <!-- Meta info adicional -->
-          <div class="mt-2 flex items-center justify-between text-xs text-glow-text-subtle">
-            <span>Comissão: {{ p.percentualComissao }}%</span>
-            <span>{{ formatRestante(p) }}</span>
-          </div>
-        </div>
+        />
       </div>
+
+      <ComissoesAvisoBanner
+        v-if="podeGerenciar"
+        @ver-regras="aba = 'regras'"
+      />
+      <aside
+        v-else
+        class="rounded-2xl border border-glow-border-soft bg-glow-surface px-4 py-3 font-urbanist text-[12px] text-glow-text-subtle"
+      >
+        Os valores exibidos são estimativas. Os valores finais podem variar de acordo com
+        ajustes, regras e cancelamentos.
+      </aside>
     </template>
 
-    <!-- ==================== ABA: METAS ==================== -->
     <template v-else-if="aba === 'metas'">
-      <!-- Filtro + Busca (quando há metas) -->
-      <div v-if="metas.length > 0" class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="financeiro-search flex-1 max-w-xs">
-          <input
-            v-model="metaBusca"
-            type="text"
-            placeholder="🔍 Buscar metas..."
-            class="financeiro-search__input"
-          />
-        </div>
-        <div class="financeiro-segmented">
+      <div
+        v-if="metas.length > 0"
+        class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <input
+          v-model="metaBusca"
+          type="search"
+          placeholder="Buscar metas..."
+          class="w-full max-w-xs rounded-xl border border-glow-border-soft bg-glow-surface px-3 py-2 font-urbanist text-[13px] text-glow-text placeholder:text-glow-placeholder"
+        />
+        <div class="flex flex-wrap gap-1 rounded-xl border border-glow-border-soft bg-glow-surface p-1">
           <button
             v-for="opt in filtroMetaOptions"
             :key="opt.value"
             type="button"
-            class="financeiro-segmented__btn"
-            :class="{ 'financeiro-segmented__btn--active': metaFiltro === opt.value }"
+            class="rounded-lg px-3 py-1.5 font-urbanist text-[12px] font-medium text-glow-text-subtle transition"
+            :class="
+              metaFiltro === opt.value
+                ? 'bg-glow-gold-selected text-glow-gold-cta'
+                : 'hover:bg-glow-hover-surface'
+            "
             @click="metaFiltro = opt.value"
           >
             {{ opt.label }}
@@ -582,22 +569,12 @@ watch(aba, () => void load())
         </div>
       </div>
 
-      <!-- Banner explicativo -->
-      <div class="mb-4 rounded-xl border border-glow-border-soft bg-glow-surface p-4">
-        <div class="flex items-start gap-3">
-          <span class="text-xl leading-none">💡</span>
-          <div class="min-w-0 flex-1">
-            <p class="font-urbanist text-sm font-semibold text-glow-text">Como funciona?</p>
-            <p class="mt-0.5 font-urbanist text-xs leading-relaxed text-glow-text-subtle">
-              As metas são verificadas automaticamente a cada recebimento. Quando um profissional
-              atingir o objetivo configurado no mês, a comissão será calculada automaticamente
-              — considerando a maior entre a regra normal e a comissão da meta.
-            </p>
-          </div>
-        </div>
-      </div>
+      <ComissoesTipBanner
+        v-if="tipMetasVisivel"
+        :texto="tipMetas"
+        @fechar="tipMetasVisivel = false"
+      />
 
-      <!-- Empty State -->
       <FinanceiroEmptyState
         v-if="metasFiltradas.length === 0 && metas.length === 0"
         title="Crie sua primeira meta de comissão"
@@ -607,76 +584,51 @@ watch(aba, () => void load())
           <button
             v-if="podeGerenciarMeta"
             type="button"
-            class="financeiro-btn-primary flex items-center gap-1.5"
+            class="assinatura-btn-cta"
             @click="abrirNovaMeta"
           >
-            <span class="text-base leading-none">+</span>
+            <Plus :size="16" :stroke-width="2" />
             Criar primeira meta
           </button>
         </template>
-        <template #default>
-          <div class="mt-4 grid gap-2 sm:grid-cols-3">
-            <div class="rounded-lg border border-glow-border-soft bg-glow-canvas p-3 opacity-50">
-              <p class="font-urbanist text-xs font-semibold text-glow-text">💰 Meta por faturamento</p>
-              <p class="mt-1 font-urbanist text-lg font-bold text-glow-text">R$ 8.000</p>
-              <p class="text-xs text-glow-text-subtle">Comissão: 10%</p>
-            </div>
-            <div class="rounded-lg border border-glow-border-soft bg-glow-canvas p-3 opacity-50">
-              <p class="font-urbanist text-xs font-semibold text-glow-text">📋 Meta por atendimentos</p>
-              <p class="mt-1 font-urbanist text-lg font-bold text-glow-text">150</p>
-              <p class="text-xs text-glow-text-subtle">Comissão: 8%</p>
-            </div>
-            <div class="rounded-lg border border-glow-border-soft bg-glow-canvas p-3 opacity-50">
-              <p class="font-urbanist text-xs font-semibold text-glow-text">🎯 Meta mista</p>
-              <p class="mt-1 font-urbanist text-lg font-bold text-glow-text">R$ 5.000</p>
-              <p class="text-xs text-glow-text-subtle">+ 80 atendimentos · 12%</p>
-            </div>
-          </div>
-        </template>
       </FinanceiroEmptyState>
 
-      <!-- Empty filter result -->
       <FinanceiroEmptyState
         v-else-if="metasFiltradas.length === 0 && metas.length > 0"
         title="Nenhuma meta encontrada"
         description="Tente ajustar o filtro ou a busca."
       />
 
-      <!-- Cards de metas -->
-      <div v-else class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <div
+      <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <article
           v-for="m in metasFiltradas"
           :key="m.id"
-          class="group relative rounded-xl border border-glow-border-soft bg-glow-surface p-4 transition hover:shadow-glow-sm"
+          class="rounded-2xl border border-glow-border-soft bg-glow-surface p-4 shadow-glow-sm"
         >
           <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0 flex-1">
-              <p class="font-urbanist text-sm font-semibold text-glow-text">{{ m.nome }}</p>
-              <p class="mt-0.5 font-urbanist text-xs text-glow-text-subtle">
+            <div class="min-w-0">
+              <p class="font-urbanist text-[14px] font-semibold text-glow-text">{{ m.nome }}</p>
+              <p class="mt-0.5 font-urbanist text-[12px] text-glow-text-subtle">
                 {{ formatTipoMeta(m.tipoMeta) }} · {{ formatValorMeta(m) }}
               </p>
             </div>
             <span
-              class="inline-flex shrink-0 rounded-full px-2 py-0.5 font-urbanist text-xs"
+              class="inline-flex rounded-full px-2 py-0.5 font-urbanist text-[11px] font-semibold"
               :class="statusClass(m.ativa)"
             >
               {{ m.ativa ? 'Ativa' : 'Inativa' }}
             </span>
           </div>
-
-          <div class="mt-3">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-medium" :class="progressBarTextClass(m.percentualComissao)">
-                {{ m.percentualComissao }}% comissão
-              </span>
-            </div>
-          </div>
-
-          <!-- Ações -->
-          <div v-if="podeGerenciarMeta && m.ativa" class="mt-3 flex items-center gap-2 pt-3 border-t border-glow-border-soft">
+          <p class="mt-3 font-urbanist text-[13px] font-semibold text-glow-text">
+            {{ m.percentualComissao }}% comissão
+          </p>
+          <div
+            v-if="podeGerenciarMeta && m.ativa"
+            class="mt-3 flex items-center gap-2 border-t border-glow-border-soft pt-3"
+          >
             <button
               type="button"
-              class="text-xs font-medium text-glow-gold-dark hover:underline"
+              class="font-urbanist text-[12px] font-semibold text-glow-gold-cta hover:underline"
               @click="abrirEditarMeta(m)"
             >
               Editar
@@ -684,17 +636,16 @@ watch(aba, () => void load())
             <span class="text-glow-border-soft">·</span>
             <button
               type="button"
-              class="text-xs font-medium text-glow-text-subtle hover:text-glow-text hover:underline"
+              class="font-urbanist text-[12px] font-medium text-glow-text-subtle hover:underline"
               @click="abrirDesativarMeta(m.id)"
             >
               Desativar
             </button>
           </div>
-        </div>
+        </article>
       </div>
     </template>
 
-    <!-- ==================== ABA: REGRAS ==================== -->
     <template v-else-if="aba === 'regras'">
       <FinanceiroEmptyState
         v-if="comissoes.length === 0"
@@ -702,35 +653,42 @@ watch(aba, () => void load())
         description="Configure comissões para os profissionais com base em percentual ou valor fixo."
       >
         <template v-if="podeGerenciar" #action>
-          <button type="button" class="financeiro-btn-primary flex items-center gap-1.5" @click="abrirNovaComissao">
-            <span class="text-base leading-none">+</span>
+          <button type="button" class="assinatura-btn-cta" @click="abrirNovaComissao">
+            <Plus :size="16" :stroke-width="2" />
             Configurar primeira regra
           </button>
         </template>
       </FinanceiroEmptyState>
+
       <div v-else class="space-y-2">
         <div
           v-for="c in comissoes"
           :key="c.id"
-          class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-glow-border-soft bg-glow-surface p-4"
+          class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-glow-border-soft bg-glow-surface p-4 shadow-glow-sm"
         >
           <div>
-            <p class="font-urbanist text-sm font-semibold text-glow-text">{{ c.nomePublico }}</p>
-            <p class="font-urbanist text-xs text-glow-text-subtle">
+            <p class="font-urbanist text-[14px] font-semibold text-glow-text">
+              {{ c.nomePublico }}
+            </p>
+            <p class="font-urbanist text-[12px] text-glow-text-subtle">
               {{ c.tipoComissao }} · {{ formatComissao(c) }}
             </p>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2">
             <span
-              class="inline-flex rounded-full px-2 py-0.5 font-urbanist text-xs"
-              :class="c.ativo ? 'bg-green-100 text-green-800' : 'bg-glow-canvas text-glow-text-subtle'"
+              class="inline-flex rounded-full px-2 py-0.5 font-urbanist text-[11px] font-semibold"
+              :class="
+                c.ativo
+                  ? 'bg-glow-success-bg text-glow-success-dark'
+                  : 'bg-glow-canvas text-glow-text-subtle'
+              "
             >
               {{ c.ativo ? 'Ativa' : 'Pausada' }}
             </span>
             <button
               v-if="podeGerenciar && c.ativo"
               type="button"
-              class="financeiro-btn-outline"
+              class="assinatura-btn-secondary"
               @click="abrirEditarComissao(c)"
             >
               Editar
@@ -738,7 +696,7 @@ watch(aba, () => void load())
             <button
               v-if="podeGerenciar && c.ativo"
               type="button"
-              class="financeiro-btn-outline"
+              class="assinatura-btn-secondary"
               @click="abrirPausarComissao(c.id)"
             >
               Pausar regra
@@ -748,7 +706,6 @@ watch(aba, () => void load())
       </div>
     </template>
 
-    <!-- ==================== MODAIS ==================== -->
     <ComissaoFormModal
       v-model="formModalOpen"
       :loading="actionLoading"
