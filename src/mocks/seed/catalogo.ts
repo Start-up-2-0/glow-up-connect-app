@@ -82,8 +82,11 @@ export const MOCK_SERVICOS: Servico[] = [
 
 export const MOCK_USUARIOS_EQUIPE: UsuarioEquipe[] = [
   { id: 1, estabelecimentoId: 1, usuarioId: 1, nome: 'Gustavo Souza', email: 'gustavo@glowup.com.br', telefone: '(79) 97999-1763', role: 'Owner', ativo: true },
-  { id: 2, estabelecimentoId: 1, usuarioId: 11, nome: 'Marina Alves', email: 'marina@glowup.com.br', telefone: '(79) 99811-2233', role: 'Admin', ativo: true },
-  { id: 3, estabelecimentoId: 1, usuarioId: 12, nome: 'Renata Lima', email: 'renata@glowup.com.br', telefone: '(79) 99844-5566', role: 'Receptionist', ativo: true },
+  /** Login mock: admin@teste.com */
+  { id: 2, estabelecimentoId: 1, usuarioId: 80, nome: 'Roberto Admin', email: 'admin@teste.com', telefone: '(79) 99999-3333', role: 'Admin', ativo: true },
+  /** Login mock: recepcionista@teste.com */
+  { id: 3, estabelecimentoId: 1, usuarioId: 83, nome: 'Fernanda Recepção', email: 'recepcionista@teste.com', telefone: '(79) 99999-6666', role: 'Receptionist', ativo: true },
+  { id: 4, estabelecimentoId: 1, usuarioId: 11, nome: 'Marina Alves', email: 'marina@glowup.com.br', telefone: '(79) 99811-2233', role: 'Admin', ativo: true },
 ]
 
 export const MOCK_PROFISSIONAIS: ProfissionalEquipe[] = [

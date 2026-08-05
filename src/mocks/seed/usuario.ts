@@ -49,6 +49,12 @@ export const MOCK_PROFISSIONAL: User = {
   updatedAt: null,
 }
 
+/**
+ * Administrador da loja — role global 5 + EstablishmentUserRole Admin.
+ * Login: admin@teste.com (qualquer senha no mock).
+ * Escopo: apenas a filial onde foi cadastrado (Studio Glow Up).
+ * Permissões: iguais ao Dono na operação da loja (ver PERMS_ADMIN).
+ */
 export const MOCK_ADMIN: User = {
   id: 80,
   nome: 'Roberto Admin',
@@ -59,6 +65,7 @@ export const MOCK_ADMIN: User = {
   whatsAppConfirmado: true,
   whatsAppOptIn: true,
   whatsAppPendenteConfirmacao: false,
+  sexo: 'Masculino',
   createdAt: '2026-03-01T09:00:00Z',
   updatedAt: null,
 }
@@ -93,7 +100,12 @@ export const MOCK_DONO_BASICO: User = {
   updatedAt: null,
 }
 
-/** Recepcionista — função de estabelecimento (role global 5 p/ UI de negócio). */
+/**
+ * Recepcionista — role global 5 + EstablishmentUserRole Receptionist.
+ * Login: recepcionista@teste.com (qualquer senha no mock).
+ * Escopo: apenas a filial onde foi cadastrado (Studio Glow Up).
+ * Foco: agenda geral, clientes e atendimento — sem caixa, equipe nem config da loja.
+ */
 export const MOCK_RECEPCIONISTA: User = {
   id: 83,
   nome: 'Fernanda Recepção',
@@ -104,6 +116,7 @@ export const MOCK_RECEPCIONISTA: User = {
   whatsAppConfirmado: true,
   whatsAppOptIn: true,
   whatsAppPendenteConfirmacao: false,
+  sexo: 'Feminino',
   createdAt: '2026-02-01T09:00:00Z',
   updatedAt: null,
 }
@@ -144,35 +157,66 @@ export const APP_MODULES = [
   'Clientes',
 ] as const
 
-/** Permissões totais de gestor (Owner/Admin). */
+/**
+ * Matriz alinhada a `MatrizPermissaoNegocioService` (API).
+ * Owner/Admin: operação completa da loja + caixa + config.
+ */
 export const APP_PERMISSOES = [
-  'AgendaVisualizarGeral',
-  'AgendaVisualizarPropria',
-  'AgendaCancelar',
-  'AgendaReagendar',
-  'AtendimentoIniciar',
-  'AtendimentoFinalizar',
-  'ServicoGerenciar',
-  'ServicoVisualizar',
-  'CaixaGerenciar',
-  'CaixaVisualizar',
-  'MetaGerenciar',
+  'NegocioVisualizar',
+  'NegocioEditar',
+  'EquipeVisualizar',
   'EquipeGerenciar',
   'ProfissionalConvidar',
   'ProfissionalGerenciar',
-  'NegocioEditar',
-  'NegocioVisualizar',
-  'ClienteVisualizarGeral',
+  'ServicoVisualizar',
+  'ServicoGerenciar',
+  'HorarioVisualizar',
   'HorarioGerenciar',
-  'HorarioGerenciarProprio',
+  'AgendaVisualizarGeral',
+  'AgendaCriar',
+  'AgendaReagendar',
+  'AgendaCancelar',
+  'AtendimentoIniciar',
+  'AtendimentoFinalizar',
+  'ClienteVisualizarGeral',
+  'CaixaVisualizar',
+  'CaixaGerenciar',
+  'MetaGerenciar',
+] as const
+
+/** Admin = mesmas permissões do Owner na loja (sem multi-filial). */
+export const PERMS_ADMIN = [...APP_PERMISSOES] as const
+
+/**
+ * Recepcionista — agenda/clientes/atendimento; sem financeiro, equipe nem edição do negócio.
+ * Espelha `PermissoesReceptionist` da API.
+ */
+export const PERMS_RECEPCIONISTA = [
+  'NegocioVisualizar',
+  'ServicoVisualizar',
+  'HorarioVisualizar',
+  'AgendaVisualizarGeral',
+  'AgendaCriar',
+  'AgendaReagendar',
+  'AgendaCancelar',
+  'AtendimentoIniciar',
+  'AtendimentoFinalizar',
+  'ClienteVisualizarGeral',
 ] as const
 
 /** Permissões de um profissional de estabelecimento (vê a própria agenda). */
 const PERMS_PROFISSIONAL = [
-  'AgendaVisualizarPropria',
-  'HorarioGerenciarProprio',
+  'NegocioVisualizar',
   'ServicoVisualizar',
-]
+  'HorarioVisualizar',
+  'HorarioGerenciarProprio',
+  'AgendaVisualizarPropria',
+  'AtendimentoVisualizarProprio',
+  'AtendimentoIniciar',
+  'AtendimentoFinalizar',
+  'ClienteVisualizarProprio',
+  'ComissaoVisualizarPropria',
+] as const
 
 export interface PlanoMock {
   id: number
@@ -190,7 +234,7 @@ function buildEstab(
   estabelecimentoId: number,
   nome: string,
   role: EstabelecimentoAcesso['role'],
-  permissoes: string[],
+  permissoes: readonly string[],
   plano: PlanoMock,
   opts: { profissionalId?: number | null; possuiVinculoProfissional?: boolean } = {},
 ): EstabelecimentoAcesso {
@@ -203,7 +247,7 @@ function buildEstab(
     possuiVinculoProfissional: opts.possuiVinculoProfissional ?? false,
     profissionalId: opts.profissionalId ?? null,
     profissionalPublicGuid: null,
-    permissoes,
+    permissoes: [...permissoes],
     assinaturaAtiva: true,
     assinaturaId: 1,
     planoId: plano.id,
@@ -227,11 +271,11 @@ function buildEstab(
 
 /** Escopo do Dono conforme o plano: Premium = todas as filiais; Básico/Plus = só a principal. */
 function ownerScope(plano: PlanoMock): EstabelecimentoAcesso[] {
-  const main = buildEstab(1, 'Studio Glow Up', 'Owner', [...APP_PERMISSOES], plano)
+  const main = buildEstab(1, 'Studio Glow Up', 'Owner', APP_PERMISSOES, plano)
   if (plano.limiteEstabelecimentos <= 1) return [main]
   return [
     main,
-    buildEstab(2, 'Glow Up Filial Centro', 'Owner', [...APP_PERMISSOES], plano),
+    buildEstab(2, 'Glow Up Filial Centro', 'Owner', APP_PERMISSOES, plano),
   ]
 }
 
@@ -251,14 +295,14 @@ export function mockEstabelecimentosAcesso(
       return []
     case 4:
       return [
-        buildEstab(1, 'Studio Glow Up', 'Profissional', [...PERMS_PROFISSIONAL], plano, {
+        buildEstab(1, 'Studio Glow Up', 'Profissional', PERMS_PROFISSIONAL, plano, {
           profissionalId: 102,
           possuiVinculoProfissional: true,
         }),
       ]
     case 5:
       return [
-        buildEstab(2, 'Glow Up Filial Centro', 'Admin', [...APP_PERMISSOES], plano),
+        buildEstab(1, 'Studio Glow Up', 'Admin', PERMS_ADMIN, plano),
       ]
     case 2:
     default:
@@ -275,17 +319,17 @@ export function mockEstablishmentsForEmail(email: string): EstabelecimentoAcesso
   if (e === MOCK_DONO_BASICO.email.toLowerCase()) return ownerScope(PLANO_BASICO)
   if (e === MOCK_PROFISSIONAL.email.toLowerCase()) {
     return [
-      buildEstab(1, 'Studio Glow Up', 'Profissional', [...PERMS_PROFISSIONAL], PLANO_PREMIUM, {
+      buildEstab(1, 'Studio Glow Up', 'Profissional', PERMS_PROFISSIONAL, PLANO_PREMIUM, {
         profissionalId: 102,
         possuiVinculoProfissional: true,
       }),
     ]
   }
   if (e === MOCK_ADMIN.email.toLowerCase()) {
-    return [buildEstab(2, 'Glow Up Filial Centro', 'Admin', [...APP_PERMISSOES], PLANO_PREMIUM)]
+    return [buildEstab(1, 'Studio Glow Up', 'Admin', PERMS_ADMIN, PLANO_PREMIUM)]
   }
   if (e === MOCK_RECEPCIONISTA.email.toLowerCase()) {
-    return [buildEstab(2, 'Glow Up Filial Centro', 'Receptionist', [...APP_PERMISSOES], PLANO_PREMIUM)]
+    return [buildEstab(1, 'Studio Glow Up', 'Receptionist', PERMS_RECEPCIONISTA, PLANO_PREMIUM)]
   }
   return []
 }

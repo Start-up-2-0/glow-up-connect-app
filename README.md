@@ -55,19 +55,21 @@ npm run dev:mock
 - Todas as chamadas HTTP do Axios são interceptadas por um adapter mock em [`src/mocks/`](src/mocks/) → devolve dados fictícios realistas.
 - Para logar, use **qualquer e-mail/senha** (válidos) na tela de login. O mock obedece ao guard e, conforme o e-mail, simula uma **role** diferente (para validar as telas de cada perfil):
 
-| Visão | E-mail no login |
-|-------|-----------------|
-| **Dono · plano Premium** (todas as filiais) | `gustavo@glowup.com.br` |
-| **Dono · plano Plus** (só a loja principal) | `plus@teste.com` |
-| **Dono · plano Básico** (só a loja principal) | `basico@teste.com` |
-| **Administrador** (só a filial 2) | `admin@teste.com` |
-| **Profissional de estabelecimento** | `profissional@teste.com` |
-| **Recepcionista** | `recepcionista@teste.com` |
-| **Cliente** | `cliente@teste.com` |
+| Visão | E-mail no login | O que vê |
+|-------|-----------------|----------|
+| **Dono · Premium** | `gustavo@glowup.com.br` | Todas as filiais; menu completo (gestão, financeiro, config) |
+| **Dono · Plus** | `plus@teste.com` | Só loja principal; menu completo |
+| **Dono · Básico** | `basico@teste.com` | Só loja principal; menu completo |
+| **Administrador** | `admin@teste.com` | Só Studio Glow Up; mesmas permissões do Dono na loja (agenda, clientes, serviços, financeiro, equipe, horários, config da loja). **Sem** multi-filial / gerenciar assinatura de outras lojas |
+| **Recepcionista** | `recepcionista@teste.com` | Só Studio Glow Up; **Dashboard**, **Agenda**, **Clientes**, **Serviços** (visualizar), atendimento (iniciar/finalizar/remarcar/cancelar). **Sem** Financeiro, Equipe, Horários (editar), Minha loja, Assinatura, WhatsApp |
+| **Profissional** | `profissional@teste.com` | Só a própria agenda/horários |
+| **Cliente** | `cliente@teste.com` | Explorar, agendamentos, perfil |
 
-  E-mails não listados caem na visão de **cliente**. Faça logout para trocar de perfil. O cadastro (`/usuario`) também cria conta de cliente no mock.
+  E-mails não listados caem na visão de **cliente**. Qualquer senha funciona no mock. Faça logout para trocar de perfil. O cadastro (`/usuario`) também cria conta de cliente no mock.
 
   **Regra de acesso (filiais):** o **Dono/Assinante** acessa todas as filiais conforme o plano (Básico/Plus = só a principal; Premium = todas). **Não-dono** (Admin/Recepcionista/Profissional) acessa somente a filial onde foi cadastrado — o mock retorna **403** para qualquer rota `/estabelecimentos/{id}/...` fora do escopo do perfil logado.
+
+  Permissões de Admin/Recepcionista seguem a matriz da API (`MatrizPermissaoNegocioService`) em `src/mocks/seed/usuario.ts` (`PERMS_ADMIN` / `PERMS_RECEPCIONISTA`).
 - Os dados vivem em `src/mocks/seed/` e as rotas em `src/mocks/handlers/`. Se faltar um endpoint, o console avisa `[mock] SEM HANDLER: METHOD /path` (resposta 501) para você adicionar o handler.
 - Remova a flag (uso de `npm run dev` normal) para voltar a usar a API real; o mock não toca o fluxo normal.
 
