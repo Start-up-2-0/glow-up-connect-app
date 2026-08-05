@@ -37,10 +37,39 @@ App disponível em `http://localhost:5173`.
 | Comando | Descrição |
 |---------|-----------|
 | `npm run dev` | Servidor de desenvolvimento |
+| `npm run dev:mock` | Dev com **dados mockados** (offline, sem API) |
 | `npm run build` | Build de produção |
 | `npm run preview` | Preview do build |
 | `npm run lint` | ESLint |
 | `npm run format` | Prettier |
+
+## Modo mockado (sem depender da API)
+
+Para **acessar, validar e corrigir telas** sem subir o servidor da API, use:
+
+```bash
+npm run dev:mock
+```
+
+- Ativo por `VITE_USE_MOCKS=true` (ver `.env.mock`).
+- Todas as chamadas HTTP do Axios são interceptadas por um adapter mock em [`src/mocks/`](src/mocks/) → devolve dados fictícios realistas.
+- Para logar, use **qualquer e-mail/senha** (válidos) na tela de login. O mock obedece ao guard e, conforme o e-mail, simula uma **role** diferente (para validar as telas de cada perfil):
+
+| Visão | E-mail no login |
+|-------|-----------------|
+| **Dono · plano Premium** (todas as filiais) | `gustavo@glowup.com.br` |
+| **Dono · plano Plus** (só a loja principal) | `plus@teste.com` |
+| **Dono · plano Básico** (só a loja principal) | `basico@teste.com` |
+| **Administrador** (só a filial 2) | `admin@teste.com` |
+| **Profissional de estabelecimento** | `profissional@teste.com` |
+| **Recepcionista** | `recepcionista@teste.com` |
+| **Cliente** | `cliente@teste.com` |
+
+  E-mails não listados caem na visão de **cliente**. Faça logout para trocar de perfil. O cadastro (`/usuario`) também cria conta de cliente no mock.
+
+  **Regra de acesso (filiais):** o **Dono/Assinante** acessa todas as filiais conforme o plano (Básico/Plus = só a principal; Premium = todas). **Não-dono** (Admin/Recepcionista/Profissional) acessa somente a filial onde foi cadastrado — o mock retorna **403** para qualquer rota `/estabelecimentos/{id}/...` fora do escopo do perfil logado.
+- Os dados vivem em `src/mocks/seed/` e as rotas em `src/mocks/handlers/`. Se faltar um endpoint, o console avisa `[mock] SEM HANDLER: METHOD /path` (resposta 501) para você adicionar o handler.
+- Remova a flag (uso de `npm run dev` normal) para voltar a usar a API real; o mock não toca o fluxo normal.
 
 ## Estrutura
 

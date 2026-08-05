@@ -8,6 +8,7 @@ import { useConsentStore } from './stores/consent.store'
 import { registerSessionSyncCallback } from './utils/sessionSync'
 import { startSessionRefreshScheduler } from './composables/useSessionRefresh'
 import { ensureRequestProofPool } from './composables/useRequestProof'
+import { MOCK_MODE } from './mocks/config'
 import './assets/main.css'
 import 'flowbite'
 
@@ -34,7 +35,9 @@ if (authStore.isAuthenticated) {
   startSessionRefreshScheduler()
 }
 
-void ensureRequestProofPool()
+if (!MOCK_MODE) {
+  void ensureRequestProofPool()
+}
 
 if (import.meta.env.DEV && !import.meta.env.VITE_API_BASE_URL) {
   console.warn('[glow-up-connect] VITE_API_BASE_URL não definida')

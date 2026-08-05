@@ -8,6 +8,7 @@ import type {
   BaixarContaPayload,
   CaixaResumo,
   ComissaoExtrato,
+  ComissaoMetasFiltro,
   ComissaoProfissional,
   ConciliacaoItem,
   ContaPagar,
@@ -22,6 +23,8 @@ import type {
   LancamentoCaixaPaginado,
   FinanceiroResumo,
   Meta,
+  MetaComissaoDetalhe,
+  MetaComissaoProfissional,
   MetaProgressoProfissional,
   ReceberAgendamentoPayload,
   ReceberAgendamentoResultado,
@@ -363,6 +366,39 @@ export const caixaService = {
       .get<ApiSuccessResponse<MetaProgressoProfissional[]>>(
         negocioPath(estabelecimentoId, '/financeiro/metas/progresso'),
         { params },
+      )
+      .then(unwrapApi)
+  },
+
+  /* ---------- Gerenciador de metas de comissão (refatoração) ---------- */
+
+  listarMetasComissao(estabelecimentoId: number, filtro?: ComissaoMetasFiltro) {
+    return api
+      .get<ApiSuccessResponse<MetaComissaoProfissional[]>>(
+        negocioPath(estabelecimentoId, '/financeiro/metas/comissoes'),
+        { params: filtro },
+      )
+      .then(unwrapApi)
+  },
+
+  obterMetaComissaoDetalhe(estabelecimentoId: number, metaId: number) {
+    return api
+      .get<ApiSuccessResponse<MetaComissaoDetalhe>>(
+        negocioPath(estabelecimentoId, `/financeiro/metas/comissoes/${metaId}`),
+      )
+      .then(unwrapApi)
+  },
+
+  reativarMeta(estabelecimentoId: number, metaId: number) {
+    return api
+      .patch(negocioPath(estabelecimentoId, `/financeiro/metas/${metaId}/reativar`))
+      .then(unwrapApi)
+  },
+
+  concluirMeta(estabelecimentoId: number, metaId: number) {
+    return api
+      .post<ApiSuccessResponse<MetaComissaoProfissional>>(
+        negocioPath(estabelecimentoId, `/financeiro/metas/${metaId}/concluir`),
       )
       .then(unwrapApi)
   },

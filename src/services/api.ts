@@ -23,6 +23,8 @@ import {
 import { getUpgradeInfo } from '@/constants/upgradeMessages'
 import { useAppStore } from '@/stores/app.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
+import { useLoadingStore } from '@/stores/loading.store'
+import { MOCK_MODE } from '@/mocks/config'
 
 type QueueCallback = {
   resolve: (token: string) => void
@@ -45,6 +47,14 @@ const PUBLIC_API_PATHS = ['/auth/login', '/auth/refresh', '/planos', '/publico/'
 function isPublicApiPath(url?: string): boolean {
   if (!url) return false
   return PUBLIC_API_PATHS.some((path) => url.includes(path))
+}
+
+/** Caminhos de infraestrutura que não devem acionar o loading global. */
+const LOADING_EXCLUDED_PATHS = ['/auth/refresh', '/security/request-proof']
+
+function isExcludedLoadingPath(url?: string): boolean {
+  if (!url) return false
+  return LOADING_EXCLUDED_PATHS.some((path) => url.includes(path))
 }
 
 function shouldAttemptRefresh(error: AxiosError<ApiErrorResponse>, url?: string) {
@@ -108,6 +118,18 @@ const api: AxiosInstance = axios.create({
 })
 
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  // Loading global de requisição (ignora infraestrutura silenciosa).
+  if (!isExcludedLoadingPath(config.url)) {
+    useLoadingStore().start()
+  }
+
+  // Modo mockado: intercepta a chamada no adapter, sem tocar na rede real.
+  if (MOCK_MODE) {
+    const { getMockAdapter } = await import('@/mocks')
+    config.adapter = getMockAdapter() as unknown as InternalAxiosRequestConfig['adapter']
+    return config
+  }
+
   const token = getAccessToken()
   if (token && config.headers) {
     config.headers[TOKEN_HEADER] = token
@@ -155,8 +177,16 @@ function handleSubscriptionError(error: AxiosError<ApiErrorResponse>) {
 }
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (!isExcludedLoadingPath(response.config.url)) {
+      useLoadingStore().finish()
+    }
+    return response
+  },
   async (error: AxiosError<ApiErrorResponse>) => {
+    if (!isExcludedLoadingPath(error.config?.url)) {
+      useLoadingStore().finish()
+    }
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean
       _proofRetry?: boolean
