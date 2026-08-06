@@ -22,7 +22,7 @@ function onNavigate() {
 <template>
   <aside
     id="drawer-navigation"
-    class="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-glow-border-sidebar bg-glow-surface pt-14 transition-transform duration-200 ease-out"
+    class="fixed left-0 top-0 z-[2010] flex h-screen w-64 flex-col border-r border-glow-border-sidebar bg-glow-surface pt-14 transition-transform duration-200 ease-out will-change-transform"
     :class="isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
     aria-label="Sidenav"
   >

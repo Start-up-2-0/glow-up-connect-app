@@ -581,6 +581,9 @@ onUnmounted(() => {
 
 .explorar-page__map-shell {
   position: relative;
+  z-index: 0;
+  isolation: isolate;
+  transform: translateZ(0);
   flex: 1 1 auto;
   min-height: min(62dvh, 640px);
   border-radius: 1.25rem;

@@ -5398,3 +5398,20 @@
     opacity: 0;
   }
 }
+
+/*
+ * iOS Safari / Leaflet: panes com transform viram layers de GPU e furam o z-index do drawer.
+ * Com o menu mobile aberto, escondemos o mapa (e o shell) para o menu ficar sempre por cima.
+ */
+@media (max-width: 767px) {
+  body.guc-mobile-drawer-open .explorar-page__map-shell,
+  body.guc-mobile-drawer-open .explorar-mapa,
+  body.guc-mobile-drawer-open .leaflet-container,
+  body.guc-mobile-drawer-open .leaflet-pane,
+  .guc-main--drawer-open .explorar-page__map-shell,
+  .guc-main--drawer-open .explorar-mapa,
+  .guc-main--drawer-open .leaflet-container {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}

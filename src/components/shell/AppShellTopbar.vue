@@ -37,7 +37,7 @@ onUnmounted(() => document.removeEventListener('keydown', onGlobalKeydown))
 
 <template>
   <nav
-    class="fixed left-0 right-0 top-0 z-50 flex items-center overflow-visible border-b border-glow-border-soft bg-glow-surface px-4"
+    class="fixed left-0 right-0 top-0 z-[2020] flex items-center overflow-visible border-b border-glow-border-soft bg-glow-surface px-4"
     style="height: calc(3.5rem + env(safe-area-inset-top)); padding-top: env(safe-area-inset-top)"
   >
     <div class="relative flex h-full w-full items-center justify-between gap-2">

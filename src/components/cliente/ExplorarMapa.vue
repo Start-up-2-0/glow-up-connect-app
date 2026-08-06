@@ -537,6 +537,7 @@ defineExpose({
 
 .leaflet-container {
   font-family: 'Urbanist', ui-sans-serif, system-ui, sans-serif;
+  z-index: 0;
 }
 
 @media (min-width: 768px) {
