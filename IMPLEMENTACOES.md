@@ -194,9 +194,23 @@ Separação explícita entre **avatar do usuário** (`Usuario.AvatarBase64`) e *
 - Resposta: `total`, `pagina`, `tamanhoPagina`, `itens` (usuários + profissionais + convites) e `resumo` (KPIs).
 - Frontend (`EquipeView`) consome paginação server-side (6 por página); endpoints antigos de usuários/profissionais permanecem para outros módulos.
 
+## 21. Explorar por mapa (`/explorar`)
+
+A listagem de cards foi substituída por um explorador geográfico; **filtros e busca permanecem** na toolbar.
+
+### Backend
+- `EstabelecimentoProximoResponseDto` passa a incluir `latitude` / `longitude` do endereço geocodificado.
+- `EstabelecimentoDescobertaService.Mapear` projeta as coordenadas no payload de próximos.
+
+### Frontend
+- Dependências: `leaflet`, `leaflet.markercluster` (+ types).
+- Componentes: `ExplorarMapa.vue` (mapa, cluster, markers customizados, sync de bounds) e `ExplorarMapaCard.vue` (resumo + Ver detalhes / Agendar).
+- `ExplorarView.vue`: mapa protagonista; chips de categoria; busca por nome/endereço/bairro/cidade; pan atualiza próximos; seleção centraliza e abre o card.
+- Utils: `explorarMapa.ts`; tipos e mocks com coordenadas.
+
 ---
 
 ## Resumo de arquivos (referência)
 
-- **Frontend** (`glow-up-connect-app`): `src/mocks/*`, `src/components/shell/*`, `src/components/sidebar/*`, `src/components/loading/*`, `src/components/dashboard/*`, `src/components/assinatura/page/*`, `src/components/assinatura/faturas/*`, `src/components/financeiro/comissoes/*`, `src/components/financeiro/dashboard/*`, `src/components/equipe/page/*`, `src/views/dashboard/*`, `src/views/configuracoes/assinatura/*`, `src/views/modulos/financeiro/*`, `src/views/modulos/equipe/*`, `src/layouts/DashboardLayout.vue`, `src/constants/{navigation,pageChrome}.ts`, `src/stores/{app,loading}.store.ts`, `src/composables/{useLoading,useDashboardNav,usePageChrome}.ts`, `src/types/*`, `src/services/*`.
+- **Frontend** (`glow-up-connect-app`): `src/mocks/*`, `src/components/shell/*`, `src/components/sidebar/*`, `src/components/loading/*`, `src/components/dashboard/*`, `src/components/assinatura/page/*`, `src/components/assinatura/faturas/*`, `src/components/financeiro/comissoes/*`, `src/components/financeiro/dashboard/*`, `src/components/equipe/page/*`, `src/components/cliente/ExplorarMapa*.vue`, `src/views/dashboard/*`, `src/views/configuracoes/assinatura/*`, `src/views/modulos/financeiro/*`, `src/views/modulos/equipe/*`, `src/layouts/DashboardLayout.vue`, `src/constants/{navigation,pageChrome}.ts`, `src/stores/{app,loading}.store.ts`, `src/composables/{useLoading,useDashboardNav,usePageChrome}.ts`, `src/types/*`, `src/services/*`, `src/utils/explorarMapa.ts`.
 - **Backend** (`glow-up-connect-api`): `src/GLOWAPI.Domain/Entities/{Estabelecimento,Usuario,CategoriaEstabelecimento}.cs`, `src/GLOWAPI.Domain/Enums/Sexo.cs`, `src/GLOWAPI.Infrastructure/Configurations/*`, `src/GLOWAPI.Infrastructure/Migrations/*`, `src/GLOWAPI.Application/DTOs/*`, `src/GLOWAPI.Application/Services/*`, `src/GLOWAPI.Application/Interfaces/*`, `src/GLOWAPI.Infrastructure/Repositories/*`, `src/GLOWAPI.API/Controllers/*`.

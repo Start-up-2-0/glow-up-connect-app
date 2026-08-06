@@ -24,6 +24,9 @@ export interface EstabelecimentoProximo {
   totalAvaliacoes?: number
   categoriaId?: number
   categoria?: string
+  /** Coordenadas do estabelecimento para o mapa (quando geocodificado). */
+  latitude?: number | null
+  longitude?: number | null
 }
 
 export interface EstabelecimentosProximosResponse {

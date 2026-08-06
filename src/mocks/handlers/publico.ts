@@ -6,12 +6,12 @@ import { mockCategoriasEstabelecimento } from '../seed/plataforma'
 const PUBLIC_GUID = 'a1b2c3d4e5f6a7b8c9d0e1f2'
 const ENDERECO = { logradouro: 'Av. das Acácias, 250', bairro: 'Centro', cidade: 'Aracaju', estado: 'SE' }
 
-/** Marketplace de estabelecimentos — itens com categoria. */
+/** Marketplace de estabelecimentos — itens com categoria e coordenadas (Aracaju/SE). */
 const MARKETPLACE_ITENS = [
-  { publicGuid: PUBLIC_GUID, nome: 'Studio Glow Up', logo: '', descricao: 'Salão completo de beleza.', distanciaKm: 0.8, endereco: ENDERECO, destaqueMarketplace: true, notaMedia: 4.8, totalAvaliacoes: 68, categoriaId: 2, categoria: 'Salão de Beleza' },
-  { publicGuid: 'bbbb-cccc-dddd', nome: 'Barbearia do Zé', logo: '', descricao: 'Corte e barba para o dia a dia.', distanciaKm: 1.4, endereco: { logradouro: 'Rua da Barba, 12', bairro: 'Centro', cidade: 'Aracaju', estado: 'SE' }, destaqueMarketplace: false, notaMedia: 4.7, totalAvaliacoes: 33, categoriaId: 1, categoria: 'Barbearia' },
-  { publicGuid: 'eeee-ffff-gggg', nome: 'Cabeleleila Leila', logo: '', descricao: 'Especializada em cabelos.', distanciaKm: 3.1, endereco: { logradouro: 'Av. Central, 500', bairro: 'Centro', cidade: 'Aracaju', estado: 'SE' }, notaMedia: 4.4, totalAvaliacoes: 22, categoriaId: 2, categoria: 'Salão de Beleza' },
-  { publicGuid: 'abcd-1111-2222', nome: 'Nail Studio Prime', logo: '', descricao: 'Esmaltação e design de unhas.', distanciaKm: 4.2, endereco: { logradouro: 'Rua das Unhas, 7', bairro: 'Jardins', cidade: 'Aracaju', estado: 'SE' }, notaMedia: 4.5, totalAvaliacoes: 18, categoriaId: 2, categoria: 'Salão de Beleza' },
+  { publicGuid: PUBLIC_GUID, nome: 'Studio Glow Up', logo: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=96&h=96&fit=crop&auto=format', descricao: 'Salão completo de beleza.', distanciaKm: 0.8, endereco: ENDERECO, destaqueMarketplace: true, notaMedia: 4.8, totalAvaliacoes: 68, categoriaId: 2, categoria: 'Salão de Beleza', latitude: -10.9472, longitude: -37.0731 },
+  { publicGuid: 'bbbb-cccc-dddd', nome: 'Barbearia do Zé', logo: 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=96&h=96&fit=crop&auto=format', descricao: 'Corte e barba para o dia a dia.', distanciaKm: 1.4, endereco: { logradouro: 'Rua da Barba, 12', bairro: 'Centro', cidade: 'Aracaju', estado: 'SE' }, destaqueMarketplace: false, notaMedia: 4.7, totalAvaliacoes: 33, categoriaId: 1, categoria: 'Barbearia', latitude: -10.9518, longitude: -37.0684 },
+  { publicGuid: 'eeee-ffff-gggg', nome: 'Cabeleleila Leila', logo: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=96&h=96&fit=crop&auto=format', descricao: 'Especializada em cabelos.', distanciaKm: 3.1, endereco: { logradouro: 'Av. Central, 500', bairro: 'Centro', cidade: 'Aracaju', estado: 'SE' }, notaMedia: 4.4, totalAvaliacoes: 22, categoriaId: 2, categoria: 'Salão de Beleza', latitude: -10.9405, longitude: -37.0812 },
+  { publicGuid: 'abcd-1111-2222', nome: 'Nail Studio Prime', logo: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=96&h=96&fit=crop&auto=format', descricao: 'Esmaltação e design de unhas.', distanciaKm: 4.2, endereco: { logradouro: 'Rua das Unhas, 7', bairro: 'Jardins', cidade: 'Aracaju', estado: 'SE' }, notaMedia: 4.5, totalAvaliacoes: 18, categoriaId: 2, categoria: 'Salão de Beleza', latitude: -10.9589, longitude: -37.0556 },
 ]
 
 function hoje(plusDays = 0): string {
