@@ -1,4 +1,4 @@
-import { onScopeDispose, ref } from 'vue'
+import { computed, onScopeDispose, ref } from 'vue'
 import { distanciaMetros } from '@/utils/explorarMapa'
 
 export type GeolocationErrorCode = 'unsupported' | 'denied' | 'unavailable' | 'timeout' | 'unknown'
@@ -20,18 +20,22 @@ const ERROR_MESSAGES: Record<GeolocationErrorCode, string> = {
   unknown: 'Erro ao obter localização.',
 }
 
-/** Meta de precisão (metros). Leituras piores só substituem se forem claramente melhores. */
-const TARGET_ACCURACY_M = 40
-const ACCEPTABLE_ACCURACY_M = 120
-/** Acima disso consideramos “aproximada” (rede/IP). */
-export const COARSE_ACCURACY_M = 500
+/** Meta ideal (metros). */
+const TARGET_ACCURACY_M = 35
+/** Consideramos confiável o suficiente para centralizar o mapa. */
+export const RELIABLE_ACCURACY_M = 80
+/** Acima disso é tipicamente rede/IP — não deve travar o mapa num bairro errado. */
+export const COARSE_ACCURACY_M = 250
+/** Descarta leituras absurdamente imprecisas enquanto houver alternativas. */
+const UNUSABLE_ACCURACY_M = 2_000
 
 const HIGH_ACCURACY_OPTIONS: PositionOptions = {
   enableHighAccuracy: true,
-  /** Sem cache: força leitura nova do sensor/rede. */
   maximumAge: 0,
-  timeout: 30_000,
+  timeout: 25_000,
 }
+
+const MAX_SAMPLES = 24
 
 export function useGeolocation() {
   const coords = ref<GeolocationCoords | null>(null)
@@ -42,6 +46,17 @@ export function useGeolocation() {
 
   let watchId: number | null = null
   let requestWatchId: number | null = null
+  const samples: GeolocationCoords[] = []
+
+  const isReliable = computed(() => {
+    const acc = coords.value?.accuracy
+    return acc != null && Number.isFinite(acc) && acc <= RELIABLE_ACCURACY_M
+  })
+
+  const isCoarse = computed(() => {
+    const acc = coords.value?.accuracy
+    return acc == null || !Number.isFinite(acc) || acc > COARSE_ACCURACY_M
+  })
 
   function mapError(error: GeolocationPositionError): GeolocationErrorCode {
     switch (error.code) {
@@ -72,43 +87,82 @@ export function useGeolocation() {
       : Number.POSITIVE_INFINITY
   }
 
+  function pushSample(sample: GeolocationCoords) {
+    samples.push(sample)
+    if (samples.length > MAX_SAMPLES) samples.shift()
+  }
+
   /**
-   * Aceita a nova leitura se for a primeira, tiver precisão melhor,
-   * ou indicar deslocamento real (acima do ruído do GPS).
+   * Escolhe a leitura mais provável: prioriza precisão + consenso
+   * (várias leituras próximas), para evitar um “pulo” de Wi‑Fi para o bairro errado.
    */
+  function pickConsensus(pool: GeolocationCoords[]): GeolocationCoords | null {
+    if (pool.length === 0) return null
+
+    const usable = pool.filter((s) => accuracyOf(s) <= UNUSABLE_ACCURACY_M)
+    const candidates = (usable.length > 0 ? usable : pool).slice()
+
+    let best = candidates[0]!
+    let bestScore = Number.NEGATIVE_INFINITY
+
+    for (const candidate of candidates) {
+      const acc = accuracyOf(candidate)
+      const radius = Math.max(60, Math.min(acc, 180))
+      const neighbors = candidates.filter((s) => distanciaMetros(candidate, s) <= radius).length
+      // Consenso pesa mais que uma única leitura “ótima” mas isolada/errada.
+      const score = neighbors * 2_000 - acc
+      if (score > bestScore) {
+        bestScore = score
+        best = candidate
+      }
+    }
+
+    return best
+  }
+
   function shouldAccept(next: GeolocationCoords, force = false): boolean {
     if (force) return true
     const prev = coords.value
-    if (!prev) return true
+    if (!prev) return accuracyOf(next) <= UNUSABLE_ACCURACY_M
 
     const nextAcc = accuracyOf(next)
     const prevAcc = accuracyOf(prev)
 
-    // Melhora relevante de precisão (ex.: IP/Wi‑Fi → GPS).
-    if (nextAcc + 8 < prevAcc) return true
+    // Nunca trocar uma posição boa por uma grosseira.
+    if (nextAcc > COARSE_ACCURACY_M && prevAcc <= RELIABLE_ACCURACY_M) return false
+    if (nextAcc > prevAcc * 1.8 && nextAcc > RELIABLE_ACCURACY_M) return false
 
-    // Mesmo nível de precisão: só atualiza se o deslocamento passar do ruído.
-    const noiseFloor = Math.max(Math.min(nextAcc, prevAcc), 12)
+    if (nextAcc + 5 < prevAcc) return true
+
+    const noiseFloor = Math.max(Math.min(nextAcc, prevAcc), 15)
     const moved = distanciaMetros(prev, next)
-    if (moved > noiseFloor && nextAcc <= prevAcc * 1.35) return true
 
-    // Leitura fresca e já aceitável, sem piorar muito.
-    if (
-      nextAcc <= ACCEPTABLE_ACCURACY_M &&
-      nextAcc <= prevAcc + 20 &&
-      (next.timestamp ?? 0) >= (prev.timestamp ?? 0)
-    ) {
-      return true
+    // Deslocamento dentro do ruído do GPS: ignora.
+    if (moved <= noiseFloor) {
+      // Ainda assim aceita se a precisão melhorou um pouco.
+      return nextAcc + 3 < prevAcc
     }
 
-    return false
+    // Pulo grande só com precisão melhor ou equivalente boa.
+    if (moved > Math.max(noiseFloor * 2, 80)) {
+      return nextAcc <= prevAcc && nextAcc <= COARSE_ACCURACY_M
+    }
+
+    return nextAcc <= prevAcc * 1.25
   }
 
   function applyPosition(position: GeolocationPosition, force = false): GeolocationCoords | null {
     const next = fromPosition(position)
-    if (!shouldAccept(next, force)) return null
-    coords.value = next
-    return next
+    pushSample(next)
+
+    // Em modo contínuo, prefere consenso recente em vez do último ponto cru.
+    const recent = samples.slice(-8)
+    const consensus = pickConsensus(recent) ?? next
+    const candidate = force ? next : consensus
+
+    if (!shouldAccept(candidate, force)) return null
+    coords.value = candidate
+    return candidate
   }
 
   function fail(err: GeolocationPositionError) {
@@ -126,26 +180,22 @@ export function useGeolocation() {
   }
 
   /**
-   * Obtém localização priorizando precisão:
-   * usa `watchPosition` até atingir boa acurácia ou esgotar o tempo,
-   * devolvendo a melhor leitura recebida.
+   * Obtém localização com amostragem + consenso.
+   * Não usa cache e evita travar na primeira leitura de rede/IP.
    */
   function request(options?: {
     force?: boolean
-    /** Tempo máximo aguardando GPS mais preciso (ms). */
     waitMs?: number
-    /** Precisão alvo em metros. */
     targetAccuracyM?: number
+    /** Mínimo de amostras antes de aceitar precisão “ok”. */
+    minSamples?: number
   }): Promise<GeolocationCoords | null> {
     const force = options?.force === true
-    const waitMs = options?.waitMs ?? 18_000
+    const waitMs = options?.waitMs ?? 22_000
     const targetAccuracyM = options?.targetAccuracyM ?? TARGET_ACCURACY_M
+    const minSamples = options?.minSamples ?? 3
 
-    if (
-      !force &&
-      coords.value &&
-      accuracyOf(coords.value) <= ACCEPTABLE_ACCURACY_M
-    ) {
+    if (!force && coords.value && accuracyOf(coords.value) <= RELIABLE_ACCURACY_M) {
       return Promise.resolve(coords.value)
     }
 
@@ -155,14 +205,25 @@ export function useGeolocation() {
       return Promise.resolve(null)
     }
 
+    // Evita dois watchPosition ao mesmo tempo (causa leituras instáveis).
+    if (watchId != null) {
+      navigator.geolocation.clearWatch(watchId)
+      watchId = null
+      watching.value = false
+    }
+
     loading.value = true
     errorCode.value = null
     errorMessage.value = null
     clearRequestWatch()
+    if (force) {
+      samples.length = 0
+      coords.value = null
+    }
 
     return new Promise((resolve) => {
-      let best: GeolocationCoords | null = coords.value
       let settled = false
+      const collected: GeolocationCoords[] = []
 
       const finish = (value: GeolocationCoords | null) => {
         if (settled) return
@@ -179,31 +240,39 @@ export function useGeolocation() {
       }
 
       const timer = window.setTimeout(() => {
-        finish(best)
+        finish(pickConsensus(collected.length ? collected : samples))
       }, waitMs)
 
       requestWatchId = navigator.geolocation.watchPosition(
         (position) => {
           const candidate = fromPosition(position)
-          const candidateAcc = accuracyOf(candidate)
-          const bestAcc = accuracyOf(best)
-
-          if (!best || candidateAcc < bestAcc) {
-            best = candidate
-            coords.value = candidate
-          } else if (shouldAccept(candidate, force)) {
-            best = candidate
-            coords.value = candidate
+          if (accuracyOf(candidate) > UNUSABLE_ACCURACY_M && collected.length > 0) {
+            return
           }
 
-          if (candidateAcc <= targetAccuracyM) {
-            finish(candidate)
+          collected.push(candidate)
+          pushSample(candidate)
+
+          const consensus = pickConsensus(collected)
+          if (consensus) {
+            coords.value = consensus
+          }
+
+          const bestAcc = accuracyOf(consensus)
+          const enoughSamples = collected.length >= minSamples
+          const preciseEnough = bestAcc <= targetAccuracyM && enoughSamples
+          const goodEnough =
+            bestAcc <= RELIABLE_ACCURACY_M &&
+            collected.length >= Math.max(minSamples, 4)
+
+          if (preciseEnough || goodEnough) {
+            finish(consensus)
           }
         },
         (err) => {
-          // Se já temos alguma leitura, devolve a melhor; senão, falha.
-          if (best) {
-            finish(best)
+          const fallback = pickConsensus(collected.length ? collected : samples)
+          if (fallback) {
+            finish(fallback)
             return
           }
           fail(err)
@@ -214,7 +283,6 @@ export function useGeolocation() {
     })
   }
 
-  /** Inicia acompanhamento contínuo via `watchPosition`. */
   function startWatch(): void {
     if (!navigator.geolocation) {
       errorCode.value = 'unsupported'
@@ -226,6 +294,9 @@ export function useGeolocation() {
       watching.value = true
       return
     }
+
+    // Não compete com uma request em andamento.
+    if (requestWatchId != null) return
 
     loading.value = coords.value == null
     errorCode.value = null
@@ -240,7 +311,6 @@ export function useGeolocation() {
         errorMessage.value = null
       },
       (err) => {
-        // Timeout intermitente no watch não deve apagar uma posição boa.
         if (err.code === err.TIMEOUT && coords.value) {
           loading.value = false
           return
@@ -271,6 +341,8 @@ export function useGeolocation() {
     coords,
     loading,
     watching,
+    isReliable,
+    isCoarse,
     errorCode,
     errorMessage,
     request,

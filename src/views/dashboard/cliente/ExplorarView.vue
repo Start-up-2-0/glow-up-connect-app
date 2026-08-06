@@ -13,20 +13,24 @@ import type {
   EstabelecimentoProximo,
 } from '@/types/estabelecimento.types'
 import { distanciaMetros, estabelecimentoTemCoordenadas } from '@/utils/explorarMapa'
-import { COARSE_ACCURACY_M } from '@/composables/useGeolocation'
+import {
+  COARSE_ACCURACY_M,
+  RELIABLE_ACCURACY_M,
+} from '@/composables/useGeolocation'
 
 const RAIO_KM = 12
 const FILTROS_KEY = 'guc_explorar_filtros'
-const FALLBACK_CENTER = { latitude: -10.9472, longitude: -37.0731 }
-/** Recarrega lojas próximas quando o usuário se desloca além deste limiar. */
+/** Centro neutro só para abrir o mapa se o GPS falhar — nunca como “posição do usuário”. */
+const MAP_BOOTSTRAP_CENTER = { latitude: -10.9472, longitude: -37.0731 }
 const REFETCH_USER_METERS = 250
-/** Se a precisão melhorar e o ponto “pular” além disso, recentraliza a busca. */
-const ACCURACY_CORRECTION_METERS = 80
+const ACCURACY_CORRECTION_METERS = 60
 
 const {
   coords,
   loading: geoLoading,
   watching: geoWatching,
+  isReliable,
+  isCoarse,
   errorMessage,
   request,
   startWatch,
@@ -48,26 +52,29 @@ const selectedGuid = ref<string | null>(null)
 const focusGuid = ref<string | null>(null)
 const mapaRef = ref<InstanceType<typeof ExplorarMapa> | null>(null)
 /** Mantém o mapa acompanhando o GPS até o usuário arrastar o mapa. */
-const followUser = ref(true)
+const followUser = ref(false)
 
 /** Centro usado na consulta (usuário ou área do mapa). */
 const queryCenter = ref<{ latitude: number; longitude: number } | null>(null)
 /** Última posição do usuário usada para buscar estabelecimentos. */
 const lastUserFetch = ref<{ latitude: number; longitude: number } | null>(null)
 
-const localizacaoAproximada = computed(() => {
-  const acc = coords.value?.accuracy
-  return acc != null && acc > COARSE_ACCURACY_M
-})
+const localizacaoAproximada = computed(() => isCoarse.value && coords.value != null)
 
 const precisaoLabel = computed(() => {
   const acc = coords.value?.accuracy
   if (acc == null || !Number.isFinite(acc)) return null
-  if (acc <= 40) return `Precisão ~${Math.round(acc)} m`
+  if (acc <= RELIABLE_ACCURACY_M) return `Precisão ~${Math.round(acc)} m`
   if (acc <= COARSE_ACCURACY_M) return `Precisão ~${Math.round(acc)} m`
-  return `Localização aproximada (~${Math.round(acc / 1000)} km)`
+  if (acc >= 1000) return `Localização aproximada (~${(acc / 1000).toFixed(1)} km)`
+  return `Localização aproximada (~${Math.round(acc)} m)`
 })
 
+/** Só exibe o ponto do usuário quando houver coordenada real do GPS. */
+const userLat = computed(() => coords.value?.latitude ?? null)
+const userLng = computed(() => coords.value?.longitude ?? null)
+const userAccuracy = computed(() => coords.value?.accuracy ?? null)
+const podeSeguirUsuario = computed(() => followUser.value && isReliable.value)
 const mapaVisivel = computed(
   () => queryCenter.value != null || coords.value != null || !geoLoading,
 )
@@ -104,9 +111,8 @@ async function carregar(opts?: { latitude: number; longitude: number }) {
   const location =
     opts ??
     queryCenter.value ??
-    coords.value ??
-    (await request()) ??
-    FALLBACK_CENTER
+    (coords.value && !isCoarse.value ? coords.value : null) ??
+    MAP_BOOTSTRAP_CENTER
 
   queryCenter.value = {
     latitude: location.latitude,
@@ -146,12 +152,13 @@ async function carregar(opts?: { latitude: number; longitude: number }) {
 
 async function handleRetryLocation() {
   followUser.value = true
-  startWatch()
   const location = await request({
     force: true,
-    waitMs: 20_000,
-    targetAccuracyM: 40,
+    waitMs: 25_000,
+    targetAccuracyM: 35,
+    minSamples: 4,
   })
+  startWatch()
   if (!location) return
   selectedGuid.value = null
   lastUserFetch.value = {
@@ -159,7 +166,12 @@ async function handleRetryLocation() {
     longitude: location.longitude,
   }
   await carregar(location)
-  mapaRef.value?.recenterUser()
+  // Só centraliza com força se a leitura estiver confiável; senão o círculo mostra a incerteza.
+  if (isReliable.value) {
+    mapaRef.value?.recenterUser()
+  } else {
+    mapaRef.value?.panToUser()
+  }
 }
 
 function onBoundsChange(payload: { latitude: number; longitude: number }) {
@@ -226,15 +238,15 @@ watch(busca, (q) => {
 watch(
   coords,
   (next, prev) => {
-    if (!next || !followUser.value) return
+    if (!next) return
 
-    // Correção quando o GPS melhora (sai da posição grosseira de rede/IP).
+    // Quando a precisão melhora de “grosseira” para confiável, corrige o mapa.
     if (prev && lastUserFetch.value) {
       const prevAcc = prev.accuracy ?? Number.POSITIVE_INFINITY
       const nextAcc = next.accuracy ?? Number.POSITIVE_INFINITY
       const improved =
-        nextAcc + 40 < prevAcc ||
-        (prevAcc > COARSE_ACCURACY_M && nextAcc <= COARSE_ACCURACY_M)
+        (prevAcc > COARSE_ACCURACY_M && nextAcc <= RELIABLE_ACCURACY_M) ||
+        nextAcc + 25 < prevAcc
       const jumped = distanciaMetros(lastUserFetch.value, next) >= ACCURACY_CORRECTION_METERS
 
       if (improved && jumped) {
@@ -242,13 +254,14 @@ watch(
           latitude: next.latitude,
           longitude: next.longitude,
         }
+        followUser.value = true
         void carregar(next)
         mapaRef.value?.recenterUser()
         return
       }
     }
 
-    if (!prev || !lastUserFetch.value) return
+    if (!followUser.value || !isReliable.value || !lastUserFetch.value || !prev) return
 
     const moved = distanciaMetros(lastUserFetch.value, next)
     if (moved < REFETCH_USER_METERS) return
@@ -264,24 +277,30 @@ watch(
 onMounted(async () => {
   lerFiltroPersistido()
   void carregarCategorias()
-  followUser.value = true
-  startWatch()
 
-  // Aguarda GPS estabilizar em vez de aceitar a 1ª leitura (geralmente imprecisa).
+  // 1) Amostra GPS com consenso (sem watch paralelo).
+  // 2) Só então inicia acompanhamento contínuo.
   const location = await request({
     force: true,
-    waitMs: 18_000,
-    targetAccuracyM: 40,
+    waitMs: 25_000,
+    targetAccuracyM: 35,
+    minSamples: 4,
   })
+  startWatch()
+
   if (location) {
+    followUser.value = isReliable.value
     lastUserFetch.value = {
       latitude: location.latitude,
       longitude: location.longitude,
     }
     await carregar(location)
-    mapaRef.value?.recenterUser()
+    if (isReliable.value) {
+      mapaRef.value?.recenterUser()
+    }
   } else {
-    await carregar(FALLBACK_CENTER)
+    followUser.value = false
+    await carregar(MAP_BOOTSTRAP_CENTER)
   }
 })
 
@@ -313,10 +332,10 @@ onUnmounted(() => {
       <button
         type="button"
         class="explorar-page__locate"
-        :class="{ 'explorar-page__locate--active': followUser && geoWatching }"
+        :class="{ 'explorar-page__locate--active': followUser && geoWatching && isReliable }"
         :disabled="geoLoading"
-        :aria-pressed="followUser && geoWatching"
-        :title="followUser && geoWatching ? 'Acompanhando sua localização' : 'Centralizar na minha localização'"
+        :aria-pressed="followUser && geoWatching && isReliable"
+        :title="followUser && isReliable ? 'Acompanhando sua localização' : 'Centralizar na minha localização'"
         @click="handleRetryLocation"
       >
         <LocateFixed
@@ -325,7 +344,7 @@ onUnmounted(() => {
           aria-hidden="true"
         />
         <span class="hidden sm:inline">
-          {{ followUser && geoWatching ? 'Acompanhar' : 'Minha localização' }}
+          {{ geoLoading ? 'Obtendo GPS…' : followUser && isReliable ? 'Acompanhar' : 'Minha localização' }}
         </span>
       </button>
     </header>
@@ -357,11 +376,11 @@ onUnmounted(() => {
     </BaseAlert>
 
     <BaseAlert v-else-if="localizacaoAproximada" variant="warning" class="mt-3">
-      Sua localização está aproximada
-      <template v-if="precisaoLabel"> ({{ precisaoLabel }})</template>.
-      No computador a precisão costuma ser limitada; em celular com GPS fica bem melhor.
+      A localização do navegador está imprecisa
+      <template v-if="precisaoLabel"> ({{ precisaoLabel }})</template>
+      e pode apontar para outro bairro. No celular com GPS, ou ao ar livre, a precisão melhora.
       <button type="button" :class="[CLIENTE_BTN_OUTLINE_CLASS, 'mt-3']" @click="handleRetryLocation">
-        Melhorar localização
+        Tentar localização precisa
       </button>
     </BaseAlert>
 
@@ -379,10 +398,10 @@ onUnmounted(() => {
         v-else
         ref="mapaRef"
         :itens="itensFiltrados"
-        :user-lat="coords?.latitude"
-        :user-lng="coords?.longitude"
-        :user-accuracy="coords?.accuracy"
-        :follow-user="followUser"
+        :user-lat="userLat"
+        :user-lng="userLng"
+        :user-accuracy="userAccuracy"
+        :follow-user="podeSeguirUsuario"
         :selected-guid="selectedGuid"
         :focus-guid="focusGuid"
         @update:selected-guid="selectedGuid = $event"

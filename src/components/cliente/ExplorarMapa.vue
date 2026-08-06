@@ -163,7 +163,7 @@ function syncUserMarker() {
     userMarker.setLatLng(latlng)
   }
 
-  if (props.followUser) {
+  if (props.followUser && props.userAccuracy != null && props.userAccuracy <= 80) {
     withSuppressedBounds(() => {
       map?.panTo(latlng, { animate: true, duration: 0.35 })
     }, 500)
@@ -172,20 +172,21 @@ function syncUserMarker() {
 
 function fitToContent(force = false) {
   if (!map || !cluster) return
-  const layers = cluster.getLayers()
-  if (layers.length === 0) {
-    if (props.userLat != null && props.userLng != null) {
+
+  // Com localização do usuário, prioriza o ponto dele — não “puxa” o mapa para o cluster de lojas.
+  if (props.userLat != null && props.userLng != null) {
+    if (force) {
       withSuppressedBounds(() => {
-        map?.setView([props.userLat!, props.userLng!], 13)
+        map?.setView([props.userLat!, props.userLng!], 15)
       })
     }
     return
   }
 
+  const layers = cluster.getLayers()
+  if (layers.length === 0) return
+
   const bounds = cluster.getBounds()
-  if (props.userLat != null && props.userLng != null) {
-    bounds.extend([props.userLat, props.userLng])
-  }
   if (force || !map.getBounds().contains(bounds)) {
     withSuppressedBounds(() => {
       map?.fitBounds(bounds.pad(0.18), { maxZoom: 15, animate: true })
