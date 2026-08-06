@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
 import {
   CalendarDays,
   CheckCircle2,
@@ -11,7 +10,7 @@ import {
 } from 'lucide-vue-next'
 import AvaliacaoNotaResumo from '@/components/avaliacao/AvaliacaoNotaResumo.vue'
 import { CLIENTE_BTN_CTA_CLASS } from '@/constants/designTokens'
-import { lojaAgendarPath } from '@/constants/routes'
+import { lojaAgendarUrl } from '@/constants/routes'
 import type { EstabelecimentoPublico } from '@/types/estabelecimento.types'
 import { formatDistanciaKm, formatEnderecoCard, formatHorarioFigma } from '@/utils/formatters'
 
@@ -168,16 +167,16 @@ const inicial = computed(() => (props.loja.nome?.charAt(0) || '?').toUpperCase()
 
       <p v-if="loja.descricao" class="loja-hero-card__desc">{{ loja.descricao }}</p>
 
-      <RouterLink
+      <a
         v-if="!hideCta"
-        :to="lojaAgendarPath(loja.publicGuid)"
+        :href="lojaAgendarUrl(loja.publicGuid)"
         class="loja-hero-card__cta loja-hero-card__cta--desktop"
       >
         <span :class="CLIENTE_BTN_CTA_CLASS">
           <CalendarDays class="size-4" aria-hidden="true" />
           Continuar agendamento
         </span>
-      </RouterLink>
+      </a>
     </div>
   </section>
 </template>

@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/user.store'
 import { useAppStore } from '@/stores/app.store'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { useNegocioStore } from '@/stores/negocio.store'
+import { isExternalRedirect } from '@/utils/authRedirect'
 import type { LoginPayload } from '@/types/auth.types'
 
 export function useAuth() {
@@ -18,6 +19,10 @@ export function useAuth() {
   async function login(payload: LoginPayload, redirect?: string) {
     await authStore.login(payload)
     await useNegocioStore().fetchEstabelecimentos(true)
+    if (redirect && isExternalRedirect(redirect)) {
+      window.location.assign(redirect)
+      return
+    }
     await router.push(redirect ?? ROUTE_PATHS.DASHBOARD)
   }
 

@@ -3,7 +3,7 @@ import { RouterLink } from 'vue-router'
 import { X } from 'lucide-vue-next'
 import AvaliacaoNotaResumo from '@/components/avaliacao/AvaliacaoNotaResumo.vue'
 import type { EstabelecimentoProximo } from '@/types/estabelecimento.types'
-import { lojaAgendarPath, lojaDetalhePath } from '@/constants/routes'
+import { lojaAgendarUrl, lojaDetalhePath } from '@/constants/routes'
 import { formatDistanciaKm } from '@/utils/formatters'
 import { formatEnderecoMapa } from '@/utils/explorarMapa'
 
@@ -72,12 +72,12 @@ const emit = defineEmits<{
         >
           Ver detalhes
         </RouterLink>
-        <RouterLink
-          :to="lojaAgendarPath(item.publicGuid)"
+        <a
+          :href="lojaAgendarUrl(item.publicGuid)"
           class="explorar-mapa-card__btn explorar-mapa-card__btn--primary"
         >
           Agendar
-        </RouterLink>
+        </a>
       </div>
     </div>
   </article>
