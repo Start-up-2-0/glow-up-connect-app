@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { ROUTE_PATHS } from '@/constants/routes'
+import { lojaAgendarUrl } from '@/constants/routes'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
@@ -68,7 +68,7 @@ const enderecoIncompleto = computed(
 
 const linkPublico = computed(() => {
   if (!estabelecimentoAtivo.value?.publicGuid) return ''
-  return `${window.location.origin}${ROUTE_PATHS.LOJA}/${estabelecimentoAtivo.value.publicGuid}/agendar`
+  return lojaAgendarUrl(estabelecimentoAtivo.value.publicGuid)
 })
 
 const enderecoResumo = computed(() => {
