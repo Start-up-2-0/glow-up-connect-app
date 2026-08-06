@@ -51,21 +51,23 @@ export function registerPublicoRoutes(router: MockRouter) {
     })
   })
 
-  router.on('get', '/publico/estabelecimentos/:publicGuid', () => {
+  router.on('get', '/publico/estabelecimentos/:publicGuid', (req: MockRequest) => {
+    const guid = String(req.params.publicGuid ?? '')
+    const item = MARKETPLACE_ITENS.find((i) => i.publicGuid === guid) ?? MARKETPLACE_ITENS[0]!
     return ok({
-      publicGuid: PUBLIC_GUID,
-      nome: 'Studio Glow Up',
-      logo: '',
-      descricao: 'Salão completo de beleza.',
-      endereco: ENDERECO,
-      distanciaKm: 0.8,
-      notaMedia: 4.8,
-      totalAvaliacoes: 68,
+      publicGuid: item.publicGuid,
+      nome: item.nome,
+      logo: item.logo,
+      descricao: item.descricao,
+      endereco: item.endereco,
+      distanciaKm: item.distanciaKm,
+      notaMedia: item.notaMedia ?? 4.5,
+      totalAvaliacoes: item.totalAvaliacoes ?? 10,
       abertoAgora: true,
       horarioAbertura: '09:00',
       horarioFechamento: '18:00',
-      categoriaId: 2,
-      categoria: 'Salão de Beleza',
+      categoriaId: item.categoriaId,
+      categoria: item.categoria,
     })
   })
 

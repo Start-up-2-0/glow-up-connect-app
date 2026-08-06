@@ -12,6 +12,8 @@ defineProps<{
   backTo?: string
   backLabel?: string
   showDivider?: boolean
+  /** Quando false, oculta o título (mantém só o botão voltar). */
+  showTitle?: boolean
 }>()
 </script>
 
@@ -34,7 +36,7 @@ defineProps<{
           />
         </svg>
       </RouterLink>
-      <div class="min-w-0">
+      <div v-if="showTitle !== false" class="min-w-0">
         <h1 :class="CLIENTE_PAGE_TITLE_CLASS">
           {{ title ?? 'Explorar lojas' }}
         </h1>

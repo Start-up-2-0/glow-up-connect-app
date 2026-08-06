@@ -12,7 +12,8 @@
 .loader-overlay {
   position: fixed;
   inset: 0;
-  z-index: 999;
+  /* Acima do shell (sidebar/topbar ~2010–2020) e de modais de conteúdo. */
+  z-index: 5000;
   display: grid;
   place-items: center;
   /* Backdrop translúcido com blur — a interface continua visível, sem fundo preto. */

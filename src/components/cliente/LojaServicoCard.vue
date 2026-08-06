@@ -1,38 +1,52 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { ChevronRight } from 'lucide-vue-next'
 import { formatPrecoFigma } from '@/utils/formatters'
 
-defineProps<{
+const props = defineProps<{
   nome: string
   duracaoMinutos: number
   precoMinimo: number
   precoMaximo: number
+  accentIndex?: number
 }>()
+
+const precoLabel = computed(() =>
+  props.precoMinimo === props.precoMaximo
+    ? formatPrecoFigma(props.precoMinimo)
+    : `${formatPrecoFigma(props.precoMinimo)} – ${formatPrecoFigma(props.precoMaximo)}`,
+)
+
+const accentClass = computed(() => {
+  const tones = [
+    'loja-servico-card__icon--violet',
+    'loja-servico-card__icon--rose',
+    'loja-servico-card__icon--emerald',
+    'loja-servico-card__icon--amber',
+    'loja-servico-card__icon--sky',
+  ]
+  return tones[(props.accentIndex ?? 0) % tones.length]
+})
 </script>
 
 <template>
-  <div class="cliente-servico-card">
-    <div class="cliente-servico-card__icon" aria-hidden="true">
-      <svg class="size-6" viewBox="0 0 24 24" fill="none">
+  <div class="loja-servico-card">
+    <div class="loja-servico-card__icon" :class="accentClass" aria-hidden="true">
+      <svg class="size-5" viewBox="0 0 24 24" fill="none">
         <path
           d="M6 7l3 14h6l3-14M9 7V5a3 3 0 0 1 6 0v2"
           stroke="currentColor"
-          stroke-width="1.2"
+          stroke-width="1.5"
           stroke-linecap="round"
           stroke-linejoin="round"
         />
-        <path d="M8 11h8M7 15h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
       </svg>
     </div>
-    <div class="cliente-servico-card__content">
-      <p class="cliente-servico-card__nome">{{ nome }}</p>
-      <p class="cliente-servico-card__duracao">{{ duracaoMinutos }} minutos</p>
+    <div class="loja-servico-card__body">
+      <p class="loja-servico-card__nome">{{ nome }}</p>
+      <p class="loja-servico-card__meta">{{ duracaoMinutos }} minutos</p>
     </div>
-    <span class="cliente-servico-card__preco">
-      {{
-        precoMinimo === precoMaximo
-          ? formatPrecoFigma(precoMinimo)
-          : `${formatPrecoFigma(precoMinimo)} – ${formatPrecoFigma(precoMaximo)}`
-      }}
-    </span>
+    <span class="loja-servico-card__preco">{{ precoLabel }}</span>
+    <ChevronRight class="loja-servico-card__chevron" aria-hidden="true" />
   </div>
 </template>

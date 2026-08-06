@@ -80,7 +80,7 @@ watch(visible, (value) => {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 998;
+  z-index: 5000;
   height: 3px;
   overflow: hidden;
   background: transparent;

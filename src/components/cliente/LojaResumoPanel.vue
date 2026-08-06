@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import {
+  CalendarDays,
+  CheckCircle2,
+  Clock3,
+  ExternalLink,
+  Heart,
+  MapPin,
+} from 'lucide-vue-next'
 import AvaliacaoNotaResumo from '@/components/avaliacao/AvaliacaoNotaResumo.vue'
 import { CLIENTE_BTN_CTA_CLASS } from '@/constants/designTokens'
 import { lojaAgendarPath } from '@/constants/routes'
@@ -9,7 +17,16 @@ import { formatDistanciaKm, formatEnderecoCard, formatHorarioFigma } from '@/uti
 
 const props = defineProps<{
   loja: EstabelecimentoPublico
+  tempoMedioMinutos?: number | null
+  /** Esconde o CTA do card (ex.: barra fixa no mobile). */
+  hideCta?: boolean
 }>()
+
+const emit = defineEmits<{
+  'toggle-favorito': []
+}>()
+
+const favorito = defineModel<boolean>('favorito', { default: false })
 
 const distanciaLabel = computed(() =>
   props.loja.distanciaKm != null ? formatDistanciaKm(props.loja.distanciaKm) : '—',
@@ -22,95 +39,145 @@ const horarioAberturaLabel = computed(() =>
 const horarioFechamentoLabel = computed(() =>
   props.loja.horarioFechamento ? formatHorarioFigma(props.loja.horarioFechamento) : '—',
 )
+
+const tempoMedioLabel = computed(() => {
+  const n = props.tempoMedioMinutos
+  if (n == null || !Number.isFinite(n) || n <= 0) return '—'
+  return `${Math.round(n)} min`
+})
+
+const enderecoCompleto = computed(() =>
+  props.loja.endereco ? formatEnderecoCard(props.loja.endereco) : null,
+)
+
+const mapaUrl = computed(() => {
+  if (!enderecoCompleto.value) return null
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoCompleto.value)}`
+})
+
+const inicial = computed(() => (props.loja.nome?.charAt(0) || '?').toUpperCase())
 </script>
 
 <template>
-  <section class="cliente-loja-panel">
-    <header class="cliente-loja-panel__header">
-      <div class="cliente-loja-panel__status">
-        <div v-if="loja.abertoAgora" class="cliente-loja-badge">
-          <span class="cliente-loja-badge__dot" aria-hidden="true" />
-          ABERTO AGORA
-        </div>
-      </div>
-
-      <AvaliacaoNotaResumo
-        class="cliente-loja-panel__rating"
-        :nota-media="loja.notaMedia ?? 0"
-        :total-avaliacoes="loja.totalAvaliacoes ?? 0"
-        variant="panel"
+  <section class="loja-hero-card">
+    <div class="loja-hero-card__media">
+      <img
+        v-if="loja.logo"
+        :src="loja.logo"
+        :alt="loja.nome"
+        class="loja-hero-card__img"
       />
-
-      <h2 class="cliente-loja-panel__nome">{{ loja.nome }}</h2>
-    </header>
-
-    <div class="cliente-loja-stats-row">
-      <div class="cliente-loja-stat-box">
-        <div class="cliente-loja-stat-box__icon-wrap">
-          <svg class="size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z"
-              stroke="currentColor"
-              stroke-width="1.2"
-            />
-            <circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.2" />
-          </svg>
-        </div>
-        <div class="cliente-loja-stat-box__content">
-          <p class="cliente-loja-stat-box__label">Distância</p>
-          <p class="cliente-loja-stat-box__value">{{ distanciaLabel }}</p>
-        </div>
+      <span v-else class="loja-hero-card__img-fallback">{{ inicial }}</span>
+      <button
+        type="button"
+        class="loja-hero-card__fav"
+        :class="{ 'loja-hero-card__fav--on': favorito }"
+        :aria-pressed="favorito"
+        :aria-label="favorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+        @click="favorito = !favorito; emit('toggle-favorito')"
+      >
+        <Heart class="size-4" :fill="favorito ? 'currentColor' : 'none'" aria-hidden="true" />
+      </button>
+      <div v-if="loja.abertoAgora" class="loja-hero-card__badge loja-hero-card__badge--on-media">
+        <span class="loja-hero-card__badge-dot" aria-hidden="true" />
+        ABERTO AGORA
       </div>
-
-      <div class="cliente-loja-stat-box cliente-loja-stat-box--horarios">
-        <div class="cliente-loja-stat-box__icon-wrap">
-          <svg class="size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.2" />
-            <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-          </svg>
-        </div>
-        <div class="cliente-loja-stat-box__horarios-grid">
-          <div class="cliente-loja-stat-box__content">
-            <p class="cliente-loja-stat-box__label">Abre às</p>
-            <p class="cliente-loja-stat-box__value">{{ horarioAberturaLabel }}</p>
-          </div>
-          <div class="cliente-loja-stat-box__content">
-            <p class="cliente-loja-stat-box__label">Fecha às</p>
-            <p class="cliente-loja-stat-box__value">{{ horarioFechamentoLabel }}</p>
-          </div>
-        </div>
+      <div v-else class="loja-hero-card__badge loja-hero-card__badge--closed loja-hero-card__badge--on-media">
+        FECHADO AGORA
       </div>
     </div>
 
-    <div v-if="loja.endereco" class="cliente-loja-address-bar">
-      <svg class="size-[22px] shrink-0 text-glow-text" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-        <path
-          d="M3 9.5C3 5.91 5.91 3 9.5 3S16 5.91 16 9.5c0 4.75-6.5 10.5-6.5 10.5S3 14.25 3 9.5Z"
-          stroke="currentColor"
-          stroke-width="1.2"
+    <div class="loja-hero-card__body">
+      <div class="loja-hero-card__identity">
+        <div class="loja-hero-card__badge-desktop">
+          <div v-if="loja.abertoAgora" class="loja-hero-card__badge">
+            <span class="loja-hero-card__badge-dot" aria-hidden="true" />
+            ABERTO AGORA
+          </div>
+          <div v-else class="loja-hero-card__badge loja-hero-card__badge--closed">
+            FECHADO AGORA
+          </div>
+        </div>
+
+        <div class="loja-hero-card__title-row">
+          <h1 class="loja-hero-card__nome">{{ loja.nome }}</h1>
+          <CheckCircle2
+            v-if="(loja.notaMedia ?? 0) >= 4.5"
+            class="loja-hero-card__verified"
+            aria-label="Loja bem avaliada"
+          />
+        </div>
+
+        <AvaliacaoNotaResumo
+          class="loja-hero-card__rating"
+          :nota-media="loja.notaMedia ?? 0"
+          :total-avaliacoes="loja.totalAvaliacoes ?? 0"
+          variant="inline"
         />
-        <circle cx="9.5" cy="9.5" r="2" stroke="currentColor" stroke-width="1.2" />
-      </svg>
-      <p class="cliente-loja-address-bar__text">
-        {{ formatEnderecoCard(loja.endereco) }}
-      </p>
-    </div>
 
-    <RouterLink :to="lojaAgendarPath(loja.publicGuid)" class="cliente-loja-panel__cta">
-      <span :class="CLIENTE_BTN_CTA_CLASS">
-        Continuar agendamento
-        <span class="cliente-loja-panel__cta-icon" aria-hidden="true">
-          <svg viewBox="0 0 28 28" fill="none">
-            <path
-              d="M7 14h14M16 9l5 5-5 5"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
+        <p v-if="loja.categoria" class="loja-hero-card__categoria">{{ loja.categoria }}</p>
+      </div>
+
+      <div class="loja-hero-card__stats">
+        <div class="loja-hero-stat">
+          <span class="loja-hero-stat__icon"><MapPin class="size-3.5" aria-hidden="true" /></span>
+          <div>
+            <p class="loja-hero-stat__label">Distância</p>
+            <p class="loja-hero-stat__value">{{ distanciaLabel }}</p>
+          </div>
+        </div>
+        <div class="loja-hero-stat">
+          <span class="loja-hero-stat__icon"><Clock3 class="size-3.5" aria-hidden="true" /></span>
+          <div>
+            <p class="loja-hero-stat__label">Abre</p>
+            <p class="loja-hero-stat__value">{{ horarioAberturaLabel }}</p>
+          </div>
+        </div>
+        <div class="loja-hero-stat">
+          <span class="loja-hero-stat__icon"><Clock3 class="size-3.5" aria-hidden="true" /></span>
+          <div>
+            <p class="loja-hero-stat__label">Fecha</p>
+            <p class="loja-hero-stat__value">{{ horarioFechamentoLabel }}</p>
+          </div>
+        </div>
+        <div class="loja-hero-stat">
+          <span class="loja-hero-stat__icon"><CalendarDays class="size-3.5" aria-hidden="true" /></span>
+          <div>
+            <p class="loja-hero-stat__label">Média</p>
+            <p class="loja-hero-stat__value">{{ tempoMedioLabel }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="enderecoCompleto" class="loja-hero-card__address">
+        <div class="loja-hero-card__address-main">
+          <MapPin class="size-4 shrink-0 text-glow-gold-cta" aria-hidden="true" />
+          <p>{{ enderecoCompleto }}</p>
+        </div>
+        <a
+          v-if="mapaUrl"
+          :href="mapaUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="loja-hero-card__map-link"
+        >
+          Ver no mapa
+          <ExternalLink class="size-3.5" aria-hidden="true" />
+        </a>
+      </div>
+
+      <p v-if="loja.descricao" class="loja-hero-card__desc">{{ loja.descricao }}</p>
+
+      <RouterLink
+        v-if="!hideCta"
+        :to="lojaAgendarPath(loja.publicGuid)"
+        class="loja-hero-card__cta loja-hero-card__cta--desktop"
+      >
+        <span :class="CLIENTE_BTN_CTA_CLASS">
+          <CalendarDays class="size-4" aria-hidden="true" />
+          Continuar agendamento
         </span>
-      </span>
-    </RouterLink>
+      </RouterLink>
+    </div>
   </section>
 </template>
