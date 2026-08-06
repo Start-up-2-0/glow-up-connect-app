@@ -42,6 +42,7 @@ export interface User {
   whatsAppOptIn?: boolean
   whatsAppPendenteConfirmacao?: boolean
   sexo?: Sexo | null
+  codigoAgendamento?: string | null
   createdAt?: string
   updatedAt?: string | null
 }

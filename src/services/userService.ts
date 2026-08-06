@@ -43,6 +43,14 @@ export const userService = {
     return api.post('/usuario/me/whatsapp/opt-in', payload)
   },
 
+  regenerarCodigoAgendamento() {
+    return api
+      .post<ApiSuccessResponse<{ codigoAgendamento: string }>>(
+        '/usuario/me/codigo-agendamento/regenerar',
+      )
+      .then((response) => response.data.data.codigoAgendamento)
+  },
+
   desativarConta() {
     return api.delete('/usuario/me')
   },

@@ -43,7 +43,7 @@ const TABS = [
 
 const userStore = useUserStore()
 const notificationsStore = useNotificationsStore()
-const { profile, saving, changingPassword } = storeToRefs(userStore)
+const { profile, saving, changingPassword, regeneratingCodigo } = storeToRefs(userStore)
 const { resolveError } = useApiError()
 
 const activeTab = ref<PerfilTabId>('informacoes')
@@ -62,6 +62,7 @@ const profileSuccess = ref(false)
 const passwordError = ref<string | null>(null)
 const passwordSuccess = ref(false)
 const passwordExpanded = ref(false)
+const codigoCopied = ref(false)
 
 const mostrarNovaSenha = ref(false)
 const mostrarConfirmarSenha = ref(false)
@@ -218,6 +219,30 @@ async function handleChangePassword() {
     passwordExpanded.value = false
   } catch (err) {
     passwordError.value = resolveError(err, 'Não foi possível alterar a senha.')
+  }
+}
+
+async function handleCopyCodigo() {
+  const codigo = profile.value?.codigoAgendamento
+  if (!codigo) return
+  try {
+    await navigator.clipboard.writeText(codigo)
+    codigoCopied.value = true
+    notificationsStore.push('success', 'Código copiado.')
+    window.setTimeout(() => {
+      codigoCopied.value = false
+    }, 2000)
+  } catch {
+    notificationsStore.push('error', 'Não foi possível copiar o código.')
+  }
+}
+
+async function handleRegenerarCodigo() {
+  try {
+    await userStore.regenerarCodigoAgendamento()
+    notificationsStore.push('success', 'Novo código gerado. O anterior deixa de funcionar.')
+  } catch (err) {
+    notificationsStore.push('error', resolveError(err, 'Não foi possível regenerar o código.'))
   }
 }
 
@@ -485,6 +510,43 @@ async function handleSolicitarWhatsApp() {
                     </BaseButton>
                   </div>
                 </form>
+
+                <div class="perfil-security-row">
+                  <div class="min-w-0 flex-1">
+                    <p class="perfil-security-row__label">Código de agendamento</p>
+                    <p class="perfil-security-row__meta">
+                      Use este código no link público da loja para agendar sem e-mail e senha.
+                      A sessão dura 15 minutos.
+                    </p>
+                    <p
+                      v-if="profile?.codigoAgendamento"
+                      class="mt-2 font-mono text-base font-semibold tracking-wider text-glow-text"
+                    >
+                      {{ profile.codigoAgendamento }}
+                    </p>
+                    <p v-else class="mt-2 text-sm text-glow-text-subtle">
+                      O código será gerado automaticamente ao salvar o perfil.
+                    </p>
+                  </div>
+                  <div class="flex shrink-0 flex-wrap gap-2">
+                    <BaseButton
+                      variant="secondary"
+                      size="sm"
+                      :disabled="!profile?.codigoAgendamento"
+                      @click="handleCopyCodigo"
+                    >
+                      {{ codigoCopied ? 'Copiado' : 'Copiar' }}
+                    </BaseButton>
+                    <BaseButton
+                      variant="secondary"
+                      size="sm"
+                      :loading="regeneratingCodigo"
+                      @click="handleRegenerarCodigo"
+                    >
+                      Regenerar
+                    </BaseButton>
+                  </div>
+                </div>
 
                 <div class="perfil-security-row perfil-security-row--muted">
                   <div>
