@@ -49,8 +49,12 @@ function isPublicApiPath(url?: string): boolean {
   return PUBLIC_API_PATHS.some((path) => url.includes(path))
 }
 
-/** Caminhos de infraestrutura que não devem acionar o loading global. */
-const LOADING_EXCLUDED_PATHS = ['/auth/refresh', '/security/request-proof']
+/** Caminhos de infraestrutura / listas com skeleton local que não devem acionar o loading global. */
+const LOADING_EXCLUDED_PATHS = [
+  '/auth/refresh',
+  '/security/request-proof',
+  '/agendamentos/me',
+]
 
 function isExcludedLoadingPath(url?: string): boolean {
   if (!url) return false
