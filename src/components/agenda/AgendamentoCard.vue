@@ -20,6 +20,7 @@ const props = defineProps<{
   podeFinalizarAtendimento?: boolean
   iniciarAtendimentoHabilitado?: boolean
   finalizarAtendimentoHabilitado?: boolean
+  podeAvaliar?: boolean
   actionLoading?: boolean
 }>()
 
@@ -28,12 +29,16 @@ const emit = defineEmits<{
   cancel: []
   iniciarAtendimento: []
   finalizarAtendimento: []
+  avaliar: []
 }>()
 
 const theme = computed(() => resolveAgendamentoStatusTheme(props.status))
 const isPending = computed(() => props.status === 'PendenteConfirmacao')
 const showStatusBadge = computed(
-  () => (!isPending.value || !props.showActions) && !props.showAtendimentoActions,
+  () =>
+    (!isPending.value || !props.showActions) &&
+    !props.showAtendimentoActions &&
+    !props.podeAvaliar,
 )
 const rootTag = computed(() => (props.to ? RouterLink : 'div'))
 
@@ -126,6 +131,25 @@ const cardClasses = computed(() => [
         >
           Concluir atendimento
         </button>
+      </div>
+    </div>
+
+    <div v-else-if="podeAvaliar" class="mt-3">
+      <div class="agendamento-card__actions">
+        <button
+          type="button"
+          class="agendamento-card__btn-confirm"
+          @click.stop="emit('avaliar')"
+        >
+          Avaliar atendimento
+        </button>
+      </div>
+      <div class="agendamento-card__footer mt-2">
+        <span v-if="valorTotal != null && valorTotal > 0" class="agendamento-card__price">
+          {{ formatCurrency(valorTotal) }}
+        </span>
+        <span v-else class="flex-1" />
+        <AgendamentoStatusBadge :status="status" />
       </div>
     </div>
 

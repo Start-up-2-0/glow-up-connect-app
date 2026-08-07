@@ -24,7 +24,7 @@ export function registerAgendaRoutes(router: MockRouter) {
   router.on('post', `${base}/agendamentos/:agendamentoId/cancelar`, () => voidOk('Agendamento cancelado.'))
   router.on('post', `${base}/agendamentos/:agendamentoId/sugerir-remarcacao`, () => voidOk('Sugestão enviada.'))
   router.on('post', `${base}/atendimentos/:agendamentoItemId/iniciar`, () => voidOk('Atendimento iniciado.'))
-  router.on('post', `${base}/atendimentos/:agendamentoItemId/finalizar`, () => voidOk('Atendimento finalizado.'))
+  router.on('post', `${base}/atendimentos/:agendamentoItemId/finalizar`, () => voidOk('Atendimento concluído com sucesso.'))
 
   /* ---------- Agendamentos (cliente) ---------- */
   router.on('post', '/agendamentos', () => ok(MOCK_AGENDAMENTOS_ME[1]))

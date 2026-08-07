@@ -9,7 +9,7 @@ import { avaliacaoService } from '@/services/avaliacaoService'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import type { AvaliacaoContexto } from '@/types/avaliacao.types'
-import { agendamentoDetalhePath } from '@/constants/routes'
+import { ROUTE_PATHS, agendamentoDetalhePath } from '@/constants/routes'
 import { formatAgendaDateTime } from '@/utils/formatters'
 
 const props = defineProps<{
@@ -24,6 +24,7 @@ const { resolveError } = useApiError()
 const contexto = ref<AvaliacaoContexto | null>(null)
 const loading = ref(false)
 const submitting = ref(false)
+const enviadaComSucesso = ref(false)
 const error = ref<string | null>(null)
 
 const notaEstabelecimento = ref<number | null>(null)
@@ -36,12 +37,15 @@ const agendamentoId = computed(() =>
   props.mode === 'agendamento' ? Number(route.params.id) : 0,
 )
 
-const readonly = computed(() => contexto.value?.status === 'Realizada')
+const readonly = computed(
+  () => contexto.value?.status === 'Realizada' || enviadaComSucesso.value,
+)
 const indisponivel = computed(() => contexto.value?.status === 'Indisponivel')
 
 async function load() {
   loading.value = true
   error.value = null
+  enviadaComSucesso.value = false
   try {
     contexto.value =
       props.mode === 'token'
@@ -80,6 +84,7 @@ async function enviar() {
         ? await avaliacaoService.criarPorToken(token.value, payload)
         : await avaliacaoService.criarMeuAgendamento(agendamentoId.value, payload)
 
+    enviadaComSucesso.value = true
     notifications.push('success', 'Avaliação enviada com sucesso!')
   } catch (err) {
     error.value = resolveError(err, 'Não foi possível enviar a avaliação.')
@@ -88,12 +93,12 @@ async function enviar() {
   }
 }
 
-function voltarHistorico() {
+function voltar() {
   if (props.mode === 'agendamento') {
-    router.push(agendamentoDetalhePath(agendamentoId.value))
-  } else {
-    router.push('/auth/login')
+    void router.push(agendamentoDetalhePath(agendamentoId.value))
+    return
   }
+  void router.push(ROUTE_PATHS.EXPLORAR)
 }
 
 onMounted(load)
@@ -104,8 +109,9 @@ onMounted(load)
     <h1 class="font-satoshi text-xl font-bold text-glow-text">Avaliar atendimento</h1>
 
     <BaseAlert v-if="error" variant="error">{{ error }}</BaseAlert>
+    <BaseAlert v-else-if="loading" variant="info">Carregando avaliação...</BaseAlert>
 
-    <template v-if="contexto">
+    <template v-if="contexto && !loading">
       <BaseCard>
         <div class="flex items-center gap-3">
           <img
@@ -127,8 +133,12 @@ onMounted(load)
         Este agendamento não está disponível para avaliação.
       </BaseAlert>
 
-      <BaseAlert v-else-if="readonly" variant="success">
-        Você já avaliou este atendimento.
+      <BaseAlert v-else-if="enviadaComSucesso || contexto.status === 'Realizada'" variant="success">
+        {{
+          enviadaComSucesso
+            ? 'Obrigado! Sua avaliação ajuda outros clientes e a loja.'
+            : 'Você já avaliou este atendimento.'
+        }}
       </BaseAlert>
 
       <BaseCard v-if="!indisponivel">
@@ -161,8 +171,8 @@ onMounted(load)
             <BaseButton v-if="!readonly" :loading="submitting" @click="enviar">
               Enviar avaliação
             </BaseButton>
-            <BaseButton variant="secondary" @click="voltarHistorico">
-              {{ mode === 'agendamento' ? 'Voltar ao agendamento' : 'Ir para login' }}
+            <BaseButton variant="secondary" @click="voltar">
+              {{ mode === 'agendamento' ? 'Voltar ao agendamento' : 'Explorar lojas' }}
             </BaseButton>
           </div>
         </div>

@@ -523,10 +523,8 @@ watch(
             :itens="serviceItens"
             :agendamento-status="agendamento.status"
             :pode-iniciar="podeIniciarAtendimento"
-            :pode-finalizar="podeFinalizarAtendimento"
             :action-loading-id="atendimentoItemLoadingId"
             @iniciar="handleIniciarAtendimento"
-            @finalizar="handleFinalizarAtendimento"
           />
           <AgendamentoDetailHistorico v-if="visaoGeral" :itens="historico" />
         </div>

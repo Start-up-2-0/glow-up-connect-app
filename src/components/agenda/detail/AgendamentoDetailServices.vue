@@ -9,7 +9,6 @@ import {
   labelStatusItemAtendimento,
   motivoInicioIndisponivel,
   podeIniciarItemAtendimento,
-  statusPermiteFinalizarItemAtendimento,
   statusPermiteIniciarItemAtendimento,
 } from '@/utils/agendamentoAtendimento'
 
@@ -27,26 +26,17 @@ const props = defineProps<{
   itens: AgendamentoDetailServiceItem[]
   agendamentoStatus: string
   podeIniciar?: boolean
-  podeFinalizar?: boolean
   actionLoadingId?: number | string | null
 }>()
 
 const emit = defineEmits<{
   iniciar: [itemId: number | string]
-  finalizar: [itemId: number | string]
 }>()
 
 function showIniciar(item: AgendamentoDetailServiceItem): boolean {
   return (
     !!props.podeIniciar &&
     statusPermiteIniciarItemAtendimento(item.status, props.agendamentoStatus)
-  )
-}
-
-function showFinalizar(item: AgendamentoDetailServiceItem): boolean {
-  return (
-    !!props.podeFinalizar &&
-    statusPermiteFinalizarItemAtendimento(item.status, props.agendamentoStatus)
   )
 }
 
@@ -88,12 +78,8 @@ function tituloIniciar(item: AgendamentoDetailServiceItem): string | undefined {
         <div class="agendamento-detail-service-side">
           <p class="agendamento-detail-service-time">{{ formatAgendaTime(item.inicio) }}</p>
           <p class="agendamento-detail-service-price">{{ formatCurrency(item.valor) }}</p>
-          <div
-            v-if="showIniciar(item) || showFinalizar(item)"
-            class="mt-2 flex flex-col gap-1"
-          >
+          <div v-if="showIniciar(item)" class="mt-2 flex flex-col gap-1">
             <button
-              v-if="showIniciar(item)"
               type="button"
               class="agendamento-detail-btn agendamento-detail-btn--confirm min-w-0 px-2 text-xs"
               :disabled="actionLoadingId === item.id || !iniciarHabilitado(item)"
@@ -101,15 +87,6 @@ function tituloIniciar(item: AgendamentoDetailServiceItem): string | undefined {
               @click="emit('iniciar', item.id)"
             >
               Iniciar
-            </button>
-            <button
-              v-if="showFinalizar(item)"
-              type="button"
-              class="agendamento-detail-btn agendamento-detail-btn--secondary min-w-0 px-2 text-xs"
-              :disabled="actionLoadingId === item.id"
-              @click="emit('finalizar', item.id)"
-            >
-              Concluir
             </button>
           </div>
         </div>
