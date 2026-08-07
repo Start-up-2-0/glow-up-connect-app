@@ -17,7 +17,6 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { useLoading } from '@/composables/useLoading'
 import { ROUTE_PATHS } from '@/constants/routes'
-import { redirectToLandingPlanos } from '@/utils/landingUrl'
 import { formatBRL, telefoneToApi } from '@/utils/formatters'
 import { USER_ROLE } from '@/types/user.types'
 import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
@@ -71,7 +70,7 @@ onMounted(async () => {
   }
 
   if (!plano.value) {
-    redirectToLandingPlanos()
+    await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
     return
   }
 

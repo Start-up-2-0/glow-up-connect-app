@@ -31,7 +31,9 @@ export function useAuth() {
     // O tema vale apenas enquanto o usuário está logado: no logout reseta p/ claro
     // e remove a escolha do cache do navegador.
     useAppStore().resetTheme()
-    await router.push(ROUTE_PATHS.LOGIN)
+    // Hard navigation no mesmo domínio do app.
+    // Evita remounts (ex.: AssinaturaView) que chamavam window.location na landing.
+    window.location.assign(`${window.location.origin}${ROUTE_PATHS.LOGIN}`)
   }
 
   async function ensureProfile() {

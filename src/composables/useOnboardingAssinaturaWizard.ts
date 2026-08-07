@@ -12,7 +12,6 @@ import { useApiError } from '@/composables/useApiError'
 import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
 import type { PagamentoAssinaturaPayload } from '@/types/assinatura.types'
 import { ROUTE_PATHS } from '@/constants/routes'
-import { redirectToLandingPlanos } from '@/utils/landingUrl'
 import type {
   OnboardingAssinaturaDraft,
   OnboardingEstabelecimentoDraft,
@@ -133,13 +132,13 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     loading.value = true
     try {
       if (!planoId || Number.isNaN(planoId)) {
-        redirectToLandingPlanos()
+        await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
         return
       }
 
       await planosStore.fetchPlanos()
       if (!plano.value) {
-        redirectToLandingPlanos()
+        await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
         return
       }
 

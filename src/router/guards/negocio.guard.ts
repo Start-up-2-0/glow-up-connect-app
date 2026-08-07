@@ -4,7 +4,6 @@ import { useUserStore } from '@/stores/user.store'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { ROUTE_PATHS } from '@/constants/routes'
-import { redirectToLandingPlanos } from '@/utils/landingUrl'
 import { isClienteRole } from '@/types/user.types'
 
 function rotaRequerNegocio(to: Parameters<NavigationGuard>[0]): boolean {
@@ -78,8 +77,8 @@ export const negocioGuard: NavigationGuard = async (to) => {
     negocioStore.estabelecimentos.length === 0 &&
     !isOnboarding
   ) {
-    redirectToLandingPlanos()
-    return false
+    // Domínios separados: fluxo de produto fica no app, não na landing.
+    return { path: ROUTE_PATHS.ONBOARDING_CONTRATAR }
   }
 
   if (

@@ -22,7 +22,6 @@ import { useUserStore } from '@/stores/user.store'
 import { useApiError } from '@/composables/useApiError'
 import { assinaturaService } from '@/services/assinaturaService'
 import { ROUTE_PATHS } from '@/constants/routes'
-import { redirectToLandingPlanos } from '@/utils/landingUrl'
 import { formatDate } from '@/utils/formatters'
 import type { AssinaturaOnboardingContexto } from '@/types/assinaturaOnboarding.types'
 import type { EstabelecimentoOnboarding } from '@/types/assinatura.types'
@@ -64,7 +63,7 @@ const paginaPronta = computed(() => !loading.value && !planosLoading.value)
 onMounted(async () => {
   await ensureContext()
   if (!estabelecimentoAtivo.value) {
-    redirectToLandingPlanos()
+    await router.replace(ROUTE_PATHS.ONBOARDING_CONTRATAR)
     return
   }
   await Promise.all([
