@@ -10,7 +10,6 @@ import { startSessionRefreshScheduler } from './composables/useSessionRefresh'
 import { ensureRequestProofPool } from './composables/useRequestProof'
 import { MOCK_MODE } from './mocks/config'
 import './assets/main.css'
-import 'flowbite'
 
 const app = createApp(App)
 const pinia = createPinia()

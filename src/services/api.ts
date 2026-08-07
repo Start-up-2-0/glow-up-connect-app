@@ -55,6 +55,7 @@ const LOADING_EXCLUDED_PATHS = [
   '/security/request-proof',
   '/agendamentos/me',
   '/dashboard',
+  '/publico/estabelecimentos/proximos',
 ]
 
 function isExcludedLoadingPath(url?: string): boolean {
