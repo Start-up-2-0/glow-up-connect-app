@@ -54,6 +54,7 @@ const LOADING_EXCLUDED_PATHS = [
   '/auth/refresh',
   '/security/request-proof',
   '/agendamentos/me',
+  '/dashboard',
 ]
 
 function isExcludedLoadingPath(url?: string): boolean {

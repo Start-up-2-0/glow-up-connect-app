@@ -1,16 +1,8 @@
 import { computed, ref } from 'vue'
 import { agendamentoService } from '@/services/agendamentoService'
 import { useUserStore } from '@/stores/user.store'
-import { getMesAnteriorRange, getMesAtualRange } from '@/utils/dashboardDateRange'
-import {
-  agruparHistoricoTimeline,
-  calcularVariacaoPercentual,
-  derivarRelacionamento,
-  encontrarProximoAgendamento,
-  isAgendamentoConcluido,
-  type ClienteRelacionamento,
-  type TimelineGroup,
-} from '@/utils/dashboardClienteUtils'
+import { calcularVariacaoPercentual } from '@/utils/dashboardClienteUtils'
+import type { ClienteRelacionamento, TimelineGroup } from '@/utils/dashboardClienteUtils'
 import type { AgendamentoCliente } from '@/types/agendamento.types'
 
 const RELACIONAMENTO_VAZIO: ClienteRelacionamento = {
@@ -24,10 +16,20 @@ const RELACIONAMENTO_VAZIO: ClienteRelacionamento = {
   frequenciaMediaDias: null,
 }
 
-/** Amostra para métricas de relacionamento — UI só usa frequência relativa. */
-const AMOSTRA_RELACIONAMENTO = 24
-/** Timeline do dashboard mostra no máx. 6 itens. */
-const HISTORICO_TIMELINE = 6
+function asAgendamentoCliente(raw: AgendamentoCliente | null): AgendamentoCliente | null {
+  if (!raw) return null
+  return {
+    ...raw,
+    estabelecimentoLogo: raw.estabelecimentoLogo ?? '',
+    duracaoTotalMinutos: raw.duracaoTotalMinutos ?? 0,
+    observacao: raw.observacao ?? '',
+    origem: raw.origem ?? '',
+    createAd: raw.createAd ?? raw.inicio,
+    canceladoEm: raw.canceladoEm ?? null,
+    endereco: raw.endereco ?? null,
+    itens: raw.itens ?? [],
+  }
+}
 
 export function useDashboardClienteData() {
   const loading = ref(false)
@@ -53,55 +55,18 @@ export function useDashboardClienteData() {
         await userStore.fetchMe()
       }
 
-      const mes = getMesAtualRange()
-      const mesAnterior = getMesAnteriorRange()
-
-      // 4 chamadas enxutas em paralelo (logo base64 omitido na listagem pela API).
-      // Antes: 50+50+80+10 com logos → ~14 MB. Agora: volumes alinhados ao UI.
-      const [mesResult, mesAnteriorResult, historicoResult, proximosResult] =
-        await Promise.all([
-          agendamentoService.listarMeus({
-            dataInicio: mes.inicio,
-            dataFim: mes.fim,
-            pagina: 1,
-            tamanhoPagina: 50,
-            ordenacao: 'recentes',
-          }),
-          agendamentoService.listarMeus({
-            dataInicio: mesAnterior.inicio,
-            dataFim: mesAnterior.fim,
-            pagina: 1,
-            tamanhoPagina: 50,
-            ordenacao: 'recentes',
-          }),
-          agendamentoService.listarMeus({
-            pagina: 1,
-            tamanhoPagina: AMOSTRA_RELACIONAMENTO,
-            ordenacao: 'recentes',
-          }),
-          agendamentoService.listarMeus({
-            pagina: 1,
-            tamanhoPagina: 1,
-            ordenacao: 'proximos',
-          }),
-        ])
-
-      const concluidosMes = mesResult.itens.filter((a) => isAgendamentoConcluido(a.status))
-      totalGastoMes.value = concluidosMes.reduce((sum, a) => sum + a.valorTotal, 0)
-      atendimentosMes.value = concluidosMes.length
-
-      totalGastoMesAnterior.value = mesAnteriorResult.itens
-        .filter((a) => isAgendamentoConcluido(a.status))
-        .reduce((sum, a) => sum + a.valorTotal, 0)
-
-      totalAgendamentos.value = historicoResult.total
-      proximoAgendamento.value = encontrarProximoAgendamento(proximosResult.itens)
-      historicoTimeline.value = agruparHistoricoTimeline(historicoResult.itens, HISTORICO_TIMELINE)
-      relacionamento.value = derivarRelacionamento(
-        historicoResult.itens,
-        historicoResult.total,
-        userStore.profile?.createdAt,
-      )
+      const data = await agendamentoService.obterDashboard()
+      totalGastoMes.value = data.totalGastoMes
+      totalGastoMesAnterior.value = data.totalGastoMesAnterior
+      atendimentosMes.value = data.atendimentosMes
+      totalAgendamentos.value = data.totalAgendamentos
+      proximoAgendamento.value = asAgendamentoCliente(data.proximoAgendamento)
+      historicoTimeline.value = data.historicoTimeline ?? []
+      relacionamento.value = {
+        ...RELACIONAMENTO_VAZIO,
+        ...data.relacionamento,
+        clienteDesde: data.relacionamento?.clienteDesde ?? userStore.profile?.createdAt ?? null,
+      }
     } finally {
       loading.value = false
     }
