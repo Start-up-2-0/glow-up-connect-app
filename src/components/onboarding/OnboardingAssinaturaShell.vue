@@ -21,6 +21,10 @@ withDefaults(
     publicShowBack?: boolean
     stepSubtitle?: string
     steps?: ReadonlyArray<{ id: string; label: string }>
+    skippedIds?: ReadonlyArray<string>
+    modoAutonomo?: boolean
+    title?: string
+    description?: string
   }>(),
   {
     isCheckoutStep: false,
@@ -30,6 +34,9 @@ withDefaults(
     publicStepLabel: '',
     publicShowBack: false,
     stepSubtitle: '',
+    modoAutonomo: false,
+    title: '',
+    description: '',
   },
 )
 
@@ -57,9 +64,16 @@ const emit = defineEmits<{
   <div v-else :class="ONBOARDING_CONTRATAR_PAGE_CLASS">
     <div class="space-y-6">
       <header v-if="!isCheckoutStep">
-        <h1 class="font-satoshi text-2xl font-bold text-glow-text">Contratar plano</h1>
+        <h1 class="font-satoshi text-2xl font-bold text-glow-text">
+          {{ title || 'Contratar plano' }}
+        </h1>
         <p class="mt-2 font-satoshi text-base text-glow-text-subtle">
-          Complete as etapas para vincular o plano ao seu estabelecimento.
+          {{
+            description ||
+            (modoAutonomo
+              ? 'Complete as etapas para vincular o plano ao seu perfil profissional.'
+              : 'Complete as etapas para vincular o plano ao seu estabelecimento.')
+          }}
         </p>
       </header>
 
@@ -88,6 +102,7 @@ const emit = defineEmits<{
         v-if="showStepper && steps"
         :current="stepperIndex"
         :steps="steps"
+        :skipped-ids="skippedIds"
       />
 
       <p

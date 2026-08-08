@@ -19,7 +19,10 @@ import type {
   AssinaturaOnboardingContexto,
   EstabelecimentoOnboardingContexto,
 } from '@/types/assinaturaOnboarding.types'
-import { ASSINATURA_LOGADA_WIZARD_STEPS } from '@/types/assinaturaOnboarding.types'
+import {
+  ASSINATURA_LOGADA_WIZARD_STEPS,
+  ASSINATURA_LOGADA_WIZARD_STEPS_AUTONOMO,
+} from '@/types/assinaturaOnboarding.types'
 import { telefoneToApi } from '@/utils/formatters'
 import { draftEnderecoToApi, validateEnderecoForSubmit } from '@/utils/enderecoPayload'
 import { buildAtualizarPerfilPayload } from '@/utils/perfilPayload'
@@ -161,16 +164,24 @@ export function useAssinaturaLogadaWizard(
     () => contexto.value?.temEstabelecimentoProprio === true,
   )
 
+  const ehAutonomo = computed(() => draft.value.tipoAssinatura === 'ProfissionalAutonomo')
+
+  const avatarContaDisponivel = computed(() => Boolean(userStore.profile?.avatarBase64?.trim()))
+
   const wizardSteps = computed(() => {
+    const baseSteps = ehAutonomo.value
+      ? ASSINATURA_LOGADA_WIZARD_STEPS_AUTONOMO
+      : ASSINATURA_LOGADA_WIZARD_STEPS
+
     if (usaEstabelecimentoExistente.value && !requerComplementoEndereco.value) {
-      return ASSINATURA_LOGADA_WIZARD_STEPS.filter(
+      return baseSteps.filter(
         (item) => item.id !== 'informacoes-basicas' && item.id !== 'endereco',
       )
     }
     if (usaEstabelecimentoExistente.value && requerComplementoEndereco.value) {
-      return ASSINATURA_LOGADA_WIZARD_STEPS.filter((item) => item.id !== 'informacoes-basicas')
+      return baseSteps.filter((item) => item.id !== 'informacoes-basicas')
     }
-    return ASSINATURA_LOGADA_WIZARD_STEPS
+    return baseSteps
   })
 
   const stepperIndex = computed(() => {
@@ -190,11 +201,22 @@ export function useAssinaturaLogadaWizard(
     const profile = userStore.profile
     if (!profile) return
 
-    if (!draft.value.estabelecimento.email) {
-      draft.value.estabelecimento.email = profile.email
+    const negocio = draft.value.estabelecimento
+
+    if (!negocio.email) {
+      negocio.email = profile.email
     }
-    if (!draft.value.estabelecimento.telefone) {
-      draft.value.estabelecimento.telefone = profile.telefone ?? ''
+    if (!negocio.telefone) {
+      negocio.telefone = profile.telefone ?? ''
+    }
+
+    if (draft.value.tipoAssinatura !== 'ProfissionalAutonomo') return
+
+    if (!negocio.nome.trim()) {
+      negocio.nome = profile.nome
+    }
+    if (!negocio.logoDataUrl && profile.avatarBase64?.trim()) {
+      negocio.logoDataUrl = profile.avatarBase64
     }
   }
 
@@ -274,13 +296,13 @@ export function useAssinaturaLogadaWizard(
         return
       }
 
+      preencherDadosUsuario()
+
       await planosStore.fetchPlanos(false, draft.value.tipoAssinatura)
       if (!plano.value) {
         await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
         return
       }
-
-      preencherDadosUsuario()
 
       const data = await assinaturaService.obterContextoOnboarding()
       if (!(await aplicarContexto(data))) {
@@ -297,27 +319,27 @@ export function useAssinaturaLogadaWizard(
     erro.value = null
 
     if (!estabelecimento.nome.trim()) {
-      erro.value = draft.value.tipoAssinatura === 'ProfissionalAutonomo'
-        ? 'Informe o nome público profissional.'
+      erro.value = ehAutonomo.value
+        ? 'Informe o nome profissional.'
         : 'Informe o nome do estabelecimento.'
       return
     }
-    if (draft.value.tipoAssinatura !== 'ProfissionalAutonomo' && !estabelecimento.categoriaId) {
+    if (!ehAutonomo.value && !estabelecimento.categoriaId) {
       erro.value = 'Selecione a categoria do estabelecimento.'
       return
     }
     if (!estabelecimento.logoDataUrl) {
-      erro.value = draft.value.tipoAssinatura === 'ProfissionalAutonomo'
-        ? 'Envie a foto ou logo do perfil.'
+      erro.value = ehAutonomo.value
+        ? 'Envie a foto profissional ou use a foto da sua conta.'
         : 'Envie a logo do estabelecimento.'
       return
     }
     if (!estabelecimento.email.trim()) {
-      erro.value = 'Informe o e-mail comercial.'
+      erro.value = ehAutonomo.value ? 'Informe o e-mail.' : 'Informe o e-mail comercial.'
       return
     }
     if (!estabelecimento.telefone.trim()) {
-      erro.value = 'Informe o telefone comercial.'
+      erro.value = ehAutonomo.value ? 'Informe o telefone.' : 'Informe o telefone comercial.'
       return
     }
 
@@ -429,7 +451,12 @@ export function useAssinaturaLogadaWizard(
       if (negocioStore.assinaturaAtiva) {
         aguardandoPagamento.value = false
         clearDraft()
-        notifications.push('success', 'Pagamento confirmado! Bem-vindo ao seu estabelecimento.')
+        notifications.push(
+          'success',
+          ehAutonomo.value
+            ? 'Pagamento confirmado! Bem-vindo ao seu perfil profissional.'
+            : 'Pagamento confirmado! Bem-vindo ao seu estabelecimento.',
+        )
         await router.push(ROUTE_PATHS.DASHBOARD)
         return
       }
@@ -541,7 +568,8 @@ export function useAssinaturaLogadaWizard(
     promocao,
     contexto,
     usaEstabelecimentoExistente,
-    ehAutonomo: computed(() => draft.value.tipoAssinatura === 'ProfissionalAutonomo'),
+    ehAutonomo,
+    avatarContaDisponivel,
     loading,
     submitting,
     aguardandoPagamento,

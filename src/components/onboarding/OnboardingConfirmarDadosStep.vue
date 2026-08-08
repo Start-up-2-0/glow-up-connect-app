@@ -8,20 +8,25 @@ import { formatBRL, formatEnderecoOnboarding, telefoneLocalFromApi } from '@/uti
 import type { Plano } from '@/types/plano.types'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 
-defineProps<{
-  plano: Plano
-  estabelecimento: OnboardingEstabelecimentoDraft
-  estabelecimentoExistente?: boolean
-  loading?: boolean
-  errorMessage?: string | null
-}>()
+withDefaults(
+  defineProps<{
+    plano: Plano
+    estabelecimento: OnboardingEstabelecimentoDraft
+    estabelecimentoExistente?: boolean
+    loading?: boolean
+    errorMessage?: string | null
+    modoAutonomo?: boolean
+  }>(),
+  {
+    modoAutonomo: false,
+  },
+)
 
 const emit = defineEmits<{
   back: []
   submit: []
   edit: []
 }>()
-
 </script>
 
 <template>
@@ -38,12 +43,14 @@ const emit = defineEmits<{
 
     <article :class="[ONBOARDING_CONTRATAR_CARD_CLASS, 'relative']">
       <div class="flex items-start justify-between gap-3">
-        <p class="font-urbanist text-sm font-bold text-glow-text">Estabelecimento</p>
+        <p class="font-urbanist text-sm font-bold text-glow-text">
+          {{ modoAutonomo ? 'Perfil profissional' : 'Estabelecimento' }}
+        </p>
         <button
           v-if="!estabelecimentoExistente"
           type="button"
           class="flex size-[30px] shrink-0 items-center justify-center rounded border-[0.5px] border-glow-border-soft bg-glow-surface-tint text-glow-text-subtle transition hover:bg-glow-hover-surface hover:text-glow-text"
-          aria-label="Editar estabelecimento"
+          :aria-label="modoAutonomo ? 'Editar perfil profissional' : 'Editar estabelecimento'"
           @click="emit('edit')"
         >
           <svg class="size-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -58,16 +65,18 @@ const emit = defineEmits<{
         <div
           v-if="estabelecimento.logoDataUrl"
           class="size-14 shrink-0 overflow-hidden rounded sm:size-[56px]"
+          :class="{ 'rounded-full': modoAutonomo }"
         >
           <img
             :src="estabelecimento.logoDataUrl"
-            alt="Logo do estabelecimento"
+            :alt="modoAutonomo ? 'Foto profissional' : 'Logo do estabelecimento'"
             class="size-full object-cover"
           />
         </div>
         <div
           v-else
           class="flex size-14 shrink-0 items-center justify-center rounded bg-glow-canvas font-urbanist text-xl font-bold text-glow-text-muted sm:size-[56px]"
+          :class="{ 'rounded-full': modoAutonomo }"
           aria-hidden="true"
         >
           {{ estabelecimento.nome.charAt(0) }}

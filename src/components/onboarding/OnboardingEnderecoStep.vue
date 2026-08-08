@@ -6,11 +6,17 @@ import { ONBOARDING_CONTRATAR_CARD_CLASS, ONBOARDING_CONTRATAR_FORM_CLASS } from
 import type { EnderecoFormFields } from '@/types/endereco.types'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 
-const props = defineProps<{
-  initial: OnboardingEstabelecimentoDraft
-  loading?: boolean
-  errorMessage?: string | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    initial: OnboardingEstabelecimentoDraft
+    loading?: boolean
+    errorMessage?: string | null
+    modoAutonomo?: boolean
+  }>(),
+  {
+    modoAutonomo: false,
+  },
+)
 
 const emit = defineEmits<{
   submit: [estabelecimento: OnboardingEstabelecimentoDraft]
@@ -43,6 +49,13 @@ function handleSubmit() {
       role="alert"
     >
       {{ errorMessage }}
+    </p>
+
+    <p
+      v-if="modoAutonomo"
+      class="mb-4 font-urbanist text-sm text-glow-text-muted"
+    >
+      Informe a localização de atendimento. Ela será usada na descoberta de profissionais e no mapa.
     </p>
 
     <form :class="ONBOARDING_CONTRATAR_FORM_CLASS" @submit.prevent="handleSubmit">

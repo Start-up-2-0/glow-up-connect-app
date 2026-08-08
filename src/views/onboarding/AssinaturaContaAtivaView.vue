@@ -7,7 +7,10 @@ import OnboardingEnderecoStep from '@/components/onboarding/OnboardingEnderecoSt
 import OnboardingConfirmarDadosStep from '@/components/onboarding/OnboardingConfirmarDadosStep.vue'
 import OnboardingPagamentoStep from '@/components/onboarding/OnboardingPagamentoStep.vue'
 import { useAssinaturaLogadaWizard } from '@/composables/useAssinaturaLogadaWizard'
-import { ASSINATURA_LOGADA_STEP_SUBTITLES } from '@/types/assinaturaOnboarding.types'
+import {
+  ASSINATURA_LOGADA_STEP_SUBTITLES,
+  ASSINATURA_LOGADA_STEP_SUBTITLES_AUTONOMO,
+} from '@/types/assinaturaOnboarding.types'
 import { ROUTE_PATHS } from '@/constants/routes'
 import type { TipoAssinatura } from '@/types/assinatura.types'
 
@@ -31,6 +34,7 @@ const {
   promocao,
   usaEstabelecimentoExistente,
   ehAutonomo,
+  avatarContaDisponivel,
   loading,
   submitting,
   aguardandoPagamento,
@@ -50,7 +54,17 @@ const {
 
 const isCheckoutStep = computed(() => step.value === 'assinatura')
 
-const stepSubtitle = computed(() => ASSINATURA_LOGADA_STEP_SUBTITLES[step.value])
+const stepSubtitle = computed(() =>
+  ehAutonomo.value
+    ? ASSINATURA_LOGADA_STEP_SUBTITLES_AUTONOMO[step.value]
+    : ASSINATURA_LOGADA_STEP_SUBTITLES[step.value],
+)
+
+const usarDadosContaPadrao = computed(() => {
+  if (!ehAutonomo.value) return false
+  const e = draft.value.estabelecimento
+  return Boolean(e.nome.trim() || e.email.trim() || e.telefone.trim())
+})
 
 onMounted(() => {
   void init()
@@ -75,6 +89,7 @@ function voltarDeInformacoesBasicas() {
     :stepper-index="stepperIndex"
     :steps="wizardSteps"
     :step-subtitle="isCheckoutStep ? '' : stepSubtitle"
+    :modo-autonomo="ehAutonomo"
     @back="onShellBack"
   >
     <template v-if="plano">
@@ -82,6 +97,8 @@ function voltarDeInformacoesBasicas() {
         v-if="step === 'informacoes-basicas'"
         :initial="draft.estabelecimento"
         :modo-autonomo="ehAutonomo"
+        :usar-dados-conta-padrao="usarDadosContaPadrao"
+        :avatar-conta-disponivel="avatarContaDisponivel"
         :loading="loading"
         :error-message="erro"
         @submit="avancarDeInformacoesBasicas"
@@ -91,6 +108,7 @@ function voltarDeInformacoesBasicas() {
       <OnboardingEnderecoStep
         v-else-if="step === 'endereco'"
         :initial="draft.estabelecimento"
+        :modo-autonomo="ehAutonomo"
         :loading="submitting"
         :error-message="erro"
         @submit="avancarDeEndereco"
@@ -102,6 +120,7 @@ function voltarDeInformacoesBasicas() {
         :plano="plano"
         :estabelecimento="draft.estabelecimento"
         :estabelecimento-existente="usaEstabelecimentoExistente"
+        :modo-autonomo="ehAutonomo"
         :loading="loading"
         :error-message="erro"
         @back="voltarDoConfirmar"

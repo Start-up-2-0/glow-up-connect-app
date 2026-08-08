@@ -16,10 +16,16 @@ const props = withDefaults(
   defineProps<{
     label?: string
     variant?: 'auth' | 'contratar'
+    /** Data URL ou URL já disponível (ex.: avatar da conta). */
+    previewUrl?: string | null
+    /** Texto auxiliar quando há preview sem arquivo novo. */
+    previewHint?: string
   }>(),
   {
     label: 'Avatar',
     variant: 'auth',
+    previewUrl: null,
+    previewHint: undefined,
   },
 )
 
@@ -43,6 +49,8 @@ const emit = defineEmits<{
 const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
 const fileName = ref<string | null>(null)
+
+const hasPreview = computed(() => Boolean(props.previewUrl?.trim()))
 
 function validateAndEmit(file: File | null) {
   if (!file) {
@@ -106,7 +114,14 @@ function openPicker() {
         @change="onFileChange"
       />
       <div class="flex items-center justify-center gap-2.5 px-4">
+        <img
+          v-if="hasPreview"
+          :src="previewUrl!"
+          alt=""
+          class="size-12 shrink-0 rounded-full object-cover"
+        />
         <svg
+          v-else
           class="h-6 w-6 shrink-0 text-glow-gold"
           viewBox="0 0 24 24"
           fill="currentColor"
@@ -118,6 +133,8 @@ function openPicker() {
         </svg>
         <p :class="placeholderClass">
           <span v-if="fileName">{{ fileName }}</span>
+          <span v-else-if="previewHint">{{ previewHint }}</span>
+          <span v-else-if="hasPreview">Foto selecionada. Clique para alterar.</span>
           <span v-else>Solte arquivos para anexar ou navegue até eles.</span>
         </p>
       </div>
