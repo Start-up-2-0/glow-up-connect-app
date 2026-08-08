@@ -173,7 +173,7 @@ export function useLojaSetupWizard() {
 
   async function loadPerfil(estabelecimentoId: number) {
     try {
-      perfil.value = await estabelecimentoPerfilService.obter(estabelecimentoId)
+      perfil.value = await estabelecimentoPerfilService.obterPerfil(estabelecimentoId)
     } catch {
       perfil.value = null
     }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, toRef } from 'vue'
+import { computed } from 'vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import HorarioDiaLojaCard from '@/components/horarios/HorarioDiaLojaCard.vue'
 import { useHorarios } from '@/composables/useHorarios'
