@@ -97,7 +97,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
         <div
           v-if="open"
           ref="menuEl"
-          class="fixed z-[60] min-w-[220px] overflow-hidden rounded-2xl border border-glow-border-soft bg-glow-surface p-1.5 shadow-glow-sm"
+          class="fixed z-[2100] min-w-[220px] overflow-hidden rounded-2xl border border-glow-border-soft bg-glow-surface p-1.5 shadow-glow-sm"
           :style="menuStyle"
           role="menu"
           @click.stop

@@ -13,6 +13,10 @@ export interface NavGateMeta {
   requerAssinatura?: boolean
   /** Ocultar para profissional autônomo (equipe, comissões, multi-loja). */
   ocultarParaAutonomo?: boolean
+  /** Exclusivo do proprietário (Owner) no estabelecimento ativo. */
+  requerRoleOwner?: boolean
+  /** Plano com multi-unidade (limite de estabelecimentos > 1). */
+  requerMultiLoja?: boolean
 }
 
 export interface NavChildItem extends NavGateMeta {
@@ -115,6 +119,16 @@ export const businessNavSections: NavSection[] = [
         to: ROUTE_PATHS.DASHBOARD,
         icon: 'dashboard',
         requerAssinatura: false,
+      },
+      {
+        id: 'minhas-lojas',
+        label: 'Minhas Lojas',
+        to: ROUTE_PATHS.MINHAS_LOJAS,
+        icon: 'building',
+        requerRoleOwner: true,
+        requerMultiLoja: true,
+        ocultarParaAutonomo: true,
+        requerAssinatura: true,
       },
       {
         id: 'agenda',

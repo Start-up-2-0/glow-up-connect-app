@@ -6,6 +6,7 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { useLoading } from '@/composables/useLoading'
+import { lojaSetupLocation } from '@/utils/lojaSetupNavigation'
 
 const route = useRoute()
 const router = useRouter()
@@ -50,7 +51,12 @@ async function tentarAtivar(): Promise<boolean> {
   if (negocioStore.assinaturaAtiva) {
     finishWaiting()
     notifications.push('success', 'Assinatura ativa! Bem-vindo ao Glow Up Connect.')
-    await router.replace(ROUTE_PATHS.DASHBOARD)
+    await router.replace(
+      lojaSetupLocation({
+        mode: 'assinatura',
+        estabelecimentoId: negocioStore.estabelecimentoIdSelecionado,
+      }),
+    )
     return true
   }
   return false

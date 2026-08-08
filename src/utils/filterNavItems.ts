@@ -3,6 +3,8 @@ import type { NavChildItem, NavItem, NavSection } from '@/constants/navigation'
 export interface NavFilterContext {
   assinaturaAtiva: boolean
   ehProfissionalAutonomo?: boolean
+  ehOwner?: boolean
+  permiteMultiLoja?: boolean
   possuiModulo: (modulo: string) => boolean
   possuiPermissao: (permissao: string) => boolean
   possuiAlgumModulo: (modulos: string[]) => boolean
@@ -19,10 +21,20 @@ function itemPermitido(
     | 'requerPermissoes'
     | 'requerAssinatura'
     | 'ocultarParaAutonomo'
+    | 'requerRoleOwner'
+    | 'requerMultiLoja'
   >,
   context: NavFilterContext,
 ): boolean {
   if (item.ocultarParaAutonomo && context.ehProfissionalAutonomo) {
+    return false
+  }
+
+  if (item.requerRoleOwner && !context.ehOwner) {
+    return false
+  }
+
+  if (item.requerMultiLoja && !context.permiteMultiLoja) {
     return false
   }
 
@@ -31,7 +43,9 @@ function itemPermitido(
       item.requerModulo ||
       item.requerModulos?.length ||
       item.requerPermissao ||
-      item.requerPermissoes?.length
+      item.requerPermissoes?.length ||
+      item.requerRoleOwner ||
+      item.requerMultiLoja
 
     if (temRequisito) return false
   }

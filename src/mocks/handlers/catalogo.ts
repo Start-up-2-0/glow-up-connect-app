@@ -191,6 +191,25 @@ export function registerCatalogoRoutes(router: MockRouter) {
 
   /* ---------- Horários ---------- */
   router.on('get', `${base}/horarios-funcionamento`, () => ok(MOCK_HORARIOS_LOJA))
+  router.on('post', `${base}/horarios-funcionamento`, (req: MockRequest) => {
+    const body = (req.body ?? {}) as Record<string, unknown>
+    return ok({
+      id: Date.now(),
+      estabelecimentoId: Number(req.params?.estabelecimentoId ?? 1),
+      ...body,
+      ativo: body.ativo ?? true,
+    })
+  })
+  router.on('put', `${base}/horarios-funcionamento/:horarioId`, (req: MockRequest) => {
+    return ok({ id: Number(req.params?.horarioId ?? 1), ...(req.body as object) })
+  })
+  router.on('patch', `${base}/horarios-funcionamento/:horarioId/status`, (req: MockRequest) => {
+    const body = (req.body ?? {}) as { ativo?: boolean }
+    return ok({
+      id: Number(req.params?.horarioId ?? 1),
+      ativo: body.ativo ?? true,
+    })
+  })
   router.on('put', `${base}/horarios-funcionamento`, (req: MockRequest) => ok(req.body ?? MOCK_HORARIOS_LOJA))
   router.on('get', `${base}/profissionais/horarios`, () => ok(MOCK_HORARIOS_PROFISSIONAIS))
   router.on('put', `${base}/profissionais/horarios`, (req: MockRequest) => ok(req.body ?? MOCK_HORARIOS_PROFISSIONAIS))

@@ -90,6 +90,15 @@ export function getMockAdapter() {
       status = 501
       data = { success: false, message: `Sem handler mock para ${method.toUpperCase()} ${path}`, code: 'NOT_IMPLEMENTED' }
       console.warn(`[mock] SEM HANDLER: ${method.toUpperCase()} ${path}`)
+    } else if (
+      body &&
+      typeof body === 'object' &&
+      'success' in body &&
+      (body as { success?: boolean }).success === false &&
+      'status' in body &&
+      typeof (body as { status?: unknown }).status === 'number'
+    ) {
+      status = (body as { status: number }).status
     }
 
     await delay(MOCK_LATENCY_MS)
@@ -97,7 +106,7 @@ export function getMockAdapter() {
     return {
       data,
       status,
-      statusText: status === 501 ? 'Not Implemented' : 'OK',
+      statusText: status >= 400 ? 'Error' : status === 501 ? 'Not Implemented' : 'OK',
       headers: { 'content-type': 'application/json' },
       config,
       request: {},

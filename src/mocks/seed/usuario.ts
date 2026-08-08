@@ -270,6 +270,26 @@ function buildEstab(
   }
 }
 
+/** Filiais criadas no mock durante a sessão (Minhas Lojas → Adicionar). */
+const EXTRA_ESTABS_KEY = 'guc_mock_extra_estabs'
+
+export function mockExtraEstablishments(): EstabelecimentoAcesso[] {
+  try {
+    const raw = sessionStorage.getItem(EXTRA_ESTABS_KEY)
+    if (!raw) return []
+    return JSON.parse(raw) as EstabelecimentoAcesso[]
+  } catch {
+    return []
+  }
+}
+
+export function mockPushExtraEstablishment(estab: EstabelecimentoAcesso) {
+  const list = mockExtraEstablishments()
+  if (list.some((e) => e.estabelecimentoId === estab.estabelecimentoId)) return
+  list.push(estab)
+  sessionStorage.setItem(EXTRA_ESTABS_KEY, JSON.stringify(list))
+}
+
 /** Escopo do Dono conforme o plano: Premium = todas as filiais; Básico/Plus = só a principal. */
 function ownerScope(plano: PlanoMock): EstabelecimentoAcesso[] {
   const main = buildEstab(1, 'Studio Glow Up', 'Owner', APP_PERMISSOES, plano)
@@ -277,6 +297,7 @@ function ownerScope(plano: PlanoMock): EstabelecimentoAcesso[] {
   return [
     main,
     buildEstab(2, 'Glow Up Filial Centro', 'Owner', APP_PERMISSOES, plano),
+    ...mockExtraEstablishments(),
   ]
 }
 

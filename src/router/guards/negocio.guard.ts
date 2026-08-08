@@ -150,5 +150,26 @@ export const negocioGuard: NavigationGuard = async (to) => {
     return { path: ROUTE_PATHS.DASHBOARD }
   }
 
+  const requerRoleOwner = to.matched.some((record) => record.meta.requerRoleOwner === true)
+  if (requerRoleOwner && negocioStore.role !== 'Owner') {
+    useNotificationsStore().push(
+      'warning',
+      'Apenas o proprietário da conta pode gerenciar as lojas.',
+    )
+    return { path: ROUTE_PATHS.DASHBOARD }
+  }
+
+  const requerMultiLoja = to.matched.some((record) => record.meta.requerMultiLoja === true)
+  if (requerMultiLoja) {
+    const limite = negocioStore.limites.estabelecimentos ?? 1
+    if (limite <= 1) {
+      useNotificationsStore().push(
+        'info',
+        'Gestão de múltiplas lojas está disponível no plano Premium.',
+      )
+      return { path: ROUTE_PATHS.CONFIG_ASSINATURA }
+    }
+  }
+
   return true
 }

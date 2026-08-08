@@ -12,6 +12,7 @@ import { useApiError } from '@/composables/useApiError'
 import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
 import type { PagamentoAssinaturaPayload, TipoAssinatura } from '@/types/assinatura.types'
 import { ROUTE_PATHS } from '@/constants/routes'
+import { lojaSetupLocation } from '@/utils/lojaSetupNavigation'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 import type { EstabelecimentoPerfilCompleto } from '@/types/estabelecimento.types'
 import type {
@@ -457,7 +458,13 @@ export function useAssinaturaLogadaWizard(
             ? 'Pagamento confirmado! Bem-vindo ao seu perfil profissional.'
             : 'Pagamento confirmado! Bem-vindo ao seu estabelecimento.',
         )
-        await router.push(ROUTE_PATHS.DASHBOARD)
+        const estabId = negocioStore.estabelecimentoIdSelecionado
+        await router.push(
+          lojaSetupLocation({
+            mode: 'assinatura',
+            estabelecimentoId: estabId,
+          }),
+        )
         return
       }
     }
@@ -534,12 +541,26 @@ export function useAssinaturaLogadaWizard(
         onTrial: async (diasTrial) => {
           notifications.push('success', `Assinatura iniciada! Você tem ${diasTrial} dias de teste.`)
           clearDraft()
-          await router.push(ROUTE_PATHS.DASHBOARD)
+          const estabId =
+            result.estabelecimentoId ?? negocioStore.estabelecimentoIdSelecionado
+          await router.push(
+            lojaSetupLocation({
+              mode: 'assinatura',
+              estabelecimentoId: estabId,
+            }),
+          )
         },
         onDashboard: async () => {
           notifications.push('success', 'Assinatura iniciada com sucesso!')
           clearDraft()
-          await router.push(ROUTE_PATHS.DASHBOARD)
+          const estabId =
+            result.estabelecimentoId ?? negocioStore.estabelecimentoIdSelecionado
+          await router.push(
+            lojaSetupLocation({
+              mode: 'assinatura',
+              estabelecimentoId: estabId,
+            }),
+          )
         },
         aguardarAtivacao,
       })

@@ -12,6 +12,7 @@ import { useApiError } from '@/composables/useApiError'
 import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
 import type { PagamentoAssinaturaPayload, TipoAssinatura } from '@/types/assinatura.types'
 import { ROUTE_PATHS } from '@/constants/routes'
+import { lojaSetupLocation } from '@/utils/lojaSetupNavigation'
 import type {
   OnboardingAssinaturaDraft,
   OnboardingEstabelecimentoDraft,
@@ -302,8 +303,18 @@ export function useOnboardingAssinaturaWizard(
       draft.value.usuario.emailConfirmado = true
       await userStore.fetchMe()
       clearDraft()
-      notifications.push('success', 'Conta confirmada! Bem-vindo ao dashboard.')
-      await router.push(ROUTE_PATHS.DASHBOARD)
+      await negocioStore.fetchEstabelecimentos(true)
+      notifications.push('success', 'Conta confirmada!')
+      if (negocioStore.assinaturaAtiva) {
+        await router.push(
+          lojaSetupLocation({
+            mode: 'assinatura',
+            estabelecimentoId: negocioStore.estabelecimentoIdSelecionado,
+          }),
+        )
+      } else {
+        await router.push(ROUTE_PATHS.DASHBOARD)
+      }
       return true
     } catch (err) {
       erro.value = resolveError(err)
@@ -436,7 +447,13 @@ export function useOnboardingAssinaturaWizard(
             return
           }
           clearDraft()
-          await router.push(ROUTE_PATHS.DASHBOARD)
+          await router.push(
+            lojaSetupLocation({
+              mode: 'assinatura',
+              estabelecimentoId:
+                result.estabelecimentoId ?? negocioStore.estabelecimentoIdSelecionado,
+            }),
+          )
         },
         onDashboard: async () => {
           notifications.push('success', 'Assinatura iniciada com sucesso!')
@@ -445,7 +462,13 @@ export function useOnboardingAssinaturaWizard(
             return
           }
           clearDraft()
-          await router.push(ROUTE_PATHS.DASHBOARD)
+          await router.push(
+            lojaSetupLocation({
+              mode: 'assinatura',
+              estabelecimentoId:
+                result.estabelecimentoId ?? negocioStore.estabelecimentoIdSelecionado,
+            }),
+          )
         },
         aguardarAtivacao,
       })

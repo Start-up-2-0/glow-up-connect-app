@@ -4,6 +4,7 @@ import { computed } from 'vue'
 const props = defineProps<{
   current: number
   steps: ReadonlyArray<{ id: string; label: string }>
+  skippedIds?: ReadonlyArray<string>
 }>()
 
 const items = computed(() =>
@@ -11,7 +12,8 @@ const items = computed(() =>
     ...step,
     index,
     isActive: index === props.current,
-    isCompleted: index < props.current,
+    isCompleted: index < props.current && !props.skippedIds?.includes(step.id),
+    isSkipped: Boolean(props.skippedIds?.includes(step.id)) && index < props.current,
   })),
 )
 </script>
@@ -26,6 +28,19 @@ const items = computed(() =>
           aria-current="step"
         >
           {{ index + 1 }}
+        </span>
+        <span
+          v-else-if="item.isSkipped"
+          class="flex size-[30px] shrink-0 items-center justify-center rounded-full border border-dashed border-glow-border-soft font-urbanist text-xs text-glow-text-subtle"
+          title="Etapa pulada"
+        >
+          —
+        </span>
+        <span
+          v-else-if="item.isCompleted"
+          class="flex size-[30px] shrink-0 items-center justify-center rounded-full bg-glow-success/20 font-urbanist text-sm font-bold text-glow-success"
+        >
+          ✓
         </span>
         <span
           v-else

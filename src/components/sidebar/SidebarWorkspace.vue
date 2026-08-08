@@ -1,23 +1,32 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { ChevronDown, ChevronsUpDown, Store } from 'lucide-vue-next'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useTrocarEstabelecimento } from '@/composables/useTrocarEstabelecimento'
 import UserAvatar from '@/components/layout/UserAvatar.vue'
 import SidebarTooltip from './SidebarTooltip.vue'
+import { ROUTE_PATHS } from '@/constants/routes'
 
 defineProps<{ collapsed?: boolean }>()
 
 const negocioStore = useNegocioStore()
 const { trocarEstabelecimento, trocandoEstabelecimento } = useTrocarEstabelecimento()
-const { estabelecimentos, estabelecimentoAtivo, loading } = storeToRefs(negocioStore)
+const { estabelecimentos, estabelecimentoAtivo, loading, role, limites } = storeToRefs(negocioStore)
 
 const open = ref(false)
 const triggerEl = ref<HTMLElement | null>(null)
-const popoverStyle = ref({ left: '0px', top: '0px', width: '0px' })
+const menuEl = ref<HTMLElement | null>(null)
+/** Acima do AppShellSidebar (z-2010) para o Teleport não ficar atrás da aside. */
+const POPOVER_Z = 2100
+const popoverStyle = ref({ left: '0px', top: '0px', width: '260px', zIndex: POPOVER_Z })
 
 const planoLabel = computed(() => estabelecimentoAtivo.value?.planoNome ?? 'Plano Profissional')
+
+const mostrarAtalhoMinhasLojas = computed(
+  () => role.value === 'Owner' && (limites.value.estabelecimentos ?? 1) > 1,
+)
 
 function toggle() {
   if (!open.value && triggerEl.value) {
@@ -25,7 +34,8 @@ function toggle() {
     popoverStyle.value = {
       left: `${r.left}px`,
       top: `${r.bottom + 8}px`,
-      width: `${r.width}px`,
+      width: `${Math.max(r.width, 260)}px`,
+      zIndex: POPOVER_Z,
     }
   }
   open.value = !open.value
@@ -39,6 +49,7 @@ async function select(id: number) {
 function onDocumentClick(event: MouseEvent) {
   const target = event.target as Node
   if (triggerEl.value?.contains(target)) return
+  if (menuEl.value?.contains(target)) return
   open.value = false
 }
 
@@ -73,7 +84,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
       type="button"
       class="sb-workspace group flex w-full items-center gap-2.5 rounded-md border border-glow-border-soft bg-glow-canvas p-2 text-left transition-colors hover:border-glow-gold-cta/40"
       :aria-expanded="open"
-      :aria-label="`Empresa ${estabelecimentoAtivo?.nome ?? ''} — trocar`"
+      :aria-label="`Loja atual: ${estabelecimentoAtivo?.nome ?? 'Selecione'} — trocar`"
       @click.stop="toggle"
     >
       <span class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-glow-surface">
@@ -85,7 +96,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
         />
       </span>
       <span class="min-w-0 flex-1">
-        <span class="block truncate font-urbanist text-[13px] font-medium text-glow-text">
+        <span class="block truncate font-urbanist text-[13px] font-semibold text-glow-text">
           {{ estabelecimentoAtivo?.nome ?? 'Selecione a loja' }}
         </span>
         <span class="flex items-center gap-1 font-urbanist text-[11px] font-normal text-glow-gold-cta">
@@ -112,13 +123,14 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
       >
         <div
           v-if="open"
-          class="fixed z-[60] min-w-[240px] overflow-hidden rounded-lg border border-glow-border-soft bg-glow-surface p-1.5 shadow-lg"
+          ref="menuEl"
+          class="fixed min-w-[260px] overflow-hidden rounded-lg border border-glow-border-soft bg-glow-surface p-1.5 shadow-lg"
           :style="popoverStyle"
           role="menu"
           @click.stop
         >
           <p class="px-3 py-2 font-urbanist text-[11px] font-semibold uppercase tracking-wider text-glow-text-soft">
-            Trocar empresa
+            Trocar loja
           </p>
           <button
             v-for="est in estabelecimentos"
@@ -132,11 +144,29 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
           >
             <UserAvatar :src="est.logo || null" :name="est.nome" size="xs" aria-hidden="true" />
             <span class="min-w-0 flex-1 truncate">{{ est.nome }}</span>
-            <ChevronsUpDown v-if="est.estabelecimentoId === estabelecimentoAtivo?.estabelecimentoId" :size="14" class="shrink-0 text-glow-gold-cta" />
+            <ChevronsUpDown
+              v-if="est.estabelecimentoId === estabelecimentoAtivo?.estabelecimentoId"
+              :size="14"
+              class="shrink-0 text-glow-gold-cta"
+            />
           </button>
           <p v-if="estabelecimentos.length === 0" class="px-3 py-2 font-urbanist text-xs text-glow-text-subtle">
             <Store :size="14" class="mr-1 inline" /> Nenhuma loja disponível.
           </p>
+          <div
+            v-if="mostrarAtalhoMinhasLojas"
+            class="mt-1 border-t border-glow-border-soft pt-1"
+          >
+            <RouterLink
+              :to="ROUTE_PATHS.MINHAS_LOJAS"
+              class="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 font-urbanist text-sm font-medium text-glow-gold-cta transition-colors hover:bg-glow-surface-tint"
+              role="menuitem"
+              @click="open = false"
+            >
+              <Store :size="14" />
+              Minhas Lojas
+            </RouterLink>
+          </div>
         </div>
       </Transition>
     </Teleport>

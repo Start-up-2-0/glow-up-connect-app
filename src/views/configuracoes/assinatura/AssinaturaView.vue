@@ -6,7 +6,6 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import CancelarAssinaturaDialog from '@/components/assinatura/CancelarAssinaturaDialog.vue'
 import TrialStatusBanner from '@/components/assinatura/TrialStatusBanner.vue'
-import AdicionarUnidadePanel from '@/components/assinatura/AdicionarUnidadePanel.vue'
 import AssinaturaPageHeader from '@/components/assinatura/page/AssinaturaPageHeader.vue'
 import AssinaturaPlanoHero from '@/components/assinatura/page/AssinaturaPlanoHero.vue'
 import AssinaturaDetalhesCard from '@/components/assinatura/page/AssinaturaDetalhesCard.vue'
@@ -14,7 +13,6 @@ import AssinaturaBeneficiosCard from '@/components/assinatura/page/AssinaturaBen
 import AssinaturaComparacaoPlanos from '@/components/assinatura/page/AssinaturaComparacaoPlanos.vue'
 import AssinaturaSegurancaBanner from '@/components/assinatura/page/AssinaturaSegurancaBanner.vue'
 import { useNegocioContext } from '@/composables/useNegocioContext'
-import { useTrocarEstabelecimento } from '@/composables/useTrocarEstabelecimento'
 import { useAssinaturaStore } from '@/stores/assinatura.store'
 import { usePlanosStore } from '@/stores/planos.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
@@ -24,7 +22,6 @@ import { assinaturaService } from '@/services/assinaturaService'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { formatDate } from '@/utils/formatters'
 import type { AssinaturaOnboardingContexto } from '@/types/assinaturaOnboarding.types'
-import type { EstabelecimentoOnboarding } from '@/types/assinatura.types'
 import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
 import '@/components/assinatura/page/assinaturaPage.css'
 
@@ -36,7 +33,6 @@ const {
   estabelecimentoAtivo,
   ensureContext,
 } = useNegocioContext()
-const { trocarEstabelecimento } = useTrocarEstabelecimento()
 const assinaturaStore = useAssinaturaStore()
 const planosStore = usePlanosStore()
 const { assinatura, loading } = storeToRefs(assinaturaStore)
@@ -48,9 +44,6 @@ const { resolveError } = useApiError()
 const dialogAberto = ref(false)
 const cancelando = ref(false)
 const contextoOnboarding = ref<AssinaturaOnboardingContexto | null>(null)
-const exibirFormUnidade = ref(false)
-const adicionandoUnidade = ref(false)
-const erroUnidade = ref<string | null>(null)
 
 const planoAtual = computed(() => {
   const id = assinatura.value?.planoId ?? planoId.value
@@ -59,6 +52,12 @@ const planoAtual = computed(() => {
 })
 
 const paginaPronta = computed(() => !loading.value && !planosLoading.value)
+
+const mostrarLinkMinhasLojas = computed(() => {
+  const ctx = contextoOnboarding.value
+  if (!ctx) return false
+  return (ctx.limiteLojas ?? 0) > 1 || ctx.podeAdicionarLoja || ctx.lojasVinculadas > 1
+})
 
 onMounted(async () => {
   await ensureContext()
@@ -101,24 +100,6 @@ async function confirmarCancelamento() {
     notifications.push('error', resolveError(err))
   } finally {
     cancelando.value = false
-  }
-}
-
-async function adicionarUnidade(estabelecimento: EstabelecimentoOnboarding) {
-  const id = contextoOnboarding.value?.assinaturaPremiumId ?? assinaturaId.value
-  if (!id) return
-  adicionandoUnidade.value = true
-  erroUnidade.value = null
-  try {
-    const resultado = await assinaturaStore.adicionarEstabelecimento(id, { estabelecimento })
-    await trocarEstabelecimento(resultado.estabelecimentoId)
-    notifications.push('success', `Unidade "${resultado.nome}" adicionada com sucesso.`)
-    exibirFormUnidade.value = false
-    contextoOnboarding.value = await assinaturaService.obterContextoOnboarding()
-  } catch (err) {
-    erroUnidade.value = resolveError(err)
-  } finally {
-    adicionandoUnidade.value = false
   }
 }
 
@@ -190,35 +171,21 @@ function abrirPolitica() {
     </BaseCard>
 
     <BaseCard
-      v-if="contextoOnboarding?.podeAdicionarLoja"
-      title="Multi-unidades Premium"
+      v-if="mostrarLinkMinhasLojas"
+      title="Multi-unidades"
     >
       <p class="mb-3 text-sm text-glow-text-subtle">
-        {{ contextoOnboarding.lojasVinculadas }}
-        de
-        {{ contextoOnboarding.limiteLojas ?? '—' }}
-        unidades em uso.
+        <template v-if="contextoOnboarding">
+          {{ contextoOnboarding.lojasVinculadas }}
+          de
+          {{ contextoOnboarding.limiteLojas ?? '—' }}
+          lojas utilizadas.
+        </template>
+        A gestão operacional das unidades fica em Minhas Lojas.
       </p>
-      <div class="flex flex-wrap gap-2">
-        <BaseButton
-          v-if="!exibirFormUnidade"
-          variant="primary"
-          @click="exibirFormUnidade = true"
-        >
-          Adicionar unidade
-        </BaseButton>
-        <RouterLink :to="ROUTE_PATHS.FINANCEIRO_REDE">
-          <BaseButton variant="secondary">Painel da rede</BaseButton>
-        </RouterLink>
-      </div>
-      <AdicionarUnidadePanel
-        v-if="exibirFormUnidade"
-        class="mt-4"
-        :loading="adicionandoUnidade"
-        :error-message="erroUnidade"
-        @submit="adicionarUnidade"
-        @cancel="exibirFormUnidade = false"
-      />
+      <RouterLink :to="ROUTE_PATHS.MINHAS_LOJAS">
+        <BaseButton variant="secondary">Gerenciar lojas</BaseButton>
+      </RouterLink>
     </BaseCard>
 
     <template v-if="paginaPronta && assinatura">

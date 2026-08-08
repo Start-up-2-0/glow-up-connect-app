@@ -67,7 +67,7 @@ export function useDashboardNav() {
   const userStore = useUserStore()
   const negocioStore = useNegocioStore()
   const { profile } = storeToRefs(userStore)
-  const { assinaturaAtiva, ehProfissionalAutonomo } = storeToRefs(negocioStore)
+  const { assinaturaAtiva, ehProfissionalAutonomo, role, limites } = storeToRefs(negocioStore)
   const {
     temVinculoNegocio,
     ehProfissionalOperacional,
@@ -78,6 +78,8 @@ export function useDashboardNav() {
     const filterCtx = {
       assinaturaAtiva: assinaturaAtiva.value,
       ehProfissionalAutonomo: ehProfissionalAutonomo.value,
+      ehOwner: role.value === 'Owner',
+      permiteMultiLoja: (limites.value.estabelecimentos ?? 1) > 1,
       possuiModulo: negocioStore.possuiModulo,
       possuiPermissao: negocioStore.possuiPermissao,
       possuiAlgumModulo: negocioStore.possuiAlgumModulo,

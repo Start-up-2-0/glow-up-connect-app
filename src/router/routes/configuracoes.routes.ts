@@ -3,6 +3,20 @@ import { ROUTE_NAMES, ROUTE_PATHS } from '@/constants/routes'
 
 export const configuracoesRoutes: RouteRecordRaw[] = [
   {
+    path: ROUTE_PATHS.MINHAS_LOJAS,
+    name: ROUTE_NAMES.MINHAS_LOJAS,
+    component: () => import('@/views/configuracoes/MinhasLojasView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerRoleOwner: true,
+      requerMultiLoja: true,
+      requerAssinaturaAtiva: true,
+      title: 'Minhas Lojas',
+    },
+  },
+  {
     path: ROUTE_PATHS.CONFIG_ASSINATURA,
     name: ROUTE_NAMES.CONFIG_ASSINATURA,
     component: () => import('@/views/configuracoes/assinatura/AssinaturaView.vue'),

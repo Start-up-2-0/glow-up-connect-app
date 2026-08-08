@@ -27,6 +27,7 @@ export const ROUTE_NAMES = {
   ONBOARDING_CONTRATAR: 'onboarding-contratar',
   ONBOARDING_CHECKOUT: 'onboarding-checkout',
   ONBOARDING_ASSINATURA: 'onboarding-assinatura',
+  ONBOARDING_LOJA_SETUP: 'onboarding-loja-setup',
   ASSINATURA_PAGAMENTO_SUCESSO: 'assinatura-pagamento-sucesso',
   ASSINATURA_PAGAMENTO_PENDENTE: 'assinatura-pagamento-pendente',
   ASSINATURA_PAGAMENTO_FALHA: 'assinatura-pagamento-falha',
@@ -34,6 +35,7 @@ export const ROUTE_NAMES = {
   CONFIG_ASSINATURA: 'config-assinatura',
   CONFIG_ASSINATURA_FATURAS: 'config-assinatura-faturas',
   CONFIG_ASSINATURA_UPGRADE: 'config-assinatura-upgrade',
+  MINHAS_LOJAS: 'minhas-lojas',
   UPGRADE: 'upgrade',
   AGENDA: 'agenda',
   SERVICOS: 'servicos',
@@ -104,6 +106,7 @@ export const ROUTE_PATHS = {
   ONBOARDING_CONTRATAR: '/onboarding/contratar',
   ONBOARDING_CHECKOUT: '/onboarding/checkout',
   ONBOARDING_ASSINATURA: '/onboarding/assinatura',
+  ONBOARDING_LOJA_SETUP: '/onboarding/loja-setup',
   ASSINATURA_PAGAMENTO_SUCESSO: '/assinatura/sucesso',
   ASSINATURA_PAGAMENTO_PENDENTE: '/assinatura/pendente',
   ASSINATURA_PAGAMENTO_FALHA: '/assinatura/falha',
@@ -111,6 +114,7 @@ export const ROUTE_PATHS = {
   CONFIG_ASSINATURA: '/configuracoes/assinatura',
   CONFIG_ASSINATURA_FATURAS: '/configuracoes/assinatura/faturas',
   CONFIG_ASSINATURA_UPGRADE: '/configuracoes/assinatura/upgrade',
+  MINHAS_LOJAS: '/minhas-lojas',
   UPGRADE: '/upgrade',
   AGENDA: '/agenda',
   SERVICOS: '/servicos',
@@ -230,6 +234,10 @@ declare module 'vue-router' {
     assinaturaOnboardingLogado?: boolean
     /** Rota acessível quando a role na loja é Profissional */
     permitidoRoleProfissional?: boolean
+    /** Exclusivo do proprietário (Owner) da conta/assinatura */
+    requerRoleOwner?: boolean
+    /** Plano com limite de estabelecimentos > 1 (multi-unidade) */
+    requerMultiLoja?: boolean
     title?: string
   }
 }

@@ -1,8 +1,9 @@
 import type { MockRouter, MockRequest } from '../match'
-import { ok, okRaw, voidOk } from '../response'
+import { ok, okRaw, voidOk, error } from '../response'
 import {
   MOCK_CLIENTE_EMAIL,
   mockEstablishmentsForEmail,
+  mockPushExtraEstablishment,
   mockUserForEmail,
 } from '../seed/usuario'
 import {
@@ -120,15 +121,70 @@ export function registerCoreRoutes(router: MockRouter) {
 
   /* ---------- Assinatura ---------- */
   router.on('get', '/assinaturas/onboarding/contexto', () => {
-    return ok({ temAssinatura: true, tipoAssinatura: 'Estabelecimento' })
+    const lojas = mockEstablishmentsForEmail(currentEmail()).filter((e) => e.role === 'Owner')
+    const limite = lojas[0]?.limites?.estabelecimentos ?? 1
+    const lojasVinculadas = lojas.length
+    const podeAdicionarLoja = lojasVinculadas > 0 && limite > 1 && lojasVinculadas < limite
+    return ok({
+      temEstabelecimentoProprio: lojas.length > 0,
+      estabelecimentos: lojas.map((e) => ({
+        estabelecimentoId: e.estabelecimentoId,
+        nome: e.nome,
+        logo: e.logo || null,
+        assinaturaAtiva: e.assinaturaAtiva,
+        assinaturaPendente: false,
+        podeContratar: false,
+      })),
+      proximaEtapa: podeAdicionarLoja ? 'AdicionarLoja' : 'GerenciarAssinatura',
+      estabelecimentoIdSugerido: lojas[0]?.estabelecimentoId ?? null,
+      podeAdicionarLoja,
+      lojasVinculadas,
+      limiteLojas: limite > 1 ? limite : null,
+      assinaturaPremiumId: podeAdicionarLoja || limite > 1 ? 1 : null,
+    })
   })
   router.on('get', '/assinaturas/atual', () => ok(MOCK_ASSINATURA))
   router.on('get', '/assinaturas/:assinaturaId/cobrancas', () => ok(MOCK_COBRANCAS))
   router.on('post', '/assinaturas', () => ok(MOCK_ASSINATURA))
   router.on('post', '/assinaturas/:assinaturaId/trocar-plano', () => ok(MOCK_ASSINATURA))
   router.on('post', '/assinaturas/:assinaturaId/cancelar', () => ok(MOCK_ASSINATURA))
-  router.on('post', '/assinaturas/:assinaturaId/estabelecimentos', () => {
-    return ok({ estabelecimentoId: 3, nome: 'Nova Unidade', assinaturaId: 1 })
+  router.on('post', '/assinaturas/:assinaturaId/estabelecimentos', (req: MockRequest) => {
+    const lojas = mockEstablishmentsForEmail(currentEmail())
+    const owner = lojas.find((e) => e.role === 'Owner')
+    if (!owner) {
+      return error(
+        'UsuarioSemPermissaoAssinatura',
+        'Apenas o proprietário pode adicionar unidades.',
+        403,
+      )
+    }
+    const limite = owner.limites?.estabelecimentos ?? 1
+    const vinculadas = lojas.filter((e) => e.role === 'Owner').length
+    if (limite <= 1 || vinculadas >= limite) {
+      return error(
+        'LimiteEstabelecimentosExcedido',
+        'Limite de estabelecimentos do plano atingido.',
+        400,
+      )
+    }
+    const payload = (req.body ?? {}) as {
+      estabelecimento?: { nome?: string; logo?: string }
+    }
+    const nome = payload.estabelecimento?.nome ?? 'Nova Unidade'
+    const nextId = Math.max(0, ...lojas.map((e) => e.estabelecimentoId)) + 1
+    const nova = {
+      ...owner,
+      estabelecimentoId: nextId,
+      publicGuid: `mock-guid-${nextId}`,
+      nome,
+      logo: payload.estabelecimento?.logo ?? '',
+    }
+    mockPushExtraEstablishment(nova)
+    return ok({
+      estabelecimentoId: nextId,
+      nome,
+      assinaturaId: 1,
+    })
   })
 
   /* ---------- Estabelecimento perfil ---------- */
