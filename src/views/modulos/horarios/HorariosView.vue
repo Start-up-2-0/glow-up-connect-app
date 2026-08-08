@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import HorarioDiaLojaCard from '@/components/horarios/HorarioDiaLojaCard.vue'
 import HorarioDiaProfissionaisModal from '@/components/horarios/HorarioDiaProfissionaisModal.vue'
 import HorariosPageHeader from '@/components/horarios/HorariosPageHeader.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useHorarios } from '@/composables/useHorarios'
+import { useNegocioStore } from '@/stores/negocio.store'
 import type { HorarioFuncionamento } from '@/types/negocio/horario.types'
 import type { DiaSemanaValue } from '@/constants/diasSemana'
 
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
+const { ehProfissionalAutonomo } = storeToRefs(useNegocioStore())
 
 const {
   DIAS_SEMANA,
@@ -61,8 +64,15 @@ const pageSubtitle = computed(() => {
   if (apenasHorarioProprio.value) {
     return 'Configure os dias e horários em que você atende nesta loja.'
   }
+  if (ehProfissionalAutonomo.value) {
+    return 'Configure os dias e horários em que você atende.'
+  }
   return 'Configure os horários da loja e vincule profissionais diretamente em cada dia.'
 })
+
+const secaoLojaTitulo = computed(() =>
+  ehProfissionalAutonomo.value ? 'Meus dias de atendimento' : 'Horários da loja',
+)
 
 function onDraftUpdate(dia: DiaSemanaValue, draft: { horaInicio: string; horaFim: string }) {
   setDraftDiaLoja(dia, draft)
@@ -94,7 +104,7 @@ function horarioProprioComoLoja(dia: DiaSemanaValue): HorarioFuncionamento | nul
 
     <template v-if="!contextLoading && !loading">
       <section v-if="podeGerenciarLoja" class="horarios-loja">
-        <h2 class="horarios-section-title">Horários da loja</h2>
+        <h2 class="horarios-section-title">{{ secaoLojaTitulo }}</h2>
         <div class="horarios-loja-grid">
           <HorarioDiaLojaCard
             v-for="dia in DIAS_SEMANA"
@@ -118,6 +128,7 @@ function horarioProprioComoLoja(dia: DiaSemanaValue): HorarioFuncionamento | nul
         </div>
 
         <HorarioDiaProfissionaisModal
+          v-if="podeGerenciarProfissionaisPorDia"
           v-model="modalProfissionaisAberta"
           :dia-label="modalProfissionaisDiaLabel"
           :loja-horario="modalLojaHorario"

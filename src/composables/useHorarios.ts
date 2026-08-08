@@ -2,6 +2,8 @@ import { computed, ref, watch, type Ref } from 'vue'
 import { horarioService } from '@/services/horarioService'
 import { equipeService } from '@/services/equipeService'
 import { profissionalVitrineService } from '@/services/profissionalVitrineService'
+import { storeToRefs } from 'pinia'
+import { useNegocioStore } from '@/stores/negocio.store'
 import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
@@ -41,6 +43,7 @@ function emptyDiaDraft(): DiaLojaDraft {
 
 export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<boolean>) {
   const { possuiModulo, possuiPermissao, estabelecimentoAtivo } = useNegocioContext()
+  const { ehProfissionalAutonomo } = storeToRefs(useNegocioStore())
   const notifications = useNotificationsStore()
   const { resolveError } = useApiError()
 
@@ -62,7 +65,10 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
   const modalProfissionaisErro = ref<string | null>(null)
 
   const temModuloProfissionais = computed(() => possuiModulo('Profissionais'))
-  const usaProfissionaisVitrine = computed(() => !temModuloProfissionais.value)
+  /** Vitrine de profissionais é só para loja sem módulo Equipe — não se aplica ao autônomo. */
+  const usaProfissionaisVitrine = computed(
+    () => !ehProfissionalAutonomo.value && !temModuloProfissionais.value,
+  )
   const listaProfissionaisHorario = computed<ProfissionalHorarioOption[]>(() =>
     temModuloProfissionais.value
       ? profissionais.value.map((p) => ({
@@ -82,13 +88,15 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
   )
   const exibeAbaProfissional = computed(
     () =>
-      temModuloProfissionais.value ||
-      usaProfissionaisVitrine.value ||
-      apenasHorarioProprio.value,
+      !ehProfissionalAutonomo.value &&
+      (temModuloProfissionais.value ||
+        usaProfissionaisVitrine.value ||
+        apenasHorarioProprio.value),
   )
 
   const podeGerenciarProfissionaisPorDia = computed(
     () =>
+      !ehProfissionalAutonomo.value &&
       podeGerenciarLoja.value &&
       exibeAbaProfissional.value &&
       listaProfissionaisHorario.value.length > 0,
@@ -554,7 +562,11 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
         ]
       } else if (temModuloProfissionais.value && possuiPermissao('ProfissionalGerenciar')) {
         profissionais.value = await equipeService.listarProfissionais(estabelecimentoId.value)
-      } else if (!temModuloProfissionais.value && possuiPermissao('ProfissionalGerenciar')) {
+      } else if (
+        !ehProfissionalAutonomo.value
+        && !temModuloProfissionais.value
+        && possuiPermissao('ProfissionalGerenciar')
+      ) {
         const vitrine = await profissionalVitrineService.listar(estabelecimentoId.value)
         profissionaisVitrine.value = vitrine
           .filter((p) => p.ativo)
@@ -563,6 +575,9 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
             nomePublico: p.nomePublico,
             avatarUrl: p.logo || null,
           }))
+      } else {
+        profissionais.value = []
+        profissionaisVitrine.value = []
       }
 
       editingDiasLoja.value = new Set()
