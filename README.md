@@ -58,8 +58,10 @@ npm run dev:mock
 | Visão | E-mail no login | O que vê |
 |-------|-----------------|----------|
 | **Dono · Premium** | `gustavo@glowup.com.br` | Todas as filiais; menu completo (gestão, financeiro, config) |
-| **Dono · Plus** | `plus@teste.com` | Só loja principal; menu completo |
+| **Dono · Essencial** | `plus@teste.com` | Só loja principal; menu completo (ex-Plus) |
 | **Dono · Básico** | `basico@teste.com` | Só loja principal; menu completo |
+| **Autônomo · Essencial** | `autonomo.essencial@teste.com` | Perfil profissional solo; Agenda, Serviços, Horários, Clientes. **Sem** Equipe, WhatsApp, Caixa, Financeiro, Minhas Lojas |
+| **Autônomo · Premium** | `autonomo.premium@teste.com` | Mesmo do Essencial + WhatsApp, Caixa e Financeiro. **Sem** Equipe, Comissões, multi-loja |
 | **Administrador** | `admin@teste.com` | Só Studio Glow Up; mesmas permissões do Dono na loja (agenda, clientes, serviços, financeiro, equipe, horários, config da loja). **Sem** multi-filial / gerenciar assinatura de outras lojas |
 | **Recepcionista** | `recepcionista@teste.com` | Só Studio Glow Up; **Dashboard**, **Agenda**, **Clientes**, **Serviços** (visualizar), atendimento (iniciar/finalizar/remarcar/cancelar). **Sem** Financeiro, Equipe, Horários (editar), Minha loja, Assinatura, WhatsApp |
 | **Profissional** | `profissional@teste.com` | Só a própria agenda/horários |

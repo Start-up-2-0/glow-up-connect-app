@@ -143,11 +143,49 @@ export function registerCoreRoutes(router: MockRouter) {
       assinaturaPremiumId: podeAdicionarLoja || limite > 1 ? 1 : null,
     })
   })
-  router.on('get', '/assinaturas/atual', () => ok(MOCK_ASSINATURA))
-  router.on('get', '/assinaturas/:assinaturaId/cobrancas', () => ok(MOCK_COBRANCAS))
-  router.on('post', '/assinaturas', () => ok(MOCK_ASSINATURA))
-  router.on('post', '/assinaturas/:assinaturaId/trocar-plano', () => ok(MOCK_ASSINATURA))
-  router.on('post', '/assinaturas/:assinaturaId/cancelar', () => ok(MOCK_ASSINATURA))
+  router.on('get', '/assinaturas/atual', () => {
+    const loja = mockEstablishmentsForEmail(currentEmail())[0]
+    return ok({
+      ...MOCK_ASSINATURA,
+      planoId: loja?.planoId ?? MOCK_ASSINATURA.planoId,
+      estabelecimentoId: loja?.estabelecimentoId ?? MOCK_ASSINATURA.estabelecimentoId,
+    })
+  })
+  router.on('get', '/assinaturas/:assinaturaId/cobrancas', () => {
+    const loja = mockEstablishmentsForEmail(currentEmail())[0]
+    const valor = loja?.planoNome === 'Essencial' ? 49.9 : loja?.planoId === 3 ? 79.9 : 159.9
+    return ok(
+      MOCK_COBRANCAS.map((c) => ({
+        ...c,
+        valor: loja?.tipoAssinatura === 'ProfissionalAutonomo' ? valor : c.valor,
+      })),
+    )
+  })
+  router.on('post', '/assinaturas', () => {
+    const loja = mockEstablishmentsForEmail(currentEmail())[0]
+    return ok({
+      ...MOCK_ASSINATURA,
+      planoId: loja?.planoId ?? MOCK_ASSINATURA.planoId,
+      estabelecimentoId: loja?.estabelecimentoId ?? MOCK_ASSINATURA.estabelecimentoId,
+    })
+  })
+  router.on('post', '/assinaturas/:assinaturaId/trocar-plano', () => {
+    const loja = mockEstablishmentsForEmail(currentEmail())[0]
+    return ok({
+      ...MOCK_ASSINATURA,
+      planoId: loja?.planoId ?? MOCK_ASSINATURA.planoId,
+      estabelecimentoId: loja?.estabelecimentoId ?? MOCK_ASSINATURA.estabelecimentoId,
+    })
+  })
+  router.on('post', '/assinaturas/:assinaturaId/cancelar', () => {
+    const loja = mockEstablishmentsForEmail(currentEmail())[0]
+    return ok({
+      ...MOCK_ASSINATURA,
+      planoId: loja?.planoId ?? MOCK_ASSINATURA.planoId,
+      estabelecimentoId: loja?.estabelecimentoId ?? MOCK_ASSINATURA.estabelecimentoId,
+      status: 'Cancelada',
+    })
+  })
   router.on('post', '/assinaturas/:assinaturaId/estabelecimentos', (req: MockRequest) => {
     const lojas = mockEstablishmentsForEmail(currentEmail())
     const owner = lojas.find((e) => e.role === 'Owner')
@@ -188,8 +226,51 @@ export function registerCoreRoutes(router: MockRouter) {
   })
 
   /* ---------- Estabelecimento perfil ---------- */
-  router.on('get', '/estabelecimentos/:estabelecimentoId/perfil', () => ok(MOCK_PERFIL_ESTABELECIMENTO))
-  router.on('put', '/estabelecimentos/:estabelecimentoId/perfil', () => ok(MOCK_PERFIL_ESTABELECIMENTO))
+  router.on('get', '/estabelecimentos/:estabelecimentoId/perfil', (req: MockRequest) => {
+    const email = currentEmail()
+    const loja = mockEstablishmentsForEmail(email).find(
+      (e) => String(e.estabelecimentoId) === String(req.params.estabelecimentoId),
+    ) ?? mockEstablishmentsForEmail(email)[0]
+    const user = mockUserForEmail(email)
+    if (loja?.tipoAssinatura === 'ProfissionalAutonomo') {
+      return ok({
+        ...MOCK_PERFIL_ESTABELECIMENTO,
+        id: loja.estabelecimentoId,
+        publicGuid: loja.publicGuid,
+        nome: loja.nome,
+        descricao: 'Profissional autônomo — atendimento individual.',
+        telefone: user.telefone ?? '',
+        email: user.email,
+        categoriaId: undefined,
+        categoria: undefined,
+      })
+    }
+    return ok({
+      ...MOCK_PERFIL_ESTABELECIMENTO,
+      id: loja?.estabelecimentoId ?? MOCK_PERFIL_ESTABELECIMENTO.id,
+      nome: loja?.nome ?? MOCK_PERFIL_ESTABELECIMENTO.nome,
+    })
+  })
+  router.on('put', '/estabelecimentos/:estabelecimentoId/perfil', (req: MockRequest) => {
+    const email = currentEmail()
+    const loja = mockEstablishmentsForEmail(email)[0]
+    const user = mockUserForEmail(email)
+    if (loja?.tipoAssinatura === 'ProfissionalAutonomo') {
+      return ok({
+        ...MOCK_PERFIL_ESTABELECIMENTO,
+        id: loja.estabelecimentoId,
+        publicGuid: loja.publicGuid,
+        nome: loja.nome,
+        descricao: 'Profissional autônomo — atendimento individual.',
+        telefone: user.telefone ?? '',
+        email: user.email,
+        categoriaId: undefined,
+        categoria: undefined,
+        ...(req.body as object),
+      })
+    }
+    return ok(MOCK_PERFIL_ESTABELECIMENTO)
+  })
 
   /* ---------- Rede ---------- */
   router.on('get', '/rede/resumo', () => ok(MOCK_REDE))

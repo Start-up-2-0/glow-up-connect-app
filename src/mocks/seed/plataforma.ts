@@ -37,8 +37,8 @@ const MOCK_PLANOS: Plano[] = [
   },
   {
     id: 2,
-    nome: 'Plus',
-    descricao: 'Gestão completa do salão em uma única loja.',
+    nome: 'Essencial',
+    descricao: 'Operação completa para uma unidade ou profissional autônomo.',
     preco: 79.9,
     periodo: 'mensal',
     limiteProfissionais: 10,
