@@ -20,18 +20,23 @@ const props = withDefaults(
     desabilitado?: boolean
     modoLogado?: boolean
     percentualDesconto?: number | null
+    tipoAssinatura?: 'Estabelecimento' | 'ProfissionalAutonomo'
   }>(),
   {
     destacado: false,
     desabilitado: false,
     modoLogado: false,
     percentualDesconto: null,
+    tipoAssinatura: 'Estabelecimento',
   },
 )
 
 const checkoutLink = computed(() => ({
   path: props.modoLogado ? ROUTE_PATHS.ONBOARDING_CONTRATAR : ROUTE_PATHS.ONBOARDING_ASSINATURA,
-  query: { planoId: String(props.plano.id) },
+  query: {
+    planoId: String(props.plano.id),
+    tipoAssinatura: props.tipoAssinatura,
+  },
 }))
 
 const anterior = computed(() => {

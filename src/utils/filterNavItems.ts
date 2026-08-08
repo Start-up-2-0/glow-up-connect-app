@@ -2,6 +2,7 @@ import type { NavChildItem, NavItem, NavSection } from '@/constants/navigation'
 
 export interface NavFilterContext {
   assinaturaAtiva: boolean
+  ehProfissionalAutonomo?: boolean
   possuiModulo: (modulo: string) => boolean
   possuiPermissao: (permissao: string) => boolean
   possuiAlgumModulo: (modulos: string[]) => boolean
@@ -17,9 +18,14 @@ function itemPermitido(
     | 'requerPermissao'
     | 'requerPermissoes'
     | 'requerAssinatura'
+    | 'ocultarParaAutonomo'
   >,
   context: NavFilterContext,
 ): boolean {
+  if (item.ocultarParaAutonomo && context.ehProfissionalAutonomo) {
+    return false
+  }
+
   if (item.requerAssinatura !== false && !context.assinaturaAtiva) {
     const temRequisito =
       item.requerModulo ||

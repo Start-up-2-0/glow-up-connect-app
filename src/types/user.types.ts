@@ -109,4 +109,5 @@ export interface EstabelecimentoAcesso {
   proximaDataVencimento?: string | null
   modulos: string[]
   limites?: LimitesAssinatura
+  tipoAssinatura?: 'Estabelecimento' | 'ProfissionalAutonomo' | null
 }

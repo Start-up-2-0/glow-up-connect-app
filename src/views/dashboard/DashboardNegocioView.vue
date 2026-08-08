@@ -42,6 +42,7 @@ const {
   diasTrial,
   proximaDataVencimento,
   planoNome,
+  ehProfissionalAutonomo,
 } = storeToRefs(negocioStore)
 const { assinatura } = storeToRefs(assinaturaStore)
 
@@ -287,6 +288,7 @@ watch(
 
     <div class="grid gap-5 lg:grid-cols-2 lg:items-stretch">
       <EquipeResumoCard
+        v-if="!ehProfissionalAutonomo"
         class="h-full min-w-0"
         :profissionais="profissionais"
         :loading="loading"
@@ -295,6 +297,7 @@ watch(
 
       <HistoricoNegocioCard
         class="h-full min-w-0"
+        :class="{ 'lg:col-span-2': ehProfissionalAutonomo }"
         :itens="ultimosAtendimentos"
         :loading="loading"
         @ver-todos="router.push(ROUTE_PATHS.AGENDA)"

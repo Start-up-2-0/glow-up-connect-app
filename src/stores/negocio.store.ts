@@ -45,6 +45,12 @@ export const useNegocioStore = defineStore('negocio', () => {
   const assinaturaId = computed(() => estabelecimentoAtivo.value?.assinaturaId ?? null)
   const planoId = computed(() => estabelecimentoAtivo.value?.planoId ?? null)
   const planoNome = computed(() => estabelecimentoAtivo.value?.planoNome ?? null)
+  const tipoAssinatura = computed(
+    () => estabelecimentoAtivo.value?.tipoAssinatura ?? null,
+  )
+  const ehProfissionalAutonomo = computed(
+    () => tipoAssinatura.value === 'ProfissionalAutonomo',
+  )
   const role = computed(() => estabelecimentoAtivo.value?.role ?? null)
   const limites = computed(
     () =>
@@ -213,6 +219,8 @@ export const useNegocioStore = defineStore('negocio', () => {
     assinaturaId,
     planoId,
     planoNome,
+    tipoAssinatura,
+    ehProfissionalAutonomo,
     role,
     limites,
     emTrial,

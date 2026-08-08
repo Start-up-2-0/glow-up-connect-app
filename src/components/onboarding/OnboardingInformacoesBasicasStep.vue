@@ -17,11 +17,17 @@ import { readFileAsDataUrl } from '@/utils/avatarFile'
 import { telefoneLocalFromApi, telefoneToApi } from '@/utils/formatters'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 
-const props = defineProps<{
-  initial: OnboardingEstabelecimentoDraft
-  loading?: boolean
-  errorMessage?: string | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    initial: OnboardingEstabelecimentoDraft
+    loading?: boolean
+    errorMessage?: string | null
+    modoAutonomo?: boolean
+  }>(),
+  {
+    modoAutonomo: false,
+  },
+)
 
 const emit = defineEmits<{
   submit: [estabelecimento: OnboardingEstabelecimentoDraft]
@@ -71,7 +77,7 @@ async function onLogoChange(file: File | null) {
 
 function handleSubmit() {
   categoriaError.value = null
-  if (!categoriaId.value) {
+  if (!props.modoAutonomo && !categoriaId.value) {
     categoriaError.value = 'Selecione a categoria do estabelecimento.'
     return
   }
@@ -83,7 +89,11 @@ function handleSubmit() {
     telefone: telefoneToApi(telefone.value),
     email: email.value,
     logoDataUrl: logoDataUrl.value,
-    categoriaId: Number(categoriaId.value),
+    categoriaId: props.modoAutonomo
+      ? undefined
+      : categoriaId.value
+        ? Number(categoriaId.value)
+        : undefined,
   })
 }
 </script>
@@ -100,13 +110,19 @@ function handleSubmit() {
 
     <form :class="ONBOARDING_CONTRATAR_FORM_CLASS" @submit.prevent="handleSubmit">
       <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
-        <label for="onb-info-nome" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">Nome do estabelecimento</label>
+        <label for="onb-info-nome" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
+          {{ modoAutonomo ? 'Nome público' : 'Nome do estabelecimento' }}
+        </label>
         <input
           id="onb-info-nome"
           v-model="nome"
           type="text"
           required
-          placeholder="Informe o nome do seu estabelecimento"
+          :placeholder="
+            modoAutonomo
+              ? 'Informe seu nome público profissional'
+              : 'Informe o nome do seu estabelecimento'
+          "
           :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
         />
       </div>
@@ -122,7 +138,7 @@ function handleSubmit() {
         />
       </div>
 
-      <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+      <div v-if="!modoAutonomo" :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
         <label for="onb-info-categoria" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
           Tipo de categoria
         </label>
@@ -137,7 +153,7 @@ function handleSubmit() {
       </div>
 
       <AuthAvatarUpload
-        label="Logo do estabelecimento"
+        :label="modoAutonomo ? 'Foto ou logo do perfil' : 'Logo do estabelecimento'"
         variant="contratar"
         @change="onLogoChange"
         @error="(msg) => (logoError = msg)"

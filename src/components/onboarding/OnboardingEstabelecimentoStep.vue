@@ -36,6 +36,7 @@ const props = withDefaults(
     submitLabel?: string
     backLabel?: string
     showBack?: boolean
+    modoAutonomo?: boolean
   }>(),
   {
     variant: 'public',
@@ -43,6 +44,7 @@ const props = withDefaults(
     submitLabel: 'Continuar para assinatura',
     backLabel: 'Voltar',
     showBack: false,
+    modoAutonomo: false,
   },
 )
 
@@ -146,8 +148,8 @@ function handleSubmit() {
     }
   }
 
-  // Categoria do estabelecimento é obrigatória.
-  if (!categoriaId.value) {
+  // Categoria do estabelecimento é obrigatória (não se aplica a autônomo).
+  if (!props.modoAutonomo && !categoriaId.value) {
     categoriaError.value = 'Selecione a categoria do estabelecimento.'
     return
   }
@@ -165,7 +167,11 @@ function handleSubmit() {
     estado: estado.value,
     complemento: complemento.value,
     logoDataUrl: logoDataUrl.value,
-    categoriaId: Number(categoriaId.value),
+    categoriaId: props.modoAutonomo
+      ? undefined
+      : categoriaId.value
+        ? Number(categoriaId.value)
+        : undefined,
   })
 }
 </script>
@@ -214,14 +220,18 @@ function handleSubmit() {
       <template v-if="isContratar">
         <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
           <label :for="`${fieldIdPrefix}-nome`" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
-            Nome do estabelecimento
+            {{ modoAutonomo ? 'Nome público' : 'Nome do estabelecimento' }}
           </label>
           <input
             :id="`${fieldIdPrefix}-nome`"
             v-model="nome"
             type="text"
             required
-            placeholder="Informe o nome do seu estabelecimento"
+            :placeholder="
+              modoAutonomo
+                ? 'Informe seu nome público profissional'
+                : 'Informe o nome do seu estabelecimento'
+            "
             :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
           />
         </div>
@@ -239,7 +249,7 @@ function handleSubmit() {
           />
         </div>
 
-        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+        <div v-if="!modoAutonomo" :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
           <label :for="`${fieldIdPrefix}-categoria`" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
             Categoria do estabelecimento
           </label>
@@ -301,7 +311,9 @@ function handleSubmit() {
       <template v-else>
         <div :class="GLOW_AUTH_FORM_GRID_CLASS">
           <div class="flex flex-col gap-2 sm:col-span-2">
-            <label :for="`${fieldIdPrefix}-nome`" :class="GLOW_LABEL_CLASS">Nome do estabelecimento</label>
+            <label :for="`${fieldIdPrefix}-nome`" :class="GLOW_LABEL_CLASS">
+              {{ modoAutonomo ? 'Nome público' : 'Nome do estabelecimento' }}
+            </label>
             <input
               :id="`${fieldIdPrefix}-nome`"
               v-model="nome"
@@ -323,7 +335,7 @@ function handleSubmit() {
             />
           </div>
 
-          <div class="flex flex-col gap-2 sm:col-span-2">
+          <div v-if="!modoAutonomo" class="flex flex-col gap-2 sm:col-span-2">
             <label :for="`${fieldIdPrefix}-categoria`" :class="GLOW_LABEL_CLASS">Categoria do estabelecimento</label>
             <BaseSelect
               :id="`${fieldIdPrefix}-categoria`"

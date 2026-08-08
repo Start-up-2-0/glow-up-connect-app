@@ -257,6 +257,7 @@ function buildEstab(
     diasTrial: null,
     proximaDataVencimento: '2026-09-05T00:00:00Z',
     modulos: [...APP_MODULES],
+    tipoAssinatura: 'Estabelecimento',
     limites: {
       profissionais: 10,
       servicos: null,

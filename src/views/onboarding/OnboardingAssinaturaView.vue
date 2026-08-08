@@ -8,17 +8,24 @@ import OnboardingEstabelecimentoStep from '@/components/onboarding/OnboardingEst
 import OnboardingPagamentoStep from '@/components/onboarding/OnboardingPagamentoStep.vue'
 import { useOnboardingAssinaturaWizard } from '@/composables/useOnboardingAssinaturaWizard'
 import { resolvePublicOnboardingStep } from '@/constants/onboardingWizardSteps'
+import type { TipoAssinatura } from '@/types/assinatura.types'
 
 const route = useRoute()
 const planoId = computed(() => Number(route.query.planoId))
+const tipoAssinatura = computed<TipoAssinatura>(() =>
+  route.query.tipoAssinatura === 'ProfissionalAutonomo'
+    ? 'ProfissionalAutonomo'
+    : 'Estabelecimento',
+)
 
-const wizard = useOnboardingAssinaturaWizard(planoId.value)
+const wizard = useOnboardingAssinaturaWizard(planoId.value, tipoAssinatura.value)
 
 const {
   draft,
   step,
   plano,
   promocao,
+  ehAutonomo,
   loading,
   submitting,
   aguardandoPagamento,
@@ -38,7 +45,13 @@ const {
 
 const isCheckoutStep = computed(() => step.value === 'assinatura')
 
-const publicStep = computed(() => resolvePublicOnboardingStep(step.value))
+const publicStep = computed(() => {
+  const base = resolvePublicOnboardingStep(step.value)
+  if (step.value === 'estabelecimento' && ehAutonomo.value) {
+    return { ...base, label: 'Perfil profissional' }
+  }
+  return base
+})
 
 onMounted(() => {
   void init()
@@ -85,6 +98,7 @@ function handlePublicBack() {
       <OnboardingEstabelecimentoStep
         v-else-if="step === 'estabelecimento'"
         variant="public"
+        :modo-autonomo="ehAutonomo"
         :initial="draft.estabelecimento"
         :loading="loading"
         :error-message="erro"

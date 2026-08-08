@@ -10,14 +10,20 @@ import { formatDate } from '@/utils/formatters'
 
 const router = useRouter()
 const negocioStore = useNegocioStore()
-const { assinaturaAtiva, planoNome, assinaturaStatus, proximaDataVencimento } =
+const { assinaturaAtiva, planoNome, assinaturaStatus, proximaDataVencimento, ehProfissionalAutonomo } =
   storeToRefs(negocioStore)
 const { temVinculoNegocio } = useAcessoUsuario()
 
 const isPremium = computed(() => assinaturaAtiva.value && planoNome.value === 'Premium')
-const planoAtual = computed(() => planoNome.value ?? 'Básico')
+const planoAtual = computed(() => planoNome.value ?? 'Essencial')
 const proximaRenovacao = computed(() =>
   proximaDataVencimento.value ? formatDate(proximaDataVencimento.value) : '—',
+)
+
+const premiumBenefits = computed(() =>
+  ehProfissionalAutonomo.value
+    ? ['WhatsApp automático', 'Financeiro pessoal', 'Destaque no Explorar']
+    : ['Caixa e financeiro', 'Comissões e CRM', 'Até 5 unidades'],
 )
 
 function goUpgrade() {
@@ -61,7 +67,7 @@ function goAssinatura() {
       </p>
       <ul class="mt-2 space-y-1">
         <li
-          v-for="benefit in ['Recursos exclusivos', 'Automações avançadas', 'Prioridade nas novidades']"
+          v-for="benefit in premiumBenefits"
           :key="benefit"
           class="flex items-center gap-1.5 font-urbanist text-[11px] leading-snug text-glow-text-subtle"
         >

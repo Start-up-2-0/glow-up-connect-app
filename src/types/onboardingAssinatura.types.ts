@@ -1,3 +1,5 @@
+import type { TipoAssinatura } from '@/types/assinatura.types'
+
 export type OnboardingWizardStep = 'conta' | 'confirmar-email' | 'estabelecimento' | 'assinatura'
 
 export interface OnboardingUsuarioDraft {
@@ -28,6 +30,7 @@ export interface OnboardingEstabelecimentoDraft {
 
 export interface OnboardingAssinaturaDraft {
   planoId: number
+  tipoAssinatura: TipoAssinatura
   step: OnboardingWizardStep
   usuario: OnboardingUsuarioDraft
   estabelecimento: OnboardingEstabelecimentoDraft

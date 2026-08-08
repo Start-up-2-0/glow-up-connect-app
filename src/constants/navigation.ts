@@ -11,6 +11,8 @@ export interface NavGateMeta {
   requerPermissoes?: string[]
   /** Default true para itens com gate de módulo */
   requerAssinatura?: boolean
+  /** Ocultar para profissional autônomo (equipe, comissões, multi-loja). */
+  ocultarParaAutonomo?: boolean
 }
 
 export interface NavChildItem extends NavGateMeta {
@@ -57,6 +59,7 @@ const financeiroNavChildren: NavChildItem[] = [
     icon: 'finance',
     requerModulo: 'ComissaoProfissionais',
     requerPermissao: 'CaixaVisualizar',
+    ocultarParaAutonomo: true,
   },
 ]
 
@@ -138,6 +141,7 @@ export const businessNavSections: NavSection[] = [
         requerModulo: 'HorariosAtendimento',
         requerSemModulo: 'Profissionais',
         requerPermissao: 'ProfissionalGerenciar',
+        ocultarParaAutonomo: true,
       },
       {
         id: 'servicos',
@@ -184,6 +188,7 @@ export const businessNavSections: NavSection[] = [
         icon: 'team',
         requerModulo: 'Profissionais',
         requerPermissao: 'EquipeGerenciar',
+        ocultarParaAutonomo: true,
       },
       {
         id: 'horarios',

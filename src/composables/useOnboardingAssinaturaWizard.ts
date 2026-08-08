@@ -10,7 +10,7 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { useApiError } from '@/composables/useApiError'
 import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
-import type { PagamentoAssinaturaPayload } from '@/types/assinatura.types'
+import type { PagamentoAssinaturaPayload, TipoAssinatura } from '@/types/assinatura.types'
 import { ROUTE_PATHS } from '@/constants/routes'
 import type {
   OnboardingAssinaturaDraft,
@@ -51,9 +51,10 @@ function emptyEstabelecimento(): OnboardingEstabelecimentoDraft {
   }
 }
 
-function createDraft(planoId: number): OnboardingAssinaturaDraft {
+function createDraft(planoId: number, tipoAssinatura: TipoAssinatura): OnboardingAssinaturaDraft {
   return {
     planoId,
+    tipoAssinatura,
     step: 'conta',
     usuario: emptyUsuario(),
     estabelecimento: emptyEstabelecimento(),
@@ -74,7 +75,10 @@ function saveDraft(draft: OnboardingAssinaturaDraft) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
 }
 
-export function useOnboardingAssinaturaWizard(planoId: number) {
+export function useOnboardingAssinaturaWizard(
+  planoId: number,
+  tipoAssinatura: TipoAssinatura = 'Estabelecimento',
+) {
   const router = useRouter()
   const authStore = useAuthStore()
   const userStore = useUserStore()
@@ -93,7 +97,12 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
 
   const storedDraft = loadDraft()
   const draft = ref<OnboardingAssinaturaDraft>(
-    storedDraft?.planoId === planoId ? storedDraft : createDraft(planoId),
+    storedDraft?.planoId === planoId
+      ? {
+          ...storedDraft,
+          tipoAssinatura: storedDraft.tipoAssinatura ?? tipoAssinatura,
+        }
+      : createDraft(planoId, tipoAssinatura),
   )
   const loading = ref(false)
   const submitting = ref(false)
@@ -136,7 +145,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
         return
       }
 
-      await planosStore.fetchPlanos()
+      await planosStore.fetchPlanos(false, draft.value.tipoAssinatura)
       if (!plano.value) {
         await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
         return
@@ -376,24 +385,42 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
 
     const negocio = draft.value.estabelecimento
     const endereco = draftEnderecoToApi(negocio)
+    const tipo = draft.value.tipoAssinatura
 
     submitting.value = true
     try {
-      const result = await assinaturaStore.criarAssinatura({
-        planoId: plano.value.id,
-        tipoAssinatura: 'Estabelecimento',
-        estabelecimento: {
-          nome: negocio.nome.trim(),
-          descricao: negocio.descricao.trim(),
-          logo: negocio.logoDataUrl!,
-          telefone: telefoneToApi(negocio.telefone),
-          email: negocio.email.trim(),
-          categoriaId: negocio.categoriaId ?? undefined,
-          endereco,
-        },
-        gateway: 'MercadoPago',
-        ...(pagamento ? { pagamento } : {}),
-      })
+      const result = await assinaturaStore.criarAssinatura(
+        tipo === 'ProfissionalAutonomo'
+          ? {
+              planoId: plano.value.id,
+              tipoAssinatura: 'ProfissionalAutonomo',
+              profissionalAutonomo: {
+                nomePublico: negocio.nome.trim(),
+                biografia: negocio.descricao.trim() || undefined,
+                logo: negocio.logoDataUrl!,
+                telefone: telefoneToApi(negocio.telefone),
+                email: negocio.email.trim(),
+                endereco,
+              },
+              gateway: 'MercadoPago',
+              ...(pagamento ? { pagamento } : {}),
+            }
+          : {
+              planoId: plano.value.id,
+              tipoAssinatura: 'Estabelecimento',
+              estabelecimento: {
+                nome: negocio.nome.trim(),
+                descricao: negocio.descricao.trim(),
+                logo: negocio.logoDataUrl!,
+                telefone: telefoneToApi(negocio.telefone),
+                email: negocio.email.trim(),
+                categoriaId: negocio.categoriaId ?? undefined,
+                endereco,
+              },
+              gateway: 'MercadoPago',
+              ...(pagamento ? { pagamento } : {}),
+            },
+      )
 
       assinaturaStore.setAssinatura(result)
       await userStore.fetchMe()
@@ -442,6 +469,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     stepperIndex,
     plano,
     promocao,
+    ehAutonomo: computed(() => draft.value.tipoAssinatura === 'ProfissionalAutonomo'),
     loading,
     submitting,
     aguardandoPagamento,

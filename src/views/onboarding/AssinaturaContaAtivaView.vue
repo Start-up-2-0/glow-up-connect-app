@@ -9,12 +9,18 @@ import OnboardingPagamentoStep from '@/components/onboarding/OnboardingPagamento
 import { useAssinaturaLogadaWizard } from '@/composables/useAssinaturaLogadaWizard'
 import { ASSINATURA_LOGADA_STEP_SUBTITLES } from '@/types/assinaturaOnboarding.types'
 import { ROUTE_PATHS } from '@/constants/routes'
+import type { TipoAssinatura } from '@/types/assinatura.types'
 
 const route = useRoute()
 const router = useRouter()
 const planoId = computed(() => Number(route.query.planoId))
+const tipoAssinatura = computed<TipoAssinatura>(() =>
+  route.query.tipoAssinatura === 'ProfissionalAutonomo'
+    ? 'ProfissionalAutonomo'
+    : 'Estabelecimento',
+)
 
-const wizard = useAssinaturaLogadaWizard(planoId.value)
+const wizard = useAssinaturaLogadaWizard(planoId.value, tipoAssinatura.value)
 
 const {
   draft,
@@ -24,6 +30,7 @@ const {
   plano,
   promocao,
   usaEstabelecimentoExistente,
+  ehAutonomo,
   loading,
   submitting,
   aguardandoPagamento,
@@ -74,6 +81,7 @@ function voltarDeInformacoesBasicas() {
       <OnboardingInformacoesBasicasStep
         v-if="step === 'informacoes-basicas'"
         :initial="draft.estabelecimento"
+        :modo-autonomo="ehAutonomo"
         :loading="loading"
         :error-message="erro"
         @submit="avancarDeInformacoesBasicas"

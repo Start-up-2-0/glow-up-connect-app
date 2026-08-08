@@ -54,7 +54,9 @@ const complemento = ref('')
 const logoFile = ref<File | null>(null)
 
 const isAutonomo = computed(
-  () => userStore.profile?.role === USER_ROLE.PROFISSIONAL_AUTONOMO,
+  () =>
+    route.query.tipoAssinatura === 'ProfissionalAutonomo'
+    || userStore.profile?.role === USER_ROLE.PROFISSIONAL_AUTONOMO,
 )
 
 onMounted(async () => {

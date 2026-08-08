@@ -67,7 +67,7 @@ export function useDashboardNav() {
   const userStore = useUserStore()
   const negocioStore = useNegocioStore()
   const { profile } = storeToRefs(userStore)
-  const { assinaturaAtiva } = storeToRefs(negocioStore)
+  const { assinaturaAtiva, ehProfissionalAutonomo } = storeToRefs(negocioStore)
   const {
     temVinculoNegocio,
     ehProfissionalOperacional,
@@ -77,6 +77,7 @@ export function useDashboardNav() {
   const navSections = computed(() => {
     const filterCtx = {
       assinaturaAtiva: assinaturaAtiva.value,
+      ehProfissionalAutonomo: ehProfissionalAutonomo.value,
       possuiModulo: negocioStore.possuiModulo,
       possuiPermissao: negocioStore.possuiPermissao,
       possuiAlgumModulo: negocioStore.possuiAlgumModulo,
@@ -98,16 +99,27 @@ export function useDashboardNav() {
     }
 
     if (temVinculoNegocio.value) {
-      return filterNavSections(businessNavSections, filterCtx)
+      return adaptLabelsAutonomo(filterNavSections(businessNavSections, filterCtx))
     }
 
     if (!isClienteRole(profile.value?.role)) {
-      return filterNavSections(businessNavSections, filterCtx)
+      return adaptLabelsAutonomo(filterNavSections(businessNavSections, filterCtx))
     }
 
     return filterNavSections(clienteSections, filterCtx)
   })
 
+  function adaptLabelsAutonomo(sections: NavSection[]): NavSection[] {
+    if (!ehProfissionalAutonomo.value) return sections
+    return sections.map((section) => ({
+      ...section,
+      items: section.items.map((item) =>
+        item.id === 'perfil-estabelecimento'
+          ? { ...item, label: 'Meu perfil' }
+          : item,
+      ),
+    }))
+  }
   const navItems = computed(() => navSections.value.flatMap((section) => section.items))
 
   const searchPlaceholder = computed(() => {

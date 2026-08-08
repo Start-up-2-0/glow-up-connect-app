@@ -10,7 +10,7 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
-import type { PagamentoAssinaturaPayload } from '@/types/assinatura.types'
+import type { PagamentoAssinaturaPayload, TipoAssinatura } from '@/types/assinatura.types'
 import { ROUTE_PATHS } from '@/constants/routes'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 import type { EstabelecimentoPerfilCompleto } from '@/types/estabelecimento.types'
@@ -33,6 +33,7 @@ const STORAGE_KEY = 'guc_assinatura_logada'
 
 interface AssinaturaLogadaDraft {
   planoId: number
+  tipoAssinatura: TipoAssinatura
   step: AssinaturaLogadaWizardStep
   estabelecimento: OnboardingEstabelecimentoDraft
   estabelecimentoId: number | null
@@ -56,9 +57,10 @@ function emptyEstabelecimento(): OnboardingEstabelecimentoDraft {
   }
 }
 
-function createDraft(planoId: number): AssinaturaLogadaDraft {
+function createDraft(planoId: number, tipoAssinatura: TipoAssinatura): AssinaturaLogadaDraft {
   return {
     planoId,
+    tipoAssinatura,
     step: 'informacoes-basicas',
     estabelecimento: emptyEstabelecimento(),
     estabelecimentoId: null,
@@ -110,7 +112,10 @@ function precisaCompletarEndereco(perfil: EstabelecimentoPerfilCompleto | null):
   return perfil.endereco.enderecoCompleto !== true
 }
 
-export function useAssinaturaLogadaWizard(planoId: number) {
+export function useAssinaturaLogadaWizard(
+  planoId: number,
+  tipoAssinatura: TipoAssinatura = 'Estabelecimento',
+) {
   const router = useRouter()
   const authStore = useAuthStore()
   const userStore = useUserStore()
@@ -128,7 +133,12 @@ export function useAssinaturaLogadaWizard(planoId: number) {
 
   const storedDraft = loadDraft()
   const draft = ref<AssinaturaLogadaDraft>(
-    storedDraft?.planoId === planoId ? storedDraft : createDraft(planoId),
+    storedDraft?.planoId === planoId
+      ? {
+          ...storedDraft,
+          tipoAssinatura: storedDraft.tipoAssinatura ?? tipoAssinatura,
+        }
+      : createDraft(planoId, tipoAssinatura),
   )
   const contexto = ref<AssinaturaOnboardingContexto | null>(null)
   const perfilExistente = ref<EstabelecimentoPerfilCompleto | null>(null)
@@ -201,7 +211,11 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       return false
     }
 
-    if (data.temEstabelecimentoProprio && data.estabelecimentoIdSugerido) {
+    if (
+      draft.value.tipoAssinatura !== 'ProfissionalAutonomo'
+      && data.temEstabelecimentoProprio
+      && data.estabelecimentoIdSugerido
+    ) {
       draft.value.estabelecimentoId = data.estabelecimentoIdSugerido
       const existente = data.estabelecimentos.find(
         (item) => item.estabelecimentoId === data.estabelecimentoIdSugerido,
@@ -236,7 +250,9 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       if (!authStore.isAuthenticated) {
         await router.replace({
           path: ROUTE_PATHS.LOGIN,
-          query: { redirect: `${ROUTE_PATHS.ONBOARDING_CONTRATAR}?planoId=${planoId}` },
+          query: {
+            redirect: `${ROUTE_PATHS.ONBOARDING_CONTRATAR}?planoId=${planoId}&tipoAssinatura=${draft.value.tipoAssinatura}`,
+          },
         })
         return
       }
@@ -258,7 +274,7 @@ export function useAssinaturaLogadaWizard(planoId: number) {
         return
       }
 
-      await planosStore.fetchPlanos()
+      await planosStore.fetchPlanos(false, draft.value.tipoAssinatura)
       if (!plano.value) {
         await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
         return
@@ -281,15 +297,19 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     erro.value = null
 
     if (!estabelecimento.nome.trim()) {
-      erro.value = 'Informe o nome do estabelecimento.'
+      erro.value = draft.value.tipoAssinatura === 'ProfissionalAutonomo'
+        ? 'Informe o nome público profissional.'
+        : 'Informe o nome do estabelecimento.'
       return
     }
-    if (!estabelecimento.categoriaId) {
+    if (draft.value.tipoAssinatura !== 'ProfissionalAutonomo' && !estabelecimento.categoriaId) {
       erro.value = 'Selecione a categoria do estabelecimento.'
       return
     }
     if (!estabelecimento.logoDataUrl) {
-      erro.value = 'Envie a logo do estabelecimento.'
+      erro.value = draft.value.tipoAssinatura === 'ProfissionalAutonomo'
+        ? 'Envie a foto ou logo do perfil.'
+        : 'Envie a logo do estabelecimento.'
       return
     }
     if (!estabelecimento.email.trim()) {
@@ -431,31 +451,48 @@ export function useAssinaturaLogadaWizard(planoId: number) {
 
     submitting.value = true
     try {
-      const payloadBase = {
-        planoId: plano.value.id,
-        tipoAssinatura: 'Estabelecimento' as const,
-        gateway: 'MercadoPago' as const,
-        ...(pagamento ? { pagamento } : {}),
-      }
+      const tipo = draft.value.tipoAssinatura
+      const negocio = draft.value.estabelecimento
 
       const result = await assinaturaStore.criarAssinatura(
-        draft.value.estabelecimentoId
+        tipo === 'ProfissionalAutonomo'
           ? {
-              ...payloadBase,
-              estabelecimentoId: draft.value.estabelecimentoId,
-            }
-          : {
-              ...payloadBase,
-              estabelecimento: {
-                nome: draft.value.estabelecimento.nome.trim(),
-                descricao: draft.value.estabelecimento.descricao.trim(),
-                logo: draft.value.estabelecimento.logoDataUrl!,
-                telefone: telefoneToApi(draft.value.estabelecimento.telefone),
-                email: draft.value.estabelecimento.email.trim(),
-                categoriaId: draft.value.estabelecimento.categoriaId,
-                endereco: draftEnderecoToApi(draft.value.estabelecimento),
+              planoId: plano.value.id,
+              tipoAssinatura: 'ProfissionalAutonomo',
+              profissionalAutonomo: {
+                nomePublico: negocio.nome.trim(),
+                biografia: negocio.descricao.trim() || undefined,
+                logo: negocio.logoDataUrl!,
+                telefone: telefoneToApi(negocio.telefone),
+                email: negocio.email.trim(),
+                endereco: draftEnderecoToApi(negocio),
               },
-            },
+              gateway: 'MercadoPago',
+              ...(pagamento ? { pagamento } : {}),
+            }
+          : draft.value.estabelecimentoId
+            ? {
+                planoId: plano.value.id,
+                tipoAssinatura: 'Estabelecimento',
+                estabelecimentoId: draft.value.estabelecimentoId,
+                gateway: 'MercadoPago',
+                ...(pagamento ? { pagamento } : {}),
+              }
+            : {
+                planoId: plano.value.id,
+                tipoAssinatura: 'Estabelecimento',
+                estabelecimento: {
+                  nome: negocio.nome.trim(),
+                  descricao: negocio.descricao.trim(),
+                  logo: negocio.logoDataUrl!,
+                  telefone: telefoneToApi(negocio.telefone),
+                  email: negocio.email.trim(),
+                  categoriaId: negocio.categoriaId,
+                  endereco: draftEnderecoToApi(negocio),
+                },
+                gateway: 'MercadoPago',
+                ...(pagamento ? { pagamento } : {}),
+              },
       )
 
       assinaturaStore.setAssinatura(result)
@@ -504,6 +541,7 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     promocao,
     contexto,
     usaEstabelecimentoExistente,
+    ehAutonomo: computed(() => draft.value.tipoAssinatura === 'ProfissionalAutonomo'),
     loading,
     submitting,
     aguardandoPagamento,
