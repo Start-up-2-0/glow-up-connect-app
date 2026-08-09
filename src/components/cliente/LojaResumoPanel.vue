@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import {
   CalendarDays,
   CheckCircle2,
@@ -10,7 +11,7 @@ import {
 } from 'lucide-vue-next'
 import AvaliacaoNotaResumo from '@/components/avaliacao/AvaliacaoNotaResumo.vue'
 import { CLIENTE_BTN_CTA_CLASS } from '@/constants/designTokens'
-import { lojaAgendarUrl } from '@/constants/routes'
+import { lojaAgendarPath } from '@/constants/routes'
 import type { EstabelecimentoPublico } from '@/types/estabelecimento.types'
 import { formatDistanciaKm, formatEnderecoCard, formatHorarioFigma } from '@/utils/formatters'
 
@@ -114,7 +115,12 @@ const inicial = computed(() => (props.loja.nome?.charAt(0) || '?').toUpperCase()
           variant="inline"
         />
 
-        <p v-if="loja.categoria" class="loja-hero-card__categoria">{{ loja.categoria }}</p>
+        <p class="loja-hero-card__categoria">
+          <span class="loja-hero-card__formato">
+            {{ loja.tipoAssinatura === 'ProfissionalAutonomo' ? 'Profissional' : 'Loja' }}
+          </span>
+          <span v-if="loja.categoria">{{ loja.categoria }}</span>
+        </p>
       </div>
 
       <div class="loja-hero-card__stats">
@@ -167,16 +173,16 @@ const inicial = computed(() => (props.loja.nome?.charAt(0) || '?').toUpperCase()
 
       <p v-if="loja.descricao" class="loja-hero-card__desc">{{ loja.descricao }}</p>
 
-      <a
+      <RouterLink
         v-if="!hideCta"
-        :href="lojaAgendarUrl(loja.publicGuid)"
+        :to="lojaAgendarPath(loja.publicGuid)"
         class="loja-hero-card__cta loja-hero-card__cta--desktop"
       >
         <span :class="CLIENTE_BTN_CTA_CLASS">
           <CalendarDays class="size-4" aria-hidden="true" />
           Continuar agendamento
         </span>
-      </a>
+      </RouterLink>
     </div>
   </section>
 </template>

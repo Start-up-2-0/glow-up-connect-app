@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { ChevronRight, CalendarDays, Scissors, Users } from 'lucide-vue-next'
-import { useRoute } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import LojaResumoPanel from '@/components/cliente/LojaResumoPanel.vue'
 import LojaHorariosCard from '@/components/cliente/LojaHorariosCard.vue'
@@ -14,7 +14,7 @@ import { avaliacaoService } from '@/services/avaliacaoService'
 import { useGeolocation } from '@/composables/useGeolocation'
 import { useApiError } from '@/composables/useApiError'
 import { useLoading } from '@/composables/useLoading'
-import { lojaAgendarUrl } from '@/constants/routes'
+import { lojaAgendarPath } from '@/constants/routes'
 import type { EstabelecimentoPublico } from '@/types/estabelecimento.types'
 import type { ProfissionalPublico, ServicoPublico } from '@/types/agendamento.types'
 import type { AvaliacoesPaginadas } from '@/types/avaliacao.types'
@@ -145,10 +145,10 @@ onUnmounted(() => {
       </div>
 
       <div class="loja-detalhe-sticky-cta">
-        <a :href="lojaAgendarUrl(loja.publicGuid)" class="loja-detalhe-sticky-cta__btn">
+        <RouterLink :to="lojaAgendarPath(loja.publicGuid)" class="loja-detalhe-sticky-cta__btn">
           <CalendarDays class="size-4" aria-hidden="true" />
           Continuar agendamento
-        </a>
+        </RouterLink>
       </div>
 
       <LojaProfissionaisModal

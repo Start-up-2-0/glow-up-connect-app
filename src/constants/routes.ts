@@ -163,12 +163,15 @@ export function lojaDetalhePath(publicGuid: string): string {
   return `${ROUTE_PATHS.LOJA}/${publicGuid}`
 }
 
-/** Path relativo legado no app — preferir `lojaAgendarUrl` (landing). */
-export function lojaAgendarPath(publicGuid: string): string {
-  return `${ROUTE_PATHS.LOJA}/${publicGuid}/agendar`
+/** Path in-app do wizard de agendamento (Explorar / detalhe da loja). */
+export function lojaAgendarPath(publicGuid: string, profissionalPublicGuid?: string): string {
+  const path = `${ROUTE_PATHS.LOJA}/${publicGuid}/agendar`
+  if (!profissionalPublicGuid) return path
+  const params = new URLSearchParams({ profissional: profissionalPublicGuid })
+  return `${path}?${params.toString()}`
 }
 
-/** URL absoluta do wizard público hospedado na landing. */
+/** URL absoluta do wizard público hospedado na landing (links compartilháveis). */
 export function lojaAgendarUrl(publicGuid: string, profissionalPublicGuid?: string): string {
   const url = new URL(`${LANDING_URL}/loja/${publicGuid}/agendar`)
   if (profissionalPublicGuid) {

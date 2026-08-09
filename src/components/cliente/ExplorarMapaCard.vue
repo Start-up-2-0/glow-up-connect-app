@@ -3,7 +3,7 @@ import { RouterLink } from 'vue-router'
 import { X } from 'lucide-vue-next'
 import AvaliacaoNotaResumo from '@/components/avaliacao/AvaliacaoNotaResumo.vue'
 import type { EstabelecimentoProximo } from '@/types/estabelecimento.types'
-import { lojaAgendarUrl, lojaDetalhePath } from '@/constants/routes'
+import { lojaAgendarPath, lojaDetalhePath } from '@/constants/routes'
 import { formatDistanciaKm } from '@/utils/formatters'
 import { formatEnderecoMapa } from '@/utils/explorarMapa'
 
@@ -48,9 +48,14 @@ const emit = defineEmits<{
     <div class="explorar-mapa-card__body">
       <h2 class="explorar-mapa-card__title">{{ item.nome }}</h2>
 
-      <span v-if="item.categoria" class="explorar-mapa-card__categoria">
-        {{ item.categoria }}
-      </span>
+      <div class="explorar-mapa-card__tags">
+        <span class="explorar-mapa-card__formato">
+          {{ item.tipoAssinatura === 'ProfissionalAutonomo' ? 'Profissional' : 'Loja' }}
+        </span>
+        <span v-if="item.categoria" class="explorar-mapa-card__categoria">
+          {{ item.categoria }}
+        </span>
+      </div>
 
       <div class="explorar-mapa-card__meta">
         <AvaliacaoNotaResumo
@@ -72,12 +77,12 @@ const emit = defineEmits<{
         >
           Ver detalhes
         </RouterLink>
-        <a
-          :href="lojaAgendarUrl(item.publicGuid)"
+        <RouterLink
+          :to="lojaAgendarPath(item.publicGuid)"
           class="explorar-mapa-card__btn explorar-mapa-card__btn--primary"
         >
           Agendar
-        </a>
+        </RouterLink>
       </div>
     </div>
   </article>
@@ -160,8 +165,25 @@ const emit = defineEmits<{
   line-height: 1.25;
 }
 
-.explorar-mapa-card__categoria {
+.explorar-mapa-card__tags {
   margin-top: 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.explorar-mapa-card__formato {
+  display: inline-flex;
+  border-radius: 0.375rem;
+  padding: 0.15rem 0.5rem;
+  font-family: 'Urbanist', ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--glow-text);
+  background: var(--glow-surface-tint);
+}
+
+.explorar-mapa-card__categoria {
   display: inline-flex;
   border-radius: 9999px;
   padding: 0.15rem 0.5rem;

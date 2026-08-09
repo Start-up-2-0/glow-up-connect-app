@@ -1,13 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
-import { lojaAgendarUrl, ROUTE_NAMES, ROUTE_PATHS } from '@/constants/routes'
-
-function redirectAgendarToLanding(to: { params: Record<string, unknown>; query: Record<string, unknown> }) {
-  const publicGuid = String(to.params.publicGuid ?? '')
-  const profissional =
-    typeof to.query.profissional === 'string' ? to.query.profissional : undefined
-  window.location.replace(lojaAgendarUrl(publicGuid, profissional))
-  return false
-}
+import { ROUTE_NAMES, ROUTE_PATHS } from '@/constants/routes'
 
 export const clienteRoutes: RouteRecordRaw[] = [
   {
@@ -36,7 +28,6 @@ export const clienteRoutes: RouteRecordRaw[] = [
     path: `${ROUTE_PATHS.LOJA}/:publicGuid/agendar`,
     name: ROUTE_NAMES.LOJA_AGENDAR,
     component: () => import('@/views/dashboard/cliente/AgendarWizardView.vue'),
-    beforeEnter: (to) => redirectAgendarToLanding(to),
     meta: {
       layout: 'agendar-publico',
       skipNegocioGuard: true,
