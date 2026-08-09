@@ -3,14 +3,12 @@ import axios, {
   type AxiosInstance,
   type InternalAxiosRequestConfig,
 } from 'axios'
-import { API_BASE_URL, TOKEN_HEADER } from '@/constants/storageKeys'
+import { API_BASE_URL } from '@/constants/storageKeys'
 import { ROUTE_PATHS } from '@/constants/routes'
 import type { ApiErrorResponse } from '@/types/api.types'
 import type { AuthTokens } from '@/types/auth.types'
 import {
   clearSessionStorage,
-  getAccessToken,
-  setAccessToken,
 } from '@/utils/storage'
 import { syncSession } from '@/utils/sessionSync'
 import {
@@ -27,17 +25,17 @@ import { useLoadingStore } from '@/stores/loading.store'
 import { MOCK_MODE } from '@/mocks/config'
 
 type QueueCallback = {
-  resolve: (token: string) => void
+  resolve: () => void
   reject: (error: unknown) => void
 }
 
 let isRefreshing = false
 let failedQueue: QueueCallback[] = []
 
-function processQueue(error: unknown, token: string | null = null) {
+function processQueue(error: unknown) {
   failedQueue.forEach(({ resolve, reject }) => {
     if (error) reject(error)
-    else if (token) resolve(token)
+    else resolve()
   })
   failedQueue = []
 }
@@ -93,24 +91,22 @@ function redirectToLogin() {
   }
 }
 
-async function refreshAccessToken(client: AxiosInstance): Promise<string> {
+async function refreshAccessToken(client: AxiosInstance): Promise<void> {
   const { data } = await client.post<{ success: boolean; data: AuthTokens }>(
     '/auth/refresh',
     {},
     {
-      headers: { [TOKEN_HEADER]: undefined },
       withCredentials: true,
     },
   )
 
   const tokens = data.data
   syncSession({
-    token: tokens.token,
+    token: '',
     refreshToken: '',
     expiresAt: tokens.expiresAt,
     refreshExpiresAt: tokens.refreshExpiresAt,
   })
-  return tokens.token
 }
 
 const api: AxiosInstance = axios.create({
@@ -136,10 +132,7 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     return config
   }
 
-  const token = getAccessToken()
-  if (token && config.headers) {
-    config.headers[TOKEN_HEADER] = token
-  }
+  // Auth via cookie HttpOnly (guc_access); não injeta token no header.
 
   if (!isExemptRequestProofPath(config.url)) {
     const proof = await acquireRequestProof(config.method, config.url)
@@ -246,25 +239,20 @@ api.interceptors.response.use(
     }
 
     if (isRefreshing) {
-      return new Promise<string>((resolve, reject) => {
+      return new Promise<void>((resolve, reject) => {
         failedQueue.push({ resolve, reject })
-      }).then((token) => {
-        originalRequest.headers[TOKEN_HEADER] = token
-        return api(originalRequest)
-      })
+      }).then(() => api(originalRequest))
     }
 
     originalRequest._retry = true
     isRefreshing = true
 
     try {
-      const newToken = await refreshAccessToken(api)
-      setAccessToken(newToken)
-      processQueue(null, newToken)
-      originalRequest.headers[TOKEN_HEADER] = newToken
+      await refreshAccessToken(api)
+      processQueue(null)
       return api(originalRequest)
     } catch (refreshError) {
-      processQueue(refreshError, null)
+      processQueue(refreshError)
       redirectToLogin()
       return Promise.reject(refreshError)
     } finally {

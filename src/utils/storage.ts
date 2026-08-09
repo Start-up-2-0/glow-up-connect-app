@@ -1,8 +1,6 @@
 import { STORAGE_KEYS } from '@/constants/storageKeys'
 import type { StoredSession } from '@/types/auth.types'
 
-const memoryAccessToken: { value: string | null } = { value: null }
-
 function sessionStorageSafe() {
   return {
     get(key: string): string | null {
@@ -61,36 +59,40 @@ export const storage = {
   },
 }
 
+/** Metadados de sessão (sem segredos). Tokens ficam só em cookies HttpOnly. */
 export function readStoredSession(): Partial<StoredSession> {
-  const token = memoryAccessToken.value ?? session.get(STORAGE_KEYS.ACCESS_TOKEN) ?? undefined
+  const active = session.get(STORAGE_KEYS.SESSION_ACTIVE) === '1'
+  if (!active) {
+    return {}
+  }
+
   return {
-    token,
+    token: '',
+    refreshToken: '',
     expiresAt: session.get(STORAGE_KEYS.EXPIRES_AT) ?? undefined,
     refreshExpiresAt: session.get(STORAGE_KEYS.REFRESH_EXPIRES_AT) ?? undefined,
   }
 }
 
 export function persistSession(sessionData: StoredSession): void {
-  memoryAccessToken.value = sessionData.token
-  session.set(STORAGE_KEYS.ACCESS_TOKEN, sessionData.token)
+  session.set(STORAGE_KEYS.SESSION_ACTIVE, '1')
   session.set(STORAGE_KEYS.EXPIRES_AT, sessionData.expiresAt)
   session.set(STORAGE_KEYS.REFRESH_EXPIRES_AT, sessionData.refreshExpiresAt)
+  // Limpa resíduos legados (nunca mais guardar tokens no browser storage).
+  session.remove(STORAGE_KEYS.ACCESS_TOKEN)
+  storage.remove(STORAGE_KEYS.ACCESS_TOKEN)
   storage.remove(STORAGE_KEYS.REFRESH_TOKEN)
 }
 
 export function clearSessionStorage(): void {
-  memoryAccessToken.value = null
-  session.remove(STORAGE_KEYS.ACCESS_TOKEN)
+  session.remove(STORAGE_KEYS.SESSION_ACTIVE)
   session.remove(STORAGE_KEYS.EXPIRES_AT)
   session.remove(STORAGE_KEYS.REFRESH_EXPIRES_AT)
+  session.remove(STORAGE_KEYS.ACCESS_TOKEN)
+  storage.remove(STORAGE_KEYS.ACCESS_TOKEN)
   storage.remove(STORAGE_KEYS.REFRESH_TOKEN)
 }
 
-export function getAccessToken(): string | null {
-  return memoryAccessToken.value ?? session.get(STORAGE_KEYS.ACCESS_TOKEN)
-}
-
-export function setAccessToken(token: string): void {
-  memoryAccessToken.value = token
-  session.set(STORAGE_KEYS.ACCESS_TOKEN, token)
+export function hasActiveSessionHint(): boolean {
+  return session.get(STORAGE_KEYS.SESSION_ACTIVE) === '1'
 }

@@ -40,8 +40,8 @@ export function registerCoreRoutes(router: MockRouter) {
     setCurrentEmail(email)
     const user = mockUserForEmail(email)
     return ok({
-      token: 'mock-token-abc123',
-      refreshToken: 'mock-refresh-xyz789',
+      token: '',
+      refreshToken: '',
       expiresAt: isoFromNow(2),
       refreshExpiresAt: isoFromNow(48),
       usuario: {
@@ -60,8 +60,8 @@ export function registerCoreRoutes(router: MockRouter) {
   })
   router.on('post', '/auth/refresh', () => {
     return ok({
-      token: 'mock-token-refreshed',
-      refreshToken: 'mock-refresh-refreshed',
+      token: '',
+      refreshToken: '',
       expiresAt: isoFromNow(2),
       refreshExpiresAt: isoFromNow(48),
     })

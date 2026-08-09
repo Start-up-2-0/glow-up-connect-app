@@ -1,6 +1,7 @@
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: 'guc_access_token',
   REFRESH_TOKEN: 'guc_refresh_token',
+  SESSION_ACTIVE: 'guc_session_active',
   EXPIRES_AT: 'guc_expires_at',
   REFRESH_EXPIRES_AT: 'guc_refresh_expires_at',
   THEME: 'guc_theme',
