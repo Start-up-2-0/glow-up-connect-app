@@ -12,9 +12,13 @@ const props = withDefaults(
     loading?: boolean
     errorMessage?: string | null
     modoAutonomo?: boolean
+    submitLabel?: string
+    backLabel?: string
   }>(),
   {
     modoAutonomo: false,
+    submitLabel: 'Continuar',
+    backLabel: 'Voltar',
   },
 )
 
@@ -65,7 +69,12 @@ function handleSubmit() {
         id-prefix="onb-end"
       />
 
-      <OnboardingContratarFormActions :loading="loading" @back="emit('back')" />
+      <OnboardingContratarFormActions
+        :submit-label="submitLabel"
+        :back-label="backLabel"
+        :loading="loading"
+        @back="emit('back')"
+      />
     </form>
   </div>
 </template>

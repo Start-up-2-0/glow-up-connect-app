@@ -62,6 +62,7 @@ npm run dev:mock
 | **Dono · Básico** | `basico@teste.com` | Só loja principal; menu completo |
 | **Autônomo · Essencial** | `autonomo.essencial@teste.com` | Perfil profissional solo; Agenda, Serviços, Horários, Clientes. **Sem** Equipe, WhatsApp, Caixa, Financeiro, Minhas Lojas |
 | **Autônomo · Premium** | `autonomo.premium@teste.com` | Mesmo do Essencial + WhatsApp, Caixa e Financeiro. **Sem** Equipe, Comissões, multi-loja |
+| **Autônomo · onboarding** | `autonomo.novo@teste.com` | Sem tenant — testa o wizard Dados → Perfil → Localização → Revisão → Assinatura |
 | **Administrador** | `admin@teste.com` | Só Studio Glow Up; mesmas permissões do Dono na loja (agenda, clientes, serviços, financeiro, equipe, horários, config da loja). **Sem** multi-filial / gerenciar assinatura de outras lojas |
 | **Recepcionista** | `recepcionista@teste.com` | Só Studio Glow Up; **Dashboard**, **Agenda**, **Clientes**, **Serviços** (visualizar), atendimento (iniciar/finalizar/remarcar/cancelar). **Sem** Financeiro, Equipe, Horários (editar), Minha loja, Assinatura, WhatsApp |
 | **Profissional** | `profissional@teste.com` | Só a própria agenda/horários |

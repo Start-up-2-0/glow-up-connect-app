@@ -101,6 +101,26 @@ export const MOCK_DONO_BASICO: User = {
 }
 
 /**
+ * Conta sem tenant — para testar onboarding autônomo (Dados → Assinatura).
+ * Login: autonomo.novo@teste.com (qualquer senha no mock).
+ * WhatsApp já confirmado; altere o telefone no step Dados para exercitar o gate.
+ */
+export const MOCK_AUTONOMO_NOVO: User = {
+  id: 92,
+  nome: 'Carla Nova Autônoma',
+  email: 'autonomo.novo@teste.com',
+  telefone: '(79) 98888-3003',
+  role: 1, // CLIENTE até assinar como autônomo
+  ativo: true,
+  whatsAppConfirmado: true,
+  whatsAppOptIn: false,
+  whatsAppPendenteConfirmacao: false,
+  sexo: 'Feminino',
+  createdAt: '2026-06-15T09:00:00Z',
+  updatedAt: null,
+}
+
+/**
  * Profissional autônomo · Essencial — role 3.
  * Login: autonomo.essencial@teste.com (qualquer senha no mock).
  * Módulos: agenda, serviços, horários, clientes, e-mail — sem WhatsApp/caixa/financeiro.
@@ -453,6 +473,9 @@ export function mockEstablishmentsForEmail(email: string): EstabelecimentoAcesso
       ),
     ]
   }
+  if (e === MOCK_AUTONOMO_NOVO.email.toLowerCase()) {
+    return []
+  }
   if (e === MOCK_AUTONOMO_PREMIUM.email.toLowerCase()) {
     return [
       buildAutonomoEstab(
@@ -494,6 +517,7 @@ export function mockUserForEmail(email: string): User {
     [MOCK_RECEPCIONISTA.email.toLowerCase()]: MOCK_RECEPCIONISTA,
     [MOCK_AUTONOMO_ESSENCIAL.email.toLowerCase()]: MOCK_AUTONOMO_ESSENCIAL,
     [MOCK_AUTONOMO_PREMIUM.email.toLowerCase()]: MOCK_AUTONOMO_PREMIUM,
+    [MOCK_AUTONOMO_NOVO.email.toLowerCase()]: MOCK_AUTONOMO_NOVO,
   }
   return map[e] ?? MOCK_CLIENTE
 }

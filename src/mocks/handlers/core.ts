@@ -92,7 +92,6 @@ export function registerCoreRoutes(router: MockRouter) {
       mensagem: 'Usuário criado com sucesso.',
     })
   })
-  router.on('get', '/usuario/me', () => okRaw(mockUserForEmail(currentEmail())))
   router.on('put', '/usuario/me', (req: MockRequest) => {
     // Aplica o patch (nome/telefone/sexo/avatar) ao usuário atual para refletir a edição de perfil.
     const payload = (req.body ?? {}) as {
@@ -101,12 +100,38 @@ export function registerCoreRoutes(router: MockRouter) {
       sexo?: string
       avatarBase64?: string | null
     }
-    const user = { ...mockUserForEmail(currentEmail()) }
+    const email = currentEmail()
+    const patchedRaw = sessionStorage.getItem(`guc_mock_user_patch_${email}`)
+    const user = {
+      ...(patchedRaw
+        ? (JSON.parse(patchedRaw) as ReturnType<typeof mockUserForEmail>)
+        : mockUserForEmail(email)),
+    }
     if (payload.nome !== undefined) user.nome = payload.nome
-    if (payload.telefone !== undefined) user.telefone = payload.telefone
+    if (payload.telefone !== undefined) {
+      const telefoneMudou = (payload.telefone ?? '') !== (user.telefone ?? '')
+      user.telefone = payload.telefone
+      if (telefoneMudou) {
+        user.whatsAppConfirmado = false
+        user.whatsAppPendenteConfirmacao = true
+      }
+    }
     if (payload.sexo !== undefined) user.sexo = payload.sexo as 'Masculino' | 'Feminino'
     if (payload.avatarBase64 !== undefined) user.avatarBase64 = payload.avatarBase64
+    sessionStorage.setItem(`guc_mock_user_patch_${email}`, JSON.stringify(user))
     return okRaw(user)
+  })
+  router.on('get', '/usuario/me', () => {
+    const email = currentEmail()
+    const patched = sessionStorage.getItem(`guc_mock_user_patch_${email}`)
+    if (patched) {
+      try {
+        return okRaw(JSON.parse(patched))
+      } catch {
+        /* fall through */
+      }
+    }
+    return okRaw(mockUserForEmail(email))
   })
   router.on('delete', '/usuario/me', () => voidOk('Conta excluída.'))
   router.on('put', '/usuario/me/senha', () => voidOk('Senha alterada.'))
@@ -115,6 +140,38 @@ export function registerCoreRoutes(router: MockRouter) {
     return okRaw(mockEstablishmentsForEmail(currentEmail()))
   })
   router.on('post', '/usuario/me/whatsapp/opt-in', () => voidOk('Preferência atualizada.'))
+  router.on('post', '/usuario/me/whatsapp/solicitar-confirmacao', () => {
+    const email = currentEmail()
+    const patchedRaw = sessionStorage.getItem(`guc_mock_user_patch_${email}`)
+    const user = patchedRaw
+      ? (JSON.parse(patchedRaw) as ReturnType<typeof mockUserForEmail>)
+      : { ...mockUserForEmail(email) }
+    user.whatsAppPendenteConfirmacao = true
+    user.whatsAppConfirmado = false
+    sessionStorage.setItem(`guc_mock_user_patch_${email}`, JSON.stringify(user))
+
+    // Simula webhook: confirma após ~2s para o poll / "Já confirmei" funcionarem no mock.
+    window.setTimeout(() => {
+      const latestRaw = sessionStorage.getItem(`guc_mock_user_patch_${email}`)
+      const latest = latestRaw
+        ? (JSON.parse(latestRaw) as ReturnType<typeof mockUserForEmail>)
+        : { ...mockUserForEmail(email) }
+      latest.whatsAppConfirmado = true
+      latest.whatsAppPendenteConfirmacao = false
+      sessionStorage.setItem(`guc_mock_user_patch_${email}`, JSON.stringify(latest))
+    }, 2000)
+
+    const telefone = (user.telefone ?? '5511999999999').replace(/\D/g, '')
+    const token = btoa(telefone)
+    return ok({
+      numeroPlataforma: '5511999999999',
+      tokenConfirmacao: token,
+      linkConfirmacao: `http://localhost:3000/c/${token}`,
+      linkWhatsApp: `https://wa.me/5511999999999?text=${encodeURIComponent(token)}`,
+      whatsAppEnviado: true,
+      emailEnviado: true,
+    })
+  })
 
   /* ---------- Planos ---------- */
   router.on('get', '/planos', () => ok(MOCK_PLANOS_RESPONSE))
@@ -122,11 +179,23 @@ export function registerCoreRoutes(router: MockRouter) {
   /* ---------- Assinatura ---------- */
   router.on('get', '/assinaturas/onboarding/contexto', () => {
     const lojas = mockEstablishmentsForEmail(currentEmail()).filter((e) => e.role === 'Owner')
+    if (lojas.length === 0) {
+      return ok({
+        temEstabelecimentoProprio: false,
+        estabelecimentos: [],
+        proximaEtapa: 'AssinarPlano',
+        estabelecimentoIdSugerido: null,
+        podeAdicionarLoja: false,
+        lojasVinculadas: 0,
+        limiteLojas: null,
+        assinaturaPremiumId: null,
+      })
+    }
     const limite = lojas[0]?.limites?.estabelecimentos ?? 1
     const lojasVinculadas = lojas.length
     const podeAdicionarLoja = lojasVinculadas > 0 && limite > 1 && lojasVinculadas < limite
     return ok({
-      temEstabelecimentoProprio: lojas.length > 0,
+      temEstabelecimentoProprio: true,
       estabelecimentos: lojas.map((e) => ({
         estabelecimentoId: e.estabelecimentoId,
         nome: e.nome,

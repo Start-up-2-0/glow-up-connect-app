@@ -27,6 +27,10 @@ export const API_ERROR_MESSAGES: Record<string, string> = {
   CLIENTE_SEM_ACESSO_NEGOCIO: 'Você não tem acesso a esta área.',
   SUBSCRIPTION_MODULE_BLOCKED: 'Este recurso não está disponível no seu plano atual.',
   INVALID_SUBSCRIPTION_SCOPE: 'Selecione um estabelecimento para continuar.',
+  TELEFONE_NAO_CONFIRMADO:
+    'Confirme o telefone no WhatsApp antes de concluir a assinatura.',
+  TELEFONE_DIVERGENTE_NAO_CONFIRMADO:
+    'O telefone informado difere do confirmado na conta. Atualize e confirme no WhatsApp para continuar.',
 }
 
 export const DEFAULT_ERROR_MESSAGE = 'Ocorreu um erro inesperado. Tente novamente.'

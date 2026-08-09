@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const props = defineProps<{
-  current: number
-  steps: ReadonlyArray<{ id: string; label: string }>
-  skippedIds?: ReadonlyArray<string>
-}>()
+const props = withDefaults(
+  defineProps<{
+    current: number
+    steps: ReadonlyArray<{ id: string; label: string }>
+    skippedIds?: ReadonlyArray<string>
+    variant?: 'default' | 'autonomo'
+  }>(),
+  {
+    variant: 'default',
+  },
+)
 
 const items = computed(() =>
   props.steps.map((step, index) => ({
@@ -19,12 +25,18 @@ const items = computed(() =>
 </script>
 
 <template>
-  <ol class="flex flex-wrap items-center justify-center gap-y-2">
+  <ol
+    class="flex flex-wrap items-center justify-center gap-y-2"
+    :class="variant === 'autonomo' ? 'gap-x-1 sm:gap-x-0' : ''"
+  >
     <template v-for="(item, index) in items" :key="item.id">
-      <li class="flex items-center gap-[13px]">
+      <li
+        class="flex items-center gap-[13px]"
+        :class="variant === 'autonomo' ? 'min-w-0 sm:flex-1 sm:justify-center' : ''"
+      >
         <span
           v-if="item.isActive"
-          class="flex size-[30px] shrink-0 items-center justify-center rounded-full bg-glow-gold font-urbanist text-sm font-bold text-white"
+          class="flex size-[30px] shrink-0 items-center justify-center rounded-full bg-glow-gold font-urbanist text-sm font-bold text-white ring-4 ring-glow-gold/20"
           aria-current="step"
         >
           {{ index + 1 }}
@@ -44,7 +56,7 @@ const items = computed(() =>
         </span>
         <span
           v-else
-          class="font-urbanist text-sm font-normal text-glow-text-subtle"
+          class="flex size-[30px] shrink-0 items-center justify-center rounded-full border border-glow-border-soft font-urbanist text-sm font-normal text-glow-text-subtle"
         >
           {{ index + 1 }}
         </span>
@@ -59,8 +71,11 @@ const items = computed(() =>
 
       <li
         v-if="index < items.length - 1"
-        class="mx-[13px] hidden h-0.5 w-10 shrink-0 rounded-full sm:block"
-        :class="index < current ? 'bg-glow-gold' : 'bg-glow-border-soft'"
+        class="mx-[13px] hidden h-0.5 shrink-0 rounded-full sm:block"
+        :class="[
+          index < current ? 'bg-glow-gold' : 'bg-glow-border-soft',
+          variant === 'autonomo' ? 'w-6 flex-1 lg:w-10' : 'w-10',
+        ]"
         aria-hidden="true"
       />
     </template>

@@ -23,15 +23,14 @@ import type {
 import {
   ASSINATURA_LOGADA_WIZARD_STEPS,
   ASSINATURA_LOGADA_WIZARD_STEPS_AUTONOMO,
+  normalizeAutonomoStoredStep,
+  normalizeEstabelecimentoStoredStep,
 } from '@/types/assinaturaOnboarding.types'
 import { telefoneToApi } from '@/utils/formatters'
 import { draftEnderecoToApi, validateEnderecoForSubmit } from '@/utils/enderecoPayload'
 import { buildAtualizarPerfilPayload } from '@/utils/perfilPayload'
-
-function normalizeStoredStep(step: string): AssinaturaLogadaWizardStep {
-  if (step === 'estabelecimento') return 'informacoes-basicas'
-  return step as AssinaturaLogadaWizardStep
-}
+import { userService } from '@/services/userService'
+import type { WhatsAppConfirmacaoInstrucoes } from '@/types/whatsapp.types'
 
 const STORAGE_KEY = 'guc_assinatura_logada'
 
@@ -65,7 +64,7 @@ function createDraft(planoId: number, tipoAssinatura: TipoAssinatura): Assinatur
   return {
     planoId,
     tipoAssinatura,
-    step: 'informacoes-basicas',
+    step: tipoAssinatura === 'ProfissionalAutonomo' ? 'dados' : 'informacoes-basicas',
     estabelecimento: emptyEstabelecimento(),
     estabelecimentoId: null,
   }
@@ -76,9 +75,15 @@ function loadDraft(): AssinaturaLogadaDraft | null {
   if (!raw) return null
   try {
     const parsed = JSON.parse(raw) as AssinaturaLogadaDraft & { step: string }
+    const tipo = parsed.tipoAssinatura ?? 'Estabelecimento'
+    const step =
+      tipo === 'ProfissionalAutonomo'
+        ? normalizeAutonomoStoredStep(parsed.step)
+        : normalizeEstabelecimentoStoredStep(parsed.step)
     return {
       ...parsed,
-      step: normalizeStoredStep(parsed.step),
+      tipoAssinatura: tipo,
+      step,
     }
   } catch {
     return null
@@ -87,6 +92,12 @@ function loadDraft(): AssinaturaLogadaDraft | null {
 
 function saveDraft(draft: AssinaturaLogadaDraft) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
+}
+
+function telefonesEquivalentes(a: string | null | undefined, b: string | null | undefined): boolean {
+  const na = telefoneToApi(a)
+  const nb = telefoneToApi(b)
+  return Boolean(na) && na === nb
 }
 
 function mapEstabelecimentoExistente(
@@ -150,6 +161,8 @@ export function useAssinaturaLogadaWizard(
   const loading = ref(false)
   const submitting = ref(false)
   const erro = ref<string | null>(null)
+  const telefonePendenteConfirmacao = ref(false)
+  const whatsappInstrucoes = ref<WhatsAppConfirmacaoInstrucoes | null>(null)
   const step = computed({
     get: () => draft.value.step,
     set: (value: AssinaturaLogadaWizardStep) => {
@@ -258,8 +271,11 @@ export function useAssinaturaLogadaWizard(
       perfilExistente.value = perfil
       requerComplementoEndereco.value = precisaCompletarEndereco(perfil)
       step.value = requerComplementoEndereco.value ? 'endereco' : 'confirmar'
-    } else if (step.value === 'confirmar' && !data.temEstabelecimentoProprio) {
-      step.value = 'informacoes-basicas'
+    } else if (
+      (step.value === 'confirmar' || step.value === 'revisao')
+      && !data.temEstabelecimentoProprio
+    ) {
+      step.value = ehAutonomo.value ? 'dados' : 'informacoes-basicas'
     }
 
     persist()
@@ -320,27 +336,23 @@ export function useAssinaturaLogadaWizard(
     erro.value = null
 
     if (!estabelecimento.nome.trim()) {
-      erro.value = ehAutonomo.value
-        ? 'Informe o nome profissional.'
-        : 'Informe o nome do estabelecimento.'
+      erro.value = 'Informe o nome do estabelecimento.'
       return
     }
-    if (!ehAutonomo.value && !estabelecimento.categoriaId) {
+    if (!estabelecimento.categoriaId) {
       erro.value = 'Selecione a categoria do estabelecimento.'
       return
     }
     if (!estabelecimento.logoDataUrl) {
-      erro.value = ehAutonomo.value
-        ? 'Envie a foto profissional ou use a foto da sua conta.'
-        : 'Envie a logo do estabelecimento.'
+      erro.value = 'Envie a logo do estabelecimento.'
       return
     }
     if (!estabelecimento.email.trim()) {
-      erro.value = ehAutonomo.value ? 'Informe o e-mail.' : 'Informe o e-mail comercial.'
+      erro.value = 'Informe o e-mail comercial.'
       return
     }
     if (!estabelecimento.telefone.trim()) {
-      erro.value = ehAutonomo.value ? 'Informe o telefone.' : 'Informe o telefone comercial.'
+      erro.value = 'Informe o telefone comercial.'
       return
     }
 
@@ -358,8 +370,124 @@ export function useAssinaturaLogadaWizard(
     persist()
   }
 
+  /**
+   * Step Dados (autônomo): conta — nome/e-mail/telefone/avatar.
+   * Gate de WhatsApp quando o telefone muda ou ainda não está confirmado.
+   */
+  async function avancarDeDados(dados: OnboardingEstabelecimentoDraft) {
+    erro.value = null
+    telefonePendenteConfirmacao.value = false
+    whatsappInstrucoes.value = null
+
+    if (!dados.nome.trim()) {
+      erro.value = 'Informe seu nome.'
+      return
+    }
+    if (!dados.email.trim()) {
+      erro.value = 'Informe o e-mail.'
+      return
+    }
+    if (!dados.telefone.trim()) {
+      erro.value = 'Informe o telefone.'
+      return
+    }
+
+    const telefoneNovo = telefoneToApi(dados.telefone)
+    const telefoneConta = telefoneToApi(userStore.profile?.telefone)
+    const whatsConfirmado = Boolean(userStore.profile?.whatsAppConfirmado)
+    const telefoneIgual = telefonesEquivalentes(telefoneNovo, telefoneConta)
+
+    draft.value.estabelecimento = {
+      ...draft.value.estabelecimento,
+      nome: dados.nome.trim(),
+      telefone: telefoneNovo,
+      email: dados.email.trim(),
+      logoDataUrl:
+        dados.logoDataUrl
+        ?? draft.value.estabelecimento.logoDataUrl
+        ?? userStore.profile?.avatarBase64
+        ?? null,
+    }
+
+    if (telefoneIgual && whatsConfirmado) {
+      step.value = 'perfil'
+      persist()
+      return
+    }
+
+    submitting.value = true
+    try {
+      if (!telefoneIgual) {
+        await userStore.updateProfile({ telefone: telefoneNovo })
+      }
+
+      const instrucoes = await userService.solicitarConfirmacaoWhatsApp()
+      whatsappInstrucoes.value = instrucoes
+      telefonePendenteConfirmacao.value = true
+      erro.value =
+        'Confirme o telefone no WhatsApp para continuar. Assim que confirmar, clique em Continuar novamente.'
+    } catch (err) {
+      await userStore.fetchMe(true)
+      if (userStore.profile?.whatsAppConfirmado) {
+        telefonePendenteConfirmacao.value = false
+        step.value = 'perfil'
+        persist()
+        return
+      }
+      erro.value = resolveError(err)
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  async function verificarTelefoneEAvancar(opts?: { silencioso?: boolean }) {
+    const silencioso = opts?.silencioso === true
+    if (!silencioso) erro.value = null
+    await userStore.fetchMe(true)
+    if (userStore.profile?.whatsAppConfirmado) {
+      telefonePendenteConfirmacao.value = false
+      whatsappInstrucoes.value = null
+      erro.value = null
+      step.value = 'perfil'
+      persist()
+      return
+    }
+    if (!silencioso) {
+      erro.value =
+        'Ainda não detectamos a confirmação. Envie a mensagem no WhatsApp e tente de novo.'
+    }
+  }
+
+  function avancarDePerfil(perfil: OnboardingEstabelecimentoDraft) {
+    erro.value = null
+
+    if (!perfil.nome.trim()) {
+      erro.value = 'Informe o nome profissional.'
+      return
+    }
+    if (!perfil.logoDataUrl) {
+      erro.value = 'Envie a foto profissional ou use a foto da sua conta.'
+      return
+    }
+
+    draft.value.estabelecimento = {
+      ...draft.value.estabelecimento,
+      nome: perfil.nome.trim(),
+      descricao: perfil.descricao,
+      logoDataUrl: perfil.logoDataUrl,
+    }
+    draft.value.estabelecimentoId = null
+    step.value = 'endereco'
+    persist()
+  }
+
   function voltarDeEndereco() {
-    step.value = 'informacoes-basicas'
+    step.value = ehAutonomo.value ? 'perfil' : 'informacoes-basicas'
+    persist()
+  }
+
+  function voltarDePerfil() {
+    step.value = 'dados'
     persist()
   }
 
@@ -415,7 +543,7 @@ export function useAssinaturaLogadaWizard(
       draft.value.estabelecimentoId = null
     }
 
-    step.value = 'confirmar'
+    step.value = ehAutonomo.value ? 'revisao' : 'confirmar'
     persist()
   }
 
@@ -428,8 +556,20 @@ export function useAssinaturaLogadaWizard(
     persist()
   }
 
+  function voltarDeRevisao() {
+    step.value = 'endereco'
+    persist()
+  }
+
   function editarEstabelecimento() {
     step.value = 'informacoes-basicas'
+    persist()
+  }
+
+  function editarAutonomo(
+    destino: 'dados' | 'perfil' | 'endereco' = 'dados',
+  ) {
+    step.value = destino
     persist()
   }
 
@@ -438,8 +578,14 @@ export function useAssinaturaLogadaWizard(
     persist()
   }
 
+  function avancarDeRevisao() {
+    erro.value = null
+    step.value = 'assinatura'
+    persist()
+  }
+
   function voltarParaConfirmar() {
-    step.value = 'confirmar'
+    step.value = ehAutonomo.value ? 'revisao' : 'confirmar'
     persist()
   }
 
@@ -574,6 +720,14 @@ export function useAssinaturaLogadaWizard(
         persist()
         return
       }
+      if (
+        code === 'TELEFONE_NAO_CONFIRMADO'
+        || code === 'TELEFONE_DIVERGENTE_NAO_CONFIRMADO'
+      ) {
+        telefonePendenteConfirmacao.value = true
+        step.value = 'dados'
+        persist()
+      }
       erro.value = resolveError(err)
     } finally {
       submitting.value = false
@@ -591,6 +745,8 @@ export function useAssinaturaLogadaWizard(
     usaEstabelecimentoExistente,
     ehAutonomo,
     avatarContaDisponivel,
+    telefonePendenteConfirmacao,
+    whatsappInstrucoes,
     loading,
     submitting,
     aguardandoPagamento,
@@ -599,11 +755,18 @@ export function useAssinaturaLogadaWizard(
     erro,
     init,
     avancarDeInformacoesBasicas,
+    avancarDeDados,
+    verificarTelefoneEAvancar,
+    avancarDePerfil,
+    voltarDePerfil,
     voltarDeEndereco,
     avancarDeEndereco,
     voltarDoConfirmar,
+    voltarDeRevisao,
     editarEstabelecimento,
+    editarAutonomo,
     avancarParaPagamento,
+    avancarDeRevisao,
     voltarParaConfirmar,
     finalizarAssinatura,
   }

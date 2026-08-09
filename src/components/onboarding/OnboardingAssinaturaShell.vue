@@ -7,8 +7,11 @@ import {
 } from '@/constants/onboardingWizardSteps'
 import {
   AGENDAR_WIZARD_CONTENT_CLASS,
+  ONBOARDING_CONTRATAR_CARD_CLASS,
   ONBOARDING_CONTRATAR_PAGE_CLASS,
 } from '@/constants/designTokens'
+import { formatBRL } from '@/utils/formatters'
+import type { Plano, PromocaoLancamento } from '@/types/plano.types'
 
 withDefaults(
   defineProps<{
@@ -25,6 +28,8 @@ withDefaults(
     modoAutonomo?: boolean
     title?: string
     description?: string
+    planoResumo?: Plano | null
+    promocaoResumo?: PromocaoLancamento | null
   }>(),
   {
     isCheckoutStep: false,
@@ -37,6 +42,8 @@ withDefaults(
     modoAutonomo: false,
     title: '',
     description: '',
+    planoResumo: null,
+    promocaoResumo: null,
   },
 )
 
@@ -65,14 +72,17 @@ const emit = defineEmits<{
     <div class="space-y-6">
       <header v-if="!isCheckoutStep">
         <h1 class="font-satoshi text-2xl font-bold text-glow-text">
-          {{ title || 'Contratar plano' }}
+          {{
+            title
+              || (modoAutonomo ? 'Ativar perfil profissional' : 'Contratar plano')
+          }}
         </h1>
         <p class="mt-2 font-satoshi text-base text-glow-text-subtle">
           {{
-            description ||
-            (modoAutonomo
-              ? 'Complete as etapas para vincular o plano ao seu perfil profissional.'
-              : 'Complete as etapas para vincular o plano ao seu estabelecimento.')
+            description
+              || (modoAutonomo
+                ? 'Complete as etapas para vincular o plano ao seu perfil profissional.'
+                : 'Complete as etapas para vincular o plano ao seu estabelecimento.')
           }}
         </p>
       </header>
@@ -103,6 +113,7 @@ const emit = defineEmits<{
         :current="stepperIndex"
         :steps="steps"
         :skipped-ids="skippedIds"
+        :variant="modoAutonomo ? 'autonomo' : 'default'"
       />
 
       <p
@@ -112,7 +123,37 @@ const emit = defineEmits<{
         {{ stepSubtitle }}
       </p>
 
-      <div :class="isCheckoutStep ? 'w-full' : 'mx-auto w-full max-w-[721px]'">
+      <div
+        v-if="modoAutonomo && !isCheckoutStep && planoResumo"
+        class="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[240px_minmax(0,1fr)]"
+      >
+        <aside :class="[ONBOARDING_CONTRATAR_CARD_CLASS, 'h-fit lg:sticky lg:top-6']">
+          <p class="font-urbanist text-xs font-bold uppercase tracking-wide text-glow-text-subtle">
+            Seu plano
+          </p>
+          <p class="mt-3 font-satoshi text-lg font-bold text-glow-text">{{ planoResumo.nome }}</p>
+          <p class="mt-2 font-urbanist text-sm text-glow-text-muted">{{ planoResumo.descricao }}</p>
+          <p class="mt-4 font-urbanist text-xl font-black text-glow-gold-cta">
+            {{ formatBRL(planoResumo.preco) }}
+            <span class="text-sm font-normal text-glow-text-muted">/mês</span>
+          </p>
+          <p
+            v-if="promocaoResumo?.diasTrial && promocaoResumo.diasTrial > 0"
+            class="mt-3 font-urbanist text-sm text-glow-text-soft"
+          >
+            Inclui {{ promocaoResumo.diasTrial }} dias de teste.
+          </p>
+        </aside>
+
+        <div class="min-w-0">
+          <slot />
+        </div>
+      </div>
+
+      <div
+        v-else
+        :class="isCheckoutStep ? 'w-full' : 'mx-auto w-full max-w-[721px]'"
+      >
         <slot />
       </div>
     </div>
