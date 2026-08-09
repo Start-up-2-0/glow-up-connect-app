@@ -42,10 +42,10 @@ const displayValue = computed(() => {
 })
 
 const AUTH_PREFIX_CLASS =
-  'inline-flex h-[54px] shrink-0 items-center rounded-l-xl border border-r-0 border-glow-border-soft bg-glow-bg-surface px-4 font-satoshi text-sm font-medium text-glow-text-subtle'
+  'inline-flex h-11 shrink-0 items-center rounded-l-lg border border-r-0 border-glow-border-soft bg-glow-bg-surface px-4 font-satoshi text-sm font-medium text-glow-text-subtle'
 
 const AUTH_INPUT_CLASS =
-  'h-[54px] w-full border border-glow-border-soft bg-glow-bg-surface px-4 font-satoshi text-[15px] text-glow-text placeholder:font-satoshi placeholder:text-[15px] placeholder:text-glow-placeholder outline-none transition-all duration-200 focus:border-glow-gold-dark focus:ring-2 focus:ring-glow-gold/20 disabled:cursor-not-allowed disabled:opacity-60'
+  'h-11 w-full border border-glow-border-soft bg-glow-bg-surface px-4 font-satoshi text-sm text-glow-text placeholder:text-glow-placeholder outline-none transition-all duration-200 focus:border-glow-gold-dark focus:ring-2 focus:ring-glow-gold/20 disabled:cursor-not-allowed disabled:opacity-60'
 
 const prefixClass = computed(() => {
   if (props.variant === 'contratar') return ONBOARDING_CONTRATAR_TELEFONE_PREFIX_CLASS
@@ -66,8 +66,8 @@ const inputClass = computed(() => {
   let shape: string
   if (props.variant === 'auth') {
     shape = props.showDdiPrefix && !props.unified
-      ? `${base} rounded-r-xl rounded-l-none`
-      : `${base} rounded-xl`
+      ? `${base} rounded-r-lg rounded-l-none`
+      : `${base} rounded-lg`
   } else if (props.unified) {
     shape = `${base} rounded-lg`
   } else if (props.showDdiPrefix) {
@@ -80,7 +80,7 @@ const inputClass = computed(() => {
 })
 
 const labelClass = computed(() => {
-  if (props.variant === 'auth') return 'font-satoshi text-sm font-medium text-glow-text'
+  if (props.variant === 'auth') return 'mb-2 block font-satoshi text-sm font-medium text-glow-text'
   if (props.variant === 'contratar') return ONBOARDING_CONTRATAR_LABEL_CLASS
   return 'font-urbanist text-sm font-medium text-glow-text'
 })
