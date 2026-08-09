@@ -28,7 +28,6 @@ export interface AssinaturaOnboardingContexto {
 /** Steps do wizard logado (estabelecimento + autônomo). */
 export type AssinaturaLogadaWizardStep =
   | 'informacoes-basicas'
-  | 'dados'
   | 'perfil'
   | 'endereco'
   | 'confirmar'
@@ -43,7 +42,6 @@ export const ASSINATURA_LOGADA_WIZARD_STEPS = [
 ] as const
 
 export const ASSINATURA_LOGADA_WIZARD_STEPS_AUTONOMO = [
-  { id: 'dados', label: 'Dados' },
   { id: 'perfil', label: 'Perfil' },
   { id: 'endereco', label: 'Localização' },
   { id: 'revisao', label: 'Revisão' },
@@ -60,7 +58,6 @@ export const ASSINATURA_LOGADA_STEP_SUBTITLES: Partial<Record<AssinaturaLogadaWi
 export const ASSINATURA_LOGADA_STEP_SUBTITLES_AUTONOMO: Partial<
   Record<AssinaturaLogadaWizardStep, string>
 > = {
-  dados: 'Confirme os dados da conta para continuar',
   perfil: 'Como você aparece para os clientes',
   endereco: 'Onde você atende',
   revisao: 'Revise e confirme para finalizar',
@@ -69,7 +66,13 @@ export const ASSINATURA_LOGADA_STEP_SUBTITLES_AUTONOMO: Partial<
 
 /** Migra steps antigos salvos no sessionStorage (autônomo). */
 export function normalizeAutonomoStoredStep(step: string): AssinaturaLogadaWizardStep {
-  if (step === 'informacoes-basicas' || step === 'estabelecimento') return 'dados'
+  if (
+    step === 'informacoes-basicas'
+    || step === 'estabelecimento'
+    || step === 'dados'
+  ) {
+    return 'perfil'
+  }
   if (step === 'confirmar') return 'revisao'
   return step as AssinaturaLogadaWizardStep
 }

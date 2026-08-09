@@ -3,7 +3,6 @@ import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import OnboardingAssinaturaShell from '@/components/onboarding/OnboardingAssinaturaShell.vue'
 import OnboardingInformacoesBasicasStep from '@/components/onboarding/OnboardingInformacoesBasicasStep.vue'
-import OnboardingAutonomoDadosStep from '@/components/onboarding/OnboardingAutonomoDadosStep.vue'
 import OnboardingAutonomoPerfilStep from '@/components/onboarding/OnboardingAutonomoPerfilStep.vue'
 import OnboardingAutonomoRevisaoStep from '@/components/onboarding/OnboardingAutonomoRevisaoStep.vue'
 import OnboardingEnderecoStep from '@/components/onboarding/OnboardingEnderecoStep.vue'
@@ -50,9 +49,8 @@ const {
   erro,
   init,
   avancarDeInformacoesBasicas,
-  avancarDeDados,
-  verificarTelefoneEAvancar,
   avancarDePerfil,
+  verificarTelefoneEAvancar,
   voltarDePerfil,
   voltarDeEndereco,
   avancarDeEndereco,
@@ -84,8 +82,7 @@ const stepHeading = computed(() => {
   if (isCheckoutStep.value) return ''
   if (ehAutonomo.value) {
     const map: Record<string, string> = {
-      dados: 'Dados da conta',
-      perfil: 'Perfil profissional',
+      perfil: 'Perfil',
       endereco: 'Localização',
       revisao: 'Confirmação',
     }
@@ -117,10 +114,6 @@ function onShellBack() {
 function voltarDeInformacoesBasicas() {
   void router.push(ROUTE_PATHS.ONBOARDING_PLANOS)
 }
-
-function voltarDeDados() {
-  void router.push(ROUTE_PATHS.ONBOARDING_PLANOS)
-}
 </script>
 
 <template>
@@ -140,29 +133,20 @@ function voltarDeDados() {
   >
     <template v-if="plano">
       <template v-if="ehAutonomo">
-        <OnboardingAutonomoDadosStep
-          v-if="step === 'dados'"
+        <OnboardingAutonomoPerfilStep
+          v-if="step === 'perfil'"
           :initial="draft.estabelecimento"
           :usar-dados-conta-padrao="usarDadosContaPadrao"
+          :avatar-conta-disponivel="avatarContaDisponivel"
+          :avatar-conta-url="userStore.profile?.avatarBase64 ?? null"
           :telefone-pendente-confirmacao="telefonePendenteConfirmacao"
           :whatsapp-instrucoes="whatsappInstrucoes"
           :whats-app-confirmado="Boolean(userStore.profile?.whatsAppConfirmado)"
           :loading="submitting || loading"
           :error-message="erro"
-          @submit="avancarDeDados"
-          @back="voltarDeDados"
-          @verificar-whats-app="verificarTelefoneEAvancar"
-        />
-
-        <OnboardingAutonomoPerfilStep
-          v-else-if="step === 'perfil'"
-          :initial="draft.estabelecimento"
-          :avatar-conta-disponivel="avatarContaDisponivel"
-          :avatar-conta-url="userStore.profile?.avatarBase64 ?? null"
-          :loading="loading"
-          :error-message="erro"
           @submit="avancarDePerfil"
           @back="voltarDePerfil"
+          @verificar-whats-app="verificarTelefoneEAvancar"
         />
 
         <OnboardingEnderecoStep

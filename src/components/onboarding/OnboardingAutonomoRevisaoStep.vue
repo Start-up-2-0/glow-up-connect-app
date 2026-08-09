@@ -16,7 +16,7 @@ defineProps<{
 const emit = defineEmits<{
   back: []
   submit: []
-  edit: [destino: 'dados' | 'perfil' | 'endereco']
+  edit: [destino: 'perfil' | 'endereco']
 }>()
 </script>
 
@@ -91,7 +91,7 @@ const emit = defineEmits<{
           <button
             type="button"
             class="shrink-0 font-satoshi text-sm font-medium text-glow-gold-cta"
-            @click="emit('edit', 'dados')"
+            @click="emit('edit', 'perfil')"
           >
             Editar
           </button>

@@ -65,7 +65,7 @@ function createDraft(planoId: number, tipoAssinatura: TipoAssinatura): Assinatur
   return {
     planoId,
     tipoAssinatura,
-    step: tipoAssinatura === 'ProfissionalAutonomo' ? 'dados' : 'informacoes-basicas',
+    step: tipoAssinatura === 'ProfissionalAutonomo' ? 'perfil' : 'informacoes-basicas',
     estabelecimento: emptyEstabelecimento(),
     estabelecimentoId: null,
   }
@@ -276,7 +276,7 @@ export function useAssinaturaLogadaWizard(
       (step.value === 'confirmar' || step.value === 'revisao')
       && !data.temEstabelecimentoProprio
     ) {
-      step.value = ehAutonomo.value ? 'dados' : 'informacoes-basicas'
+      step.value = ehAutonomo.value ? 'perfil' : 'informacoes-basicas'
     }
 
     persist()
@@ -372,46 +372,48 @@ export function useAssinaturaLogadaWizard(
   }
 
   /**
-   * Step Dados (autônomo): conta — nome/e-mail/telefone/avatar.
+   * Step Perfil (autônomo): nome, e-mail, telefone, bio, foto.
    * Gate de WhatsApp quando o telefone muda ou ainda não está confirmado.
    */
-  async function avancarDeDados(dados: OnboardingEstabelecimentoDraft) {
+  async function avancarDePerfil(perfil: OnboardingEstabelecimentoDraft) {
     erro.value = null
     telefonePendenteConfirmacao.value = false
     whatsappInstrucoes.value = null
 
-    if (!dados.nome.trim()) {
-      erro.value = 'Informe seu nome.'
+    if (!perfil.nome.trim()) {
+      erro.value = 'Informe o nome profissional.'
       return
     }
-    if (!dados.email.trim()) {
+    if (!perfil.email.trim()) {
       erro.value = 'Informe o e-mail.'
       return
     }
-    if (!dados.telefone.trim()) {
+    if (!perfil.telefone.trim()) {
       erro.value = 'Informe o telefone.'
       return
     }
+    if (!perfil.logoDataUrl) {
+      erro.value = 'Envie a foto profissional ou use a foto da sua conta.'
+      return
+    }
 
-    const telefoneNovo = telefoneToApi(dados.telefone)
+    const telefoneNovo = telefoneToApi(perfil.telefone)
     const telefoneConta = telefoneToApi(userStore.profile?.telefone)
     const whatsConfirmado = Boolean(userStore.profile?.whatsAppConfirmado)
     const telefoneIgual = telefonesEquivalentes(telefoneNovo, telefoneConta)
 
     draft.value.estabelecimento = {
       ...draft.value.estabelecimento,
-      nome: dados.nome.trim(),
+      nome: perfil.nome.trim(),
+      descricao: perfil.descricao,
       telefone: telefoneNovo,
-      email: dados.email.trim(),
-      logoDataUrl:
-        dados.logoDataUrl
-        ?? draft.value.estabelecimento.logoDataUrl
-        ?? userStore.profile?.avatarBase64
-        ?? null,
+      email: perfil.email.trim(),
+      logoDataUrl: perfil.logoDataUrl,
     }
+    draft.value.estabelecimentoId = null
 
     if (telefoneIgual && whatsConfirmado) {
-      step.value = 'perfil'
+      step.value = 'endereco'
       persist()
       return
     }
@@ -431,7 +433,7 @@ export function useAssinaturaLogadaWizard(
       await userStore.fetchMe(true)
       if (userStore.profile?.whatsAppConfirmado) {
         telefonePendenteConfirmacao.value = false
-        step.value = 'perfil'
+        step.value = 'endereco'
         persist()
         return
       }
@@ -449,7 +451,7 @@ export function useAssinaturaLogadaWizard(
       telefonePendenteConfirmacao.value = false
       whatsappInstrucoes.value = null
       erro.value = null
-      step.value = 'perfil'
+      step.value = 'endereco'
       persist()
       return
     }
@@ -459,37 +461,13 @@ export function useAssinaturaLogadaWizard(
     }
   }
 
-  function avancarDePerfil(perfil: OnboardingEstabelecimentoDraft) {
-    erro.value = null
-
-    if (!perfil.nome.trim()) {
-      erro.value = 'Informe o nome profissional.'
-      return
-    }
-    if (!perfil.logoDataUrl) {
-      erro.value = 'Envie a foto profissional ou use a foto da sua conta.'
-      return
-    }
-
-    draft.value.estabelecimento = {
-      ...draft.value.estabelecimento,
-      nome: perfil.nome.trim(),
-      descricao: perfil.descricao,
-      logoDataUrl: perfil.logoDataUrl,
-    }
-    draft.value.estabelecimentoId = null
-    step.value = 'endereco'
-    persist()
-  }
-
   function voltarDeEndereco() {
     step.value = ehAutonomo.value ? 'perfil' : 'informacoes-basicas'
     persist()
   }
 
   function voltarDePerfil() {
-    step.value = 'dados'
-    persist()
+    void router.push(ROUTE_PATHS.ONBOARDING_PLANOS)
   }
 
   async function avancarDeEndereco(estabelecimento: OnboardingEstabelecimentoDraft) {
@@ -568,7 +546,7 @@ export function useAssinaturaLogadaWizard(
   }
 
   function editarAutonomo(
-    destino: 'dados' | 'perfil' | 'endereco' = 'dados',
+    destino: 'perfil' | 'endereco' = 'perfil',
   ) {
     step.value = destino
     persist()
@@ -726,7 +704,7 @@ export function useAssinaturaLogadaWizard(
         || code === 'TELEFONE_DIVERGENTE_NAO_CONFIRMADO'
       ) {
         telefonePendenteConfirmacao.value = true
-        step.value = 'dados'
+        step.value = 'perfil'
         persist()
       }
       erro.value = resolveError(err)
@@ -756,9 +734,8 @@ export function useAssinaturaLogadaWizard(
     erro,
     init,
     avancarDeInformacoesBasicas,
-    avancarDeDados,
-    verificarTelefoneEAvancar,
     avancarDePerfil,
+    verificarTelefoneEAvancar,
     voltarDePerfil,
     voltarDeEndereco,
     avancarDeEndereco,
