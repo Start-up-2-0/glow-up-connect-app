@@ -148,9 +148,11 @@ function handleSubmit() {
     }
   }
 
-  // Categoria do estabelecimento é obrigatória (não se aplica a autônomo).
-  if (!props.modoAutonomo && !categoriaId.value) {
-    categoriaError.value = 'Selecione a categoria do estabelecimento.'
+  // Área de atuação (ofício) — obrigatória para loja e autônomo.
+  if (!categoriaId.value) {
+    categoriaError.value = props.modoAutonomo
+      ? 'Selecione a área em que você atua.'
+      : 'Selecione a área de atuação do negócio.'
     return
   }
 
@@ -167,11 +169,7 @@ function handleSubmit() {
     estado: estado.value,
     complemento: complemento.value,
     logoDataUrl: logoDataUrl.value,
-    categoriaId: props.modoAutonomo
-      ? undefined
-      : categoriaId.value
-        ? Number(categoriaId.value)
-        : undefined,
+    categoriaId: Number(categoriaId.value),
   })
 }
 </script>
@@ -261,15 +259,15 @@ function handleSubmit() {
           />
         </div>
 
-        <div v-if="!modoAutonomo" :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
           <label :for="`${fieldIdPrefix}-categoria`" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
-            Categoria do estabelecimento
+            {{ modoAutonomo ? 'Em que área você atua?' : 'Área de atuação' }}
           </label>
           <BaseSelect
             :id="`${fieldIdPrefix}-categoria`"
             v-model="categoriaId"
             :options="categoriaOptions"
-            placeholder="Selecione a categoria"
+            placeholder="Selecione: Cabelo e barba ou Beleza e estética"
             :error="categoriaError ?? undefined"
             required
           />
@@ -353,13 +351,15 @@ function handleSubmit() {
             />
           </div>
 
-          <div v-if="!modoAutonomo" class="flex flex-col gap-2 sm:col-span-2">
-            <label :for="`${fieldIdPrefix}-categoria`" :class="GLOW_LABEL_CLASS">Categoria do estabelecimento</label>
+          <div class="flex flex-col gap-2 sm:col-span-2">
+            <label :for="`${fieldIdPrefix}-categoria`" :class="GLOW_LABEL_CLASS">
+              {{ modoAutonomo ? 'Em que área você atua?' : 'Área de atuação' }}
+            </label>
             <BaseSelect
               :id="`${fieldIdPrefix}-categoria`"
               v-model="categoriaId"
               :options="categoriaOptions"
-              placeholder="Selecione a categoria"
+              placeholder="Selecione: Cabelo e barba ou Beleza e estética"
               :error="categoriaError ?? undefined"
               required
             />

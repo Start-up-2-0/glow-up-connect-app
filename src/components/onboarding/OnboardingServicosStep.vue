@@ -9,9 +9,14 @@ import type { Servico } from '@/types/negocio/servico.types'
 import { formatCurrency } from '@/utils/formatters'
 import { ONBOARDING_CONTRATAR_CARD_CLASS } from '@/constants/designTokens'
 
-const props = defineProps<{
-  estabelecimentoId: number
-}>()
+const props = withDefaults(
+  defineProps<{
+    estabelecimentoId: number
+    modoAutonomo?: boolean
+    continueLabel?: string
+  }>(),
+  { modoAutonomo: false, continueLabel: 'Continuar' },
+)
 
 const emit = defineEmits<{
   continue: []
@@ -55,7 +60,11 @@ watch(
     <div :class="ONBOARDING_CONTRATAR_CARD_CLASS">
       <h2 class="font-urbanist text-lg font-semibold text-glow-text">Serviços</h2>
       <p class="mt-1 text-sm text-glow-text-subtle">
-        Cadastre os serviços da loja agora ou configure depois.
+        {{
+          modoAutonomo
+            ? 'Cadastre o que você oferece agora ou configure depois no painel.'
+            : 'Cadastre os serviços da loja agora ou configure depois.'
+        }}
       </p>
 
       <BaseButton
@@ -97,7 +106,7 @@ watch(
 
     <div class="flex flex-wrap justify-between gap-2">
       <BaseButton variant="ghost" @click="emit('skip')">Configurar depois</BaseButton>
-      <BaseButton variant="primary" @click="emit('continue')">Continuar</BaseButton>
+      <BaseButton variant="primary" @click="emit('continue')">{{ continueLabel }}</BaseButton>
     </div>
   </div>
 </template>

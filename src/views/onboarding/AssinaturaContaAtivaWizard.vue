@@ -8,6 +8,8 @@ import OnboardingAutonomoRevisaoStep from '@/components/onboarding/OnboardingAut
 import OnboardingEnderecoStep from '@/components/onboarding/OnboardingEnderecoStep.vue'
 import OnboardingConfirmarDadosStep from '@/components/onboarding/OnboardingConfirmarDadosStep.vue'
 import OnboardingPagamentoStep from '@/components/onboarding/OnboardingPagamentoStep.vue'
+import OnboardingServicosStep from '@/components/onboarding/OnboardingServicosStep.vue'
+import OnboardingHorariosStep from '@/components/onboarding/OnboardingHorariosStep.vue'
 import { useAssinaturaLogadaWizard } from '@/composables/useAssinaturaLogadaWizard'
 import { useUserStore } from '@/stores/user.store'
 import {
@@ -60,9 +62,15 @@ const {
   avancarDeRevisao,
   voltarParaConfirmar,
   finalizarAssinatura,
+  avancarDeServicos,
+  pularServicos,
+  voltarDeHorarios,
+  avancarDeHorarios,
+  pularHorarios,
 } = wizard
 
 const isCheckoutStep = computed(() => step.value === 'assinatura')
+const estabelecimentoOpsId = computed(() => draft.value.estabelecimentoId)
 
 const stepSubtitle = computed(() =>
   ehAutonomo.value
@@ -83,6 +91,8 @@ const stepHeading = computed(() => {
       perfil: 'Perfil',
       endereco: 'Localização',
       revisao: 'Confirmação',
+      servicos: 'Serviços',
+      horarios: 'Horários',
     }
     return map[step.value] ?? 'Assinatura'
   }
@@ -170,7 +180,7 @@ function voltarDeInformacoesBasicas() {
         />
 
         <OnboardingPagamentoStep
-          v-else
+          v-else-if="step === 'assinatura'"
           variant="dashboard"
           :plano="plano"
           :promocao="promocao"
@@ -181,6 +191,24 @@ function voltarDeInformacoesBasicas() {
           :error-message="erro"
           @back="voltarParaConfirmar"
           @submit="finalizarAssinatura"
+        />
+
+        <OnboardingServicosStep
+          v-else-if="step === 'servicos' && estabelecimentoOpsId"
+          :estabelecimento-id="estabelecimentoOpsId"
+          modo-autonomo
+          continue-label="Próximo: Horários"
+          @continue="avancarDeServicos"
+          @skip="pularServicos"
+        />
+
+        <OnboardingHorariosStep
+          v-else-if="step === 'horarios' && estabelecimentoOpsId"
+          :estabelecimento-id="estabelecimentoOpsId"
+          modo-autonomo
+          continue-label="Ir ao painel"
+          @continue="avancarDeHorarios"
+          @skip="pularHorarios"
         />
       </template>
 

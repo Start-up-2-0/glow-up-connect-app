@@ -87,7 +87,7 @@ const categoriaOptions = computed(() => [
 const subtituloLocal = computed(() => {
   if (cidade.value && estado.value) return `${cidade.value}, ${estado.value}`
   if (cidade.value) return cidade.value
-  return 'Descubra lojas próximas no mapa'
+  return 'Descubra profissionais e lojas próximas no mapa'
 })
 
 const itensFiltrados = computed(() => {

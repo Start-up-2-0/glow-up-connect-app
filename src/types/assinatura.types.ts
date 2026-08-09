@@ -46,6 +46,8 @@ export interface ProfissionalAutonomoOnboarding {
   logo: string
   telefone?: string
   email?: string
+  /** Área de atuação (mesmo catálogo do marketplace). */
+  categoriaId?: number
   endereco: EnderecoOnboarding
 }
 

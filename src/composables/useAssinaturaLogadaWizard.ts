@@ -211,6 +211,64 @@ export function useAssinaturaLogadaWizard(
     sessionStorage.removeItem(STORAGE_KEY)
   }
 
+  function emSetupOperacionalAutonomo(): boolean {
+    return (
+      draft.value.tipoAssinatura === 'ProfissionalAutonomo'
+      && (step.value === 'servicos' || step.value === 'horarios')
+      && Boolean(draft.value.estabelecimentoId)
+    )
+  }
+
+  async function entrarSetupOperacionalAutonomo(estabelecimentoId: number | null | undefined) {
+    const estabId = estabelecimentoId ?? negocioStore.estabelecimentoIdSelecionado
+    if (!estabId) {
+      await router.push(ROUTE_PATHS.DASHBOARD)
+      return
+    }
+
+    try {
+      await negocioStore.fetchEstabelecimentos(true)
+      if (negocioStore.estabelecimentoIdSelecionado !== estabId) {
+        await negocioStore.trocarEstabelecimento(estabId)
+      }
+    } catch {
+      // Segue mesmo assim — os steps tentam carregar com o id do draft.
+    }
+
+    draft.value.estabelecimentoId = estabId
+    step.value = 'servicos'
+    persist()
+  }
+
+  async function concluirSetupOperacionalAutonomo() {
+    clearDraft()
+    notifications.push('success', 'Perfil configurado! Bem-vindo ao painel.')
+    await router.push(ROUTE_PATHS.DASHBOARD)
+  }
+
+  function avancarDeServicos() {
+    step.value = 'horarios'
+    persist()
+  }
+
+  function pularServicos() {
+    step.value = 'horarios'
+    persist()
+  }
+
+  function voltarDeHorarios() {
+    step.value = 'servicos'
+    persist()
+  }
+
+  async function avancarDeHorarios() {
+    await concluirSetupOperacionalAutonomo()
+  }
+
+  async function pularHorarios() {
+    await concluirSetupOperacionalAutonomo()
+  }
+
   function preencherDadosUsuario() {
     const profile = userStore.profile
     if (!profile) return
@@ -238,8 +296,12 @@ export function useAssinaturaLogadaWizard(
     contexto.value = data
 
     if (data.proximaEtapa === 'GerenciarAssinatura' && !MOCK_MODE) {
-      void router.replace(ROUTE_PATHS.CONFIG_ASSINATURA)
-      return false
+      // Autônomo pode ainda estar no setup pós-pagamento (serviços/horários).
+      if (!emSetupOperacionalAutonomo()) {
+        void router.replace(ROUTE_PATHS.CONFIG_ASSINATURA)
+        return false
+      }
+      return true
     }
 
     if (data.proximaEtapa === 'EscolherPlano') {
@@ -396,6 +458,10 @@ export function useAssinaturaLogadaWizard(
       erro.value = 'Envie a foto profissional ou use a foto da sua conta.'
       return
     }
+    if (!perfil.categoriaId) {
+      erro.value = 'Selecione a área em que você atua.'
+      return
+    }
 
     const telefoneNovo = telefoneToApi(perfil.telefone)
     const telefoneConta = telefoneToApi(userStore.profile?.telefone)
@@ -409,6 +475,7 @@ export function useAssinaturaLogadaWizard(
       telefone: telefoneNovo,
       email: perfil.email.trim(),
       logoDataUrl: perfil.logoDataUrl,
+      categoriaId: perfil.categoriaId,
     }
     draft.value.estabelecimentoId = null
 
@@ -576,14 +643,18 @@ export function useAssinaturaLogadaWizard(
       await negocioStore.fetchEstabelecimentos(true)
       if (negocioStore.assinaturaAtiva) {
         aguardandoPagamento.value = false
-        clearDraft()
         notifications.push(
           'success',
           ehAutonomo.value
-            ? 'Pagamento confirmado! Bem-vindo ao seu perfil profissional.'
+            ? 'Pagamento confirmado! Configure seus serviços e horários.'
             : 'Pagamento confirmado! Bem-vindo ao seu estabelecimento.',
         )
         const estabId = negocioStore.estabelecimentoIdSelecionado
+        if (ehAutonomo.value) {
+          await entrarSetupOperacionalAutonomo(estabId)
+          return
+        }
+        clearDraft()
         await router.push(
           lojaSetupLocation({
             mode: 'assinatura',
@@ -624,6 +695,7 @@ export function useAssinaturaLogadaWizard(
                 logo: negocio.logoDataUrl!,
                 telefone: telefoneToApi(negocio.telefone),
                 email: negocio.email.trim(),
+                categoriaId: negocio.categoriaId,
                 endereco: draftEnderecoToApi(negocio),
               },
               gateway: 'MercadoPago',
@@ -665,9 +737,13 @@ export function useAssinaturaLogadaWizard(
       await processarResposta(result, {
         onTrial: async (diasTrial) => {
           notifications.push('success', `Assinatura iniciada! Você tem ${diasTrial} dias de teste.`)
-          clearDraft()
           const estabId =
             result.estabelecimentoId ?? negocioStore.estabelecimentoIdSelecionado
+          if (ehAutonomo.value) {
+            await entrarSetupOperacionalAutonomo(estabId)
+            return
+          }
+          clearDraft()
           await router.push(
             lojaSetupLocation({
               mode: 'assinatura',
@@ -677,9 +753,13 @@ export function useAssinaturaLogadaWizard(
         },
         onDashboard: async () => {
           notifications.push('success', 'Assinatura iniciada com sucesso!')
-          clearDraft()
           const estabId =
             result.estabelecimentoId ?? negocioStore.estabelecimentoIdSelecionado
+          if (ehAutonomo.value) {
+            await entrarSetupOperacionalAutonomo(estabId)
+            return
+          }
+          clearDraft()
           await router.push(
             lojaSetupLocation({
               mode: 'assinatura',
@@ -747,5 +827,10 @@ export function useAssinaturaLogadaWizard(
     avancarDeRevisao,
     voltarParaConfirmar,
     finalizarAssinatura,
+    avancarDeServicos,
+    pularServicos,
+    voltarDeHorarios,
+    avancarDeHorarios,
+    pularHorarios,
   }
 }

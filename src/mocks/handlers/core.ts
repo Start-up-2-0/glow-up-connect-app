@@ -314,8 +314,8 @@ export function registerCoreRoutes(router: MockRouter) {
         descricao: 'Profissional autônomo — atendimento individual.',
         telefone: user.telefone ?? '',
         email: user.email,
-        categoriaId: undefined,
-        categoria: undefined,
+        categoriaId: 1,
+        categoria: 'Cabelo e barba',
       })
     }
     return ok({
@@ -337,8 +337,8 @@ export function registerCoreRoutes(router: MockRouter) {
         descricao: 'Profissional autônomo — atendimento individual.',
         telefone: user.telefone ?? '',
         email: user.email,
-        categoriaId: undefined,
-        categoria: undefined,
+        categoriaId: 1,
+        categoria: 'Cabelo e barba',
         ...(req.body as object),
       })
     }

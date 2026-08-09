@@ -1633,7 +1633,16 @@
   }
 
   .loja-hero-card__categoria {
-    @apply mt-2 inline-flex rounded-full bg-glow-surface-tint px-2.5 py-0.5 font-urbanist text-xs font-semibold text-glow-gold-cta;
+    @apply mt-2 flex flex-wrap items-center gap-1.5 font-urbanist text-xs font-semibold text-glow-gold-cta;
+  }
+
+  .loja-hero-card__formato {
+    @apply inline-flex rounded-md bg-glow-surface-tint px-2.5 py-0.5 font-semibold text-glow-text;
+  }
+
+  .loja-hero-card__categoria > span:last-child:not(.loja-hero-card__formato) {
+    @apply inline-flex rounded-full px-2.5 py-0.5 text-glow-gold-cta;
+    background: color-mix(in srgb, var(--glow-gold-cta) 12%, transparent);
   }
 
   .loja-hero-card__img {

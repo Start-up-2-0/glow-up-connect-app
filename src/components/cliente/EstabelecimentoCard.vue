@@ -33,13 +33,25 @@ defineProps<{
         {{ item.nome }}
       </h2>
 
-      <span
-        v-if="item.categoria"
-        class="mt-1 inline-flex w-fit items-center rounded-full px-2 py-0.5 font-urbanist text-[11px] font-semibold text-glow-gold-cta"
-        style="background: color-mix(in srgb, var(--glow-gold-cta) 12%, transparent)"
-      >
-        {{ item.categoria }}
-      </span>
+      <div class="mt-1 flex flex-wrap items-center gap-1.5">
+        <span
+          class="inline-flex w-fit items-center rounded-md px-2 py-0.5 font-urbanist text-[11px] font-semibold"
+          :class="
+            item.tipoAssinatura === 'ProfissionalAutonomo'
+              ? 'bg-glow-surface-tint text-glow-text'
+              : 'bg-glow-canvas text-glow-text-muted'
+          "
+        >
+          {{ item.tipoAssinatura === 'ProfissionalAutonomo' ? 'Profissional' : 'Loja' }}
+        </span>
+        <span
+          v-if="item.categoria"
+          class="inline-flex w-fit items-center rounded-full px-2 py-0.5 font-urbanist text-[11px] font-semibold text-glow-gold-cta"
+          style="background: color-mix(in srgb, var(--glow-gold-cta) 12%, transparent)"
+        >
+          {{ item.categoria }}
+        </span>
+      </div>
 
       <p class="cliente-estab-card__meta mt-1">
         <svg class="cliente-estab-card__meta-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">

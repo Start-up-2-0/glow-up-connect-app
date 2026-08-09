@@ -26,6 +26,7 @@ import {
   emptyLojaSetupSkipped,
   LOJA_SETUP_STEPS,
   LOJA_SETUP_STEP_SUBTITLES,
+  LOJA_SETUP_STEP_SUBTITLES_AUTONOMO,
   LOJA_SETUP_STORAGE_KEY,
 } from '@/types/lojaSetup.types'
 
@@ -121,7 +122,12 @@ export function useLojaSetupWizard() {
     const idx = visibleSteps.value.findIndex((s) => s.id === draft.value.step)
     return idx >= 0 ? idx : 0
   })
-  const stepSubtitle = computed(() => LOJA_SETUP_STEP_SUBTITLES[draft.value.step])
+  const stepSubtitle = computed(() =>
+    ehProfissionalAutonomo.value
+      ? (LOJA_SETUP_STEP_SUBTITLES_AUTONOMO[draft.value.step]
+        ?? LOJA_SETUP_STEP_SUBTITLES[draft.value.step])
+      : LOJA_SETUP_STEP_SUBTITLES[draft.value.step],
+  )
   const skippedIds = computed(() => {
     const ids: string[] = []
     if (draft.value.skipped.equipe) ids.push('equipe')
@@ -130,14 +136,18 @@ export function useLojaSetupWizard() {
     return ids
   })
 
-  const pageTitle = computed(() =>
-    mode.value === 'adicionar-unidade' ? 'Adicionar loja' : 'Configurar loja',
-  )
-  const pageDescription = computed(() =>
-    mode.value === 'adicionar-unidade'
-      ? 'Cadastre a nova unidade e deixe a operação pronta antes de acessar o painel.'
-      : 'Configure equipe, serviços e horários para começar a receber agendamentos.',
-  )
+  const pageTitle = computed(() => {
+    if (mode.value === 'adicionar-unidade') return 'Adicionar loja'
+    return ehProfissionalAutonomo.value ? 'Configurar perfil' : 'Configurar loja'
+  })
+  const pageDescription = computed(() => {
+    if (mode.value === 'adicionar-unidade') {
+      return 'Cadastre a nova unidade e deixe a operação pronta antes de acessar o painel.'
+    }
+    return ehProfissionalAutonomo.value
+      ? 'Configure serviços e horários para começar a receber agendamentos.'
+      : 'Configure equipe, serviços e horários para começar a receber agendamentos.'
+  })
 
   function persist() {
     saveStored(draft.value)

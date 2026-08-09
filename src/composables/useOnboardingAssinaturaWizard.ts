@@ -410,6 +410,7 @@ export function useOnboardingAssinaturaWizard(
                 logo: negocio.logoDataUrl!,
                 telefone: telefoneToApi(negocio.telefone),
                 email: negocio.email.trim(),
+                categoriaId: negocio.categoriaId,
                 endereco,
               },
               gateway: 'MercadoPago',

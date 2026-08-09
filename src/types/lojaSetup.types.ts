@@ -40,6 +40,12 @@ export const LOJA_SETUP_STEP_SUBTITLES: Record<LojaSetupStepId, string> = {
   revisao: 'Revise o que foi configurado antes de entrar no painel.',
 }
 
+export const LOJA_SETUP_STEP_SUBTITLES_AUTONOMO: Partial<Record<LojaSetupStepId, string>> = {
+  servicos: 'O que você oferece e quanto cobra',
+  horarios: 'Quando você atende',
+  revisao: 'Revise o que foi configurado antes de entrar no painel.',
+}
+
 export const LOJA_SETUP_STORAGE_KEY = 'guc_loja_setup'
 
 export function emptyLojaSetupSkipped(): LojaSetupSkipped {

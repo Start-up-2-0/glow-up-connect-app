@@ -65,7 +65,7 @@ const categorias = ref<EstabelecimentoCategoria[]>([])
 const categoriaId = ref(props.initial.categoriaId ? String(props.initial.categoriaId) : '')
 const categoriaError = ref<string | null>(null)
 
-/** Escopo atual: Barbearia e Salão de Beleza. */
+/** Escopo atual: Cabelo e barba / Beleza e estética. */
 const CATEGORIA_IDS_ATIVAS = new Set([1, 2])
 
 const categoriaOptions = computed(() =>
@@ -247,13 +247,13 @@ function handleSubmit() {
 
         <div v-if="!modoAutonomo" :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
           <label for="onb-info-categoria" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
-            Tipo de categoria
+            Área de atuação
           </label>
           <BaseSelect
             id="onb-info-categoria"
             v-model="categoriaId"
             :options="categoriaOptions"
-            placeholder="Selecione: Salão de Beleza ou Barbearia"
+            placeholder="Selecione: Cabelo e barba ou Beleza e estética"
             :error="categoriaError ?? undefined"
             required
           />

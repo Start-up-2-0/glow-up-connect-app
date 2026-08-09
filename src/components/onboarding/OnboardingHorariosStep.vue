@@ -6,9 +6,14 @@ import { useHorarios } from '@/composables/useHorarios'
 import type { DiaSemanaValue } from '@/constants/diasSemana'
 import { ONBOARDING_CONTRATAR_CARD_CLASS } from '@/constants/designTokens'
 
-const props = defineProps<{
-  estabelecimentoId: number
-}>()
+const props = withDefaults(
+  defineProps<{
+    estabelecimentoId: number
+    modoAutonomo?: boolean
+    continueLabel?: string
+  }>(),
+  { modoAutonomo: false, continueLabel: 'Continuar' },
+)
 
 const emit = defineEmits<{
   continue: []
@@ -41,9 +46,15 @@ function onDraftUpdate(dia: DiaSemanaValue, draft: { horaInicio: string; horaFim
 <template>
   <div class="space-y-4">
     <div :class="ONBOARDING_CONTRATAR_CARD_CLASS">
-      <h2 class="font-urbanist text-lg font-semibold text-glow-text">Horários de funcionamento</h2>
+      <h2 class="font-urbanist text-lg font-semibold text-glow-text">
+        {{ modoAutonomo ? 'Horários de atendimento' : 'Horários de funcionamento' }}
+      </h2>
       <p class="mt-1 mb-4 text-sm text-glow-text-subtle">
-        Configure os dias e horários em que a loja atende. Você pode ajustar depois.
+        {{
+          modoAutonomo
+            ? 'Defina os dias e horários em que você atende. Você pode ajustar depois.'
+            : 'Configure os dias e horários em que a loja atende. Você pode ajustar depois.'
+        }}
       </p>
 
       <p v-if="loading" class="text-sm text-glow-text-subtle">Carregando horários…</p>
@@ -75,7 +86,7 @@ function onDraftUpdate(dia: DiaSemanaValue, draft: { horaInicio: string; horaFim
 
     <div class="flex flex-wrap justify-between gap-2">
       <BaseButton variant="ghost" @click="emit('skip')">Configurar depois</BaseButton>
-      <BaseButton variant="primary" @click="emit('continue')">Continuar</BaseButton>
+      <BaseButton variant="primary" @click="emit('continue')">{{ continueLabel }}</BaseButton>
     </div>
   </div>
 </template>

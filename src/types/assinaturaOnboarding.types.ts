@@ -33,6 +33,8 @@ export type AssinaturaLogadaWizardStep =
   | 'confirmar'
   | 'revisao'
   | 'assinatura'
+  | 'servicos'
+  | 'horarios'
 
 export const ASSINATURA_LOGADA_WIZARD_STEPS = [
   { id: 'informacoes-basicas', label: 'Informações básicas' },
@@ -46,6 +48,8 @@ export const ASSINATURA_LOGADA_WIZARD_STEPS_AUTONOMO = [
   { id: 'endereco', label: 'Localização' },
   { id: 'revisao', label: 'Revisão' },
   { id: 'assinatura', label: 'Assinatura' },
+  { id: 'servicos', label: 'Serviços' },
+  { id: 'horarios', label: 'Horários' },
 ] as const
 
 export const ASSINATURA_LOGADA_STEP_SUBTITLES: Partial<Record<AssinaturaLogadaWizardStep, string>> = {
@@ -62,6 +66,8 @@ export const ASSINATURA_LOGADA_STEP_SUBTITLES_AUTONOMO: Partial<
   endereco: 'Onde você atende',
   revisao: 'Revise e confirme para finalizar',
   assinatura: '',
+  servicos: 'O que você oferece e quanto cobra',
+  horarios: 'Quando você atende',
 }
 
 /** Migra steps antigos salvos no sessionStorage (autônomo). */

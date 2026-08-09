@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import OnboardingContratarFormActions from '@/components/onboarding/OnboardingContratarFormActions.vue'
+import { publicoService } from '@/services/publicoService'
+import type { EstabelecimentoCategoria } from '@/types/estabelecimento.types'
 import {
   ONBOARDING_CONTRATAR_FIELD_CLASS,
   ONBOARDING_CONTRATAR_FORM_CLASS,
@@ -57,6 +60,18 @@ const descricao = ref(props.initial.descricao)
 const logoDataUrl = ref<string | null>(props.initial.logoDataUrl)
 const logoError = ref<string | null>(null)
 const fotoAlteradaManual = ref(false)
+const categorias = ref<EstabelecimentoCategoria[]>([])
+const categoriaId = ref(props.initial.categoriaId ? String(props.initial.categoriaId) : '')
+const categoriaError = ref<string | null>(null)
+
+/** Escopo atual: Cabelo e barba / Beleza e estética. */
+const CATEGORIA_IDS_ATIVAS = new Set([1, 2])
+
+const categoriaOptions = computed(() =>
+  categorias.value
+    .filter((c) => CATEGORIA_IDS_ATIVAS.has(c.id))
+    .map((c) => ({ value: String(c.id), label: c.nome })),
+)
 
 const usarFotoPerfil = ref(
   props.avatarContaDisponivel
@@ -123,6 +138,14 @@ watch(usarFotoPerfil, (ligado) => {
   }
 })
 
+onMounted(async () => {
+  try {
+    categorias.value = await publicoService.listarCategorias()
+  } catch {
+    categorias.value = []
+  }
+})
+
 async function onAvatarChange(file: File | null) {
   logoError.value = null
   if (!file) {
@@ -145,6 +168,13 @@ async function onAvatarChange(file: File | null) {
 }
 
 function handleSubmit() {
+  categoriaError.value = null
+  const catId = categoriaId.value ? Number(categoriaId.value) : undefined
+  if (!catId || !CATEGORIA_IDS_ATIVAS.has(catId)) {
+    categoriaError.value = 'Selecione a área em que você atua.'
+    return
+  }
+
   emit('submit', {
     ...props.initial,
     nome: nome.value.trim(),
@@ -152,6 +182,7 @@ function handleSubmit() {
     telefone: telefoneToApi(telefone.value),
     descricao: descricao.value,
     logoDataUrl: logoDataUrl.value,
+    categoriaId: catId,
   })
 }
 </script>
@@ -286,6 +317,20 @@ function handleSubmit() {
           required
           placeholder="(00) 0 0000-0000"
         />
+
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label for="onb-aut-perfil-area" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
+            Em que área você atua?
+          </label>
+          <BaseSelect
+            id="onb-aut-perfil-area"
+            v-model="categoriaId"
+            :options="categoriaOptions"
+            placeholder="Selecione: Cabelo e barba ou Beleza e estética"
+            :error="categoriaError ?? undefined"
+            required
+          />
+        </div>
 
         <AuthAvatarUpload
           label="Foto profissional"

@@ -127,6 +127,7 @@ async function onContinueOps(from: LojaSetupStepId) {
       <OnboardingServicosStep
         v-else-if="step === 'servicos' && estabelecimentoId"
         :estabelecimento-id="estabelecimentoId"
+        :modo-autonomo="ehProfissionalAutonomo"
         @continue="onContinueOps('servicos')"
         @skip="skipStep('servicos')"
       />
@@ -134,6 +135,7 @@ async function onContinueOps(from: LojaSetupStepId) {
       <OnboardingHorariosStep
         v-else-if="step === 'horarios' && estabelecimentoId"
         :estabelecimento-id="estabelecimentoId"
+        :modo-autonomo="ehProfissionalAutonomo"
         @continue="onContinueOps('horarios')"
         @skip="skipStep('horarios')"
       />
