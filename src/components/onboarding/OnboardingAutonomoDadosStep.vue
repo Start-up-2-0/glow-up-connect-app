@@ -208,50 +208,52 @@ function handleSubmit() {
         <span>Usar meus dados cadastrais</span>
       </label>
 
-      <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
-        <label for="onb-aut-dados-nome" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">Nome</label>
-        <input
-          id="onb-aut-dados-nome"
-          v-model="nome"
-          type="text"
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label for="onb-aut-dados-nome" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">Nome</label>
+          <input
+            id="onb-aut-dados-nome"
+            v-model="nome"
+            type="text"
+            required
+            placeholder="Seu nome completo"
+            :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
+          />
+        </div>
+
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label for="onb-aut-dados-email" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">E-mail</label>
+          <input
+            id="onb-aut-dados-email"
+            v-model="email"
+            type="email"
+            required
+            placeholder="ex: voce@email.com"
+            :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
+          />
+        </div>
+
+        <TelefoneInput
+          id="onb-aut-dados-telefone"
+          v-model="telefone"
+          label="Telefone"
+          variant="contratar"
           required
-          placeholder="Seu nome completo"
-          :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
+          placeholder="(00) 0 0000-0000"
+        />
+
+        <AuthAvatarUpload
+          label="Foto da conta (opcional)"
+          variant="contratar"
+          :preview-url="logoDataUrl"
+          @change="onAvatarChange"
+          @error="(msg) => (logoError = msg)"
         />
       </div>
-
-      <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
-        <label for="onb-aut-dados-email" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">E-mail</label>
-        <input
-          id="onb-aut-dados-email"
-          v-model="email"
-          type="email"
-          required
-          placeholder="ex: voce@email.com"
-          :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
-        />
-      </div>
-
-      <TelefoneInput
-        id="onb-aut-dados-telefone"
-        v-model="telefone"
-        label="Telefone"
-        variant="contratar"
-        required
-        placeholder="(00) 0 0000-0000"
-      />
-
-      <AuthAvatarUpload
-        label="Foto da conta (opcional)"
-        variant="contratar"
-        :preview-url="logoDataUrl"
-        @change="onAvatarChange"
-        @error="(msg) => (logoError = msg)"
-      />
 
       <OnboardingContratarFormActions
-        submit-label="Continuar para Perfil"
-        back-label="Voltar aos planos"
+        submit-label="Continuar"
+        back-label="Voltar"
         :loading="loading"
         @back="emit('back')"
       />

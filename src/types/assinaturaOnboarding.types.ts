@@ -51,20 +51,19 @@ export const ASSINATURA_LOGADA_WIZARD_STEPS_AUTONOMO = [
 ] as const
 
 export const ASSINATURA_LOGADA_STEP_SUBTITLES: Partial<Record<AssinaturaLogadaWizardStep, string>> = {
-  'informacoes-basicas':
-    'Preencha os dados básicos que identificarão o seu negócio na plataforma.',
-  endereco: 'Informe o endereço onde seu estabelecimento está localizado.',
-  confirmar: 'Revise o plano e o estabelecimento antes de concluir a assinatura.',
+  'informacoes-basicas': 'Informações do estabelecimento',
+  endereco: 'Endereço do estabelecimento',
+  confirmar: 'Revise e confirme para finalizar',
   assinatura: '',
 }
 
 export const ASSINATURA_LOGADA_STEP_SUBTITLES_AUTONOMO: Partial<
   Record<AssinaturaLogadaWizardStep, string>
 > = {
-  dados: 'Encontramos seus dados. Revise ou edite as informações da sua conta.',
-  perfil: 'Configure como seu perfil profissional aparece para os clientes.',
-  endereco: 'Informe a localização de atendimento para aparecer na busca e no mapa.',
-  revisao: 'Confira a prévia do seu perfil antes de finalizar a assinatura.',
+  dados: 'Confirme os dados da conta para continuar',
+  perfil: 'Como você aparece para os clientes',
+  endereco: 'Onde você atende',
+  revisao: 'Revise e confirme para finalizar',
   assinatura: '',
 }
 

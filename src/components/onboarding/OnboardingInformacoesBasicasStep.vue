@@ -210,92 +210,94 @@ function handleSubmit() {
         </label>
       </div>
 
-      <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
-        <label for="onb-info-nome" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
-          {{ modoAutonomo ? 'Nome profissional' : 'Nome do estabelecimento' }}
-        </label>
-        <input
-          id="onb-info-nome"
-          v-model="nome"
-          type="text"
-          required
-          :placeholder="
-            modoAutonomo
-              ? 'Informe seu nome profissional'
-              : 'Informe o nome do seu estabelecimento'
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label for="onb-info-nome" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
+            {{ modoAutonomo ? 'Nome profissional' : 'Nome do estabelecimento' }}
+          </label>
+          <input
+            id="onb-info-nome"
+            v-model="nome"
+            type="text"
+            required
+            :placeholder="
+              modoAutonomo
+                ? 'Informe seu nome profissional'
+                : 'Informe o nome do seu estabelecimento'
+            "
+            :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
+          />
+        </div>
+
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label for="onb-info-descricao" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
+            {{ modoAutonomo ? 'Sobre mim (opcional)' : 'Descrição (opcional)' }}
+          </label>
+          <input
+            id="onb-info-descricao"
+            v-model="descricao"
+            type="text"
+            :placeholder="
+              modoAutonomo
+                ? 'Breve apresentação sobre você'
+                : 'Breve apresentação do seu negócio'
+            "
+            :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
+          />
+        </div>
+
+        <div v-if="!modoAutonomo" :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label for="onb-info-categoria" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
+            Tipo de categoria
+          </label>
+          <BaseSelect
+            id="onb-info-categoria"
+            v-model="categoriaId"
+            :options="categoriaOptions"
+            placeholder="Selecione: Salão de Beleza ou Barbearia"
+            :error="categoriaError ?? undefined"
+            required
+          />
+        </div>
+
+        <AuthAvatarUpload
+          :label="modoAutonomo ? 'Foto profissional' : 'Logo do estabelecimento'"
+          variant="contratar"
+          :preview-url="logoDataUrl"
+          :preview-hint="
+            modoAutonomo && usarFotoPerfil && !fotoAlteradaManual
+              ? 'Usando a foto da sua conta'
+              : undefined
           "
-          :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
+          @change="onLogoChange"
+          @error="(msg) => (logoError = msg)"
         />
-      </div>
 
-      <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
-        <label for="onb-info-descricao" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
-          {{ modoAutonomo ? 'Sobre mim (opcional)' : 'Descrição (opcional)' }}
-        </label>
-        <input
-          id="onb-info-descricao"
-          v-model="descricao"
-          type="text"
-          :placeholder="
-            modoAutonomo
-              ? 'Breve apresentação sobre você'
-              : 'Breve apresentação do seu negócio'
-          "
-          :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
-        />
-      </div>
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label for="onb-info-email" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
+            {{ modoAutonomo ? 'E-mail' : 'E-mail comercial' }}
+          </label>
+          <input
+            id="onb-info-email"
+            v-model="email"
+            type="email"
+            required
+            placeholder="ex: usuario01@gmail.com"
+            :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
+          />
+        </div>
 
-      <div v-if="!modoAutonomo" :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
-        <label for="onb-info-categoria" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
-          Tipo de categoria
-        </label>
-        <BaseSelect
-          id="onb-info-categoria"
-          v-model="categoriaId"
-          :options="categoriaOptions"
-          placeholder="Selecione: Salão de Beleza ou Barbearia"
-          :error="categoriaError ?? undefined"
+        <TelefoneInput
+          id="onb-info-telefone"
+          v-model="telefone"
+          :label="modoAutonomo ? 'Telefone' : 'Telefone comercial'"
+          variant="contratar"
           required
+          placeholder="(00) 0 0000-0000"
         />
       </div>
 
-      <AuthAvatarUpload
-        :label="modoAutonomo ? 'Foto profissional' : 'Logo do estabelecimento'"
-        variant="contratar"
-        :preview-url="logoDataUrl"
-        :preview-hint="
-          modoAutonomo && usarFotoPerfil && !fotoAlteradaManual
-            ? 'Usando a foto da sua conta'
-            : undefined
-        "
-        @change="onLogoChange"
-        @error="(msg) => (logoError = msg)"
-      />
-
-      <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
-        <label for="onb-info-email" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
-          {{ modoAutonomo ? 'E-mail' : 'E-mail comercial' }}
-        </label>
-        <input
-          id="onb-info-email"
-          v-model="email"
-          type="email"
-          required
-          placeholder="ex: usuario01@gmail.com"
-          :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
-        />
-      </div>
-
-      <TelefoneInput
-        id="onb-info-telefone"
-        v-model="telefone"
-        :label="modoAutonomo ? 'Telefone' : 'Telefone comercial'"
-        variant="contratar"
-        required
-        placeholder="(00) 0 0000-0000"
-      />
-
-      <OnboardingContratarFormActions :loading="loading" @back="emit('back')" />
+      <OnboardingContratarFormActions submit-label="Continuar" back-label="Voltar" :loading="loading" @back="emit('back')" />
     </form>
   </div>
 </template>

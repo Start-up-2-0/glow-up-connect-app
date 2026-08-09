@@ -95,59 +95,63 @@ function handleSubmit() {
     </p>
 
     <form :class="ONBOARDING_CONTRATAR_FORM_CLASS" @submit.prevent="handleSubmit">
-      <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
-        <label for="onb-aut-perfil-nome" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
-          Nome profissional
-        </label>
-        <input
-          id="onb-aut-perfil-nome"
-          v-model="nome"
-          type="text"
-          required
-          placeholder="Como você quer aparecer para os clientes"
-          :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
-        />
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label for="onb-aut-perfil-nome" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
+            Nome profissional
+          </label>
+          <input
+            id="onb-aut-perfil-nome"
+            v-model="nome"
+            type="text"
+            required
+            placeholder="Como você quer aparecer para os clientes"
+            :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
+          />
+        </div>
+
+        <div class="space-y-3">
+          <label
+            v-if="avatarContaDisponivel && avatarContaUrl"
+            class="flex cursor-pointer items-start gap-3 font-urbanist text-sm text-glow-text"
+          >
+            <input
+              v-model="usarFotoPerfil"
+              type="checkbox"
+              class="mt-0.5 size-4 shrink-0 rounded border-glow-border text-glow-gold focus:ring-glow-gold"
+            />
+            <span>Usar minha foto de perfil</span>
+          </label>
+
+          <AuthAvatarUpload
+            label="Foto profissional"
+            variant="contratar"
+            :preview-url="logoDataUrl"
+            :preview-hint="
+              usarFotoPerfil && !fotoAlteradaManual ? 'Usando a foto da sua conta' : undefined
+            "
+            @change="onLogoChange"
+            @error="(msg) => (logoError = msg)"
+          />
+        </div>
+
+        <div :class="[ONBOARDING_CONTRATAR_FIELD_CLASS, 'sm:col-span-2']">
+          <label for="onb-aut-perfil-bio" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
+            Sobre mim (opcional)
+          </label>
+          <textarea
+            id="onb-aut-perfil-bio"
+            v-model="descricao"
+            rows="3"
+            placeholder="Breve apresentação sobre você e seu trabalho"
+            :class="[ONBOARDING_CONTRATAR_INPUT_CLASS, 'h-auto min-h-[96px] py-3']"
+          />
+        </div>
       </div>
-
-      <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
-        <label for="onb-aut-perfil-bio" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
-          Sobre mim (opcional)
-        </label>
-        <textarea
-          id="onb-aut-perfil-bio"
-          v-model="descricao"
-          rows="3"
-          placeholder="Breve apresentação sobre você e seu trabalho"
-          :class="[ONBOARDING_CONTRATAR_INPUT_CLASS, 'h-auto min-h-[96px] py-3']"
-        />
-      </div>
-
-      <label
-        v-if="avatarContaDisponivel && avatarContaUrl"
-        class="flex cursor-pointer items-start gap-3 font-urbanist text-sm text-glow-text"
-      >
-        <input
-          v-model="usarFotoPerfil"
-          type="checkbox"
-          class="mt-0.5 size-4 shrink-0 rounded border-glow-border text-glow-gold focus:ring-glow-gold"
-        />
-        <span>Usar minha foto de perfil</span>
-      </label>
-
-      <AuthAvatarUpload
-        label="Foto profissional"
-        variant="contratar"
-        :preview-url="logoDataUrl"
-        :preview-hint="
-          usarFotoPerfil && !fotoAlteradaManual ? 'Usando a foto da sua conta' : undefined
-        "
-        @change="onLogoChange"
-        @error="(msg) => (logoError = msg)"
-      />
 
       <OnboardingContratarFormActions
-        submit-label="Continuar para Localização"
-        back-label="Voltar aos Dados"
+        submit-label="Continuar"
+        back-label="Voltar"
         :loading="loading"
         @back="emit('back')"
       />

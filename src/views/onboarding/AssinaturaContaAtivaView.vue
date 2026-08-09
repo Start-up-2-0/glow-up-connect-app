@@ -81,21 +81,15 @@ const usarDadosContaPadrao = computed(() => {
 })
 
 const shellTitle = computed(() => {
-  if (!ehAutonomo.value) return ''
   if (isCheckoutStep.value) return ''
-  const map: Record<string, string> = {
-    dados: 'Seus dados',
-    perfil: 'Seu perfil profissional',
-    endereco: 'Sua localização',
-    revisao: 'Revise e confirme',
-  }
-  return map[step.value] ?? 'Contratar plano'
+  return 'Assinatura'
 })
 
-const shellDescription = computed(() => {
-  if (!ehAutonomo.value) return ''
-  return 'Configure seu perfil profissional e ative o plano escolhido.'
-})
+const shellDescription = computed(() =>
+  ehAutonomo.value
+    ? 'Ative seu plano e complete os dados do perfil profissional.'
+    : 'Ative seu plano e complete os dados do estabelecimento.',
+)
 
 onMounted(() => {
   void init()
@@ -162,8 +156,8 @@ function voltarDeDados() {
           v-else-if="step === 'endereco'"
           :initial="draft.estabelecimento"
           modo-autonomo
-          submit-label="Continuar para Revisão"
-          back-label="Voltar ao Perfil"
+          submit-label="Continuar"
+          back-label="Voltar"
           :loading="submitting"
           :error-message="erro"
           @submit="avancarDeEndereco"

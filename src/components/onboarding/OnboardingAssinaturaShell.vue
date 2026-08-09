@@ -73,15 +73,15 @@ const emit = defineEmits<{
         <h1 class="font-satoshi text-2xl font-bold text-glow-text">
           {{
             title
-              || (modoAutonomo ? 'Ativar perfil profissional' : 'Contratar plano')
+              || 'Assinatura'
           }}
         </h1>
         <p class="mt-2 font-satoshi text-base text-glow-text-subtle">
           {{
             description
               || (modoAutonomo
-                ? 'Complete as etapas para vincular o plano ao seu perfil profissional.'
-                : 'Complete as etapas para vincular o plano ao seu estabelecimento.')
+                ? 'Ative seu plano e complete os dados do perfil profissional.'
+                : 'Ative seu plano e complete os dados do estabelecimento.')
           }}
         </p>
       </header>
@@ -117,14 +117,15 @@ const emit = defineEmits<{
 
       <p
         v-if="!isCheckoutStep && stepSubtitle"
-        class="text-center font-satoshi text-base text-glow-text-subtle"
+        class="font-satoshi text-base text-glow-text-subtle"
+        :class="planoResumo ? 'text-left' : 'text-center'"
       >
         {{ stepSubtitle }}
       </p>
 
       <div
         v-if="!isCheckoutStep && planoResumo"
-        class="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[280px_minmax(0,1fr)]"
+        class="grid w-full gap-6 lg:grid-cols-[280px_minmax(0,1fr)]"
       >
         <OnboardingPlanoResumoCard
           :plano="planoResumo"
@@ -137,10 +138,7 @@ const emit = defineEmits<{
         </div>
       </div>
 
-      <div
-        v-else
-        :class="isCheckoutStep ? 'w-full' : 'mx-auto w-full max-w-[721px]'"
-      >
+      <div v-else class="w-full">
         <slot />
       </div>
     </div>
