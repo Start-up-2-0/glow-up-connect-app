@@ -4,21 +4,27 @@ import {
   ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS,
   ONBOARDING_CONTRATAR_CARD_CLASS,
 } from '@/constants/designTokens'
-import { formatBRL, formatEnderecoOnboarding, telefoneLocalFromApi } from '@/utils/formatters'
-import type { Plano } from '@/types/plano.types'
+import OnboardingPlanoResumoCard from '@/components/onboarding/OnboardingPlanoResumoCard.vue'
+import { formatEnderecoOnboarding, telefoneLocalFromApi } from '@/utils/formatters'
+import type { Plano, PromocaoLancamento } from '@/types/plano.types'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 
 withDefaults(
   defineProps<{
     plano: Plano
+    promocao?: PromocaoLancamento | null
     estabelecimento: OnboardingEstabelecimentoDraft
     estabelecimentoExistente?: boolean
     loading?: boolean
     errorMessage?: string | null
     modoAutonomo?: boolean
+    /** Quando true, o plano já aparece na sidebar do shell. */
+    ocultarResumoPlano?: boolean
   }>(),
   {
+    promocao: null,
     modoAutonomo: false,
+    ocultarResumoPlano: false,
   },
 )
 
@@ -31,15 +37,12 @@ const emit = defineEmits<{
 
 <template>
   <div class="mx-auto w-full space-y-4">
-    <article :class="ONBOARDING_CONTRATAR_CARD_CLASS">
-      <p class="font-urbanist text-sm font-bold text-glow-text">Plano escolhido</p>
-      <p class="mt-2 font-urbanist text-base font-black text-glow-gold-cta">{{ plano.nome }}</p>
-      <p class="mt-2 font-urbanist text-sm text-glow-text-muted">{{ plano.descricao }}</p>
-      <p class="mt-3 font-urbanist text-base font-black text-glow-text">
-        {{ formatBRL(plano.preco) }}
-        <span class="text-sm font-normal text-glow-text-muted">/mês</span>
-      </p>
-    </article>
+    <OnboardingPlanoResumoCard
+      v-if="!ocultarResumoPlano"
+      :plano="plano"
+      :promocao="promocao"
+      variant="inline"
+    />
 
     <article :class="[ONBOARDING_CONTRATAR_CARD_CLASS, 'relative']">
       <div class="flex items-start justify-between gap-3">

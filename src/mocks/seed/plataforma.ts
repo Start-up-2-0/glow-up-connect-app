@@ -74,8 +74,8 @@ export const MOCK_PLANOS_RESPONSE: PlanosResponse = {
   promocaoLancamento: {
     disponivel: true,
     vagasRestantes: 15,
-    diasTrial: 14,
-    percentualDescontoMensalidade: 20,
+    diasTrial: 30,
+    percentualDescontoMensalidade: 50,
     diasAntecedenciaAlertaFatura: 3,
     diasAntecedenciaGeracaoCobranca: 1,
     diasToleranciaInadimplencia: 5,

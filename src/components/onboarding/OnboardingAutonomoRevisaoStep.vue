@@ -4,12 +4,10 @@ import {
   ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS,
   ONBOARDING_CONTRATAR_CARD_CLASS,
 } from '@/constants/designTokens'
-import { formatBRL, formatEnderecoOnboarding, telefoneLocalFromApi } from '@/utils/formatters'
-import type { Plano } from '@/types/plano.types'
+import { formatEnderecoOnboarding, telefoneLocalFromApi } from '@/utils/formatters'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 
 defineProps<{
-  plano: Plano
   perfil: OnboardingEstabelecimentoDraft
   loading?: boolean
   errorMessage?: string | null
@@ -116,16 +114,6 @@ const emit = defineEmits<{
           </button>
         </li>
       </ul>
-    </article>
-
-    <article :class="ONBOARDING_CONTRATAR_CARD_CLASS">
-      <p class="font-urbanist text-sm font-bold text-glow-text">Plano escolhido</p>
-      <p class="mt-2 font-urbanist text-base font-black text-glow-gold-cta">{{ plano.nome }}</p>
-      <p class="mt-2 font-urbanist text-sm text-glow-text-muted">{{ plano.descricao }}</p>
-      <p class="mt-3 font-urbanist text-base font-black text-glow-text">
-        {{ formatBRL(plano.preco) }}
-        <span class="text-sm font-normal text-glow-text-muted">/mês</span>
-      </p>
     </article>
 
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">

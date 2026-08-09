@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import OnboardingPublicWizardStepper from '@/components/onboarding/OnboardingPublicWizardStepper.vue'
 import OnboardingContratarStepper from '@/components/onboarding/OnboardingContratarStepper.vue'
+import OnboardingPlanoResumoCard from '@/components/onboarding/OnboardingPlanoResumoCard.vue'
 import {
   PUBLIC_ONBOARDING_TOTAL,
   type OnboardingUiVariant,
 } from '@/constants/onboardingWizardSteps'
 import {
   AGENDAR_WIZARD_CONTENT_CLASS,
-  ONBOARDING_CONTRATAR_CARD_CLASS,
   ONBOARDING_CONTRATAR_PAGE_CLASS,
 } from '@/constants/designTokens'
-import { formatBRL } from '@/utils/formatters'
 import type { Plano, PromocaoLancamento } from '@/types/plano.types'
 
 withDefaults(
@@ -124,26 +123,14 @@ const emit = defineEmits<{
       </p>
 
       <div
-        v-if="modoAutonomo && !isCheckoutStep && planoResumo"
-        class="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[240px_minmax(0,1fr)]"
+        v-if="!isCheckoutStep && planoResumo"
+        class="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[280px_minmax(0,1fr)]"
       >
-        <aside :class="[ONBOARDING_CONTRATAR_CARD_CLASS, 'h-fit lg:sticky lg:top-6']">
-          <p class="font-urbanist text-xs font-bold uppercase tracking-wide text-glow-text-subtle">
-            Seu plano
-          </p>
-          <p class="mt-3 font-satoshi text-lg font-bold text-glow-text">{{ planoResumo.nome }}</p>
-          <p class="mt-2 font-urbanist text-sm text-glow-text-muted">{{ planoResumo.descricao }}</p>
-          <p class="mt-4 font-urbanist text-xl font-black text-glow-gold-cta">
-            {{ formatBRL(planoResumo.preco) }}
-            <span class="text-sm font-normal text-glow-text-muted">/mês</span>
-          </p>
-          <p
-            v-if="promocaoResumo?.diasTrial && promocaoResumo.diasTrial > 0"
-            class="mt-3 font-urbanist text-sm text-glow-text-soft"
-          >
-            Inclui {{ promocaoResumo.diasTrial }} dias de teste.
-          </p>
-        </aside>
+        <OnboardingPlanoResumoCard
+          :plano="planoResumo"
+          :promocao="promocaoResumo"
+          variant="sidebar"
+        />
 
         <div class="min-w-0">
           <slot />

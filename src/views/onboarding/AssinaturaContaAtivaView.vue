@@ -125,8 +125,8 @@ function voltarDeDados() {
     :steps="wizardSteps"
     :step-subtitle="isCheckoutStep ? '' : stepSubtitle"
     :modo-autonomo="ehAutonomo"
-    :plano-resumo="ehAutonomo ? plano : null"
-    :promocao-resumo="ehAutonomo ? promocao : null"
+    :plano-resumo="plano"
+    :promocao-resumo="promocao"
     :title="shellTitle"
     :description="shellDescription"
     @back="onShellBack"
@@ -172,7 +172,6 @@ function voltarDeDados() {
 
         <OnboardingAutonomoRevisaoStep
           v-else-if="step === 'revisao'"
-          :plano="plano"
           :perfil="draft.estabelecimento"
           :loading="loading"
           :error-message="erro"
@@ -218,6 +217,8 @@ function voltarDeDados() {
         <OnboardingConfirmarDadosStep
           v-else-if="step === 'confirmar'"
           :plano="plano"
+          :promocao="promocao"
+          ocultar-resumo-plano
           :estabelecimento="draft.estabelecimento"
           :estabelecimento-existente="usaEstabelecimentoExistente"
           :loading="loading"
