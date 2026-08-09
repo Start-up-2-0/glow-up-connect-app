@@ -5,6 +5,7 @@ import BaseSelect from '@/components/ui/BaseSelect.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import OnboardingContratarFormActions from '@/components/onboarding/OnboardingContratarFormActions.vue'
 import { publicoService } from '@/services/publicoService'
+import { useUserStore } from '@/stores/user.store'
 import type { EstabelecimentoCategoria } from '@/types/estabelecimento.types'
 import {
   ONBOARDING_CONTRATAR_FIELD_CLASS,
@@ -45,12 +46,18 @@ const emit = defineEmits<{
   verificarWhatsApp: [opts?: { silencioso?: boolean }]
 }>()
 
-const dadosConta = {
-  nome: props.initial.nome,
-  email: props.initial.email,
-  telefone: telefoneLocalFromApi(props.initial.telefone),
-  logoDataUrl: props.initial.logoDataUrl ?? props.avatarContaUrl,
-}
+const userStore = useUserStore()
+
+/** Fonte reativa da conta — não depende do draft (que pode estar vazio no mount). */
+const dadosConta = computed(() => {
+  const profile = userStore.profile
+  return {
+    nome: (profile?.nome ?? props.initial.nome ?? '').trim(),
+    email: (profile?.email ?? props.initial.email ?? '').trim(),
+    telefone: telefoneLocalFromApi(profile?.telefone ?? props.initial.telefone),
+    logoDataUrl: props.avatarContaUrl ?? props.initial.logoDataUrl ?? null,
+  }
+})
 
 const usarDadosCadastrais = ref(props.usarDadosContaPadrao)
 const nome = ref(props.initial.nome)
@@ -95,6 +102,22 @@ function stopPoll() {
   }
 }
 
+function aplicarDadosConta() {
+  const conta = dadosConta.value
+  nome.value = conta.nome
+  email.value = conta.email
+  telefone.value = conta.telefone
+  if (!logoDataUrl.value && conta.logoDataUrl) {
+    logoDataUrl.value = conta.logoDataUrl
+  }
+}
+
+function limparDadosConta() {
+  nome.value = ''
+  email.value = ''
+  telefone.value = ''
+}
+
 watch(
   () => props.telefonePendenteConfirmacao,
   (pendente) => {
@@ -116,17 +139,36 @@ watch(
 
 onUnmounted(stopPoll)
 
-watch(usarDadosCadastrais, (ligado) => {
-  if (ligado) {
-    nome.value = dadosConta.nome
-    email.value = dadosConta.email
-    telefone.value = dadosConta.telefone
-  } else {
-    nome.value = ''
-    email.value = ''
-    telefone.value = ''
-  }
-})
+watch(
+  () => props.usarDadosContaPadrao,
+  (disponivel) => {
+    if (disponivel && !usarDadosCadastrais.value) {
+      usarDadosCadastrais.value = true
+    }
+  },
+)
+
+watch(
+  usarDadosCadastrais,
+  (ligado, estavaLigado) => {
+    if (ligado) {
+      aplicarDadosConta()
+      return
+    }
+    // Só limpa ao desmarcar — não no mount com checkbox off (preserva draft).
+    if (estavaLigado === true) limparDadosConta()
+  },
+  { immediate: true },
+)
+
+// Se o perfil carregar depois do mount com o checkbox já ligado, reaplica.
+watch(
+  dadosConta,
+  () => {
+    if (usarDadosCadastrais.value) aplicarDadosConta()
+  },
+  { deep: true },
+)
 
 watch(usarFotoPerfil, (ligado) => {
   logoError.value = null
@@ -139,6 +181,10 @@ watch(usarFotoPerfil, (ligado) => {
 })
 
 onMounted(async () => {
+  if (usarDadosCadastrais.value) aplicarDadosConta()
+  if (usarFotoPerfil.value && props.avatarContaUrl) {
+    logoDataUrl.value = props.avatarContaUrl
+  }
   try {
     categorias.value = await publicoService.listarCategorias()
   } catch {
@@ -153,7 +199,7 @@ async function onAvatarChange(file: File | null) {
     if (usarFotoPerfil.value && props.avatarContaUrl) {
       logoDataUrl.value = props.avatarContaUrl
     } else {
-      logoDataUrl.value = usarDadosCadastrais.value ? dadosConta.logoDataUrl : null
+      logoDataUrl.value = usarDadosCadastrais.value ? dadosConta.value.logoDataUrl : null
     }
     return
   }

@@ -363,9 +363,9 @@ export function useAssinaturaLogadaWizard(
         return
       }
 
-      if (!userStore.profile) {
-        await userStore.fetchMe()
-      }
+      // Login grava só UserSummary (sem telefone/WhatsApp). /me completo
+      // alimenta o prefill de "Usar meus dados cadastrais".
+      await userStore.fetchMe(true)
 
       if (!userStore.profile?.ativo) {
         await router.replace({

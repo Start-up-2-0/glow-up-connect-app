@@ -79,8 +79,12 @@ const stepSubtitle = computed(() =>
 
 const usarDadosContaPadrao = computed(() => {
   if (!ehAutonomo.value) return false
-  const e = draft.value.estabelecimento
-  return Boolean(e.nome.trim() || e.email.trim() || e.telefone.trim())
+  const profile = userStore.profile
+  return Boolean(
+    profile?.nome?.trim()
+    || profile?.email?.trim()
+    || profile?.telefone?.trim(),
+  )
 })
 
 const stepHeading = computed(() => {
