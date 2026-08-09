@@ -4,7 +4,6 @@ import { useRoute, useRouter, RouterLink } from 'vue-router'
 import registerCrest from '@/assets/logo/logo_original.png'
 import loginBackground from '@/assets/auth/login-background.webp'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
-import SegmentedControl from '@/components/ui/SegmentedControl.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import { userService } from '@/services/userService'
 import { useApiError } from '@/composables/useApiError'
@@ -269,9 +268,25 @@ function onAvatarError(message: string) {
               </p>
             </div>
 
-            <div class="sm:col-span-2">
-              <span class="mb-2 block font-satoshi text-sm font-medium text-glow-text">Sexo</span>
-              <SegmentedControl v-model="sexo" :options="SEXO_OPTIONS" aria-label="Sexo" />
+            <div>
+              <label for="sexo" class="mb-2 block font-satoshi text-sm font-medium text-glow-text">
+                Sexo
+              </label>
+              <select
+                id="sexo"
+                v-model="sexo"
+                :class="inputClass"
+                aria-label="Sexo"
+              >
+                <option value="" disabled>Selecione</option>
+                <option
+                  v-for="option in SEXO_OPTIONS"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </select>
             </div>
 
             <TelefoneInput
