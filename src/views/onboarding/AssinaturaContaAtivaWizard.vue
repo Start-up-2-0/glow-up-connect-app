@@ -64,7 +64,6 @@ const {
   finalizarAssinatura,
   avancarDeServicos,
   pularServicos,
-  voltarDeHorarios,
   avancarDeHorarios,
   pularHorarios,
 } = wizard
