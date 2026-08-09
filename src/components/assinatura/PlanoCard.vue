@@ -6,6 +6,7 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { aplicarDescontoPercentual, formatBRL, formatLimite } from '@/utils/formatters'
 import type { Plano } from '@/types/plano.types'
+import type { TipoAssinatura } from '@/types/assinatura.types'
 
 const props = withDefaults(
   defineProps<{
@@ -14,15 +15,20 @@ const props = withDefaults(
     desabilitado?: boolean
     modoLogado?: boolean
     percentualDesconto?: number | null
+    tipoAssinatura?: TipoAssinatura
   }>(),
   {
     modoLogado: false,
+    tipoAssinatura: 'Estabelecimento',
   },
 )
 
 const checkoutLink = computed(() => ({
   path: props.modoLogado ? ROUTE_PATHS.ONBOARDING_CONTRATAR : ROUTE_PATHS.ONBOARDING_ASSINATURA,
-  query: { planoId: String(props.plano.id) },
+  query: {
+    planoId: String(props.plano.id),
+    tipoAssinatura: props.tipoAssinatura,
+  },
 }))
 
 const temDesconto = computed(() => (props.percentualDesconto ?? 0) > 0)

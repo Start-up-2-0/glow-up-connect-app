@@ -148,13 +148,12 @@ export function useAssinaturaLogadaWizard(
   } = useAssinaturaPagamentoResposta()
 
   const storedDraft = loadDraft()
+  const draftCompativel =
+    storedDraft != null
+    && storedDraft.planoId === planoId
+    && (storedDraft.tipoAssinatura ?? 'Estabelecimento') === tipoAssinatura
   const draft = ref<AssinaturaLogadaDraft>(
-    storedDraft?.planoId === planoId
-      ? {
-          ...storedDraft,
-          tipoAssinatura: storedDraft.tipoAssinatura ?? tipoAssinatura,
-        }
-      : createDraft(planoId, tipoAssinatura),
+    draftCompativel ? storedDraft! : createDraft(planoId, tipoAssinatura),
   )
   const contexto = ref<AssinaturaOnboardingContexto | null>(null)
   const perfilExistente = ref<EstabelecimentoPerfilCompleto | null>(null)
@@ -291,7 +290,7 @@ export function useAssinaturaLogadaWizard(
         await router.replace({
           path: ROUTE_PATHS.LOGIN,
           query: {
-            redirect: `${ROUTE_PATHS.ONBOARDING_CONTRATAR}?planoId=${planoId}&tipoAssinatura=${draft.value.tipoAssinatura}`,
+            redirect: `${ROUTE_PATHS.ONBOARDING_CONTRATAR}?planoId=${planoId}&tipoAssinatura=${tipoAssinatura}`,
           },
         })
         return
@@ -316,7 +315,8 @@ export function useAssinaturaLogadaWizard(
 
       preencherDadosUsuario()
 
-      await planosStore.fetchPlanos(false, draft.value.tipoAssinatura)
+      // Sempre o tipo da URL/entrada do wizard — não o draft stale.
+      await planosStore.fetchPlanos(false, tipoAssinatura)
       if (!plano.value) {
         await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
         return

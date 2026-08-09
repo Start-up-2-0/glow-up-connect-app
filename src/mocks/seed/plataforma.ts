@@ -13,73 +13,152 @@ function iso(daysFromNow: number): string {
 
 /* ---------- Planos ---------- */
 
-const MODULOS_TODOS = [
+const MODULOS_ESTABELECIMENTO_ESSENCIAL = [
   'Estabelecimento', 'Assinatura', 'Agenda', 'Servicos', 'HorariosAtendimento',
-  'Caixa', 'Financeiro', 'ComissaoProfissionais', 'Clientes', 'Profissionais', 'WhatsApp',
+  'Notificacoes', 'Email', 'Profissionais', 'WhatsApp',
 ]
 
-const MOCK_PLANOS: Plano[] = [
-  {
-    id: 1,
-    nome: 'Básico',
-    descricao: 'Para começar com o essencial da agenda.',
-    preco: 0,
-    periodo: 'mensal',
-    limiteProfissionais: 3,
-    limiteServicos: 30,
-    limiteAgendamentos: 100,
-    limiteUsuarios: 3,
-    limiteAgendamentosPorDia: 20,
-    limiteEstabelecimentos: 1,
-    prioridadeListagemPublica: false,
-    modulos: ['Agenda', 'Servicos', 'HorariosAtendimento'],
-    funcionalidades: ['Agenda', 'Gestão de serviços'],
-  },
-  {
-    id: 2,
-    nome: 'Essencial',
-    descricao: 'Operação completa para uma unidade ou profissional autônomo.',
-    preco: 79.9,
-    periodo: 'mensal',
-    limiteProfissionais: 10,
-    limiteServicos: null,
-    limiteAgendamentos: null,
-    limiteUsuarios: 10,
-    limiteAgendamentosPorDia: null,
-    limiteEstabelecimentos: 1,
-    prioridadeListagemPublica: true,
-    modulos: MODULOS_TODOS,
-    funcionalidades: ['Agenda ilimitada', 'Comissões por metas', 'Relatórios financeiros', 'Vitrine pública'],
-  },
-  {
-    id: 3,
-    nome: 'Premium',
-    descricao: 'Para redes com múltiplas unidades.',
-    preco: 159.9,
-    periodo: 'mensal',
-    limiteProfissionais: null,
-    limiteServicos: null,
-    limiteAgendamentos: null,
-    limiteUsuarios: null,
-    limiteAgendamentosPorDia: null,
-    limiteEstabelecimentos: 5,
-    prioridadeListagemPublica: true,
-    modulos: MODULOS_TODOS,
-    funcionalidades: ['Tudo do Plus', 'Múltiplas unidades', 'Relatório de rede', 'Suporte prioritário'],
-  },
+const MODULOS_ESTABELECIMENTO_PREMIUM = [
+  ...MODULOS_ESTABELECIMENTO_ESSENCIAL,
+  'Caixa', 'Financeiro', 'ComissaoProfissionais', 'Clientes',
 ]
 
+const MODULOS_AUTONOMO_ESSENCIAL = [
+  'Estabelecimento', 'Assinatura', 'Agenda', 'Servicos', 'HorariosAtendimento',
+  'Notificacoes', 'Email', 'Clientes', 'ProfissionalAutonomo',
+]
+
+const MODULOS_AUTONOMO_PREMIUM = [
+  ...MODULOS_AUTONOMO_ESSENCIAL,
+  'WhatsApp', 'Caixa', 'Financeiro',
+]
+
+const FUNCIONALIDADES_ESTABELECIMENTO_ESSENCIAL = [
+  'Operação completa para uma unidade',
+  'Agenda compartilhada',
+  'Gestão de profissionais',
+  'WhatsApp e e-mail',
+]
+
+const FUNCIONALIDADES_ESTABELECIMENTO_PREMIUM = [
+  ...FUNCIONALIDADES_ESTABELECIMENTO_ESSENCIAL,
+  'Até 5 unidades na mesma assinatura',
+  'Caixa e financeiro',
+  'Comissão automática',
+  'Prioridade no marketplace',
+]
+
+const FUNCIONALIDADES_AUTONOMO_ESSENCIAL = [
+  'Agenda pessoal',
+  'Cadastro de serviços',
+  'Perfil profissional público',
+  'Gestão de clientes',
+]
+
+const FUNCIONALIDADES_AUTONOMO_PREMIUM = [
+  ...FUNCIONALIDADES_AUTONOMO_ESSENCIAL,
+  'WhatsApp automático',
+  'Caixa pessoal',
+  'Relatórios financeiros',
+  'Prioridade no marketplace',
+]
+
+/** Preços alinhados a `PlanoComercialCatalogo` (API). */
+const PRECO_LOJA_ESSENCIAL = 79.9
+const PRECO_LOJA_PREMIUM = 199.9
+const PRECO_AUTONOMO_ESSENCIAL = 49.99
+const PRECO_AUTONOMO_PREMIUM = 79.99
+
+function buildMockPlanos(tipoAssinatura: 'Estabelecimento' | 'ProfissionalAutonomo'): Plano[] {
+  const ehAutonomo = tipoAssinatura === 'ProfissionalAutonomo'
+
+  return [
+    {
+      id: 1,
+      nome: 'Básico',
+      descricao: 'Para começar com o essencial da agenda.',
+      preco: 0,
+      periodo: 'mensal',
+      limiteProfissionais: 3,
+      limiteServicos: 30,
+      limiteAgendamentos: 100,
+      limiteUsuarios: 3,
+      limiteAgendamentosPorDia: 20,
+      limiteEstabelecimentos: 1,
+      prioridadeListagemPublica: false,
+      modulos: ['Agenda', 'Servicos', 'HorariosAtendimento'],
+      funcionalidades: ['Agenda', 'Gestão de serviços'],
+    },
+    {
+      id: 2,
+      nome: 'Essencial',
+      descricao: ehAutonomo
+        ? 'Operação completa para profissional autônomo.'
+        : 'Operação completa para uma unidade.',
+      preco: ehAutonomo ? PRECO_AUTONOMO_ESSENCIAL : PRECO_LOJA_ESSENCIAL,
+      periodo: 'mensal',
+      limiteProfissionais: ehAutonomo ? 1 : 10,
+      limiteServicos: null,
+      limiteAgendamentos: null,
+      limiteUsuarios: ehAutonomo ? 1 : 10,
+      limiteAgendamentosPorDia: null,
+      limiteEstabelecimentos: 1,
+      prioridadeListagemPublica: !ehAutonomo,
+      modulos: ehAutonomo
+        ? [...MODULOS_AUTONOMO_ESSENCIAL]
+        : [...MODULOS_ESTABELECIMENTO_ESSENCIAL],
+      funcionalidades: ehAutonomo
+        ? [...FUNCIONALIDADES_AUTONOMO_ESSENCIAL]
+        : [...FUNCIONALIDADES_ESTABELECIMENTO_ESSENCIAL],
+    },
+    {
+      id: 3,
+      nome: 'Premium',
+      descricao: ehAutonomo
+        ? 'Recursos avançados para o profissional autônomo.'
+        : 'Para redes com múltiplas unidades.',
+      preco: ehAutonomo ? PRECO_AUTONOMO_PREMIUM : PRECO_LOJA_PREMIUM,
+      periodo: 'mensal',
+      limiteProfissionais: ehAutonomo ? 1 : null,
+      limiteServicos: null,
+      limiteAgendamentos: null,
+      limiteUsuarios: ehAutonomo ? 1 : null,
+      limiteAgendamentosPorDia: null,
+      limiteEstabelecimentos: ehAutonomo ? 1 : 5,
+      prioridadeListagemPublica: true,
+      modulos: ehAutonomo
+        ? [...MODULOS_AUTONOMO_PREMIUM]
+        : [...MODULOS_ESTABELECIMENTO_PREMIUM],
+      funcionalidades: ehAutonomo
+        ? [...FUNCIONALIDADES_AUTONOMO_PREMIUM]
+        : [...FUNCIONALIDADES_ESTABELECIMENTO_PREMIUM],
+    },
+  ]
+}
+
+const MOCK_PROMOCAO_LANCAMENTO = {
+  disponivel: true,
+  vagasRestantes: 15,
+  diasTrial: 30,
+  percentualDescontoMensalidade: 50,
+  diasAntecedenciaAlertaFatura: 3,
+  diasAntecedenciaGeracaoCobranca: 1,
+  diasToleranciaInadimplencia: 5,
+}
+
+/** @deprecated Prefer `mockPlanosResponse(tipo)`. Mantido para seeds que esperam o catálogo de loja. */
 export const MOCK_PLANOS_RESPONSE: PlanosResponse = {
-  planos: MOCK_PLANOS,
-  promocaoLancamento: {
-    disponivel: true,
-    vagasRestantes: 15,
-    diasTrial: 30,
-    percentualDescontoMensalidade: 50,
-    diasAntecedenciaAlertaFatura: 3,
-    diasAntecedenciaGeracaoCobranca: 1,
-    diasToleranciaInadimplencia: 5,
-  },
+  planos: buildMockPlanos('Estabelecimento'),
+  promocaoLancamento: MOCK_PROMOCAO_LANCAMENTO,
+}
+
+export function mockPlanosResponse(
+  tipoAssinatura: 'Estabelecimento' | 'ProfissionalAutonomo' = 'Estabelecimento',
+): PlanosResponse {
+  return {
+    planos: buildMockPlanos(tipoAssinatura),
+    promocaoLancamento: MOCK_PROMOCAO_LANCAMENTO,
+  }
 }
 
 /* ---------- Categorias de estabelecimento ---------- */

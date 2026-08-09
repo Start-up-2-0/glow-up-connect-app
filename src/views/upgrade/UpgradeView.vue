@@ -70,6 +70,7 @@ onMounted(() =>
         :key="plano.id"
         :plano="plano"
         :destacado="plano.nome === info.planoMinimo"
+        :tipo-assinatura="ehProfissionalAutonomo ? 'ProfissionalAutonomo' : 'Estabelecimento'"
       />
     </div>
   </div>

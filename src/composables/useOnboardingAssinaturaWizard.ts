@@ -97,13 +97,12 @@ export function useOnboardingAssinaturaWizard(
   } = useAssinaturaPagamentoResposta()
 
   const storedDraft = loadDraft()
+  const draftCompativel =
+    storedDraft != null
+    && storedDraft.planoId === planoId
+    && (storedDraft.tipoAssinatura ?? 'Estabelecimento') === tipoAssinatura
   const draft = ref<OnboardingAssinaturaDraft>(
-    storedDraft?.planoId === planoId
-      ? {
-          ...storedDraft,
-          tipoAssinatura: storedDraft.tipoAssinatura ?? tipoAssinatura,
-        }
-      : createDraft(planoId, tipoAssinatura),
+    draftCompativel ? storedDraft! : createDraft(planoId, tipoAssinatura),
   )
   const loading = ref(false)
   const submitting = ref(false)
@@ -146,7 +145,7 @@ export function useOnboardingAssinaturaWizard(
         return
       }
 
-      await planosStore.fetchPlanos(false, draft.value.tipoAssinatura)
+      await planosStore.fetchPlanos(false, tipoAssinatura)
       if (!plano.value) {
         await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
         return

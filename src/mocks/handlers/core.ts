@@ -11,8 +11,8 @@ import {
   MOCK_COBRANCAS,
   MOCK_DADOS_PRIVACIDADE,
   MOCK_PERFIL_ESTABELECIMENTO,
-  MOCK_PLANOS_RESPONSE,
   MOCK_REDE,
+  mockPlanosResponse,
 } from '../seed/plataforma'
 
 function isoFromNow(hours: number): string {
@@ -174,7 +174,13 @@ export function registerCoreRoutes(router: MockRouter) {
   })
 
   /* ---------- Planos ---------- */
-  router.on('get', '/planos', () => ok(MOCK_PLANOS_RESPONSE))
+  router.on('get', '/planos', (req) => {
+    const tipo =
+      req.query.tipoAssinatura === 'ProfissionalAutonomo'
+        ? 'ProfissionalAutonomo'
+        : 'Estabelecimento'
+    return ok(mockPlanosResponse(tipo))
+  })
 
   /* ---------- Assinatura ---------- */
   router.on('get', '/assinaturas/onboarding/contexto', () => {
