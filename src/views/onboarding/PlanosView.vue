@@ -5,12 +5,16 @@ import PlanosOnboardingSection from '@/components/assinatura/PlanosOnboardingSec
 import { assinaturaService } from '@/services/assinaturaService'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { ROUTE_PATHS } from '@/constants/routes'
+import { MOCK_MODE } from '@/mocks/config'
 
 const router = useRouter()
 const negocioStore = useNegocioStore()
 
 onMounted(async () => {
   await negocioStore.ensureContext()
+
+  // Em mock, mantém a página de planos para testar o wizard de assinatura.
+  if (MOCK_MODE) return
 
   const possuiAssinaturaAtivaComoDono = negocioStore.estabelecimentos.some(
     (e) => e.role === 'Owner' && e.assinaturaAtiva,

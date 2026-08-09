@@ -7,7 +7,6 @@ import OnboardingContratarFormActions from '@/components/onboarding/OnboardingCo
 import { publicoService } from '@/services/publicoService'
 import type { EstabelecimentoCategoria } from '@/types/estabelecimento.types'
 import {
-  ONBOARDING_CONTRATAR_CARD_CLASS,
   ONBOARDING_CONTRATAR_FIELD_CLASS,
   ONBOARDING_CONTRATAR_FORM_CLASS,
   ONBOARDING_CONTRATAR_INPUT_CLASS,
@@ -164,10 +163,10 @@ function handleSubmit() {
 </script>
 
 <template>
-  <div :class="ONBOARDING_CONTRATAR_CARD_CLASS">
+  <div class="space-y-6">
     <p
       v-if="errorMessage || logoError || categoriaError"
-      class="checkout-alert-error mb-6 px-4 py-3"
+      class="checkout-alert-error px-4 py-3"
       role="alert"
     >
       {{ errorMessage || logoError || categoriaError }}
@@ -176,7 +175,7 @@ function handleSubmit() {
     <form :class="ONBOARDING_CONTRATAR_FORM_CLASS" @submit.prevent="handleSubmit">
       <div
         v-if="mostrarReusoDados || mostrarReusoFoto"
-        class="mb-2 space-y-3 rounded-lg border border-glow-border-soft bg-glow-surface-tint/60 px-4 py-3"
+        class="space-y-3 rounded-lg border border-glow-border-soft bg-glow-surface-tint/60 px-4 py-3"
       >
         <p
           v-if="mostrarReusoDados"
@@ -297,7 +296,12 @@ function handleSubmit() {
         />
       </div>
 
-      <OnboardingContratarFormActions submit-label="Continuar" back-label="Voltar" :loading="loading" @back="emit('back')" />
+      <OnboardingContratarFormActions
+        submit-label="Próximo: Endereço"
+        back-label="Anterior: Planos"
+        :loading="loading"
+        @back="emit('back')"
+      />
     </form>
   </div>
 </template>

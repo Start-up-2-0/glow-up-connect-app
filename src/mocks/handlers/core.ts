@@ -179,6 +179,8 @@ export function registerCoreRoutes(router: MockRouter) {
   /* ---------- Assinatura ---------- */
   router.on('get', '/assinaturas/onboarding/contexto', () => {
     const lojas = mockEstablishmentsForEmail(currentEmail()).filter((e) => e.role === 'Owner')
+    // Mock: permite testar o wizard de contratação mesmo com tenant já existente.
+    // Contas sem loja (cliente / autonomo.novo) e também as com loja entram em AssinarPlano.
     if (lojas.length === 0) {
       return ok({
         temEstabelecimentoProprio: false,
@@ -191,21 +193,17 @@ export function registerCoreRoutes(router: MockRouter) {
         assinaturaPremiumId: null,
       })
     }
+
     const limite = lojas[0]?.limites?.estabelecimentos ?? 1
     const lojasVinculadas = lojas.length
     const podeAdicionarLoja = lojasVinculadas > 0 && limite > 1 && lojasVinculadas < limite
+
+    // Força AssinarPlano no mock para QA do onboarding (não redireciona para Gerenciar).
     return ok({
-      temEstabelecimentoProprio: true,
-      estabelecimentos: lojas.map((e) => ({
-        estabelecimentoId: e.estabelecimentoId,
-        nome: e.nome,
-        logo: e.logo || null,
-        assinaturaAtiva: e.assinaturaAtiva,
-        assinaturaPendente: false,
-        podeContratar: false,
-      })),
-      proximaEtapa: podeAdicionarLoja ? 'AdicionarLoja' : 'GerenciarAssinatura',
-      estabelecimentoIdSugerido: lojas[0]?.estabelecimentoId ?? null,
+      temEstabelecimentoProprio: false,
+      estabelecimentos: [],
+      proximaEtapa: 'AssinarPlano',
+      estabelecimentoIdSugerido: null,
       podeAdicionarLoja,
       lojasVinculadas,
       limiteLojas: limite > 1 ? limite : null,

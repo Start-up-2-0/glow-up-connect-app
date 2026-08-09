@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import EnderecoForm from '@/components/form/EnderecoForm.vue'
 import OnboardingContratarFormActions from '@/components/onboarding/OnboardingContratarFormActions.vue'
-import { ONBOARDING_CONTRATAR_CARD_CLASS, ONBOARDING_CONTRATAR_FORM_CLASS } from '@/constants/designTokens'
+import { ONBOARDING_CONTRATAR_FORM_CLASS } from '@/constants/designTokens'
 import type { EnderecoFormFields } from '@/types/endereco.types'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 
@@ -46,20 +46,13 @@ function handleSubmit() {
 </script>
 
 <template>
-  <div :class="ONBOARDING_CONTRATAR_CARD_CLASS">
+  <div class="space-y-6">
     <p
       v-if="errorMessage"
-      class="checkout-alert-error mb-6 px-4 py-3"
+      class="checkout-alert-error px-4 py-3"
       role="alert"
     >
       {{ errorMessage }}
-    </p>
-
-    <p
-      v-if="modoAutonomo"
-      class="mb-4 font-urbanist text-sm text-glow-text-muted"
-    >
-      Informe a localização de atendimento. Ela será usada na descoberta de profissionais e no mapa.
     </p>
 
     <form :class="ONBOARDING_CONTRATAR_FORM_CLASS" @submit.prevent="handleSubmit">

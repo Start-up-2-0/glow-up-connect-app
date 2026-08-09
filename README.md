@@ -62,13 +62,15 @@ npm run dev:mock
 | **Dono · Básico** | `basico@teste.com` | Só loja principal; menu completo |
 | **Autônomo · Essencial** | `autonomo.essencial@teste.com` | Perfil profissional solo; Agenda, Serviços, Horários, Clientes. **Sem** Equipe, WhatsApp, Caixa, Financeiro, Minhas Lojas |
 | **Autônomo · Premium** | `autonomo.premium@teste.com` | Mesmo do Essencial + WhatsApp, Caixa e Financeiro. **Sem** Equipe, Comissões, multi-loja |
-| **Autônomo · onboarding** | `autonomo.novo@teste.com` | Sem tenant — testa o wizard Dados → Perfil → Localização → Revisão → Assinatura |
+| **Autônomo · onboarding** | `autonomo.novo@teste.com` | Sem tenant — ideal para o wizard; em mock, **qualquer conta** também pode abrir `/onboarding/planos` |
 | **Administrador** | `admin@teste.com` | Só Studio Glow Up; mesmas permissões do Dono na loja (agenda, clientes, serviços, financeiro, equipe, horários, config da loja). **Sem** multi-filial / gerenciar assinatura de outras lojas |
 | **Recepcionista** | `recepcionista@teste.com` | Só Studio Glow Up; **Dashboard**, **Agenda**, **Clientes**, **Serviços** (visualizar), atendimento (iniciar/finalizar/remarcar/cancelar). **Sem** Financeiro, Equipe, Horários (editar), Minha loja, Assinatura, WhatsApp |
 | **Profissional** | `profissional@teste.com` | Só a própria agenda/horários |
 | **Cliente** | `cliente@teste.com` | Explorar, agendamentos, perfil |
 
   E-mails não listados caem na visão de **cliente**. Qualquer senha funciona no mock. Faça logout para trocar de perfil. O cadastro (`/usuario`) também cria conta de cliente no mock.
+
+  **Onboarding de assinatura (mock):** o guard e a página de planos **não** redirecionam para “Gerenciar assinatura”. Abra `/onboarding/planos`, escolha o modelo (autônomo/loja) e um plano para testar o wizard.
 
   **Regra de acesso (filiais):** o **Dono/Assinante** acessa todas as filiais conforme o plano (Básico/Plus = só a principal; Premium = todas). **Não-dono** (Admin/Recepcionista/Profissional) acessa somente a filial onde foi cadastrado — o mock retorna **403** para qualquer rota `/estabelecimentos/{id}/...` fora do escopo do perfil logado.
 

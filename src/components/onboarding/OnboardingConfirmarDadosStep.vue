@@ -133,11 +133,20 @@ const emit = defineEmits<{
 
     <p v-if="errorMessage" class="text-sm text-red-600 dark:text-red-400" role="alert">{{ errorMessage }}</p>
 
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+    <div
+      class="flex flex-col-reverse gap-3 border-t border-glow-border-soft pt-6 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <button
+        type="button"
+        :class="[ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS, 'sm:w-auto sm:min-w-[160px]']"
+        @click="emit('back')"
+      >
+        Anterior
+      </button>
       <button
         type="button"
         :disabled="loading"
-        :class="ONBOARDING_CONTRATAR_BTN_PRIMARY_CLASS"
+        :class="[ONBOARDING_CONTRATAR_BTN_PRIMARY_CLASS, 'sm:w-auto sm:min-w-[200px]']"
         @click="emit('submit')"
       >
         <span
@@ -145,14 +154,7 @@ const emit = defineEmits<{
           class="mr-2 inline-block size-4 animate-spin rounded-full border-2 border-white border-t-transparent"
           aria-hidden="true"
         />
-        Continuar para o pagamento
-      </button>
-      <button
-        type="button"
-        :class="ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS"
-        @click="emit('back')"
-      >
-        Voltar
+        Próximo: Pagamento
       </button>
     </div>
   </div>

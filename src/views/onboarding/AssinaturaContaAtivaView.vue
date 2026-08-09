@@ -80,16 +80,29 @@ const usarDadosContaPadrao = computed(() => {
   return Boolean(e.nome.trim() || e.email.trim() || e.telefone.trim())
 })
 
-const shellTitle = computed(() => {
+const stepHeading = computed(() => {
   if (isCheckoutStep.value) return ''
-  return 'Assinatura'
+  if (ehAutonomo.value) {
+    const map: Record<string, string> = {
+      dados: 'Dados da conta',
+      perfil: 'Perfil profissional',
+      endereco: 'Localização',
+      revisao: 'Confirmação',
+    }
+    return map[step.value] ?? 'Assinatura'
+  }
+  const map: Record<string, string> = {
+    'informacoes-basicas': 'Dados do estabelecimento',
+    endereco: 'Endereço',
+    confirmar: 'Confirmação',
+  }
+  return map[step.value] ?? 'Assinatura'
 })
 
-const shellDescription = computed(() =>
-  ehAutonomo.value
-    ? 'Ative seu plano e complete os dados do perfil profissional.'
-    : 'Ative seu plano e complete os dados do estabelecimento.',
-)
+const shellDescription = computed(() => {
+  if (isCheckoutStep.value) return ''
+  return stepSubtitle.value ?? ''
+})
 
 onMounted(() => {
   void init()
@@ -121,7 +134,7 @@ function voltarDeDados() {
     :modo-autonomo="ehAutonomo"
     :plano-resumo="plano"
     :promocao-resumo="promocao"
-    :title="shellTitle"
+    :title="stepHeading"
     :description="shellDescription"
     @back="onShellBack"
   >
@@ -156,8 +169,8 @@ function voltarDeDados() {
           v-else-if="step === 'endereco'"
           :initial="draft.estabelecimento"
           modo-autonomo
-          submit-label="Continuar"
-          back-label="Voltar"
+          submit-label="Próximo: Revisão"
+          back-label="Anterior: Perfil"
           :loading="submitting"
           :error-message="erro"
           @submit="avancarDeEndereco"
@@ -202,6 +215,8 @@ function voltarDeDados() {
         <OnboardingEnderecoStep
           v-else-if="step === 'endereco'"
           :initial="draft.estabelecimento"
+          submit-label="Próximo: Confirmação"
+          back-label="Anterior: Dados"
           :loading="submitting"
           :error-message="erro"
           @submit="avancarDeEndereco"

@@ -3,7 +3,6 @@ import { ref, watch } from 'vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import OnboardingContratarFormActions from '@/components/onboarding/OnboardingContratarFormActions.vue'
 import {
-  ONBOARDING_CONTRATAR_CARD_CLASS,
   ONBOARDING_CONTRATAR_FIELD_CLASS,
   ONBOARDING_CONTRATAR_FORM_CLASS,
   ONBOARDING_CONTRATAR_INPUT_CLASS,
@@ -85,10 +84,10 @@ function handleSubmit() {
 </script>
 
 <template>
-  <div :class="ONBOARDING_CONTRATAR_CARD_CLASS">
+  <div class="space-y-6">
     <p
       v-if="errorMessage || logoError"
-      class="checkout-alert-error mb-6 px-4 py-3"
+      class="checkout-alert-error px-4 py-3"
       role="alert"
     >
       {{ errorMessage || logoError }}
@@ -150,8 +149,8 @@ function handleSubmit() {
       </div>
 
       <OnboardingContratarFormActions
-        submit-label="Continuar"
-        back-label="Voltar"
+        submit-label="Próximo: Localização"
+        back-label="Anterior: Dados"
         :loading="loading"
         @back="emit('back')"
       />

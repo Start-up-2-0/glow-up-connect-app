@@ -31,6 +31,7 @@ import { draftEnderecoToApi, validateEnderecoForSubmit } from '@/utils/enderecoP
 import { buildAtualizarPerfilPayload } from '@/utils/perfilPayload'
 import { userService } from '@/services/userService'
 import type { WhatsAppConfirmacaoInstrucoes } from '@/types/whatsapp.types'
+import { MOCK_MODE } from '@/mocks/config'
 
 const STORAGE_KEY = 'guc_assinatura_logada'
 
@@ -237,7 +238,7 @@ export function useAssinaturaLogadaWizard(
   async function aplicarContexto(data: AssinaturaOnboardingContexto) {
     contexto.value = data
 
-    if (data.proximaEtapa === 'GerenciarAssinatura') {
+    if (data.proximaEtapa === 'GerenciarAssinatura' && !MOCK_MODE) {
       void router.replace(ROUTE_PATHS.CONFIG_ASSINATURA)
       return false
     }

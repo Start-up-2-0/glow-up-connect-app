@@ -21,7 +21,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="mx-auto w-full space-y-4">
+  <div class="space-y-6">
     <p
       v-if="errorMessage"
       class="checkout-alert-error px-4 py-3"
@@ -116,21 +116,23 @@ const emit = defineEmits<{
       </ul>
     </article>
 
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+    <div
+      class="flex flex-col-reverse gap-3 border-t border-glow-border-soft pt-6 sm:flex-row sm:items-center sm:justify-between"
+    >
       <button
         type="button"
-        :disabled="loading"
-        :class="ONBOARDING_CONTRATAR_BTN_PRIMARY_CLASS"
-        @click="emit('submit')"
+        :class="[ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS, 'sm:w-auto sm:min-w-[160px]']"
+        @click="emit('back')"
       >
-        Continuar para Assinatura
+        Anterior: Localização
       </button>
       <button
         type="button"
-        :class="ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS"
-        @click="emit('back')"
+        :disabled="loading"
+        :class="[ONBOARDING_CONTRATAR_BTN_PRIMARY_CLASS, 'sm:w-auto sm:min-w-[200px]']"
+        @click="emit('submit')"
       >
-        Voltar à Localização
+        Próximo: Pagamento
       </button>
     </div>
   </div>
