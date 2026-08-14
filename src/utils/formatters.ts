@@ -114,6 +114,8 @@ export function getAgendaWallClockParts(reference = new Date()): {
   year: number
   month: number
   day: number
+  hours: number
+  minutes: number
 } {
   const shifted = new Date(
     reference.getTime() + (reference.getTimezoneOffset() + AGENDA_UTC_OFFSET_MINUTES) * 60_000,
@@ -122,6 +124,8 @@ export function getAgendaWallClockParts(reference = new Date()): {
     year: shifted.getUTCFullYear(),
     month: shifted.getUTCMonth(),
     day: shifted.getUTCDate(),
+    hours: shifted.getUTCHours(),
+    minutes: shifted.getUTCMinutes(),
   }
 }
 
@@ -451,6 +455,7 @@ export function agendamentoStatusLabel(status: string): string {
   const labels: Record<string, string> = {
     PendentePagamento: 'Pagamento pendente',
     Confirmado: 'Confirmado',
+    Agendado: 'Agendado',
     EmAtendimento: 'Em atendimento',
     Concluido: 'Concluído',
     Cancelado: 'Cancelado',

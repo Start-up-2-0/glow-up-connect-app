@@ -269,10 +269,7 @@ onMounted(load)
         </div>
 
         <div class="agendamento-detail-column">
-          <AgendamentoDetailServices
-            :itens="serviceItens"
-            :agendamento-status="agendamento.status"
-          />
+          <AgendamentoDetailServices :itens="serviceItens" />
         </div>
       </div>
 

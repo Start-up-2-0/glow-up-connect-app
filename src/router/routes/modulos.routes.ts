@@ -45,6 +45,20 @@ export const modulosRoutes: RouteRecordRaw[] = [
     },
   },
   {
+    path: ROUTE_PATHS.AGENDA_DIA,
+    name: ROUTE_NAMES.AGENDA_DIA,
+    component: () => import('@/views/modulos/agenda/AgendaDiaView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerModulo: 'Agenda',
+      requerPermissoes: ['AgendaVisualizarGeral', 'AgendaVisualizarPropria'],
+      permitidoRoleProfissional: true,
+      title: 'Agenda — Dia',
+    },
+  },
+  {
     path: `${ROUTE_PATHS.AGENDA_DETALHE}/:id`,
     name: ROUTE_NAMES.AGENDA_DETALHE,
     component: () => import('@/views/modulos/agenda/AgendaDetalheView.vue'),

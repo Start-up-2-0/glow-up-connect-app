@@ -1,3 +1,4 @@
+import { normalizeAgendaIso } from '@/utils/formatters'
 import type { AgendamentoStatus } from '@/types/agendamento.types'
 
 const STATUS_BLOQUEADOS_INICIO: readonly string[] = [
@@ -11,7 +12,8 @@ const STATUS_BLOQUEADOS_INICIO: readonly string[] = [
   'PendentePagamento',
 ]
 
-const STATUS_AGENDAMENTO_INICIAVEL: readonly string[] = ['Confirmado', 'EmAtendimento']
+const STATUS_AGENDAMENTO_INICIAVEL: readonly string[] = ['Confirmado', 'Agendado', 'EmAtendimento']
+const STATUS_ITEM_INICIAVEL: readonly string[] = ['Confirmado', 'Agendado']
 
 /** Fallback de permissão para equipe da loja com agenda geral (sessão pode não listar AtendimentoIniciar ainda). */
 export function possuiPermissaoIniciarAtendimento(possuiPermissao: (permissao: string) => boolean): boolean {
@@ -29,7 +31,7 @@ export function possuiPermissaoFinalizarAtendimento(
  * Compara instantes UTC quando o backend envia ISO com offset/Z.
  */
 export function horarioPermiteIniciarAtendimento(inicio: string, agora: Date = new Date()): boolean {
-  const inicioMs = new Date(inicio).getTime()
+  const inicioMs = new Date(normalizeAgendaIso(inicio)).getTime()
   if (Number.isNaN(inicioMs)) return false
   return agora.getTime() >= inicioMs
 }
@@ -38,7 +40,7 @@ export function statusPermiteIniciarItemAtendimento(
   itemStatus: string,
   agendamentoStatus: string,
 ): boolean {
-  if (itemStatus !== 'Confirmado') return false
+  if (!STATUS_ITEM_INICIAVEL.includes(itemStatus)) return false
   if (STATUS_BLOQUEADOS_INICIO.includes(agendamentoStatus)) return false
   return STATUS_AGENDAMENTO_INICIAVEL.includes(agendamentoStatus)
 }
@@ -54,7 +56,7 @@ export function podeIniciarItemAtendimento(
 }
 
 export function motivoInicioIndisponivel(inicio: string): string | null {
-  const inicioMs = new Date(inicio).getTime()
+  const inicioMs = new Date(normalizeAgendaIso(inicio)).getTime()
   if (Number.isNaN(inicioMs)) return 'Horário do atendimento inválido.'
   if (Date.now() < inicioMs) return 'O horário do atendimento ainda não chegou.'
   return null
@@ -78,6 +80,7 @@ export function labelStatusItemAtendimento(status: string): string {
   const labels: Record<string, string> = {
     Pendente: 'Pendente',
     Confirmado: 'Confirmado',
+    Agendado: 'Agendado',
     EmAtendimento: 'Em atendimento',
     Concluido: 'Concluído',
     Cancelado: 'Cancelado',

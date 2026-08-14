@@ -45,6 +45,28 @@ export type AgendaOrdenacao =
   | 'criacao_desc'
   | 'criacao_asc'
 
+export type AgendaCalendarView = 'mes' | 'semana' | 'dia'
+
+export interface AgendaCalendarEvent {
+  id: number
+  agendamentoItemId: number | null
+  clienteNome: string
+  servicoNome: string
+  profissionalId: number | null
+  profissionalNome: string
+  status: string
+  agendamentoStatus: string
+  itemStatus: string
+  valorTotal: number
+  inicio: string
+  fim: string
+}
+
+export interface AgendaCalendarResource {
+  id: number
+  nome: string
+}
+
 export interface AgendaCustomDateRange {
   inicio: string
   fim: string

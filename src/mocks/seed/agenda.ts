@@ -24,7 +24,7 @@ export const MOCK_AGENDA_GERAL: AgendaGeral[] = [
     inicio: iso(0, 9),
     fim: iso(0, 10),
     observacao: null,
-    itens: [{ id: 1010, servicoId: 1, servicoNome: 'Corte de Cabelo', profissionalId: 101, profissionalNome: 'Marina Alves', inicio: iso(0, 9), fim: iso(0, 10), valor: 60, status: 'Agendado' }],
+    itens: [{ id: 1010, servicoId: 1, servicoNome: 'Corte de Cabelo', profissionalId: 101, profissionalNome: 'Marina Alves', inicio: iso(0, 9), fim: iso(0, 10), valor: 60, status: 'Confirmado' }],
   },
   {
     id: 11,
@@ -45,12 +45,12 @@ export const MOCK_AGENDA_GERAL: AgendaGeral[] = [
     clienteNome: 'Camila Ferreira',
     clienteEmail: null,
     clienteTelefone: '(79) 98833-0033',
-    status: 'Agendado',
+    status: 'Confirmado',
     valorTotal: 45,
     inicio: iso(0, 15),
     fim: iso(0, 16),
     observacao: null,
-    itens: [{ id: 1012, servicoId: 3, servicoNome: 'Escova Modeladora', profissionalId: 103, profissionalNome: 'Patrícia Rocha', inicio: iso(0, 15), fim: iso(0, 16), valor: 45, status: 'Agendado' }],
+    itens: [{ id: 1012, servicoId: 3, servicoNome: 'Escova Modeladora', profissionalId: 103, profissionalNome: 'Patrícia Rocha', inicio: iso(0, 15), fim: iso(0, 16), valor: 45, status: 'Confirmado' }],
   },
   {
     id: 13,

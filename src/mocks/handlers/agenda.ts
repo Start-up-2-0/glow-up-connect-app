@@ -1,4 +1,4 @@
-import type { MockRouter } from '../match'
+import type { MockRouter, MockRequest } from '../match'
 import { ok, voidOk } from '../response'
 import {
   MOCK_AGENDA_GERAL,
@@ -12,19 +12,48 @@ export function registerAgendaRoutes(router: MockRouter) {
   const base = '/estabelecimentos/:estabelecimentoId'
 
   /* ---------- Agenda (negócio) ---------- */
-  router.on('get', `${base}/agenda`, () => ok({ total: MOCK_AGENDA_GERAL.length, pagina: 1, tamanhoPagina: 50, itens: MOCK_AGENDA_GERAL }))
-  router.on('get', `${base}/agenda/propria`, () => ok({ total: MOCK_AGENDA_PROPRIA.length, pagina: 1, tamanhoPagina: 50, itens: MOCK_AGENDA_PROPRIA }))
-  router.on('get', `${base}/agendamentos/:agendamentoId`, () => ok(MOCK_AGENDA_GERAL[0]))
+  router.on('get', `${base}/agenda`, () => {
+    return ok({ total: MOCK_AGENDA_GERAL.length, pagina: 1, tamanhoPagina: 50, itens: MOCK_AGENDA_GERAL })
+  })
+  router.on('get', `${base}/agenda/propria`, () => {
+    return ok({ total: MOCK_AGENDA_PROPRIA.length, pagina: 1, tamanhoPagina: 50, itens: MOCK_AGENDA_PROPRIA })
+  })
+  router.on('get', `${base}/agendamentos/:agendamentoId`, (req: MockRequest) => {
+    const found = MOCK_AGENDA_GERAL.find((a) => a.id === Number(req.params.agendamentoId))
+    return ok(found ?? MOCK_AGENDA_GERAL[0])
+  })
   router.on('get', `${base}/agendamentos/:agendamentoId/historico`, () => {
     return ok([
       { id: 1, usuarioExecutorId: 1, usuarioExecutorNome: 'Gustavo Souza', statusAnterior: 'Agendado', statusNovo: 'Confirmado', motivo: null, criadoEm: new Date().toISOString() },
     ])
   })
-  router.on('post', `${base}/agendamentos/:agendamentoId/confirmar`, () => voidOk('Agendamento confirmado.'))
+  router.on('post', `${base}/agendamentos/:agendamentoId/confirmar`, () => {
+    return voidOk('Agendamento confirmado.')
+  })
   router.on('post', `${base}/agendamentos/:agendamentoId/cancelar`, () => voidOk('Agendamento cancelado.'))
   router.on('post', `${base}/agendamentos/:agendamentoId/sugerir-remarcacao`, () => voidOk('Sugestão enviada.'))
-  router.on('post', `${base}/atendimentos/:agendamentoItemId/iniciar`, () => voidOk('Atendimento iniciado.'))
-  router.on('post', `${base}/atendimentos/:agendamentoItemId/finalizar`, () => voidOk('Atendimento concluído com sucesso.'))
+  router.on('post', `${base}/atendimentos/:agendamentoItemId/iniciar`, (req: MockRequest) => {
+    const itemId = Number(req.params.agendamentoItemId)
+    for (const agendamento of MOCK_AGENDA_GERAL) {
+      const item = agendamento.itens.find((entry) => entry.id === itemId)
+      if (!item) continue
+      item.status = 'EmAtendimento'
+      agendamento.status = 'EmAtendimento'
+      break
+    }
+    return voidOk('Atendimento iniciado.')
+  })
+  router.on('post', `${base}/atendimentos/:agendamentoItemId/finalizar`, (req: MockRequest) => {
+    const itemId = Number(req.params.agendamentoItemId)
+    for (const agendamento of MOCK_AGENDA_GERAL) {
+      const item = agendamento.itens.find((entry) => entry.id === itemId)
+      if (!item) continue
+      item.status = 'Concluido'
+      agendamento.status = 'Concluido'
+      break
+    }
+    return voidOk('Atendimento concluído com sucesso.')
+  })
 
   /* ---------- Agendamentos (cliente) ---------- */
   router.on('post', '/agendamentos', () => ok(MOCK_AGENDAMENTOS_ME[1]))
