@@ -206,7 +206,7 @@ watch(
       "
       compact
       :plano-nome="planoNome ?? undefined"
-      :dias-trial="assinatura?.diasTrial ?? diasTrial ?? 30"
+      :dias-trial="assinatura?.diasTrial ?? diasTrial ?? 14"
       :proxima-data-vencimento="assinatura?.proximaDataVencimento ?? proximaDataVencimento ?? ''"
       :inicio="assinatura?.inicio"
       :percentual-desconto-permanente="assinatura?.percentualDescontoPermanente"

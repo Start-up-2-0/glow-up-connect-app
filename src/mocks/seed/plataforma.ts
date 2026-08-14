@@ -139,7 +139,7 @@ function buildMockPlanos(tipoAssinatura: 'Estabelecimento' | 'ProfissionalAutono
 const MOCK_PROMOCAO_LANCAMENTO = {
   disponivel: true,
   vagasRestantes: 15,
-  diasTrial: 30,
+  diasTrial: 14,
   percentualDescontoMensalidade: 50,
   diasAntecedenciaAlertaFatura: 3,
   diasAntecedenciaGeracaoCobranca: 1,

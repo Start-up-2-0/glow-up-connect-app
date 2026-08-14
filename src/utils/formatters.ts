@@ -423,26 +423,15 @@ function calendarDaysBetween(from: Date, to: Date): number {
   return Math.floor((to.getTime() - from.getTime()) / 86_400_000)
 }
 
-/** Dias restantes do trial (30 no 1º dia), alinhado ao DiasTrial da API. */
+/** Dias restantes até a primeira cobrança (fim do trial). */
 export function calcularDiasRestantesTrial(options: {
   diasTrial: number
   proximaDataVencimento: string
   inicio?: string | null
 }): number {
   const hoje = startOfTodayLocal()
-
-  if (options.inicio) {
-    const inicio = dateOnlyToLocalDate(parseIsoToDateOnlyParts(options.inicio))
-    const diasDecorridos = calendarDaysBetween(inicio, hoje)
-    return Math.max(0, options.diasTrial - diasDecorridos)
-  }
-
-  const fimTrialDateOnly = addDaysToDateOnly(
-    parseIsoToDateOnlyParts(options.proximaDataVencimento),
-    -1,
-  )
-  const fimTrial = dateOnlyToLocalDate(fimTrialDateOnly)
-  return Math.max(0, calendarDaysBetween(hoje, fimTrial))
+  const vencimento = dateOnlyToLocalDate(parseIsoToDateOnlyParts(options.proximaDataVencimento))
+  return Math.max(0, calendarDaysBetween(hoje, vencimento))
 }
 
 export function toTimeOnlyString(date: Date): string {

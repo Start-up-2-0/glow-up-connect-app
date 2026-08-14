@@ -46,7 +46,7 @@ const trialAtivo = computed(
   () => props.promocao?.disponivel && (!usarCheckoutPro ? metodoPagamento.value === 'cartao' : true),
 )
 
-const diasTrialPromocao = computed(() => props.promocao?.diasTrial ?? 30)
+const diasTrialPromocao = computed(() => props.promocao?.diasTrial ?? 14)
 const descontoPromocao = computed(() => props.promocao?.percentualDescontoMensalidade ?? 0)
 
 const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))

@@ -17,7 +17,7 @@ Convencoes HTTP: [../../frontend/convencoes.md](../../frontend/convencoes.md)
 | [onboarding-assinatura.md](./onboarding-assinatura.md) | Fluxo completo de contratacao (trial e pago) |
 | [payload-assinatura.md](./payload-assinatura.md) | Payload completo POST /api/assinaturas |
 | [catalogo-planos.md](./catalogo-planos.md) | `GET /api/planos` — vitrine e comparacao |
-| [promocao-lancamento.md](./promocao-lancamento.md) | Trial 30 dias — 100 primeiros |
+| [promocao-lancamento.md](./promocao-lancamento.md) | Trial 14 dias — 100 primeiros |
 | [ciclo-cobranca.md](./ciclo-cobranca.md) | Dia de vencimento e datas na assinatura |
 | [cobrancas-assinatura.md](./cobrancas-assinatura.md) | Historico de faturas do tenant |
 

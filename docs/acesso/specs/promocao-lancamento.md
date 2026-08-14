@@ -1,6 +1,6 @@
 # Spec — Promocao de lancamento (frontend)
 
-Campanha **100 primeiros tenants** com **30 dias gratis** (status `Trial`), cartao tokenizado no onboarding.
+Campanha **100 primeiros tenants** com **14 dias gratis** (status `Trial`), cartao tokenizado no onboarding. Ao fim do teste, a mensalidade e cobrada para continuar.
 
 Dados vem de `GET /api/planos` → `data.promocaoLancamento`.
 
@@ -12,7 +12,7 @@ Dados vem de `GET /api/planos` → `data.promocaoLancamento`.
 |-------|-----------|
 | `disponivel` | Exibir banner e copy de trial |
 | `vagasRestantes` | Urgencia: "Restam X vagas" |
-| `diasTrial` | "30 dias gratis" |
+| `diasTrial` | "14 dias gratis" |
 | `diasVencimentoPermitidos` | Options do select de vencimento |
 | `diasAntecedenciaAlertaFatura` | Tooltip "Aviso 3 dias antes" |
 | `diasAntecedenciaGeracaoCobranca` | Tooltip ciclo de cobranca |
@@ -23,7 +23,7 @@ Dados vem de `GET /api/planos` → `data.promocaoLancamento`.
 
 **Banner vitrine (disponivel):**
 
-> Lancamento Glow Up Connect — **30 dias gratis** para os 100 primeiros negocios. Restam **{vagasRestantes}** vagas.
+> Lancamento Glow Up Connect — **14 dias gratis** para os 100 primeiros negocios. Restam **{vagasRestantes}** vagas.
 
 **Checkout:**
 
@@ -64,10 +64,10 @@ O frontend **nao** decide trial — apenas reage ao `emTrial` / `status` da resp
 
 ## Calculo `diasRestantes` (cliente)
 
-Usar `proximaDataVencimento` da assinatura (pos-trial) ou `fim` quando API expor:
+Usar `proximaDataVencimento` da assinatura (data da primeira cobranca / fim do trial):
 
 ```ts
-// Fallback: diasTrial - dias desde inicio
+// dias restantes = dias ate proximaDataVencimento
 ```
 
 Preferir campos da API quando disponiveis em `AssinaturaResponseDto`.
