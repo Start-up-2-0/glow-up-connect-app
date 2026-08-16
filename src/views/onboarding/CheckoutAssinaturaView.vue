@@ -122,7 +122,13 @@ async function finalizarCheckout() {
     return
   }
 
-  const logo = await readFileAsDataUrl(logoFile.value)
+  let logo: string
+  try {
+    logo = await readFileAsDataUrl(logoFile.value)
+  } catch (err) {
+    erro.value = err instanceof Error ? err.message : 'Não foi possível otimizar a logo. Tente outra imagem.'
+    return
+  }
 
   const endereco = {
     cep: cep.value,

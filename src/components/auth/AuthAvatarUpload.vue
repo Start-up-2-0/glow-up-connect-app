@@ -8,9 +8,7 @@ import {
   ONBOARDING_CONTRATAR_DROPZONE_TEXT_CLASS,
   ONBOARDING_CONTRATAR_LABEL_CLASS,
 } from '@/constants/designTokens'
-
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-const MAX_SIZE_BYTES = 5 * 1024 * 1024
+import { validateAvatarFile } from '@/utils/avatarFile'
 
 const props = withDefaults(
   defineProps<{
@@ -59,13 +57,9 @@ function validateAndEmit(file: File | null) {
     return
   }
 
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    emit('error', 'Formato inválido. Use JPEG, PNG ou WebP.')
-    return
-  }
-
-  if (file.size > MAX_SIZE_BYTES) {
-    emit('error', 'Arquivo muito grande. Máximo 5 MB.')
+  const validationError = validateAvatarFile(file)
+  if (validationError) {
+    emit('error', validationError)
     return
   }
 

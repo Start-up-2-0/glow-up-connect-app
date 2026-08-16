@@ -8,7 +8,7 @@ export const API_ERROR_MESSAGES: Record<string, string> = {
   USER_INACTIVE: 'Conta inativa. Entre em contato com o suporte.',
   EMAIL_JA_CADASTRADO: 'Este e-mail já está cadastrado.',
   CONFIRMACAO_EMAIL_INVALIDA: 'Código ou link de confirmação inválido.',
-  AVATAR_INVALIDO: 'Avatar inválido. Use JPEG, PNG ou WebP com até 5 MB.',
+  AVATAR_INVALIDO: 'Avatar inválido. Use JPEG, PNG ou WebP. A imagem deve ter até 1 MB após a otimização.',
   RESET_SENHA_INVALIDO: 'Link ou token de redefinição inválido ou expirado.',
   RESET_CODIGO_INVALIDO: 'Código de verificação inválido ou expirado.',
   NOT_IMPLEMENTED: 'Funcionalidade ainda não disponível.',

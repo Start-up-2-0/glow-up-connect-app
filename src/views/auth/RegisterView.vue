@@ -25,6 +25,7 @@ import { establishmentRoleLabel } from '@/constants/establishmentRoles'
 import { useConsent } from '@/composables/useConsent'
 import { useCaptcha } from '@/composables/useCaptcha'
 import AuthRecaptcha from '@/components/auth/AuthRecaptcha.vue'
+import { compressAvatarFile } from '@/utils/avatarFile'
 
 const route = useRoute()
 const router = useRouter()
@@ -100,15 +101,6 @@ function applyFieldErrors(errors: Record<string, string[]>) {
   fieldErrors.value = errors
 }
 
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
-}
-
 function validateForm(): boolean {
   if (!aceitoTermos.value) {
     errorMessage.value = 'Você precisa aceitar os termos de uso para criar a conta.'
@@ -151,8 +143,9 @@ async function handleSubmit() {
     }
 
     if (avatarFile.value) {
-      payload.avatarBase64 = await readFileAsDataUrl(avatarFile.value)
-      payload.avatarContentType = avatarFile.value.type
+      const compressed = await compressAvatarFile(avatarFile.value)
+      payload.avatarBase64 = compressed.dataUrl
+      payload.avatarContentType = compressed.contentType
     }
 
     payload.captchaToken = captchaRef.value?.getToken()

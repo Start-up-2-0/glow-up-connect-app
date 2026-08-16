@@ -14,6 +14,7 @@ import {
 import type { OnboardingUsuarioDraft } from '@/types/onboardingAssinatura.types'
 import { telefoneLocalFromApi } from '@/utils/formatters'
 import { useCaptcha } from '@/composables/useCaptcha'
+import { compressAvatarFile } from '@/utils/avatarFile'
 
 const props = defineProps<{
   initial: OnboardingUsuarioDraft
@@ -55,6 +56,7 @@ const mostrarConfirmarSenha = ref(false)
 const avatarFile = ref<File | null>(null)
 const sexo = ref<'' | 'Masculino' | 'Feminino'>('')
 const captchaError = ref('')
+const avatarError = ref('')
 
 const SEXO_OPTIONS = [
   { value: 'Masculino', label: 'Masculino' },
@@ -76,15 +78,6 @@ function getFieldError(...keys: readonly string[]): string | undefined {
   return undefined
 }
 
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
-}
-
 async function handleSubmit() {
   const captchaToken = captchaRef.value?.getToken()
   if (captchaEnabled && !captchaToken) {
@@ -92,6 +85,7 @@ async function handleSubmit() {
     return
   }
   captchaError.value = ''
+  avatarError.value = ''
 
   const payload = {
     nome: nome.value,
@@ -115,8 +109,15 @@ async function handleSubmit() {
   }
 
   if (avatarFile.value) {
-    payload.avatarBase64 = await readFileAsDataUrl(avatarFile.value)
-    payload.avatarContentType = avatarFile.value.type
+    try {
+      const compressed = await compressAvatarFile(avatarFile.value)
+      payload.avatarBase64 = compressed.dataUrl
+      payload.avatarContentType = compressed.contentType
+    } catch (err) {
+      avatarError.value =
+        err instanceof Error ? err.message : 'Não foi possível otimizar a imagem. Tente outra foto.'
+      return
+    }
   }
 
   payload.captchaToken = captchaToken
@@ -240,7 +241,13 @@ async function handleSubmit() {
         </div>
 
         <div class="sm:col-span-2">
-          <AuthAvatarUpload @change="(file) => (avatarFile = file)" @error="() => {}" />
+          <AuthAvatarUpload
+            @change="(file) => (avatarFile = file)"
+            @error="(msg) => (avatarError = msg)"
+          />
+          <p v-if="avatarError" class="mt-2 text-sm text-red-600" role="alert">
+            {{ avatarError }}
+          </p>
         </div>
       </div>
 

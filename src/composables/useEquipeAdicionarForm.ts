@@ -9,7 +9,7 @@ import { userService } from '@/services/userService'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { equipeAdicionarBotaoConfirmar } from '@/constants/equipeAdicionarAcoes'
 import { getUnmetPasswordRules } from '@/utils/passwordRules'
-import { readFileAsDataUrl, validateAvatarFile } from '@/utils/avatarFile'
+import { compressAvatarFile, validateAvatarFile } from '@/utils/avatarFile'
 import type { EstablishmentUserRole } from '@/types/negocio/equipe.types'
 
 export type ModoCadastro = 'convite' | 'criar'
@@ -192,8 +192,11 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
     if (!estabelecimentoId.value) return false
     try {
       let foto: string | undefined
+      let fotoContentType: string | undefined
       if (fotoFile.value) {
-        foto = await readFileAsDataUrl(fotoFile.value)
+        const compressed = await compressAvatarFile(fotoFile.value)
+        foto = compressed.dataUrl
+        fotoContentType = compressed.contentType
       }
       await equipeService.vincularProfissional(estabelecimentoId.value, {
         email: emailTrim || undefined,
@@ -201,7 +204,7 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
         nomePublico: nomePublico.value.trim() || undefined,
         podeReceberAgendamento: podeReceberAgendamento.value,
         foto,
-        fotoContentType: fotoFile.value?.type,
+        fotoContentType,
       })
       return true
     } catch {

@@ -24,7 +24,7 @@ import {
 import { agendaDetalhePath } from '@/constants/routes'
 import { equipeService } from '@/services/equipeService'
 import type { AgendamentoFuturoEquipe, EstablishmentUserRole, MembroEquipeItem } from '@/types/negocio/equipe.types'
-import { readFileAsDataUrl } from '@/utils/avatarFile'
+import { compressAvatarFile } from '@/utils/avatarFile'
 import { formatDateTime } from '@/utils/formatters'
 import { iniciaisNome } from '@/utils/servicoFormatters'
 
@@ -336,11 +336,11 @@ async function salvar() {
           { removerFoto: true },
         )
       } else if (fotoFile.value) {
-        const foto = await readFileAsDataUrl(fotoFile.value)
+        const compressed = await compressAvatarFile(fotoFile.value)
         await equipeService.atualizarProfissional(
           props.estabelecimentoId,
           props.membro.profissionalId,
-          { foto, fotoContentType: fotoFile.value.type },
+          { foto: compressed.dataUrl, fotoContentType: compressed.contentType },
         )
       }
     }

@@ -18,7 +18,7 @@ import { useFetchOnce } from '@/composables/useFetchOnce'
 import { useWhatsAppConfirmacao } from '@/composables/useWhatsAppConfirmacao'
 import { useApiError } from '@/composables/useApiError'
 import { getUserRoleLabel } from '@/utils/userRoleLabel'
-import { readFileAsDataUrl } from '@/utils/avatarFile'
+import { compressAvatarFile } from '@/utils/avatarFile'
 import { getUnmetPasswordRules } from '@/utils/passwordRules'
 import {
   buildPerfilStatusItems,
@@ -181,8 +181,9 @@ async function handleSaveProfile() {
     if (avatarRemoved.value) {
       payload.avatarBase64 = null
     } else if (avatarFile.value) {
-      payload.avatarBase64 = await readFileAsDataUrl(avatarFile.value)
-      payload.avatarContentType = avatarFile.value.type
+      const compressed = await compressAvatarFile(avatarFile.value)
+      payload.avatarBase64 = compressed.dataUrl
+      payload.avatarContentType = compressed.contentType
     }
 
     await userStore.updateProfile(payload)
