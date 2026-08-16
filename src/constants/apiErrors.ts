@@ -20,8 +20,10 @@ export const API_ERROR_MESSAGES: Record<string, string> = {
   ATENDIMENTO_STATUS_INVALIDO: 'Esta ação não é permitida para o status atual do atendimento.',
   HORARIO_INDISPONIVEL: 'Horário indisponível. Escolha outro horário.',
   CONVITE_NEGOCIO_NAO_ENCONTRADO: 'Convite não encontrado ou inválido.',
-  CONVITE_NEGOCIO_INVALIDO: 'Convite expirado, já respondido ou destinado a outro e-mail.',
-  CONVITE_NEGOCIO_DUPLICADO: 'Já existe um convite pendente para este e-mail.',
+  CONVITE_NEGOCIO_INVALIDO: 'Convite inválido ou já utilizado.',
+  CONVITE_NEGOCIO_INDISPONIVEL:
+    'Este convite expirou ou não está mais disponível. Solicite um novo convite ao administrador da loja.',
+  CONVITE_NEGOCIO_DUPLICADO: 'Já existe um convite ativo semelhante.',
   CONVITE_USUARIO_NAO_CONFIRMADO:
     'Esta conta ainda não confirmou o e-mail. Peça para confirmar antes de convidar ou vincular.',
   CLIENTE_SEM_ACESSO_NEGOCIO: 'Você não tem acesso a esta área.',

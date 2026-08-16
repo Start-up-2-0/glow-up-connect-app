@@ -150,13 +150,19 @@ export function registerCatalogoRoutes(router: MockRouter) {
   router.on('post', `${base}/equipe/profissionais/:profissionalId/agendamentos-futuros/cancelar`, () => ok({ quantidadeCancelada: 0 }))
 
   /* ---------- Convites ---------- */
-  router.on('post', `${base}/convites/profissionais`, () => ok({ tipoResultado: 'Convite', linkConvite: 'https://glowupconnect.com.br/c/mock-token', convite: MOCK_CONVITES[0] }))
-  router.on('post', `${base}/convites/usuarios`, () => ok({ tipoResultado: 'Convite', linkConvite: 'https://glowupconnect.com.br/c/mock-token', convite: MOCK_CONVITES[1] }))
+  router.on('post', `${base}/convites`, () =>
+    ok({
+      ...MOCK_CONVITES[0],
+      linkConvite: 'https://glowupconnect.com.br/convite/11111111-1111-1111-1111-111111111111',
+    }),
+  )
   router.on('get', `${base}/convites`, () => ok(MOCK_CONVITES))
   router.on('delete', `${base}/convites/:conviteId`, () => ok(MOCK_CONVITES[0]))
-  router.on('get', '/convites/:token/preview', (req: MockRequest) => ok(mockConvitePreview(req.params.token)))
-  router.on('post', '/convites/:token/aceitar', () => ok(MOCK_CONVITES[1]))
-  router.on('post', '/convites/:token/rejeitar', () => ok(MOCK_CONVITES[0]))
+  router.on('get', '/publico/convites/:token/preview', (req: MockRequest) =>
+    ok(mockConvitePreview(req.params.token)),
+  )
+  router.on('post', '/publico/convites/:token/aceitar', () => ok(MOCK_CONVITES[0]))
+  router.on('post', '/publico/convites/:token/aceitar-com-cadastro', () => ok(MOCK_CONVITES[0]))
 
   /* ---------- Serviços ---------- */
   router.on('get', `${base}/servicos`, (req: MockRequest) => {

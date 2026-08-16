@@ -74,9 +74,7 @@ onMounted(async () => {
 
   try {
     const preview = await conviteService.obterPreview(token)
-    email.value = preview.email
-    confirmarEmail.value = preview.email
-    conviteResumo.value = `Convite para ${establishmentRoleLabel(preview.roleSugerida)} em ${preview.nomeEstabelecimento}. Use este e-mail no cadastro.`
+    conviteResumo.value = `Convite para ${establishmentRoleLabel(preview.roleSugerida)} em ${preview.nomeEstabelecimento}.`
   } catch {
     /* cadastro segue sem pré-preenchimento */
   }

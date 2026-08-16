@@ -239,19 +239,40 @@ export const MOCK_COBRANCAS: CobrancaAssinatura[] = [
 /* ---------- Convites ---------- */
 
 export const MOCK_CONVITES: ConviteNegocio[] = [
-  { id: 1, estabelecimentoId: 1, email: 'novo.profissional@gmail.com', tipoConvite: 'Profissional', roleSugerida: 'Profissional', status: 'Pendente', expiraEm: iso(7), criadoEm: iso(-2) },
-  { id: 2, estabelecimentoId: 1, email: 'admin.novo@glowup.com.br', tipoConvite: 'UsuarioEquipe', roleSugerida: 'Admin', status: 'Aceito', expiraEm: iso(3), criadoEm: iso(-8) },
+  {
+    id: 1,
+    estabelecimentoId: 1,
+    tipoConvite: 'Profissional',
+    roleSugerida: 'Profissional',
+    status: 'Ativo',
+    limiteUsuarios: 2,
+    quantidadeUtilizacoes: 0,
+    expiraEm: iso(1),
+    criadoEm: iso(-2),
+  },
+  {
+    id: 2,
+    estabelecimentoId: 1,
+    tipoConvite: 'UsuarioEquipe',
+    roleSugerida: 'Admin',
+    status: 'Esgotado',
+    limiteUsuarios: 1,
+    quantidadeUtilizacoes: 1,
+    expiraEm: iso(3),
+    criadoEm: iso(-8),
+  },
 ]
 
 export function mockConvitePreview(_token: string): ConvitePreview {
   return {
     estabelecimentoId: 1,
     nomeEstabelecimento: 'Studio Glow Up',
-    email: 'novo.profissional@gmail.com',
-    tipoConvite: 'Profissional',
     roleSugerida: 'Profissional',
-    status: 'Pendente',
-    expiraEm: iso(7),
+    status: 'Ativo',
+    limiteUsuarios: 2,
+    quantidadeUtilizacoes: 0,
+    vagasRestantes: 2,
+    expiraEm: iso(1),
   }
 }
 

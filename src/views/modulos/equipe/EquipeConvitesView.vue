@@ -30,15 +30,21 @@ function formatarData(iso: string): string {
   })
 }
 
-function tipoConviteLabel(tipo: string): string {
-  return tipo === 'Profissional' ? 'Profissional' : 'Usuário da equipe'
+function statusLabel(status: string): string {
+  const map: Record<string, string> = {
+    Ativo: 'Ativo',
+    Expirado: 'Expirado',
+    Esgotado: 'Esgotado',
+    Cancelado: 'Cancelado',
+  }
+  return map[status] ?? status
 }
 
 async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
   try {
-    convites.value = await conviteService.listarConvites(estabelecimentoId.value, 'Pendente')
+    convites.value = await conviteService.listarConvites(estabelecimentoId.value)
   } catch (err) {
     notifications.push('error', resolveError(err))
   } finally {
@@ -51,7 +57,7 @@ async function cancelar(convite: ConviteNegocio) {
   cancelandoId.value = convite.id
   try {
     await conviteService.cancelarConvite(estabelecimentoId.value, convite.id)
-    convites.value = convites.value.filter((c) => c.id !== convite.id)
+    await load()
     notifications.push('success', 'Convite cancelado.')
   } catch (err) {
     notifications.push('error', resolveError(err))
@@ -67,14 +73,14 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
   <div :class="EQUIPE_PAGE_CLASS">
     <EquipePageHeader
       title="Links enviados"
-      subtitle="Pessoas que ainda não entraram na equipe. Aguardando aceitar o link."
+      subtitle="Links de convite da loja: usos, limite, função e validade."
     >
       <template #actions>
         <RouterLink
           :to="{ path: ROUTE_PATHS.CONFIG_EQUIPE, query: { acao: 'convite' } }"
           class="equipe-btn-primary equipe-btn-primary--add"
         >
-          Gerar convite
+          Gerar link
         </RouterLink>
         <RouterLink :to="ROUTE_PATHS.CONFIG_EQUIPE" class="equipe-btn-outline equipe-btn-outline--links">
           Voltar à equipe
@@ -87,9 +93,9 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
     </ContentAlert>
 
     <div v-if="!loading && ready && convites.length === 0" class="equipe-empty-state">
-      <h2 class="equipe-empty-state__title">Nenhum convite pendente</h2>
+      <h2 class="equipe-empty-state__title">Nenhum link criado</h2>
       <p class="equipe-empty-state__description">
-        Envie um convite pela equipe para ver a listagem aqui.
+        Gere um link de convite pela equipe para ver a listagem aqui.
       </p>
     </div>
 
@@ -98,9 +104,10 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
         <table class="equipe-convites-table">
           <thead>
             <tr class="equipe-convites-table__head-row">
-              <th class="equipe-convites-table__th">E-mail</th>
               <th class="equipe-convites-table__th">Função</th>
-              <th class="equipe-convites-table__th">Tipo</th>
+              <th class="equipe-convites-table__th">Usos</th>
+              <th class="equipe-convites-table__th">Status</th>
+              <th class="equipe-convites-table__th">Criado em</th>
               <th class="equipe-convites-table__th">Expira em</th>
               <th class="equipe-convites-table__th">Ações</th>
             </tr>
@@ -111,18 +118,22 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
               :key="convite.id"
               class="equipe-convites-table__row"
             >
-              <td class="equipe-convites-table__td">{{ convite.email }}</td>
               <td class="equipe-convites-table__td">
                 {{ establishmentRoleLabel(convite.roleSugerida) }}
               </td>
+              <td class="equipe-convites-table__td">
+                {{ convite.quantidadeUtilizacoes }}/{{ convite.limiteUsuarios }}
+              </td>
+              <td class="equipe-convites-table__td">{{ statusLabel(convite.status) }}</td>
               <td class="equipe-convites-table__td equipe-convites-table__td--muted">
-                {{ tipoConviteLabel(convite.tipoConvite) }}
+                {{ formatarData(convite.criadoEm) }}
               </td>
               <td class="equipe-convites-table__td equipe-convites-table__td--muted">
                 {{ formatarData(convite.expiraEm) }}
               </td>
               <td class="equipe-convites-table__td">
                 <button
+                  v-if="convite.status === 'Ativo'"
                   type="button"
                   class="equipe-btn-outline h-9 px-3 text-xs"
                   :disabled="cancelandoId === convite.id"
@@ -130,6 +141,7 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
                 >
                   {{ cancelandoId === convite.id ? 'Cancelando…' : 'Cancelar' }}
                 </button>
+                <span v-else class="font-urbanist text-xs text-glow-text-subtle">—</span>
               </td>
             </tr>
           </tbody>
@@ -142,26 +154,26 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
           :key="convite.id"
           class="equipe-convites__row-card"
         >
-          <p class="break-all font-urbanist font-medium text-glow-text">{{ convite.email }}</p>
+          <p class="font-urbanist font-medium text-glow-text">
+            {{ establishmentRoleLabel(convite.roleSugerida) }}
+          </p>
           <div class="financeiro-table__row-meta">
             <div class="financeiro-table__row-meta-item">
-              <span class="financeiro-table__row-meta-label">Função</span>
+              <span class="financeiro-table__row-meta-label">Usos</span>
               <span class="financeiro-table__row-meta-value">
-                {{ establishmentRoleLabel(convite.roleSugerida) }}
+                {{ convite.quantidadeUtilizacoes }}/{{ convite.limiteUsuarios }}
               </span>
             </div>
             <div class="financeiro-table__row-meta-item">
-              <span class="financeiro-table__row-meta-label">Tipo</span>
-              <span class="financeiro-table__row-meta-value">
-                {{ tipoConviteLabel(convite.tipoConvite) }}
-              </span>
+              <span class="financeiro-table__row-meta-label">Status</span>
+              <span class="financeiro-table__row-meta-value">{{ statusLabel(convite.status) }}</span>
             </div>
             <div class="financeiro-table__row-meta-item">
               <span class="financeiro-table__row-meta-label">Expira em</span>
               <span class="financeiro-table__row-meta-value">{{ formatarData(convite.expiraEm) }}</span>
             </div>
           </div>
-          <div class="financeiro-table__row-actions">
+          <div v-if="convite.status === 'Ativo'" class="financeiro-table__row-actions">
             <button
               type="button"
               class="equipe-btn-outline min-h-11 w-full px-3 text-sm sm:w-auto"

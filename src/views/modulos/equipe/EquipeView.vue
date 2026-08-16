@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia'
 import { Link2, Plus } from 'lucide-vue-next'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
-import EquipeAdicionarModal from '@/components/equipe/EquipeAdicionarModal.vue'
+import EquipeCriarLinkModal from '@/components/equipe/EquipeCriarLinkModal.vue'
 import EquipeIcons from '@/components/equipe/EquipeIcons.vue'
 import EquipeMembroDetalheModal from '@/components/equipe/EquipeMembroDetalheModal.vue'
 import EquipePageHeader from '@/components/equipe/EquipePageHeader.vue'
@@ -19,14 +19,12 @@ import EquipeMembroCard from '@/components/equipe/page/EquipeMembroCard.vue'
 import EquipeMembrosTable from '@/components/equipe/page/EquipeMembrosTable.vue'
 import EquipePagination from '@/components/equipe/page/EquipePagination.vue'
 import { EQUIPE_PAGE_CLASS } from '@/constants/designTokens'
-import { EQUIPE_ADICIONAR_ACOES, normalizarModoAcao } from '@/constants/equipeAdicionarAcoes'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useApiError } from '@/composables/useApiError'
 import { equipeService } from '@/services/equipeService'
 import { useUserStore } from '@/stores/user.store'
-import type { ModoCadastro } from '@/composables/useEquipeAdicionarForm'
 import type {
   EstablishmentUserRole,
   EquipeMembrosResumo,
@@ -59,8 +57,6 @@ const initialLoaded = ref(false)
 const loadError = ref<string | null>(null)
 const menuAberto = ref(false)
 const modalAberto = ref(false)
-const modalModo = ref<ModoCadastro>('convite')
-const modalInitialRole = ref<EstablishmentUserRole | undefined>()
 const detalheAberto = ref(false)
 const membroSelecionado = ref<MembroEquipeItem | null>(null)
 
@@ -176,8 +172,7 @@ function toMembroItem(item: MembroEquipeApiItem): MembroEquipeItem | null {
   }
 }
 
-function abrirModal(modo: ModoCadastro) {
-  modalModo.value = modo
+function abrirModalCriarLink() {
   modalAberto.value = true
   menuAberto.value = false
 }
@@ -211,31 +206,14 @@ function fecharMenuAoClicarFora(event: MouseEvent) {
 
 onMounted(() => {
   document.addEventListener('click', fecharMenuAoClicarFora)
-  abrirModalPorQuery()
+  if (route.query.acao || route.query.modo) {
+    abrirModalCriarLink()
+    void router.replace({ path: ROUTE_PATHS.CONFIG_EQUIPE, query: {} })
+  }
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', fecharMenuAoClicarFora)
-})
-
-function parseAcaoQuery(): ModoCadastro | null {
-  return normalizarModoAcao(route.query.acao ?? route.query.modo)
-}
-
-function parseRoleQuery(): EstablishmentUserRole | undefined {
-  return route.query.role === 'Profissional' ? 'Profissional' : undefined
-}
-
-function abrirModalPorQuery() {
-  const acao = parseAcaoQuery()
-  if (!acao || !ready.value) return
-  modalInitialRole.value = parseRoleQuery()
-  abrirModal(acao)
-  void router.replace({ path: ROUTE_PATHS.CONFIG_EQUIPE, query: {} })
-}
-
-watch(ready, (isReady) => {
-  if (isReady) abrirModalPorQuery()
 })
 
 let buscaDebounce: ReturnType<typeof setTimeout> | null = null
@@ -298,23 +276,11 @@ watch(ready, (isReady) => {
           <button
             type="button"
             class="equipe-btn-primary equipe-btn-primary--add"
-            @click.stop="menuAberto = !menuAberto"
+            @click="abrirModalCriarLink"
           >
             <Plus class="size-4" aria-hidden="true" />
             Adicionar membros
           </button>
-          <div v-if="menuAberto" class="equipe-add-menu">
-            <button
-              v-for="acao in EQUIPE_ADICIONAR_ACOES"
-              :key="acao.modo"
-              type="button"
-              class="equipe-add-menu__item"
-              @click="abrirModal(acao.modo)"
-            >
-              <span class="equipe-add-menu__title">{{ acao.titulo }}</span>
-              <span class="equipe-add-menu__desc">{{ acao.descricao }}</span>
-            </button>
-          </div>
         </div>
         <RouterLink
           :to="ROUTE_PATHS.CONFIG_EQUIPE_CONVITES"
@@ -366,7 +332,7 @@ watch(ready, (isReady) => {
           v-if="resumo.totalMembros === 0 && resumo.convidados === 0"
           type="button"
           class="equipe-btn-primary equipe-btn-primary--add mt-4"
-          @click="abrirModal('convite')"
+          @click="abrirModalCriarLink"
         >
           <EquipeIcons name="plus" />
           Adicionar membros
@@ -423,11 +389,9 @@ watch(ready, (isReady) => {
       </template>
     </template>
 
-    <EquipeAdicionarModal
+    <EquipeCriarLinkModal
       v-model="modalAberto"
-      :modo="modalModo"
-      :initial-role="modalInitialRole"
-      @vinculado="load"
+      @criado="load"
     />
 
     <EquipeMembroDetalheModal

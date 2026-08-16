@@ -2,34 +2,22 @@ import api from './api'
 import { negocioPath } from '@/utils/negocioApi'
 import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
-  ConviteOuVinculo,
+  ConviteCriado,
   ConviteNegocio,
   ConvitePreview,
+  CriarConviteLinkPayload,
   StatusConviteFiltro,
 } from '@/types/convite.types'
-import type {
-  CriarConviteProfissionalPayload,
-  CriarConviteUsuarioEquipePayload,
-} from '@/types/negocio/equipe.types'
 
 function unwrap<T>(response: { data: ApiSuccessResponse<T> }): T {
   return response.data.data
 }
 
 export const conviteService = {
-  criarConviteProfissional(estabelecimentoId: number, payload: CriarConviteProfissionalPayload) {
+  criarLink(estabelecimentoId: number, payload: CriarConviteLinkPayload) {
     return api
-      .post<ApiSuccessResponse<ConviteOuVinculo>>(
-        negocioPath(estabelecimentoId, '/convites/profissionais'),
-        payload,
-      )
-      .then(unwrap)
-  },
-
-  criarConviteUsuario(estabelecimentoId: number, payload: CriarConviteUsuarioEquipePayload) {
-    return api
-      .post<ApiSuccessResponse<ConviteOuVinculo>>(
-        negocioPath(estabelecimentoId, '/convites/usuarios'),
+      .post<ApiSuccessResponse<ConviteCriado>>(
+        negocioPath(estabelecimentoId, '/convites'),
         payload,
       )
       .then(unwrap)
@@ -38,7 +26,7 @@ export const conviteService = {
   obterPreview(token: string) {
     return api
       .get<ApiSuccessResponse<ConvitePreview>>(
-        `/convites/${encodeURIComponent(token)}/preview`,
+        `/publico/convites/${encodeURIComponent(token)}/preview`,
       )
       .then(unwrap)
   },
@@ -62,13 +50,9 @@ export const conviteService = {
 
   aceitar(token: string) {
     return api
-      .post<ApiSuccessResponse<ConviteNegocio>>(`/convites/${encodeURIComponent(token)}/aceitar`)
-      .then(unwrap)
-  },
-
-  rejeitar(token: string) {
-    return api
-      .post<ApiSuccessResponse<ConviteNegocio>>(`/convites/${encodeURIComponent(token)}/rejeitar`)
+      .post<ApiSuccessResponse<ConviteNegocio>>(
+        `/publico/convites/${encodeURIComponent(token)}/aceitar`,
+      )
       .then(unwrap)
   },
 }

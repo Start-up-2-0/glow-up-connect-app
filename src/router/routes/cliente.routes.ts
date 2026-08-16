@@ -92,10 +92,33 @@ export const clienteRoutes: RouteRecordRaw[] = [
   {
     path: `${ROUTE_PATHS.CONVITES}/:token`,
     name: ROUTE_NAMES.CONVITE_RESPONDER,
-    component: () => import('@/views/dashboard/cliente/ConviteResponderView.vue'),
+    redirect: (to) => {
+      const raw = to.params.token
+      const token = Array.isArray(raw) ? raw[0] : raw
+      if (!token) return { path: ROUTE_PATHS.DASHBOARD }
+      const base = (import.meta.env.VITE_LANDING_URL?.trim() || 'https://glowupconnect.com.br').replace(/\/+$/, '')
+      window.location.replace(`${base}/convite/${encodeURIComponent(String(token))}`)
+      return { path: ROUTE_PATHS.DASHBOARD }
+    },
     meta: {
       layout: 'public',
       title: 'Responder convite',
+    },
+  },
+  {
+    path: `/convite/:token`,
+    name: 'convite-landing-redirect',
+    redirect: (to) => {
+      const raw = to.params.token
+      const token = Array.isArray(raw) ? raw[0] : raw
+      if (!token) return { path: ROUTE_PATHS.DASHBOARD }
+      const base = (import.meta.env.VITE_LANDING_URL?.trim() || 'https://glowupconnect.com.br').replace(/\/+$/, '')
+      window.location.replace(`${base}/convite/${encodeURIComponent(String(token))}`)
+      return { path: ROUTE_PATHS.DASHBOARD }
+    },
+    meta: {
+      layout: 'public',
+      title: 'Convite',
     },
   },
   {
