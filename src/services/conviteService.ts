@@ -1,5 +1,6 @@
 import api from './api'
 import { negocioPath } from '@/utils/negocioApi'
+import { convitePublicoUrl } from '@/utils/landingUrl'
 import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
   ConviteCriado,
@@ -21,6 +22,11 @@ export const conviteService = {
         payload,
       )
       .then(unwrap)
+      .then((criado) => ({
+        ...criado,
+        // Homolog/prod: API pode vir com LandingBaseUrl de localhost; o app usa VITE_LANDING_URL.
+        linkConvite: convitePublicoUrl(criado.linkConvite),
+      }))
   },
 
   obterPreview(token: string) {
