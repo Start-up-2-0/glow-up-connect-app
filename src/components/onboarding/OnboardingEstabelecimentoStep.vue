@@ -7,6 +7,11 @@ import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import EnderecoForm from '@/components/form/EnderecoForm.vue'
 import { publicoService } from '@/services/publicoService'
 import type { EstabelecimentoCategoria } from '@/types/estabelecimento.types'
+import {
+  opcoesCategoriaDoTipo,
+  placeholderCategoria,
+  sugerirCategoriaId,
+} from '@/utils/categoriasEstabelecimento'
 import OnboardingContratarFormActions from '@/components/onboarding/OnboardingContratarFormActions.vue'
 import {
   AGENDAR_BTN_CONTINUE_CLASS,
@@ -102,15 +107,24 @@ const categorias = ref<EstabelecimentoCategoria[]>([])
 const categoriaId = ref<string>(props.initial.categoriaId ? String(props.initial.categoriaId) : '')
 const categoriaError = ref<string | null>(null)
 
-const categoriaOptions = computed(() =>
-  categorias.value
-    .filter((c) => c.id === 1 || c.id === 2)
-    .map((c) => ({ value: String(c.id), label: c.nome })),
+const tipoCategoria = computed(() =>
+  props.modoAutonomo ? 'ProfissionalAutonomo' as const : 'Estabelecimento' as const,
 )
+
+const categoriaOptions = computed(() =>
+  opcoesCategoriaDoTipo(categorias.value, tipoCategoria.value),
+)
+
+const categoriaPlaceholder = computed(() => placeholderCategoria(tipoCategoria.value))
 
 onMounted(async () => {
   try {
-    categorias.value = await publicoService.listarCategorias()
+    categorias.value = await publicoService.listarCategorias(tipoCategoria.value)
+    categoriaId.value = sugerirCategoriaId(
+      categorias.value,
+      tipoCategoria.value,
+      categoriaId.value,
+    )
   } catch {
     categorias.value = []
   }
@@ -267,7 +281,7 @@ function handleSubmit() {
             :id="`${fieldIdPrefix}-categoria`"
             v-model="categoriaId"
             :options="categoriaOptions"
-            placeholder="Selecione: Cabelo e barba ou Beleza e estética"
+            :placeholder="categoriaPlaceholder"
             :error="categoriaError ?? undefined"
             required
           />
@@ -359,7 +373,7 @@ function handleSubmit() {
               :id="`${fieldIdPrefix}-categoria`"
               v-model="categoriaId"
               :options="categoriaOptions"
-              placeholder="Selecione: Cabelo e barba ou Beleza e estética"
+              :placeholder="categoriaPlaceholder"
               :error="categoriaError ?? undefined"
               required
             />

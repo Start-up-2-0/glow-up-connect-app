@@ -164,8 +164,18 @@ export function mockPlanosResponse(
 /* ---------- Categorias de estabelecimento ---------- */
 
 export const MOCK_CATEGORIAS_ESTABELECIMENTO = [
-  { id: 1, nome: 'Cabelo e barba', slug: 'cabelo-e-barba' },
-  { id: 2, nome: 'Beleza e estética', slug: 'beleza-e-estetica' },
+  {
+    id: 1,
+    nome: 'Barbearia ou salão de beleza',
+    slug: 'barbearia-ou-salao-de-beleza',
+    tipoAssinatura: 'Estabelecimento' as const,
+  },
+  {
+    id: 2,
+    nome: 'Barbeiro ou cabeleireiro(a)',
+    slug: 'barbeiro-ou-cabeleireiro',
+    tipoAssinatura: 'ProfissionalAutonomo' as const,
+  },
 ] as const
 
 export function mockCategoriasEstabelecimento() {
@@ -185,8 +195,8 @@ export const MOCK_PERFIL_ESTABELECIMENTO: EstabelecimentoPerfilCompleto = {
   whatsAppConfirmado: true,
   whatsAppOptIn: true,
   whatsAppPendenteConfirmacao: false,
-  categoriaId: 2,
-  categoria: 'Beleza e estética',
+  categoriaId: 1,
+  categoria: 'Barbearia ou salão de beleza',
   endereco: {
     cep: '49020-000',
     logradouro: 'Av. das Acácias',

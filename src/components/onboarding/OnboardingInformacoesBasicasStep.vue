@@ -7,6 +7,11 @@ import OnboardingContratarFormActions from '@/components/onboarding/OnboardingCo
 import { publicoService } from '@/services/publicoService'
 import type { EstabelecimentoCategoria } from '@/types/estabelecimento.types'
 import {
+  opcoesCategoriaDoTipo,
+  placeholderCategoria,
+  sugerirCategoriaId,
+} from '@/utils/categoriasEstabelecimento'
+import {
   ONBOARDING_CONTRATAR_FIELD_CLASS,
   ONBOARDING_CONTRATAR_FORM_CLASS,
   ONBOARDING_CONTRATAR_INPUT_CLASS,
@@ -65,14 +70,15 @@ const categorias = ref<EstabelecimentoCategoria[]>([])
 const categoriaId = ref(props.initial.categoriaId ? String(props.initial.categoriaId) : '')
 const categoriaError = ref<string | null>(null)
 
-/** Escopo atual: Cabelo e barba / Beleza e estética. */
-const CATEGORIA_IDS_ATIVAS = new Set([1, 2])
+const tipoCategoria = computed(() =>
+  props.modoAutonomo ? 'ProfissionalAutonomo' as const : 'Estabelecimento' as const,
+)
 
 const categoriaOptions = computed(() =>
-  categorias.value
-    .filter((c) => CATEGORIA_IDS_ATIVAS.has(c.id))
-    .map((c) => ({ value: String(c.id), label: c.nome })),
+  opcoesCategoriaDoTipo(categorias.value, tipoCategoria.value),
 )
+
+const categoriaPlaceholder = computed(() => placeholderCategoria(tipoCategoria.value))
 
 const mostrarReusoDados = computed(
   () => props.modoAutonomo && props.usarDadosContaPadrao,
@@ -84,7 +90,14 @@ const mostrarReusoFoto = computed(
 
 onMounted(async () => {
   try {
-    categorias.value = await publicoService.listarCategorias()
+    categorias.value = await publicoService.listarCategorias(tipoCategoria.value)
+    if (!props.modoAutonomo) {
+      categoriaId.value = sugerirCategoriaId(
+        categorias.value,
+        tipoCategoria.value,
+        categoriaId.value,
+      )
+    }
   } catch {
     categorias.value = []
   }
@@ -253,7 +266,7 @@ function handleSubmit() {
             id="onb-info-categoria"
             v-model="categoriaId"
             :options="categoriaOptions"
-            placeholder="Selecione: Cabelo e barba ou Beleza e estética"
+            :placeholder="categoriaPlaceholder"
             :error="categoriaError ?? undefined"
             required
           />

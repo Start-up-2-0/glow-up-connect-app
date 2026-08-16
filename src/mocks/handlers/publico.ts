@@ -8,10 +8,10 @@ const ENDERECO = { logradouro: 'Av. das Acácias, 250', bairro: 'Centro', cidade
 
 /** Marketplace de estabelecimentos — itens com categoria e coordenadas (Aracaju/SE). */
 const MARKETPLACE_ITENS = [
-  { publicGuid: PUBLIC_GUID, nome: 'Studio Glow Up', logo: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=96&h=96&fit=crop&auto=format', descricao: 'Salão completo de beleza.', distanciaKm: 0.8, endereco: ENDERECO, destaqueMarketplace: true, notaMedia: 4.8, totalAvaliacoes: 68, categoriaId: 2, categoria: 'Beleza e estética', tipoAssinatura: 'Estabelecimento' as const, latitude: -10.9472, longitude: -37.0731 },
-  { publicGuid: 'bbbb-cccc-dddd', nome: 'Zé Cortes', logo: 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=96&h=96&fit=crop&auto=format', descricao: 'Corte e barba sob medida.', distanciaKm: 1.4, endereco: { logradouro: 'Rua da Barba, 12', bairro: 'Centro', cidade: 'Aracaju', estado: 'SE' }, destaqueMarketplace: false, notaMedia: 4.7, totalAvaliacoes: 33, categoriaId: 1, categoria: 'Cabelo e barba', tipoAssinatura: 'ProfissionalAutonomo' as const, latitude: -10.9518, longitude: -37.0684 },
-  { publicGuid: 'eeee-ffff-gggg', nome: 'Cabeleleila Leila', logo: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=96&h=96&fit=crop&auto=format', descricao: 'Especializada em cabelos.', distanciaKm: 3.1, endereco: { logradouro: 'Av. Central, 500', bairro: 'Centro', cidade: 'Aracaju', estado: 'SE' }, notaMedia: 4.4, totalAvaliacoes: 22, categoriaId: 2, categoria: 'Beleza e estética', tipoAssinatura: 'ProfissionalAutonomo' as const, latitude: -10.9405, longitude: -37.0812 },
-  { publicGuid: 'abcd-1111-2222', nome: 'Nail Studio Prime', logo: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=96&h=96&fit=crop&auto=format', descricao: 'Esmaltação e design de unhas.', distanciaKm: 4.2, endereco: { logradouro: 'Rua das Unhas, 7', bairro: 'Jardins', cidade: 'Aracaju', estado: 'SE' }, notaMedia: 4.5, totalAvaliacoes: 18, categoriaId: 2, categoria: 'Beleza e estética', tipoAssinatura: 'Estabelecimento' as const, latitude: -10.9589, longitude: -37.0556 },
+  { publicGuid: PUBLIC_GUID, nome: 'Studio Glow Up', logo: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=96&h=96&fit=crop&auto=format', descricao: 'Salão completo de beleza.', distanciaKm: 0.8, endereco: ENDERECO, destaqueMarketplace: true, notaMedia: 4.8, totalAvaliacoes: 68, categoriaId: 1, categoria: 'Barbearia ou salão de beleza', tipoAssinatura: 'Estabelecimento' as const, latitude: -10.9472, longitude: -37.0731 },
+  { publicGuid: 'bbbb-cccc-dddd', nome: 'Zé Cortes', logo: 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=96&h=96&fit=crop&auto=format', descricao: 'Corte e barba sob medida.', distanciaKm: 1.4, endereco: { logradouro: 'Rua da Barba, 12', bairro: 'Centro', cidade: 'Aracaju', estado: 'SE' }, destaqueMarketplace: false, notaMedia: 4.7, totalAvaliacoes: 33, categoriaId: 2, categoria: 'Barbeiro ou cabeleireiro(a)', tipoAssinatura: 'ProfissionalAutonomo' as const, latitude: -10.9518, longitude: -37.0684 },
+  { publicGuid: 'eeee-ffff-gggg', nome: 'Cabeleleila Leila', logo: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=96&h=96&fit=crop&auto=format', descricao: 'Especializada em cabelos.', distanciaKm: 3.1, endereco: { logradouro: 'Av. Central, 500', bairro: 'Centro', cidade: 'Aracaju', estado: 'SE' }, notaMedia: 4.4, totalAvaliacoes: 22, categoriaId: 2, categoria: 'Barbeiro ou cabeleireiro(a)', tipoAssinatura: 'ProfissionalAutonomo' as const, latitude: -10.9405, longitude: -37.0812 },
+  { publicGuid: 'abcd-1111-2222', nome: 'Nail Studio Prime', logo: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=96&h=96&fit=crop&auto=format', descricao: 'Esmaltação e design de unhas.', distanciaKm: 4.2, endereco: { logradouro: 'Rua das Unhas, 7', bairro: 'Jardins', cidade: 'Aracaju', estado: 'SE' }, notaMedia: 4.5, totalAvaliacoes: 18, categoriaId: 1, categoria: 'Barbearia ou salão de beleza', tipoAssinatura: 'Estabelecimento' as const, latitude: -10.9589, longitude: -37.0556 },
 ]
 
 function hoje(plusDays = 0): string {
@@ -32,8 +32,10 @@ export function registerPublicoRoutes(router: MockRouter) {
   })
 
   /* ---------- Categorias de estabelecimento ---------- */
-  router.on('get', '/publico/estabelecimentos/categorias', () => {
-    return ok(mockCategoriasEstabelecimento())
+  router.on('get', '/publico/estabelecimentos/categorias', (req: MockRequest) => {
+    const tipo = req.query.tipoAssinatura
+    const categorias = mockCategoriasEstabelecimento()
+    return ok(tipo ? categorias.filter((c) => c.tipoAssinatura === tipo) : categorias)
   })
 
   /* ---------- Estabelecimentos próximos (marketplace) ---------- */

@@ -15,6 +15,11 @@ import {
 } from '@/constants/designTokens'
 import { readFileAsDataUrl } from '@/utils/avatarFile'
 import { telefoneLocalFromApi, telefoneToApi } from '@/utils/formatters'
+import {
+  opcoesCategoriaDoTipo,
+  placeholderCategoria,
+  sugerirCategoriaId,
+} from '@/utils/categoriasEstabelecimento'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 import type { WhatsAppConfirmacaoInstrucoes } from '@/types/whatsapp.types'
 
@@ -71,14 +76,11 @@ const categorias = ref<EstabelecimentoCategoria[]>([])
 const categoriaId = ref(props.initial.categoriaId ? String(props.initial.categoriaId) : '')
 const categoriaError = ref<string | null>(null)
 
-/** Escopo atual: Cabelo e barba / Beleza e estética. */
-const CATEGORIA_IDS_ATIVAS = new Set([1, 2])
-
 const categoriaOptions = computed(() =>
-  categorias.value
-    .filter((c) => CATEGORIA_IDS_ATIVAS.has(c.id))
-    .map((c) => ({ value: String(c.id), label: c.nome })),
+  opcoesCategoriaDoTipo(categorias.value, 'ProfissionalAutonomo'),
 )
+
+const categoriaPlaceholder = computed(() => placeholderCategoria('ProfissionalAutonomo'))
 
 const usarFotoPerfil = ref(
   props.avatarContaDisponivel
@@ -186,7 +188,12 @@ onMounted(async () => {
     logoDataUrl.value = props.avatarContaUrl
   }
   try {
-    categorias.value = await publicoService.listarCategorias()
+    categorias.value = await publicoService.listarCategorias('ProfissionalAutonomo')
+    categoriaId.value = sugerirCategoriaId(
+      categorias.value,
+      'ProfissionalAutonomo',
+      categoriaId.value,
+    )
   } catch {
     categorias.value = []
   }
@@ -216,7 +223,7 @@ async function onAvatarChange(file: File | null) {
 function handleSubmit() {
   categoriaError.value = null
   const catId = categoriaId.value ? Number(categoriaId.value) : undefined
-  if (!catId || !CATEGORIA_IDS_ATIVAS.has(catId)) {
+  if (!catId || !categoriaOptions.value.some((opt) => opt.value === String(catId))) {
     categoriaError.value = 'Selecione a área em que você atua.'
     return
   }
@@ -372,7 +379,7 @@ function handleSubmit() {
             id="onb-aut-perfil-area"
             v-model="categoriaId"
             :options="categoriaOptions"
-            placeholder="Selecione: Cabelo e barba ou Beleza e estética"
+            :placeholder="categoriaPlaceholder"
             :error="categoriaError ?? undefined"
             required
           />

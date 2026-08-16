@@ -18,6 +18,7 @@ import type {
   ListarProximosParams,
   ObterEstabelecimentoParams,
 } from '@/types/estabelecimento.types'
+import type { TipoAssinatura } from '@/types/assinatura.types'
 import type { ProfissionalVitrinePublico } from '@/types/negocio/profissionalVitrine.types'
 
 function unwrap<T>(response: { data: ApiSuccessResponse<T> }): T {
@@ -51,10 +52,11 @@ export const publicoService = {
       .then(unwrap)
   },
 
-  listarCategorias() {
+  listarCategorias(tipoAssinatura?: TipoAssinatura) {
     return api
       .get<ApiSuccessResponse<EstabelecimentoCategoria[]>>(
         '/publico/estabelecimentos/categorias',
+        { params: tipoAssinatura ? { tipoAssinatura } : undefined },
       )
       .then(unwrap)
   },
