@@ -58,29 +58,16 @@ export function registerCatalogoRoutes(router: MockRouter) {
           foto: p.foto ?? null,
           conviteEm: null,
         })),
-      ...MOCK_CONVITES
-        .filter((c) => c.status === 'Pendente')
-        .map((c) => ({
-          id: `convite-${c.id}`,
-          tipo: 'convite' as const,
-          nome: c.email.split('@')[0] || c.email,
-          cargo: 'Convidado',
-          role: 'Convidado',
-          email: c.email,
-          telefone: null as string | null,
-          ativo: false,
-          usuarioId: null as number | null,
-          profissionalId: null as number | null,
-          podeReceberAgendamento: null as boolean | null,
-          foto: null as string | null,
-          conviteEm: '05/08/2026',
-        })),
     ]
+
+    const vagasEmConvites = MOCK_CONVITES
+      .filter((c) => c.status === 'Ativo')
+      .reduce((acc, c) => acc + Math.max(0, c.limiteUsuarios - c.quantidadeUtilizacoes), 0)
 
     const filtrados = membros.filter((m) => {
       if (cargo && m.role !== cargo) return false
       if (status) {
-        const s = m.tipo === 'convite' ? 'pendente' : m.ativo ? 'ativo' : 'inativo'
+        const s = m.ativo ? 'ativo' : 'inativo'
         if (s !== status) return false
       }
       if (busca) {
@@ -98,11 +85,11 @@ export function registerCatalogoRoutes(router: MockRouter) {
       tamanhoPagina,
       itens,
       resumo: {
-        totalMembros: membros.filter((m) => m.tipo !== 'convite' && m.ativo).length,
+        totalMembros: membros.filter((m) => m.ativo).length,
         administradores: membros.filter((m) => m.ativo && (m.role === 'Owner' || m.role === 'Admin')).length,
         profissionais: membros.filter((m) => m.ativo && m.role === 'Profissional').length,
         recepcionistas: membros.filter((m) => m.ativo && m.role === 'Receptionist').length,
-        convidados: MOCK_CONVITES.filter((c) => c.status === 'Pendente').length,
+        convidados: vagasEmConvites,
       },
     })
   })
