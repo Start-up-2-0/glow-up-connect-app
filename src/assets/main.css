@@ -3152,7 +3152,8 @@
   }
 
   .equipe-modal-overlay {
-    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/55 p-0 backdrop-blur-[3px] sm:items-center sm:p-4;
+    /* Acima do shell (sidebar/topbar ~2010–2020) para o overlay cobrir toda a UI. */
+    @apply fixed inset-0 z-[3000] flex items-end justify-center bg-black/55 p-0 backdrop-blur-[3px] sm:items-center sm:p-4;
   }
 
   .equipe-modal {
