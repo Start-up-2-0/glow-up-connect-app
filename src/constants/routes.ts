@@ -1,5 +1,6 @@
 export const ROUTE_NAMES = {
   LOGIN: 'login',
+  CONTA_EM_EXCLUSAO: 'conta-em-exclusao',
   REGISTER: 'register',
   CONFIRM_EMAIL: 'confirm-email',
   CONFIRM_EMAIL_CODE: 'confirm-email-code',
@@ -84,6 +85,7 @@ export const ROUTE_PATHS = {
   /** Alias legado documentado */
   CONFIRM_WHATSAPP_LEGACY: '/confirmar-whatsapp',
   LOGIN: '/auth/login',
+  CONTA_EM_EXCLUSAO: '/auth/conta-em-exclusao',
   REGISTER: '/auth/register',
   CONFIRM_EMAIL: '/auth/confirmar-email',
   CONFIRM_EMAIL_CODE: '/auth/confirmar-email/codigo',

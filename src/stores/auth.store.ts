@@ -91,6 +91,28 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function reativarConta(payload: LoginPayload) {
+    loading.value = true
+    error.value = null
+    try {
+      const { data } = await authService.reativarConta(payload)
+      const loginData = data.data
+      applySession({
+        token: '',
+        refreshToken: '',
+        expiresAt: loginData.expiresAt,
+        refreshExpiresAt: loginData.refreshExpiresAt,
+      })
+      useUserStore().setUserFromSummary(loginData.usuario)
+      return loginData
+    } catch (err) {
+      error.value = 'Falha ao reativar a conta'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function logout() {
     loading.value = true
     try {
@@ -119,6 +141,7 @@ export const useAuthStore = defineStore('auth', () => {
     error,
     isAuthenticated,
     login,
+    reativarConta,
     logout,
     hydrateFromStorage,
     clearSession,

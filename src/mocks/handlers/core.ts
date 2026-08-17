@@ -68,6 +68,26 @@ export function registerCoreRoutes(router: MockRouter) {
   })
   router.on('post', '/auth/confirmar-email', () => voidOk('E-mail confirmado.'))
   router.on('post', '/auth/reenviar-confirmacao', () => voidOk('Confirmação reenviada.'))
+  router.on('post', '/auth/reativar-conta', (req: MockRequest) => {
+    const payload = (req.body ?? {}) as { email?: string }
+    const email = payload.email?.trim() ?? ''
+    setCurrentEmail(email)
+    const user = mockUserForEmail(email)
+    return ok({
+      token: '',
+      refreshToken: '',
+      expiresAt: isoFromNow(2),
+      refreshExpiresAt: isoFromNow(48),
+      usuario: {
+        id: user.id,
+        nome: user.nome,
+        email: user.email,
+        role: user.role,
+        avatarBase64: user.avatarBase64 ?? null,
+      },
+      requerConfirmacaoEmail: false,
+    })
+  })
 
   /* ---------- Recovery ---------- */
   router.on('post', '/auth/forgot-password', () => voidOk('Código enviado.'))

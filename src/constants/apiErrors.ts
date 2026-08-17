@@ -6,6 +6,7 @@ export const API_ERROR_MESSAGES: Record<string, string> = {
   EMAIL_NAO_CONFIRMADO: 'Confirme seu e-mail antes de entrar.',
   USER_BLOCKED: 'Conta temporariamente bloqueada. Tente mais tarde.',
   USER_INACTIVE: 'Conta inativa. Entre em contato com o suporte.',
+  CONTA_EM_EXCLUSAO: 'Esta conta está em exclusão. Você pode reativá-la dentro do prazo de 30 dias.',
   EMAIL_JA_CADASTRADO: 'Este e-mail já está cadastrado.',
   CONFIRMACAO_EMAIL_INVALIDA: 'Código ou link de confirmação inválido.',
   AVATAR_INVALIDO: 'Avatar inválido. Use JPEG, PNG ou WebP. A imagem deve ter até 1 MB após a otimização.',

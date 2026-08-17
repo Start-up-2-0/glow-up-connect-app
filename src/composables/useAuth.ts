@@ -26,6 +26,16 @@ export function useAuth() {
     await router.push(redirect ?? ROUTE_PATHS.DASHBOARD)
   }
 
+  async function reativarConta(payload: LoginPayload, redirect?: string) {
+    await authStore.reativarConta(payload)
+    await useNegocioStore().fetchEstabelecimentos(true)
+    if (redirect && isExternalRedirect(redirect)) {
+      window.location.assign(redirect)
+      return
+    }
+    await router.push(redirect ?? ROUTE_PATHS.DASHBOARD)
+  }
+
   async function logout() {
     await authStore.logout()
     // O tema vale apenas enquanto o usuário está logado: no logout reseta p/ claro
@@ -51,6 +61,7 @@ export function useAuth() {
     error,
     profile,
     login,
+    reativarConta,
     logout,
     ensureProfile,
   }
