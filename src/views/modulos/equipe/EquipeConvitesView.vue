@@ -2,6 +2,8 @@
 import { ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
+import ConviteStatusBadge from '@/components/equipe/ConviteStatusBadge.vue'
+import EquipeConviteLinkModal from '@/components/equipe/EquipeConviteLinkModal.vue'
 import EquipePageHeader from '@/components/equipe/EquipePageHeader.vue'
 import { EQUIPE_PAGE_CLASS } from '@/constants/designTokens'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
@@ -19,6 +21,9 @@ const { resolveError } = useApiError()
 const convites = ref<ConviteNegocio[]>([])
 const loading = ref(false)
 const cancelandoId = ref<number | null>(null)
+const copiandoId = ref<number | null>(null)
+const linkModalAberto = ref(false)
+const conviteSelecionado = ref<ConviteNegocio | null>(null)
 
 function formatarData(iso: string): string {
   return new Date(iso).toLocaleString('pt-BR', {
@@ -30,14 +35,8 @@ function formatarData(iso: string): string {
   })
 }
 
-function statusLabel(status: string): string {
-  const map: Record<string, string> = {
-    Ativo: 'Ativo',
-    Expirado: 'Expirado',
-    Esgotado: 'Esgotado',
-    Cancelado: 'Cancelado',
-  }
-  return map[status] ?? status
+function conviteAtivo(convite: ConviteNegocio): boolean {
+  return convite.status === 'Ativo'
 }
 
 async function load() {
@@ -49,6 +48,26 @@ async function load() {
     notifications.push('error', resolveError(err))
   } finally {
     loading.value = false
+  }
+}
+
+function abrirLinkModal(convite: ConviteNegocio) {
+  conviteSelecionado.value = convite
+  linkModalAberto.value = true
+}
+
+async function copiarLink(convite: ConviteNegocio) {
+  if (!estabelecimentoId.value) return
+
+  copiandoId.value = convite.id
+  try {
+    const resultado = await conviteService.obterLink(estabelecimentoId.value, convite.id)
+    await navigator.clipboard.writeText(resultado.linkConvite)
+    notifications.push('success', 'Link copiado!')
+  } catch (err) {
+    notifications.push('error', resolveError(err, 'Não foi possível copiar o link.'))
+  } finally {
+    copiandoId.value = null
   }
 }
 
@@ -124,7 +143,9 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
               <td class="equipe-convites-table__td">
                 {{ convite.quantidadeUtilizacoes }}/{{ convite.limiteUsuarios }}
               </td>
-              <td class="equipe-convites-table__td">{{ statusLabel(convite.status) }}</td>
+              <td class="equipe-convites-table__td">
+                <ConviteStatusBadge :status="convite.status" />
+              </td>
               <td class="equipe-convites-table__td equipe-convites-table__td--muted">
                 {{ formatarData(convite.criadoEm) }}
               </td>
@@ -132,15 +153,31 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
                 {{ formatarData(convite.expiraEm) }}
               </td>
               <td class="equipe-convites-table__td">
-                <button
-                  v-if="convite.status === 'Ativo'"
-                  type="button"
-                  class="equipe-btn-outline h-9 px-3 text-xs"
-                  :disabled="cancelandoId === convite.id"
-                  @click="cancelar(convite)"
-                >
-                  {{ cancelandoId === convite.id ? 'Cancelando…' : 'Cancelar' }}
-                </button>
+                <div v-if="conviteAtivo(convite)" class="equipe-convites-table__actions">
+                  <button
+                    type="button"
+                    class="equipe-btn-outline h-9 px-3 text-xs"
+                    @click="abrirLinkModal(convite)"
+                  >
+                    Ver link
+                  </button>
+                  <button
+                    type="button"
+                    class="equipe-btn-outline h-9 px-3 text-xs"
+                    :disabled="copiandoId === convite.id"
+                    @click="copiarLink(convite)"
+                  >
+                    {{ copiandoId === convite.id ? 'Copiando…' : 'Copiar link' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="equipe-btn-outline h-9 px-3 text-xs"
+                    :disabled="cancelandoId === convite.id"
+                    @click="cancelar(convite)"
+                  >
+                    {{ cancelandoId === convite.id ? 'Cancelando…' : 'Cancelar' }}
+                  </button>
+                </div>
                 <span v-else class="font-urbanist text-xs text-glow-text-subtle">—</span>
               </td>
             </tr>
@@ -154,9 +191,12 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
           :key="convite.id"
           class="equipe-convites__row-card"
         >
-          <p class="font-urbanist font-medium text-glow-text">
-            {{ establishmentRoleLabel(convite.roleSugerida) }}
-          </p>
+          <div class="flex items-start justify-between gap-3">
+            <p class="font-urbanist font-medium text-glow-text">
+              {{ establishmentRoleLabel(convite.roleSugerida) }}
+            </p>
+            <ConviteStatusBadge :status="convite.status" />
+          </div>
           <div class="financeiro-table__row-meta">
             <div class="financeiro-table__row-meta-item">
               <span class="financeiro-table__row-meta-label">Usos</span>
@@ -165,18 +205,33 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
               </span>
             </div>
             <div class="financeiro-table__row-meta-item">
-              <span class="financeiro-table__row-meta-label">Status</span>
-              <span class="financeiro-table__row-meta-value">{{ statusLabel(convite.status) }}</span>
+              <span class="financeiro-table__row-meta-label">Criado em</span>
+              <span class="financeiro-table__row-meta-value">{{ formatarData(convite.criadoEm) }}</span>
             </div>
             <div class="financeiro-table__row-meta-item">
               <span class="financeiro-table__row-meta-label">Expira em</span>
               <span class="financeiro-table__row-meta-value">{{ formatarData(convite.expiraEm) }}</span>
             </div>
           </div>
-          <div v-if="convite.status === 'Ativo'" class="financeiro-table__row-actions">
+          <div v-if="conviteAtivo(convite)" class="financeiro-table__row-actions">
             <button
               type="button"
-              class="equipe-btn-outline min-h-11 w-full px-3 text-sm sm:w-auto"
+              class="equipe-btn-outline min-h-11 w-full px-3 text-sm"
+              @click="abrirLinkModal(convite)"
+            >
+              Ver link
+            </button>
+            <button
+              type="button"
+              class="equipe-btn-outline min-h-11 w-full px-3 text-sm"
+              :disabled="copiandoId === convite.id"
+              @click="copiarLink(convite)"
+            >
+              {{ copiandoId === convite.id ? 'Copiando…' : 'Copiar link' }}
+            </button>
+            <button
+              type="button"
+              class="equipe-btn-outline min-h-11 w-full px-3 text-sm"
               :disabled="cancelandoId === convite.id"
               @click="cancelar(convite)"
             >
@@ -186,5 +241,11 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
         </div>
       </div>
     </template>
+
+    <EquipeConviteLinkModal
+      v-if="conviteSelecionado"
+      v-model="linkModalAberto"
+      :convite="conviteSelecionado"
+    />
   </div>
 </template>

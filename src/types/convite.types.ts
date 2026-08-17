@@ -12,6 +12,8 @@ export interface ConviteNegocio {
   quantidadeUtilizacoes: number
   expiraEm: string
   criadoEm: string
+  /** Legado: convites antigos por e-mail. Links multi-uso podem vir vazio. */
+  email?: string
 }
 
 export interface ConviteCriado extends ConviteNegocio {
@@ -27,6 +29,9 @@ export interface ConvitePreview {
   quantidadeUtilizacoes: number
   vagasRestantes: number
   expiraEm: string
+  /** Legado: convites antigos por e-mail. */
+  email?: string
+  tipoConvite?: string
 }
 
 export interface CriarConviteLinkPayload {

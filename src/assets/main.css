@@ -3352,7 +3352,7 @@
   }
 
   .equipe-convites-table {
-    @apply w-full min-w-[640px] text-left font-urbanist text-sm;
+    @apply w-full min-w-[760px] text-left font-urbanist text-sm;
   }
 
   .equipe-convites-table__head-row {
@@ -3373,6 +3373,26 @@
 
   .equipe-convites-table__td--muted {
     @apply text-glow-text-subtle;
+  }
+
+  .equipe-convites-table__actions {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .equipe-convite-status-badge {
+    @apply inline-flex h-[14px] items-center justify-center rounded-full px-3 font-urbanist text-[10px] font-medium leading-none;
+  }
+
+  .equipe-convite-status-badge--ativo {
+    @apply bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200;
+  }
+
+  .equipe-convite-status-badge--cancelado {
+    @apply bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-200;
+  }
+
+  .equipe-convite-status-badge--indisponivel {
+    @apply bg-glow-hover-surface text-glow-text-subtle;
   }
 
   .equipe-convites__row-card {

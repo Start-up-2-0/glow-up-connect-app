@@ -8,7 +8,8 @@ import {
   MOCK_SERVICOS,
   MOCK_USUARIOS_EQUIPE,
 } from '../seed/catalogo'
-import { MOCK_AUDITORIA, MOCK_CONVITES, mockConvitePreview } from '../seed/plataforma'
+import { MOCK_AUDITORIA, MOCK_CONVITES, MOCK_LINK_CONVITE_ATIVO, mockConvitePreview } from '../seed/plataforma'
+import { establishmentRoleLabel } from '@/constants/establishmentRoles'
 import type { Servico } from '@/types/negocio/servico.types'
 
 export function registerCatalogoRoutes(router: MockRouter) {
@@ -58,6 +59,26 @@ export function registerCatalogoRoutes(router: MockRouter) {
           foto: p.foto ?? null,
           conviteEm: null,
         })),
+<<<<<<< HEAD
+=======
+      ...MOCK_CONVITES
+        .filter((c) => c.status === 'Ativo')
+        .map((c) => ({
+          id: `convite-${c.id}`,
+          tipo: 'convite' as const,
+          nome: establishmentRoleLabel(c.roleSugerida),
+          cargo: 'Convidado',
+          role: 'Convidado',
+          email: null as string | null,
+          telefone: null as string | null,
+          ativo: false,
+          usuarioId: null as number | null,
+          profissionalId: null as number | null,
+          podeReceberAgendamento: null as boolean | null,
+          foto: null as string | null,
+          conviteEm: '05/08/2026',
+        })),
+>>>>>>> 7599581 (feat(equipe): permitir ver e copiar link de convites ativos)
     ]
 
     const vagasEmConvites = MOCK_CONVITES
@@ -89,7 +110,11 @@ export function registerCatalogoRoutes(router: MockRouter) {
         administradores: membros.filter((m) => m.ativo && (m.role === 'Owner' || m.role === 'Admin')).length,
         profissionais: membros.filter((m) => m.ativo && m.role === 'Profissional').length,
         recepcionistas: membros.filter((m) => m.ativo && m.role === 'Receptionist').length,
+<<<<<<< HEAD
         convidados: vagasEmConvites,
+=======
+        convidados: MOCK_CONVITES.filter((c) => c.status === 'Ativo').length,
+>>>>>>> 7599581 (feat(equipe): permitir ver e copiar link de convites ativos)
       },
     })
   })
@@ -140,11 +165,18 @@ export function registerCatalogoRoutes(router: MockRouter) {
   router.on('post', `${base}/convites`, () =>
     ok({
       ...MOCK_CONVITES[0],
-      linkConvite: 'https://glowupconnect.com.br/convite/11111111-1111-1111-1111-111111111111',
+      linkConvite: MOCK_LINK_CONVITE_ATIVO,
     }),
   )
+  router.on('get', `${base}/convites/:conviteId/link`, (req: MockRequest) => {
+    const convite = MOCK_CONVITES.find((c) => c.id === Number(req.params.conviteId)) ?? MOCK_CONVITES[0]!
+    return ok({
+      ...convite,
+      linkConvite: MOCK_LINK_CONVITE_ATIVO,
+    })
+  })
   router.on('get', `${base}/convites`, () => ok(MOCK_CONVITES))
-  router.on('delete', `${base}/convites/:conviteId`, () => ok(MOCK_CONVITES[0]))
+  router.on('delete', `${base}/convites/:conviteId`, () => ok({ ...MOCK_CONVITES[0], status: 'Cancelado' }))
   router.on('get', '/publico/convites/:token/preview', (req: MockRequest) =>
     ok(mockConvitePreview(req.params.token)),
   )

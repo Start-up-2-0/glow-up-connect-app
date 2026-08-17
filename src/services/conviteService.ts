@@ -14,6 +14,14 @@ function unwrap<T>(response: { data: ApiSuccessResponse<T> }): T {
   return response.data.data
 }
 
+function normalizarLinkConvite(criado: ConviteCriado): ConviteCriado {
+  return {
+    ...criado,
+    // Homolog/prod: API pode vir com LandingBaseUrl de localhost; o app usa VITE_LANDING_URL.
+    linkConvite: convitePublicoUrl(criado.linkConvite),
+  }
+}
+
 export const conviteService = {
   criarLink(estabelecimentoId: number, payload: CriarConviteLinkPayload) {
     return api
@@ -22,11 +30,16 @@ export const conviteService = {
         payload,
       )
       .then(unwrap)
-      .then((criado) => ({
-        ...criado,
-        // Homolog/prod: API pode vir com LandingBaseUrl de localhost; o app usa VITE_LANDING_URL.
-        linkConvite: convitePublicoUrl(criado.linkConvite),
-      }))
+      .then(normalizarLinkConvite)
+  },
+
+  obterLink(estabelecimentoId: number, conviteId: number) {
+    return api
+      .get<ApiSuccessResponse<ConviteCriado>>(
+        negocioPath(estabelecimentoId, `/convites/${conviteId}/link`),
+      )
+      .then(unwrap)
+      .then(normalizarLinkConvite)
   },
 
   obterPreview(token: string) {

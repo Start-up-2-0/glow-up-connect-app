@@ -261,7 +261,21 @@ export const MOCK_CONVITES: ConviteNegocio[] = [
     expiraEm: iso(3),
     criadoEm: iso(-8),
   },
+  {
+    id: 3,
+    estabelecimentoId: 1,
+    tipoConvite: 'Profissional',
+    roleSugerida: 'Profissional',
+    status: 'Cancelado',
+    limiteUsuarios: 1,
+    quantidadeUtilizacoes: 0,
+    expiraEm: iso(2),
+    criadoEm: iso(-10),
+  },
 ]
+
+export const MOCK_LINK_CONVITE_ATIVO =
+  'https://glow-up-connect-app-staging.up.railway.app/convite/11111111-1111-1111-1111-111111111111'
 
 export function mockConvitePreview(_token: string): ConvitePreview {
   return {
