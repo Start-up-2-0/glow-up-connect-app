@@ -3208,7 +3208,7 @@
   }
 
   .equipe-modal__footer {
-    @apply flex shrink-0 items-center justify-end gap-2.5 border-t border-glow-border-soft bg-glow-hover-surface/40 px-6 py-5;
+    @apply flex shrink-0 items-center justify-end gap-2.5 border-t border-glow-border-soft bg-glow-hover-surface px-6 py-5;
   }
 
   .equipe-modal__dismiss {
