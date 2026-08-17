@@ -59,8 +59,6 @@ export function registerCatalogoRoutes(router: MockRouter) {
           foto: p.foto ?? null,
           conviteEm: null,
         })),
-<<<<<<< HEAD
-=======
       ...MOCK_CONVITES
         .filter((c) => c.status === 'Ativo')
         .map((c) => ({
@@ -78,7 +76,6 @@ export function registerCatalogoRoutes(router: MockRouter) {
           foto: null as string | null,
           conviteEm: '05/08/2026',
         })),
->>>>>>> 7599581 (feat(equipe): permitir ver e copiar link de convites ativos)
     ]
 
     const vagasEmConvites = MOCK_CONVITES
@@ -110,11 +107,7 @@ export function registerCatalogoRoutes(router: MockRouter) {
         administradores: membros.filter((m) => m.ativo && (m.role === 'Owner' || m.role === 'Admin')).length,
         profissionais: membros.filter((m) => m.ativo && m.role === 'Profissional').length,
         recepcionistas: membros.filter((m) => m.ativo && m.role === 'Receptionist').length,
-<<<<<<< HEAD
         convidados: vagasEmConvites,
-=======
-        convidados: MOCK_CONVITES.filter((c) => c.status === 'Ativo').length,
->>>>>>> 7599581 (feat(equipe): permitir ver e copiar link de convites ativos)
       },
     })
   })
