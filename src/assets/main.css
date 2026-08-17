@@ -3152,11 +3152,11 @@
   }
 
   .equipe-modal-overlay {
-    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4;
+    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/55 p-0 backdrop-blur-[3px] sm:items-center sm:p-4;
   }
 
   .equipe-modal {
-    @apply flex max-h-[92dvh] w-full max-w-[490px] flex-col overflow-hidden rounded-t-2xl border-[0.5px] border-glow-border-soft bg-glow-surface shadow-xl sm:max-h-[90dvh] sm:rounded-xl;
+    @apply flex max-h-[92dvh] w-full max-w-[490px] flex-col overflow-hidden rounded-t-2xl border border-glow-border-soft bg-glow-surface shadow-[0_24px_48px_-12px_rgba(0,0,0,0.28)] ring-1 ring-black/5 sm:max-h-[90dvh] sm:rounded-2xl;
   }
 
   .equipe-modal--tall {
@@ -3184,7 +3184,7 @@
   }
 
   .equipe-modal__header {
-    @apply space-y-2 border-b border-glow-border-soft px-6 pb-4 pt-6;
+    @apply shrink-0 space-y-2 border-b border-glow-border-soft bg-glow-surface px-6 pb-4 pt-6;
   }
 
   .equipe-modal__header-top {
@@ -3196,7 +3196,7 @@
   }
 
   .equipe-modal__title {
-    @apply font-urbanist text-base font-semibold text-black;
+    @apply font-urbanist text-base font-semibold text-glow-text;
   }
 
   .equipe-modal__subtitle {
@@ -3204,11 +3204,11 @@
   }
 
   .equipe-modal__body {
-    @apply flex-1 overflow-y-auto px-6 py-6;
+    @apply min-h-0 flex-1 overflow-y-auto bg-glow-surface px-6 py-6;
   }
 
   .equipe-modal__footer {
-    @apply flex items-center justify-center gap-2.5 border-t border-glow-border-soft px-6 py-6;
+    @apply flex shrink-0 items-center justify-end gap-2.5 border-t border-glow-border-soft bg-glow-hover-surface/40 px-6 py-5;
   }
 
   .equipe-modal__dismiss {

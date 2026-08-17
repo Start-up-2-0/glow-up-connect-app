@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import EquipeIcons from '@/components/equipe/EquipeIcons.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
 import { ROLES_CADASTRO_EQUIPE } from '@/constants/establishmentRoles'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
@@ -118,84 +117,129 @@ defineExpose({ resetForm })
       leave-to-class="opacity-0"
     >
       <div v-if="open" class="equipe-modal-overlay" @click.self="close">
-        <div class="equipe-modal" role="dialog" aria-modal="true" aria-labelledby="equipe-criar-link-title">
-          <div class="equipe-modal__header">
-            <div class="equipe-modal__header-top">
-              <h2 id="equipe-criar-link-title" class="equipe-modal__title">
-                Gerar link de convite
-              </h2>
-              <button type="button" class="equipe-modal__close-icon" aria-label="Fechar" @click="close">
-                <EquipeIcons name="close" />
-              </button>
+        <Transition
+          enter-active-class="equipe-modal-enter-active"
+          leave-active-class="equipe-modal-leave-active"
+          enter-from-class="equipe-modal-enter-from"
+          leave-to-class="equipe-modal-leave-to"
+        >
+          <div
+            v-if="open"
+            class="equipe-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="equipe-criar-link-title"
+          >
+            <div class="equipe-modal__header">
+              <div class="equipe-modal__header-top">
+                <h2 id="equipe-criar-link-title" class="equipe-modal__title">
+                  Gerar link de convite
+                </h2>
+                <button
+                  type="button"
+                  class="equipe-modal__close-icon"
+                  aria-label="Fechar"
+                  @click="close"
+                >
+                  <EquipeIcons name="close" />
+                </button>
+              </div>
+              <p class="equipe-modal__subtitle">
+                Defina a função, o limite de pessoas e a validade. Compartilhe o link gerado.
+              </p>
             </div>
-            <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-              Defina a função, o limite de pessoas e a validade. Compartilhe o link gerado.
-            </p>
-          </div>
 
-          <div class="equipe-modal__body space-y-4">
-            <template v-if="!linkGerado">
-              <BaseSelect
-                v-model="role"
-                label="Função na loja"
-                :options="roleOptions"
-              />
-              <p class="font-urbanist text-xs text-glow-text-subtle">{{ roleDescricao }}</p>
+            <div class="equipe-modal__body space-y-4">
+              <template v-if="!linkGerado">
+                <BaseSelect
+                  v-model="role"
+                  label="Função na loja"
+                  :options="roleOptions"
+                />
+                <p class="-mt-2 font-urbanist text-xs text-glow-text-subtle">{{ roleDescricao }}</p>
 
-              <BaseSelect
-                v-model="limiteUsuarios"
-                label="Quantidade máxima de usuários"
-                :options="limiteOptions"
-              />
+                <BaseSelect
+                  v-model="limiteUsuarios"
+                  label="Quantidade máxima de usuários"
+                  :options="limiteOptions"
+                />
 
-              <label class="flex items-center gap-2 font-urbanist text-sm text-glow-text">
-                <input v-model="usarPadraoDuracao" type="checkbox" class="rounded border-glow-border" />
-                Usar validade padrão (1 dia)
-              </label>
-
-              <div v-if="!usarPadraoDuracao" class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="mb-1 block font-urbanist text-sm text-glow-text">Duração</label>
+                <label class="flex items-center gap-2.5 font-urbanist text-sm text-glow-text">
                   <input
-                    v-model.number="duracaoValor"
-                    type="number"
-                    min="1"
-                    class="w-full rounded-xl border border-glow-border bg-glow-surface px-3 py-2 font-urbanist text-sm"
+                    v-model="usarPadraoDuracao"
+                    type="checkbox"
+                    class="size-4 rounded border-glow-border-soft text-glow-gold-cta focus:ring-glow-gold-cta/30"
+                  />
+                  Usar validade padrão (1 dia)
+                </label>
+
+                <div v-if="!usarPadraoDuracao" class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="equipe-form-label" for="equipe-link-duracao">Duração</label>
+                    <input
+                      id="equipe-link-duracao"
+                      v-model.number="duracaoValor"
+                      type="number"
+                      min="1"
+                      class="equipe-form-input"
+                    />
+                  </div>
+                  <BaseSelect
+                    v-model="duracaoUnidade"
+                    label="Unidade"
+                    :options="unidadeOptions"
                   />
                 </div>
-                <BaseSelect
-                  v-model="duracaoUnidade"
-                  label="Unidade"
-                  :options="unidadeOptions"
-                />
-              </div>
 
-              <p v-if="formError" class="font-urbanist text-sm text-red-600">{{ formError }}</p>
+                <p v-if="formError" class="font-urbanist text-sm text-red-600 dark:text-red-400">
+                  {{ formError }}
+                </p>
+              </template>
 
-              <div class="flex justify-end gap-2 pt-2">
-                <BaseButton variant="secondary" type="button" @click="close">Cancelar</BaseButton>
-                <BaseButton type="button" :loading="saving" @click="submit">
-                  Gerar link
-                </BaseButton>
-              </div>
-            </template>
+              <template v-else>
+                <div class="equipe-link-success">
+                  <p class="equipe-link-success__title">Link pronto!</p>
+                  <p class="equipe-link-success__text">
+                    Compartilhe o link abaixo. A pessoa abre na página pública do Glow Up Connect
+                    para entrar na equipe.
+                  </p>
+                  <div class="equipe-link-success__url-box">
+                    <p class="equipe-link-success__url">{{ linkGerado }}</p>
+                  </div>
+                </div>
+              </template>
+            </div>
 
-            <template v-else>
-              <p class="font-urbanist text-sm text-glow-text">
-                Link pronto para compartilhar. Ele abre na página pública do Glow Up Connect.
-              </p>
-              <div class="rounded-xl border border-glow-border bg-glow-bg-subtle p-3">
-                <p class="break-all font-mono text-xs text-glow-text">{{ linkGerado }}</p>
-              </div>
-              <div class="flex flex-wrap justify-end gap-2 pt-2">
-                <BaseButton variant="secondary" type="button" @click="copiarLink">
+            <div class="equipe-modal__footer">
+              <template v-if="!linkGerado">
+                <button type="button" class="equipe-modal__dismiss" @click="close">
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  class="equipe-modal__confirm"
+                  :disabled="saving"
+                  @click="submit"
+                >
+                  {{ saving ? 'Gerando…' : 'Gerar link' }}
+                </button>
+              </template>
+
+              <template v-else>
+                <button type="button" class="equipe-modal__dismiss" @click="close">
+                  Concluir
+                </button>
+                <button
+                  type="button"
+                  class="equipe-modal__confirm equipe-modal__confirm--copy"
+                  @click="copiarLink"
+                >
                   {{ copiado ? 'Copiado' : 'Copiar link' }}
-                </BaseButton>
-                <BaseButton type="button" @click="close">Concluir</BaseButton>
-              </div>
-            </template>
+                </button>
+              </template>
+            </div>
           </div>
-        </div>
+        </Transition>
       </div>
     </Transition>
   </Teleport>
