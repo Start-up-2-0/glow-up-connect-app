@@ -96,6 +96,8 @@ export const ROUTE_PATHS = {
   FORGOT_PASSWORD_CODE: '/auth/esqueci-senha/codigo',
   RESET_PASSWORD: '/auth/redefinir-senha',
   RESET_PASSWORD_SUCCESS: '/auth/redefinir-senha/sucesso',
+  /** Alias legado — links gerados pelo backend com FrontendBaseUrl na raiz do app */
+  RESET_PASSWORD_LEGACY: '/resetar-senha',
   DASHBOARD: '/dashboard',
   EXPLORAR: '/explorar',
   MEUS_AGENDAMENTOS: '/meus-agendamentos',

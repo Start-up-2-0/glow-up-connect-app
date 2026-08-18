@@ -84,4 +84,11 @@ export const authRoutes: RouteRecordRaw[] = [
     meta: { layout: 'auth', guestOnly: true, title: 'Senha redefinida' },
   },
   ...confirmEmailLegacyRedirects,
+  {
+    path: ROUTE_PATHS.RESET_PASSWORD_LEGACY,
+    redirect: (to) => ({
+      path: ROUTE_PATHS.RESET_PASSWORD,
+      query: to.query,
+    }),
+  },
 ]

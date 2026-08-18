@@ -90,10 +90,12 @@ export function registerCoreRoutes(router: MockRouter) {
   })
 
   /* ---------- Recovery ---------- */
-  router.on('post', '/auth/forgot-password', () => voidOk('Código enviado.'))
-  router.on('post', '/auth/verify-reset-code', () => voidOk('Código válido.'))
-  router.on('post', '/auth/reset-password', () => voidOk('Senha redefinida.'))
-  router.on('post', '/auth/resend-reset-code', () => voidOk('Código reenviado.'))
+  router.on('post', '/auth/forgot-password', () =>
+    voidOk('Se o e-mail estiver cadastrado, enviaremos instrucoes para redefinir a senha.'),
+  )
+  router.on('post', '/auth/reset-password', () =>
+    voidOk('Senha redefinida com sucesso. Voce ja pode fazer login.'),
+  )
 
   /* ---------- Usuário ---------- */
   // Cadastro cria uma conta de cliente no mock (role Cliente).

@@ -21,13 +21,11 @@ const {
   RESEND_COOLDOWN_SECONDS,
   getStoredEmail,
   resendCode,
-  requestNewCode,
-  verifyCode,
+  rememberCode,
 } = useForgotPassword()
 
 const email = ref('')
 const codigo = ref('')
-const verifying = ref(false)
 const resending = ref(false)
 const cooldown = ref(0)
 const rateLimited = ref(false)
@@ -75,31 +73,16 @@ function startCooldown() {
 async function handleCodeComplete(value: string) {
   if (rateLimited.value) return
 
-  verifying.value = true
   invalidCodeError.value = false
+  const result = rememberCode(value)
 
-  try {
-    const result = await verifyCode(value)
-
-    if (result.valid) {
-      await router.push(ROUTE_PATHS.RESET_PASSWORD)
-      return
-    }
-
-    codigo.value = ''
-
-    if (result.rateLimited) {
-      rateLimited.value = true
-      invalidCodeError.value = false
-      return
-    }
-
-    if (result.invalid) {
-      invalidCodeError.value = true
-    }
-  } finally {
-    verifying.value = false
+  if (result.ok) {
+    await router.push(ROUTE_PATHS.RESET_PASSWORD)
+    return
   }
+
+  codigo.value = ''
+  invalidCodeError.value = true
 }
 
 async function handleResend() {
@@ -127,7 +110,12 @@ async function handleRequestNewCode() {
   resending.value = true
 
   try {
-    await requestNewCode()
+    const result = await resendCode()
+    if (!result.ok && result.rateLimited) {
+      rateLimited.value = true
+      return
+    }
+
     rateLimited.value = false
     invalidCodeError.value = false
     codigo.value = ''
@@ -160,7 +148,7 @@ function goToChangeEmail() {
     <div class="flex w-full flex-col gap-6">
       <AuthOtpInput
         v-model="codigo"
-        :disabled="verifying || rateLimited"
+        :disabled="rateLimited"
         @complete="handleCodeComplete"
       />
 
