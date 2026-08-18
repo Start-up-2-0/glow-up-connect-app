@@ -7,6 +7,14 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { useLoading } from '@/composables/useLoading'
 import { lojaSetupLocation } from '@/utils/lojaSetupNavigation'
+import {
+  MENSAGEM_AGUARDANDO_PAGAMENTO,
+  MENSAGEM_LINK_EXPIRADO,
+  MENSAGEM_PAGAMENTO_CONCLUIDO,
+  MENSAGEM_REFRESH_FALHOU,
+  obterDeadlinePollPagamento,
+  sincronizarSessaoPosAssinatura,
+} from '@/utils/sessaoPosAssinatura'
 
 const route = useRoute()
 const router = useRouter()
@@ -16,7 +24,6 @@ const globalLoading = useLoading()
 
 const aguardando = ref(true)
 const tentativas = ref(0)
-const maxTentativas = 45
 
 const variante = computed<'sucesso' | 'pendente' | 'falha'>(() => {
   if (route.path.includes('/pendente')) return 'pendente'
@@ -37,7 +44,7 @@ const descricao = computed(() => {
   if (variante.value === 'falha') {
     return 'O pagamento não foi aprovado. Você pode tentar novamente com outro meio de pagamento.'
   }
-  return 'Estamos confirmando seu pagamento e preparando o acesso ao painel.'
+  return 'Aguardando confirmação do pagamento...'
 })
 
 function finishWaiting() {
@@ -50,7 +57,11 @@ async function tentarAtivar(): Promise<boolean> {
   await negocioStore.fetchEstabelecimentos(true)
   if (negocioStore.assinaturaAtiva) {
     finishWaiting()
-    notifications.push('success', 'Assinatura ativa! Bem-vindo ao Glow Up Connect.')
+    const sessaoOk = await sincronizarSessaoPosAssinatura()
+    if (!sessaoOk) {
+      notifications.push('warning', MENSAGEM_REFRESH_FALHOU)
+    }
+    notifications.push('success', MENSAGEM_PAGAMENTO_CONCLUIDO)
     await router.replace(
       lojaSetupLocation({
         mode: 'assinatura',
@@ -68,15 +79,17 @@ onMounted(async () => {
     return
   }
 
-  globalLoading.open({ message: 'Confirmando pagamento...' })
+  globalLoading.open({ message: MENSAGEM_AGUARDANDO_PAGAMENTO })
   try {
     const ativado = await tentarAtivar()
     if (ativado) return
 
+    const deadline = obterDeadlinePollPagamento()
     const interval = window.setInterval(async () => {
-      if (tentativas.value >= maxTentativas) {
+      if (Date.now() >= deadline) {
         window.clearInterval(interval)
         finishWaiting()
+        notifications.push('info', MENSAGEM_LINK_EXPIRADO)
         return
       }
       const ok = await tentarAtivar()

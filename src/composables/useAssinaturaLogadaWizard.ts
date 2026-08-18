@@ -28,6 +28,13 @@ import {
 } from '@/types/assinaturaOnboarding.types'
 import { telefoneToApi } from '@/utils/formatters'
 import { draftEnderecoToApi, validateEnderecoForSubmit } from '@/utils/enderecoPayload'
+import {
+  MENSAGEM_LINK_EXPIRADO,
+  MENSAGEM_PAGAMENTO_CONCLUIDO,
+  MENSAGEM_REFRESH_FALHOU,
+  obterDeadlinePollPagamento,
+  sincronizarSessaoPosAssinatura,
+} from '@/utils/sessaoPosAssinatura'
 import { buildAtualizarPerfilPayload } from '@/utils/perfilPayload'
 import { userService } from '@/services/userService'
 import type { WhatsAppConfirmacaoInstrucoes } from '@/types/whatsapp.types'
@@ -635,20 +642,23 @@ export function useAssinaturaLogadaWizard(
     persist()
   }
 
-  async function aguardarAtivacao() {
-    const maxTentativas = 30
-    for (let i = 0; i < maxTentativas; i++) {
+  async function aguardarAtivacao(expiraEm?: string | null) {
+    aguardandoPagamento.value = true
+    const deadline = obterDeadlinePollPagamento(expiraEm)
+    while (Date.now() < deadline) {
       await new Promise((r) => setTimeout(r, 2000))
-      await userStore.fetchMe()
-      await negocioStore.fetchEstabelecimentos(true)
+      try {
+        await negocioStore.fetchEstabelecimentos(true)
+      } catch {
+        // Continua aguardando o webhook.
+      }
       if (negocioStore.assinaturaAtiva) {
         aguardandoPagamento.value = false
-        notifications.push(
-          'success',
-          ehAutonomo.value
-            ? 'Pagamento confirmado! Configure seus serviços e horários.'
-            : 'Pagamento confirmado! Bem-vindo ao seu estabelecimento.',
-        )
+        const sessaoOk = await sincronizarSessaoPosAssinatura()
+        if (!sessaoOk) {
+          notifications.push('warning', MENSAGEM_REFRESH_FALHOU)
+        }
+        notifications.push('success', MENSAGEM_PAGAMENTO_CONCLUIDO)
         const estabId = negocioStore.estabelecimentoIdSelecionado
         if (ehAutonomo.value) {
           await entrarSetupOperacionalAutonomo(estabId)
@@ -665,10 +675,7 @@ export function useAssinaturaLogadaWizard(
       }
     }
     aguardandoPagamento.value = false
-    notifications.push(
-      'info',
-      'Pagamento em processamento. Atualize a página em alguns instantes.',
-    )
+    notifications.push('info', MENSAGEM_LINK_EXPIRADO)
   }
 
   async function finalizarAssinatura(pagamento?: PagamentoAssinaturaPayload) {

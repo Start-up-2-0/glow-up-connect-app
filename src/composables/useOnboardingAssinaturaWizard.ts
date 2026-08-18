@@ -21,6 +21,13 @@ import type {
 } from '@/types/onboardingAssinatura.types'
 import { telefoneToApi } from '@/utils/formatters'
 import { draftEnderecoToApi, validateEnderecoForSubmit } from '@/utils/enderecoPayload'
+import {
+  MENSAGEM_LINK_EXPIRADO,
+  MENSAGEM_PAGAMENTO_CONCLUIDO,
+  MENSAGEM_REFRESH_FALHOU,
+  obterDeadlinePollPagamento,
+  sincronizarSessaoPosAssinatura,
+} from '@/utils/sessaoPosAssinatura'
 
 const STORAGE_KEY = 'guc_onboarding_assinatura'
 
@@ -358,24 +365,39 @@ export function useOnboardingAssinaturaWizard(
     persist()
   }
 
-  async function aguardarAtivacao() {
+  async function aguardarAtivacao(expiraEm?: string | null) {
     aguardandoPagamento.value = true
-    const maxTentativas = 30
-    for (let i = 0; i < maxTentativas; i++) {
+    const deadline = obterDeadlinePollPagamento(expiraEm)
+    while (Date.now() < deadline) {
       await new Promise((r) => setTimeout(r, 2000))
-      await negocioStore.fetchEstabelecimentos(true)
+      try {
+        await negocioStore.fetchEstabelecimentos(true)
+      } catch {
+        // Continua aguardando o webhook.
+      }
       if (negocioStore.assinaturaAtiva) {
         aguardandoPagamento.value = false
-        notifications.push('success', 'Pagamento confirmado! Confirme seu e-mail para acessar o dashboard.')
-        irParaConfirmacaoEmail()
+        const sessaoOk = await sincronizarSessaoPosAssinatura()
+        if (!sessaoOk) {
+          notifications.push('warning', MENSAGEM_REFRESH_FALHOU)
+        }
+        notifications.push('success', MENSAGEM_PAGAMENTO_CONCLUIDO)
+        if (!userStore.profile?.ativo) {
+          irParaConfirmacaoEmail()
+          return
+        }
+        clearDraft()
+        await router.push(
+          lojaSetupLocation({
+            mode: 'assinatura',
+            estabelecimentoId: negocioStore.estabelecimentoIdSelecionado,
+          }),
+        )
         return
       }
     }
     aguardandoPagamento.value = false
-    notifications.push(
-      'info',
-      'Pagamento em processamento. Atualize a página em alguns instantes.',
-    )
+    notifications.push('info', MENSAGEM_LINK_EXPIRADO)
   }
 
   async function contratarPlano(pagamento?: PagamentoAssinaturaPayload) {

@@ -52,7 +52,7 @@ const descontoPromocao = computed(() => props.promocao?.percentualDescontoMensal
 const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
 
 const ctaLabel = computed(() => {
-  if (props.aguardandoPagamento) return 'Aguardando confirmação...'
+  if (props.aguardandoPagamento) return 'Aguardando confirmação do pagamento...'
   if (tokenizando.value) return 'Validando cartão...'
   if (usarCheckoutPro && !trialAtivo.value) {
     return `Continuar para pagamento — ${formatBRL(totalHoje.value)}`
@@ -173,7 +173,7 @@ async function handleSubmit() {
               v-else-if="usarCheckoutPro"
               class="onboarding-contratar-info-box"
             >
-              Você será redirecionado ao Mercado Pago para escolher o meio de pagamento (cartão, PIX, boleto e outros).
+              O Mercado Pago será aberto em uma nova aba. Esta página permanece aberta para confirmar o pagamento.
               O estabelecimento só será criado após a confirmação do pagamento.
             </div>
 
@@ -287,7 +287,7 @@ async function handleSubmit() {
               v-else-if="usarCheckoutPro"
               class="rounded-xl border border-glow-border-soft bg-glow-surface/60 p-4 text-sm text-glow-text-subtle"
             >
-              Você será redirecionado ao Mercado Pago para escolher o meio de pagamento (cartão, PIX, boleto e outros).
+              O Mercado Pago será aberto em uma nova aba. Esta página permanece aberta para confirmar o pagamento.
               O estabelecimento só será criado após a confirmação do pagamento.
             </div>
 

@@ -73,6 +73,7 @@ export interface CriarAssinaturaPayload {
 export interface PagamentoInicial {
   checkoutUrl?: string | null
   qrCode?: string | null
+  expiraEm?: string | null
 }
 
 export interface Assinatura {

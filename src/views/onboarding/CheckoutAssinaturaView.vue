@@ -19,7 +19,15 @@ import { useLoading } from '@/composables/useLoading'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { formatBRL, telefoneToApi } from '@/utils/formatters'
 import { USER_ROLE } from '@/types/user.types'
-import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
+import { openThirdPartyUrl } from '@/utils/thirdPartyRedirect'
+import {
+  MENSAGEM_AGUARDANDO_PAGAMENTO,
+  MENSAGEM_LINK_EXPIRADO,
+  MENSAGEM_PAGAMENTO_CONCLUIDO,
+  MENSAGEM_REFRESH_FALHOU,
+  obterDeadlinePollPagamento,
+  sincronizarSessaoPosAssinatura,
+} from '@/utils/sessaoPosAssinatura'
 
 const route = useRoute()
 const router = useRouter()
@@ -80,24 +88,29 @@ onMounted(async () => {
   nome.value = userStore.profile?.nome ?? ''
 })
 
-async function aguardarAtivacao() {
+async function aguardarAtivacao(expiraEm?: string | null) {
   aguardandoPagamento.value = true
-  globalLoading.open({ message: 'Processando pagamento...' })
+  globalLoading.open({ message: MENSAGEM_AGUARDANDO_PAGAMENTO })
   try {
-    const maxTentativas = 30
-    for (let i = 0; i < maxTentativas; i++) {
+    const deadline = obterDeadlinePollPagamento(expiraEm)
+    while (Date.now() < deadline) {
       await new Promise((r) => setTimeout(r, 2000))
-      await negocioStore.fetchEstabelecimentos(true)
+      try {
+        await negocioStore.fetchEstabelecimentos(true)
+      } catch {
+        // Continua aguardando o webhook.
+      }
       if (negocioStore.assinaturaAtiva) {
-        notifications.push('success', 'Pagamento confirmado! Bem-vindo ao dashboard.')
+        const sessaoOk = await sincronizarSessaoPosAssinatura()
+        if (!sessaoOk) {
+          notifications.push('warning', MENSAGEM_REFRESH_FALHOU)
+        }
+        notifications.push('success', MENSAGEM_PAGAMENTO_CONCLUIDO)
         await router.push(ROUTE_PATHS.DASHBOARD)
         return
       }
     }
-    notifications.push(
-      'info',
-      'Pagamento em processamento. Atualize a página em alguns instantes.',
-    )
+    notifications.push('info', MENSAGEM_LINK_EXPIRADO)
   } finally {
     aguardandoPagamento.value = false
     globalLoading.close()
@@ -183,10 +196,15 @@ async function finalizarCheckout() {
 
     if (result.status === 'PendentePagamento') {
       if (result.pagamentoInicial?.checkoutUrl) {
-        redirectToThirdPartyUrl(result.pagamentoInicial.checkoutUrl)
-        return
+        const modo = openThirdPartyUrl(result.pagamentoInicial.checkoutUrl)
+        if (modo === 'denied') {
+          return
+        }
+        if (modo === 'same-tab') {
+          return
+        }
       }
-      await aguardarAtivacao()
+      await aguardarAtivacao(result.pagamentoInicial?.expiraEm)
       return
     }
 
@@ -258,7 +276,7 @@ function onLogoError(message: string) {
         :loading="submitting || aguardandoPagamento"
         @click="finalizarCheckout"
       >
-        {{ aguardandoPagamento ? 'Processando pagamento...' : 'Contratar plano' }}
+        {{ aguardandoPagamento ? 'Aguardando confirmação do pagamento...' : 'Contratar plano' }}
       </BaseButton>
     </template>
   </div>
