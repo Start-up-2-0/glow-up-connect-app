@@ -9,12 +9,15 @@ export function openThirdPartyUrl(url: string): ThirdPartyOpenResult {
     return 'denied'
   }
 
-  const popup = window.open(url, '_blank', 'noopener,noreferrer')
-  if (popup == null || popup.closed) {
+  // Não usar 'noopener' em window.open: no Chromium o retorno fica null mesmo
+  // com a aba aberta, e o fallback navegaria esta página também.
+  const popup = window.open(url, '_blank')
+  if (!popup) {
     window.location.href = url
     return 'same-tab'
   }
 
+  popup.opener = null
   return 'new-tab'
 }
 
