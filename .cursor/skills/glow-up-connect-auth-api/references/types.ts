@@ -110,14 +110,15 @@ export interface UsuarioMe {
   updatedAt: string | null
 }
 
-// --- Recuperacao (futuro — backend ainda 501) ---
+// --- Recuperacao de senha ---
 
 export interface ForgotPasswordRequest {
   email: string
 }
 
 export interface ResetPasswordRequest {
-  token: string
+  token?: string
+  codigo?: string
   senha: string
   confirmarSenha: string
 }

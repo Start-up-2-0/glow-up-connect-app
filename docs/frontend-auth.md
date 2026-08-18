@@ -19,8 +19,8 @@ Documentacao complementar (testes manuais, SQL de dev): [cadastro-usuario.md](./
 | Confirmar e-mail | POST | `/api/auth/confirmar-email` | Nao | Implementado |
 | Reenviar confirmacao | POST | `/api/auth/reenviar-confirmacao` | Nao | Implementado |
 | Login | POST | `/api/auth/login` | Nao | Implementado |
-| Esqueci a senha | POST | `/api/auth/forgot-password` | Nao | **501 — nao implementado** |
-| Redefinir senha | POST | `/api/auth/reset-password` | Nao | **501 — nao implementado** |
+| Esqueci a senha | POST | `/api/auth/forgot-password` | Nao | Implementado |
+| Redefinir senha | POST | `/api/auth/reset-password` | Nao | Implementado |
 
 ---
 
@@ -339,60 +339,14 @@ Cadastro publico sempre retorna `role: 1` apos login.
 
 ## 4. Esqueci a senha
 
-> **Status atual:** endpoints existem mas retornam **501 Not Implemented**.  
-> Nao integrar em producao ate o backend liberar a feature.
-
-### Estado atual da API
+Mesmo padrao da confirmacao de e-mail: token opaco + codigo de 6 digitos. Documentacao detalhada: [frontend/recuperacao-senha.md](./frontend/recuperacao-senha.md).
 
 ```http
 POST /api/auth/forgot-password
 POST /api/auth/reset-password
 ```
 
-Resposta atual (501):
-
-```json
-{
-  "success": false,
-  "message": "Recuperação de senha ainda não implementada.",
-  "code": "NOT_IMPLEMENTED"
-}
-```
-
-### Contrato previsto (para preparar telas)
-
-Baseado no design interno da API (`docs/mensageria.md`). **Sujeito a alteracao** quando implementado.
-
-#### Passo 1 — Solicitar e-mail
-
-`POST /api/auth/forgot-password`
-
-```json
-{ "email": "maria@email.com" }
-```
-
-Resposta esperada (200) — mensagem generica, sem revelar se o e-mail existe:
-
-```json
-{
-  "success": true,
-  "message": "Se o e-mail estiver cadastrado, enviaremos instrucoes para redefinir a senha."
-}
-```
-
-E-mail contera link:
-
-```text
-{Auth:FrontendBaseUrl}/resetar-senha?token=<token-opaco>
-```
-
-Validade prevista: **30 minutos**.
-
-#### Passo 2 — Redefinir senha
-
-Tela `/resetar-senha` le `token` da query string e envia:
-
-`POST /api/auth/reset-password`
+`forgot-password` sempre retorna 200 generico. `reset-password` aceita exatamente `token` ou `codigo`, mais `senha`/`confirmarSenha`. Validade: **30 minutos**.
 
 ```json
 {
@@ -402,29 +356,9 @@ Tela `/resetar-senha` le `token` da query string e envia:
 }
 ```
 
-Regras de `senha`: mesmas do cadastro (complexidade minima).
+Erro `400 RESET_SENHA_INVALIDO` se token/codigo for invalido ou expirado.
 
-Resposta esperada (200):
-
-```json
-{
-  "success": true,
-  "message": "Senha redefinida com sucesso. Voce ja pode fazer login."
-}
-```
-
-#### Erros previstos
-
-| HTTP | `code` | Quando |
-|------|--------|--------|
-| 400 | `RESET_SENHA_INVALIDO` | Token expirado ou invalido |
-| 400 | — (validation) | Senhas nao conferem ou regra de complexidade |
-
-#### Preparacao recomendada no frontend (agora)
-
-1. Tela **Esqueci minha senha** com campo `email` — pode exibir aviso de "em breve" ou desabilitar submit.
-2. Tela **Redefinir senha** em `/resetar-senha?token=...` com campos `senha` e `confirmarSenha`.
-3. Tratar `501 NOT_IMPLEMENTED` graciosamente ate o backend entregar a feature.
+Telas: `/auth/esqueci-senha`, `/auth/esqueci-senha/codigo`, `/auth/redefinir-senha` (alias `/resetar-senha?token=`). Reenvio reusa `forgot-password`.
 
 ---
 
@@ -589,7 +523,7 @@ async function obterPerfil(token: string) {
 - [ ] Interceptor HTTP com header `x-glow-token`
 - [ ] Refresh automatico com `POST /api/auth/refresh`
 - [ ] Tratar `EMAIL_NAO_CONFIRMADO`, `USER_BLOCKED`, `INVALID_CREDENTIALS`
-- [ ] Telas de esqueci/redefinir senha preparadas (aguardar backend sair do 501)
+- [ ] Telas de esqueci/redefinir senha (`token` XOR `codigo`; tratar `RESET_SENHA_INVALIDO`)
 
 ---
 
