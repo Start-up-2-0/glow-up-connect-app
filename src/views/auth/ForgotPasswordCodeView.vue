@@ -94,7 +94,7 @@ async function handleResend() {
   try {
     const result = await resendCode()
 
-    if (result.rateLimited) {
+    if (!result.ok && result.rateLimited) {
       rateLimited.value = true
       return
     }
