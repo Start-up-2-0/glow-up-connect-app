@@ -24,6 +24,11 @@ import {
   writeAgendarWizardDraft,
   type ModoIdentidadeAgendamento,
 } from '@/utils/agendarWizardStorage'
+import {
+  normalizarSelecaoServicos,
+  podeSelecionarServico,
+  toggleServicoSelecionado,
+} from '@/utils/servicoSelecao'
 
 const DISPONIBILIDADE_JANELA_DIAS = 31
 
@@ -267,7 +272,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
     if (!draft) return
 
     modoIdentidade.value = draft.modoIdentidade
-    selectedServicoIds.value = draft.selectedServicoIds
+    selectedServicoIds.value = normalizarSelecaoServicos(draft.selectedServicoIds, servicos.value)
     selectedDate.value = draft.selectedDate
     observacao.value = draft.observacao
     clienteNome.value = draft.clienteNome
@@ -354,7 +359,10 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
     try {
       servicos.value = await publicoService.listarServicosLoja(publicGuid, guidProfissionalApi())
       const permitidos = new Set(servicos.value.map((servico) => servico.id))
-      selectedServicoIds.value = selectedServicoIds.value.filter((id) => permitidos.has(id))
+      selectedServicoIds.value = normalizarSelecaoServicos(
+        selectedServicoIds.value.filter((id) => permitidos.has(id)),
+        servicos.value,
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erro ao carregar serviços.'
       throw err
@@ -430,11 +438,22 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
   }
 
   function toggleServico(id: number) {
-    const index = selectedServicoIds.value.indexOf(id)
-    if (index >= 0) {
-      selectedServicoIds.value = selectedServicoIds.value.filter((sid) => sid !== id)
-    } else {
-      selectedServicoIds.value = [...selectedServicoIds.value, id]
+    selectedServicoIds.value = toggleServicoSelecionado(
+      selectedServicoIds.value,
+      id,
+      servicos.value,
+    )
+  }
+
+  function estadoSelecaoServico(servico: ServicoPublico) {
+    const resultado = podeSelecionarServico(
+      selectedServicoIds.value,
+      servico,
+      servicos.value,
+    )
+    return {
+      disabled: !resultado.ok && !selectedServicoIds.value.includes(servico.id),
+      motivoBloqueio: resultado.motivo,
     }
   }
 
@@ -816,6 +835,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
     activeProfissionalGuid,
     semPreferenciaProfissional,
     toggleServico,
+    estadoSelecaoServico,
     escolherIdentidade,
     escolherModoProfissional,
     selecionarProfissional,

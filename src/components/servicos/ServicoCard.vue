@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ServicoIcons from '@/components/servicos/ServicoIcons.vue'
+import ServicoImagem from '@/components/servicos/ServicoImagem.vue'
 import type { Servico } from '@/types/negocio/servico.types'
 import { formatCurrency } from '@/utils/formatters'
 import { formatDuracaoMinutos } from '@/utils/servicoFormatters'
@@ -22,10 +23,17 @@ const emit = defineEmits<{
 
 <template>
   <article class="servico-card">
+    <ServicoImagem :imagem="servico.imagem" :alt="servico.nome" size="lg" class="servico-card__thumb" />
     <div class="servico-card__body">
       <div class="servico-card__info">
         <div class="servico-card__title-row">
           <h2 class="servico-card__title">{{ servico.nome }}</h2>
+          <span
+            v-if="servico.tipoServico === 'Combo'"
+            class="servico-status-badge servico-status-badge--combo"
+          >
+            Combo
+          </span>
           <span
             class="servico-status-badge"
             :class="

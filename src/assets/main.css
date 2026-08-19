@@ -2676,7 +2676,11 @@
   }
 
   .servico-card {
-    @apply relative min-h-[141px] rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-[22px] shadow-glow-sm;
+    @apply relative flex min-h-[141px] gap-4 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-[22px] shadow-glow-sm;
+  }
+
+  .servico-card__thumb {
+    @apply shrink-0 self-start;
   }
 
   .servico-card__body {
@@ -2725,6 +2729,10 @@
 
   .servico-status-badge--ativo {
     @apply bg-glow-success-bg text-glow-success-dark;
+  }
+
+  .servico-status-badge--combo {
+    @apply bg-glow-gold-soft text-glow-gold-dark;
   }
 
   .servico-status-badge--inativo {

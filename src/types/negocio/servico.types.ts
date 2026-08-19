@@ -1,3 +1,5 @@
+export type TipoServico = 'Individual' | 'Combo'
+
 export interface ServicoProfissionalResumo {
   profissionalId: number
   preco: number
@@ -12,6 +14,8 @@ export interface Servico {
   descricao: string
   precoBase: number
   duracaoMinutos: number
+  tipoServico: TipoServico
+  imagem?: string | null
   ativo: boolean
   profissionais: ServicoProfissionalResumo[]
 }
@@ -21,6 +25,9 @@ export interface ServicoPayload {
   descricao?: string
   precoBase: number
   duracaoMinutos: number
+  tipoServico?: TipoServico
+  imagem?: string
+  imagemContentType?: string
 }
 
 export interface ServicoFiltro {

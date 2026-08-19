@@ -2,15 +2,18 @@
 import { computed, ref, watch } from 'vue'
 import CurrencyInput from '@/components/ui/CurrencyInput.vue'
 import ServicoIcons from '@/components/servicos/ServicoIcons.vue'
+import ServicoImagem from '@/components/servicos/ServicoImagem.vue'
 import ServicoProfissionalChip from '@/components/servicos/ServicoProfissionalChip.vue'
 import ServicoProfissionalSelectModal from '@/components/servicos/ServicoProfissionalSelectModal.vue'
+import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { equipeService } from '@/services/equipeService'
 import { servicoService } from '@/services/servicoService'
 import type { ProfissionalEquipe } from '@/types/negocio/equipe.types'
-import type { Servico } from '@/types/negocio/servico.types'
+import type { Servico, TipoServico } from '@/types/negocio/servico.types'
+import { compressAvatarFile } from '@/utils/avatarFile'
 import { isValidCurrencyValue } from '@/utils/formatters'
 
 const props = withDefaults(
@@ -53,7 +56,12 @@ const form = ref({
   descricao: '',
   precoBase: 0,
   duracaoMinutos: 30,
+  tipoServico: 'Individual' as TipoServico,
 })
+
+const imagemPreview = ref<string | null>(null)
+const imagemContentType = ref<string | undefined>(undefined)
+const imagemAlterada = ref(false)
 
 const profissionaisSelecionados = ref<number[]>([])
 const profissionaisIniciais = ref<number[]>([])
@@ -66,6 +74,19 @@ const temModuloProfissionais = computed(() =>
 )
 
 const isNovo = computed(() => props.servicoId == null)
+
+const tipoOpcoes: Array<{ value: TipoServico; titulo: string; descricao: string }> = [
+  {
+    value: 'Individual',
+    titulo: 'Serviço individual',
+    descricao: 'Pode ser selecionado junto com outros serviços no agendamento.',
+  },
+  {
+    value: 'Combo',
+    titulo: 'Combo',
+    descricao: 'Pacote exclusivo — o cliente não poderá combinar com outros serviços.',
+  },
+]
 
 const profissionaisDisponiveis = computed(() => equipe.value.filter((p) => p.ativo))
 
@@ -110,7 +131,11 @@ async function loadServico() {
       descricao: servico.descricao ?? '',
       precoBase: servico.precoBase,
       duracaoMinutos: servico.duracaoMinutos,
+      tipoServico: servico.tipoServico ?? 'Individual',
     }
+    imagemPreview.value = servico.imagem ?? null
+    imagemContentType.value = undefined
+    imagemAlterada.value = false
     const vinculados = servico.profissionais.filter((p) => p.ativo).map((p) => p.profissionalId)
     profissionaisSelecionados.value = [...vinculados]
     profissionaisIniciais.value = [...vinculados]
@@ -141,6 +166,24 @@ async function sincronizarProfissionais(estId: number, svcId: number) {
   ])
 }
 
+async function handleImagemChange(file: File | null) {
+  if (!file) {
+    imagemPreview.value = null
+    imagemContentType.value = undefined
+    imagemAlterada.value = true
+    return
+  }
+
+  try {
+    const compressed = await compressAvatarFile(file)
+    imagemPreview.value = compressed.dataUrl
+    imagemContentType.value = compressed.contentType
+    imagemAlterada.value = true
+  } catch (err) {
+    notifications.push('error', err instanceof Error ? err.message : 'Imagem inválida.')
+  }
+}
+
 async function handleSubmit() {
   if (!props.estabelecimentoId || !validate()) return
   saving.value = true
@@ -150,6 +193,10 @@ async function handleSubmit() {
       descricao: form.value.descricao?.trim() || undefined,
       precoBase: form.value.precoBase,
       duracaoMinutos: Number(form.value.duracaoMinutos),
+      tipoServico: form.value.tipoServico,
+      ...(imagemAlterada.value && imagemPreview.value
+        ? { imagem: imagemPreview.value, imagemContentType: imagemContentType.value }
+        : {}),
     }
 
     let salvo: Servico
@@ -180,7 +227,10 @@ function aplicarProfissionais(ids: number[]) {
 }
 
 function resetForm() {
-  form.value = { nome: '', descricao: '', precoBase: 0, duracaoMinutos: 30 }
+  form.value = { nome: '', descricao: '', precoBase: 0, duracaoMinutos: 30, tipoServico: 'Individual' }
+  imagemPreview.value = null
+  imagemContentType.value = undefined
+  imagemAlterada.value = false
   profissionaisSelecionados.value = []
   profissionaisIniciais.value = []
   errors.value = {}
@@ -251,6 +301,43 @@ defineExpose({ resetForm, saving, loading, notFound })
             />
             <p v-if="errors.duracaoMinutos" class="servicos-form-field__error">
               {{ errors.duracaoMinutos }}
+            </p>
+          </div>
+        </div>
+
+        <div class="servicos-form-field">
+          <span class="servicos-form-label">Tipo do serviço</span>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <button
+              v-for="opcao in tipoOpcoes"
+              :key="opcao.value"
+              type="button"
+              class="rounded-xl border p-3 text-left transition"
+              :class="
+                form.tipoServico === opcao.value
+                  ? 'border-glow-gold bg-glow-gold/5 ring-2 ring-glow-gold'
+                  : 'border-glow-border-soft hover:border-glow-gold/40'
+              "
+              @click="form.tipoServico = opcao.value"
+            >
+              <span class="block font-satoshi text-sm font-semibold text-glow-text">{{ opcao.titulo }}</span>
+              <span class="mt-1 block font-urbanist text-xs text-glow-text-subtle">{{ opcao.descricao }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="servicos-form-field">
+          <AuthAvatarUpload
+            label="Imagem ilustrativa (opcional)"
+            variant="contratar"
+            :preview-url="imagemPreview"
+            preview-hint="Imagem atual do serviço"
+            @change="handleImagemChange"
+          />
+          <div v-if="imagemPreview" class="mt-3 flex items-center gap-3">
+            <ServicoImagem :imagem="imagemPreview" size="lg" />
+            <p class="font-urbanist text-xs text-glow-text-subtle">
+              Essa imagem aparece na listagem e no agendamento para o cliente.
             </p>
           </div>
         </div>

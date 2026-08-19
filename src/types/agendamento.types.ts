@@ -160,6 +160,8 @@ export interface ServicoPublico {
   precoMaximo: number
   duracaoMinutosBase: number
   duracaoMinutosEstimada: number
+  tipoServico: 'Individual' | 'Combo'
+  imagem?: string | null
 }
 
 export interface ProfissionalPublico {

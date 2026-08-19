@@ -79,6 +79,7 @@ const {
   valorEstimado,
   duracaoTotal,
   toggleServico,
+  estadoSelecaoServico,
   escolherIdentidade,
   escolherModoProfissional,
   selecionarProfissional,
@@ -509,7 +510,11 @@ async function handleConfirmar() {
               :duracao-minutos="servico.duracaoMinutosEstimada"
               :preco-minimo="servico.precoMinimo"
               :preco-maximo="servico.precoMaximo"
+              :imagem="servico.imagem"
+              :tipo-servico="servico.tipoServico"
               :selected="selectedServicoIds.includes(servico.id)"
+              :disabled="estadoSelecaoServico(servico).disabled"
+              :motivo-bloqueio="estadoSelecaoServico(servico).motivoBloqueio"
               @toggle="toggleServico(servico.id)"
             />
           </div>

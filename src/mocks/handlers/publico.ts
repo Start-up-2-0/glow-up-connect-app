@@ -92,6 +92,8 @@ export function registerPublicoRoutes(router: MockRouter) {
         precoMaximo: s.precoBase + 20,
         duracaoMinutosBase: s.duracaoMinutos,
         duracaoMinutosEstimada: s.duracaoMinutos,
+        tipoServico: s.tipoServico ?? 'Individual',
+        imagem: s.imagem ?? null,
       })),
     )
   })
