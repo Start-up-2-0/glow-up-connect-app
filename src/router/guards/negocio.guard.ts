@@ -111,6 +111,7 @@ export const negocioGuard: NavigationGuard = async (to) => {
   if (
     negocioStore.assinaturaAtiva
     && negocioStore.role === 'Owner'
+    && negocioStore.ehProfissionalAutonomo
     && negocioStore.onboardingObrigatorioPendente
     && !isLojaSetup
     && !isOnboarding
