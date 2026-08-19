@@ -17,6 +17,7 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { useLoading } from '@/composables/useLoading'
 import { ROUTE_PATHS } from '@/constants/routes'
+import { resolveTipoAssinatura } from '@/utils/tipoAssinatura'
 import { formatBRL, telefoneToApi } from '@/utils/formatters'
 import { USER_ROLE } from '@/types/user.types'
 import { openThirdPartyUrl } from '@/utils/thirdPartyRedirect'
@@ -63,7 +64,7 @@ const logoFile = ref<File | null>(null)
 
 const isAutonomo = computed(
   () =>
-    route.query.tipoAssinatura === 'ProfissionalAutonomo'
+    resolveTipoAssinatura(String(route.query.tipoAssinatura ?? '')) === 'ProfissionalAutonomo'
     || userStore.profile?.role === USER_ROLE.PROFISSIONAL_AUTONOMO,
 )
 
@@ -73,7 +74,10 @@ onMounted(async () => {
   }
 
   try {
-    await planosStore.fetchPlanos()
+    await planosStore.fetchPlanos(
+      false,
+      resolveTipoAssinatura(String(route.query.tipoAssinatura ?? '')),
+    )
   } catch (err) {
     erro.value = resolveError(err)
     return

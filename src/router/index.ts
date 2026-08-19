@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { APP_NAME } from '@/constants/storageKeys'
 import { useLoadingStore } from '@/stores/loading.store'
 import { authGuard } from './guards/auth.guard'
+import { featuresGuard } from './guards/features.guard'
 import { negocioGuard } from './guards/negocio.guard'
 import { authRoutes } from './routes/auth.routes'
 import { dashboardRoutes } from './routes/dashboard.routes'
@@ -44,6 +45,7 @@ router.beforeEach((to, from) => {
   return true
 })
 router.beforeEach(authGuard)
+router.beforeEach(featuresGuard)
 router.beforeEach(negocioGuard)
 
 router.afterEach((to, from) => {

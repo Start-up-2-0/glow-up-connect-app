@@ -11,6 +11,8 @@ import { usePlanosStore } from '@/stores/planos.store'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useApiError } from '@/composables/useApiError'
 import { ordenarPlanosPorPreco } from '@/utils/planoDisplay'
+import { FEATURE_FLAGS } from '@/config/features'
+import { TIPO_ASSINATURA_PADRAO } from '@/utils/tipoAssinatura'
 import type { TipoAssinatura } from '@/types/assinatura.types'
 
 withDefaults(
@@ -27,7 +29,9 @@ const negocioStore = useNegocioStore()
 const { planos, promocao, loading } = storeToRefs(planosStore)
 const { resolveError } = useApiError()
 const erro = ref<string | null>(null)
-const tipoAssinatura = ref<TipoAssinatura | null>(null)
+const tipoAssinatura = ref<TipoAssinatura | null>(
+  FEATURE_FLAGS.lojasHabilitadas ? null : TIPO_ASSINATURA_PADRAO,
+)
 
 const planosOrdenados = computed(() => ordenarPlanosPorPreco(planos.value))
 
@@ -71,16 +75,18 @@ async function carregarPlanos(tipo: TipoAssinatura) {
 
 watch(tipoAssinatura, (tipo) => {
   if (tipo) void carregarPlanos(tipo)
-})
+}, { immediate: true })
 
 onMounted(async () => {
-  // Não carrega planos até o usuário escolher o modelo.
+  if (!FEATURE_FLAGS.lojasHabilitadas) {
+    tipoAssinatura.value = TIPO_ASSINATURA_PADRAO
+  }
 })
 </script>
 
 <template>
   <div class="space-y-8">
-    <TipoOperacaoPicker v-model="tipoAssinatura" />
+    <TipoOperacaoPicker v-if="FEATURE_FLAGS.lojasHabilitadas" v-model="tipoAssinatura" />
 
     <template v-if="tipoAssinatura">
       <div class="mx-auto max-w-2xl text-center">

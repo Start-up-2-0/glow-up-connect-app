@@ -7,6 +7,7 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useTrocarEstabelecimento } from '@/composables/useTrocarEstabelecimento'
 import UserAvatar from '@/components/layout/UserAvatar.vue'
 import SidebarTooltip from './SidebarTooltip.vue'
+import { FEATURE_FLAGS } from '@/config/features'
 import { ROUTE_PATHS } from '@/constants/routes'
 
 defineProps<{ collapsed?: boolean }>()
@@ -25,7 +26,10 @@ const popoverStyle = ref({ left: '0px', top: '0px', width: '260px', zIndex: POPO
 const planoLabel = computed(() => estabelecimentoAtivo.value?.planoNome ?? 'Plano Profissional')
 
 const mostrarAtalhoMinhasLojas = computed(
-  () => role.value === 'Owner' && (limites.value.estabelecimentos ?? 1) > 1,
+  () =>
+    (FEATURE_FLAGS.lojasHabilitadas || negocioStore.tipoAssinatura === 'Estabelecimento')
+    && role.value === 'Owner'
+    && (limites.value.estabelecimentos ?? 1) > 1,
 )
 
 function toggle() {

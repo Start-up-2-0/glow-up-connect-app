@@ -1,4 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
+import { FEATURE_FLAGS } from '@/config/features'
 import { ROUTE_NAMES, ROUTE_PATHS } from '@/constants/routes'
 
 export const clienteRoutes: RouteRecordRaw[] = [
@@ -10,7 +11,7 @@ export const clienteRoutes: RouteRecordRaw[] = [
       layout: 'dashboard',
       requiresAuth: true,
       clienteOnly: true,
-      title: 'Explorar lojas',
+      title: FEATURE_FLAGS.lojasHabilitadas ? 'Explorar lojas' : 'Explorar profissionais',
     },
   },
   {

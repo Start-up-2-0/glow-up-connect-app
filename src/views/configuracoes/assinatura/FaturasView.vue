@@ -22,7 +22,7 @@ import { formatBRL, formatDate } from '@/utils/formatters'
 import type { CobrancaAssinatura } from '@/types/assinatura.types'
 import '@/components/assinatura/page/assinaturaPage.css'
 
-const { assinaturaId, estabelecimentoId, planoNome, planoId } = useNegocioContext()
+const { assinaturaId, estabelecimentoId, planoNome, planoId, tipoAssinatura } = useNegocioContext()
 const assinaturaStore = useAssinaturaStore()
 const planosStore = usePlanosStore()
 const notifications = useNotificationsStore()
@@ -117,7 +117,7 @@ onMounted(async () => {
         ? assinaturaStore.fetchAtual(estabelecimentoId.value)
         : Promise.resolve(),
       assinaturaStore.fetchCobrancas(assinaturaId.value),
-      planosStore.fetchPlanos(),
+      planosStore.fetchPlanos(false, tipoAssinatura.value ?? undefined),
     ])
   } catch (err) {
     erro.value = resolveError(err)

@@ -10,6 +10,7 @@ import {
   type NavItem,
   type NavSection,
 } from '@/constants/navigation'
+import { FEATURE_FLAGS } from '@/config/features'
 import { filterNavSections } from '@/utils/filterNavItems'
 import { useUserStore } from '@/stores/user.store'
 import { useNegocioStore } from '@/stores/negocio.store'
@@ -87,28 +88,32 @@ export function useDashboardNav() {
     }
 
     const ocultarAbrirLoja =
-      ehProfissionalOperacional.value || possuiEstabelecimentoProprio.value
+      !FEATURE_FLAGS.lojasHabilitadas
+      || ehProfissionalOperacional.value
+      || possuiEstabelecimentoProprio.value
     const clienteSections = ocultarAbrirLoja
       ? clienteNavSemAbrirLojaSections(clienteNavSections)
       : clienteNavSections
 
     if (ehProfissionalOperacional.value) {
       const operacao = filterNavSections(profissionalNavSections, filterCtx)
-      return mergeNavSections(
-        filterNavSections(clienteSections, filterCtx),
-        operacao,
+      return adaptLabelsCliente(
+        mergeNavSections(
+          filterNavSections(clienteSections, filterCtx),
+          operacao,
+        ),
       )
     }
 
     if (temVinculoNegocio.value) {
-      return adaptLabelsAutonomo(filterNavSections(businessNavSections, filterCtx))
+      return adaptLabels(filterNavSections(businessNavSections, filterCtx))
     }
 
     if (!isClienteRole(profile.value?.role)) {
-      return adaptLabelsAutonomo(filterNavSections(businessNavSections, filterCtx))
+      return adaptLabels(filterNavSections(businessNavSections, filterCtx))
     }
 
-    return filterNavSections(clienteSections, filterCtx)
+    return adaptLabelsCliente(filterNavSections(clienteSections, filterCtx))
   })
 
   function adaptLabelsAutonomo(sections: NavSection[]): NavSection[] {
@@ -122,6 +127,24 @@ export function useDashboardNav() {
       ),
     }))
   }
+
+  function adaptLabelsExplorar(sections: NavSection[]): NavSection[] {
+    if (FEATURE_FLAGS.lojasHabilitadas) return sections
+    return sections.map((section) => ({
+      ...section,
+      items: section.items.map((item) =>
+        item.id === 'explorar' ? { ...item, label: 'Explorar profissionais' } : item,
+      ),
+    }))
+  }
+
+  function adaptLabels(sections: NavSection[]): NavSection[] {
+    return adaptLabelsExplorar(adaptLabelsAutonomo(sections))
+  }
+
+  function adaptLabelsCliente(sections: NavSection[]): NavSection[] {
+    return adaptLabelsExplorar(sections)
+  }
   const navItems = computed(() => navSections.value.flatMap((section) => section.items))
 
   const searchPlaceholder = computed(() => {
@@ -132,7 +155,9 @@ export function useDashboardNav() {
       return NAV_SEARCH_PLACEHOLDER_BUSINESS
     }
     return isClienteRole(profile.value?.role)
-      ? NAV_SEARCH_PLACEHOLDER_CLIENTE
+      ? FEATURE_FLAGS.lojasHabilitadas
+        ? NAV_SEARCH_PLACEHOLDER_CLIENTE
+        : 'Buscar profissionais, agendamentos, perfil…'
       : NAV_SEARCH_PLACEHOLDER_BUSINESS
   })
 

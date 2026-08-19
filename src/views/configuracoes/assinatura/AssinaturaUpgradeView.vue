@@ -17,7 +17,7 @@ import { formatBRL } from '@/utils/formatters'
 const router = useRouter()
 const planosStore = usePlanosStore()
 const assinaturaStore = useAssinaturaStore()
-const { assinaturaId, planoId, planoNome } = useNegocioContext()
+const { assinaturaId, planoId, planoNome, tipoAssinatura } = useNegocioContext()
 const { planos, loading: planosLoading } = storeToRefs(planosStore)
 const { loading: submitting } = storeToRefs(assinaturaStore)
 const notifications = useNotificationsStore()
@@ -28,7 +28,7 @@ const planoSelecionadoId = ref<number | null>(null)
 const cardFormRef = ref<InstanceType<typeof MercadoPagoCardForm> | null>(null)
 const confirmarDowngrade = ref(false)
 
-onMounted(() => planosStore.fetchPlanos())
+onMounted(() => planosStore.fetchPlanos(false, tipoAssinatura.value ?? undefined))
 
 function abrirModal(planoIdAlvo: number) {
   const atual = planos.value.find((p) => p.id === planoId.value)

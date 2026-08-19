@@ -22,6 +22,7 @@ export function useNegocioContext() {
     loading,
     trocandoEstabelecimento,
     contextoVersao,
+    tipoAssinatura,
   } = storeToRefs(negocioStore)
 
   return {
@@ -44,6 +45,7 @@ export function useNegocioContext() {
     loading,
     trocandoEstabelecimento,
     contextoVersao,
+    tipoAssinatura,
     possuiModulo: negocioStore.possuiModulo,
     possuiPermissao: negocioStore.possuiPermissao,
     possuiAlgumaPermissao: negocioStore.possuiAlgumaPermissao,

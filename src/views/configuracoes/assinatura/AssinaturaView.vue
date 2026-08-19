@@ -19,6 +19,7 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import { useUserStore } from '@/stores/user.store'
 import { useApiError } from '@/composables/useApiError'
 import { assinaturaService } from '@/services/assinaturaService'
+import { FEATURE_FLAGS } from '@/config/features'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { formatDate } from '@/utils/formatters'
 import type { AssinaturaOnboardingContexto } from '@/types/assinaturaOnboarding.types'
@@ -31,6 +32,7 @@ const {
   planoId,
   planoNome,
   estabelecimentoAtivo,
+  tipoAssinatura,
   ensureContext,
 } = useNegocioContext()
 const assinaturaStore = useAssinaturaStore()
@@ -54,6 +56,9 @@ const planoAtual = computed(() => {
 const paginaPronta = computed(() => !loading.value && !planosLoading.value)
 
 const mostrarLinkMinhasLojas = computed(() => {
+  if (!FEATURE_FLAGS.lojasHabilitadas && tipoAssinatura.value !== 'Estabelecimento') {
+    return false
+  }
   const ctx = contextoOnboarding.value
   if (!ctx) return false
   return (ctx.limiteLojas ?? 0) > 1 || ctx.podeAdicionarLoja || ctx.lojasVinculadas > 1
@@ -69,7 +74,7 @@ onMounted(async () => {
     assinaturaId.value
       ? assinaturaStore.fetchAtual(estabelecimentoAtivo.value.estabelecimentoId)
       : Promise.resolve(),
-    planosStore.fetchPlanos(),
+    planosStore.fetchPlanos(false, tipoAssinatura.value ?? undefined),
   ])
   try {
     contextoOnboarding.value = await assinaturaService.obterContextoOnboarding()

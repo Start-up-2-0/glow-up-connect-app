@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import PlanosOnboardingSection from '@/components/assinatura/PlanosOnboardingSection.vue'
 import { assinaturaService } from '@/services/assinaturaService'
 import { useNegocioStore } from '@/stores/negocio.store'
+import { FEATURE_FLAGS } from '@/config/features'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { MOCK_MODE } from '@/mocks/config'
 
@@ -40,11 +41,18 @@ onMounted(async () => {
   <div class="mx-auto w-full max-w-6xl space-y-8 pb-4">
     <header class="mx-auto max-w-2xl text-center">
       <h1 class="font-satoshi text-3xl font-bold tracking-tight text-glow-text sm:text-4xl">
-        Escolha como você trabalha e o plano ideal
+        {{
+          FEATURE_FLAGS.lojasHabilitadas
+            ? 'Escolha como você trabalha e o plano ideal'
+            : 'Escolha o plano ideal para o seu atendimento'
+        }}
       </h1>
       <p class="mt-3 font-urbanist text-sm leading-relaxed text-glow-text-subtle sm:text-base">
-        Do profissional autônomo ao estabelecimento com equipe — a plataforma se adapta ao seu
-        modelo. Comece grátis e evolua quando precisar.
+        {{
+          FEATURE_FLAGS.lojasHabilitadas
+            ? 'Do profissional autônomo ao estabelecimento com equipe — a plataforma se adapta ao seu modelo. Comece grátis e evolua quando precisar.'
+            : 'Planos pensados para barbeiros e cabeleireiros autônomos. Comece grátis e evolua quando precisar.'
+        }}
       </p>
     </header>
 

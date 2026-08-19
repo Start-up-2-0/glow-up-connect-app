@@ -10,6 +10,7 @@ import {
   limitesComoItens,
   recursosIncrementais,
 } from '@/utils/planoDisplay'
+import { TIPO_ASSINATURA_PADRAO } from '@/utils/tipoAssinatura'
 import type { Plano } from '@/types/plano.types'
 
 const props = withDefaults(
@@ -27,7 +28,7 @@ const props = withDefaults(
     desabilitado: false,
     modoLogado: false,
     percentualDesconto: null,
-    tipoAssinatura: 'Estabelecimento',
+    tipoAssinatura: TIPO_ASSINATURA_PADRAO,
   },
 )
 

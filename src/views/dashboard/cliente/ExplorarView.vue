@@ -12,6 +12,8 @@ import type {
   EstabelecimentoCategoria,
   EstabelecimentoProximo,
 } from '@/types/estabelecimento.types'
+import { visivelNoMarketplace, tipoAssinaturaParaCategorias } from '@/utils/tipoAssinatura'
+import { FEATURE_FLAGS } from '@/config/features'
 import { distanciaMetros, estabelecimentoTemCoordenadas } from '@/utils/explorarMapa'
 import {
   COARSE_ACCURACY_M,
@@ -87,13 +89,16 @@ const categoriaOptions = computed(() => [
 const subtituloLocal = computed(() => {
   if (cidade.value && estado.value) return `${cidade.value}, ${estado.value}`
   if (cidade.value) return cidade.value
-  return 'Descubra profissionais e lojas próximas no mapa'
+  return FEATURE_FLAGS.lojasHabilitadas
+    ? 'Descubra profissionais e lojas próximas no mapa'
+    : 'Descubra profissionais próximos no mapa'
 })
 
 const itensFiltrados = computed(() => {
+  const visiveis = itens.value.filter(visivelNoMarketplace)
   const q = busca.value.trim().toLowerCase()
-  if (!q) return itens.value
-  return itens.value.filter((item) => {
+  if (!q) return visiveis
+  return visiveis.filter((item) => {
     const hay = [
       item.nome,
       item.categoria ?? '',
@@ -144,7 +149,12 @@ async function carregar(opts?: { latitude: number; longitude: number }) {
       selectedGuid.value = null
     }
   } catch (err) {
-    error.value = resolveError(err, 'Não foi possível carregar estabelecimentos.')
+    error.value = resolveError(
+      err,
+      FEATURE_FLAGS.lojasHabilitadas
+        ? 'Não foi possível carregar estabelecimentos.'
+        : 'Não foi possível carregar profissionais.',
+    )
   } finally {
     loading.value = false
   }
@@ -184,7 +194,7 @@ function onUserInteract() {
 
 async function carregarCategorias() {
   try {
-    categorias.value = await publicoService.listarCategorias()
+    categorias.value = await publicoService.listarCategorias(tipoAssinaturaParaCategorias())
   } catch {
     categorias.value = []
   }
@@ -414,19 +424,20 @@ onUnmounted(() => {
         class="explorar-page__empty-overlay"
       >
         <EmptyState
-          title="Nenhuma loja nesta área"
+          :title="FEATURE_FLAGS.lojasHabilitadas ? 'Nenhuma loja nesta área' : 'Nenhum profissional nesta área'"
           description="Ajuste os filtros, mova o mapa ou atualize sua localização."
         />
       </div>
 
-      <p v-if="total > 0 || itensFiltrados.length > 0 || precisaoLabel" class="explorar-page__count">
-        <template v-if="total > 0 || itensFiltrados.length > 0">
+      <p v-if="itensFiltrados.length > 0 || precisaoLabel" class="explorar-page__count">
+        <template v-if="itensFiltrados.length > 0">
           {{ itensFiltrados.length }}
-          <template v-if="total > 0"> de {{ total }}</template>
-          lojas
+          {{ FEATURE_FLAGS.lojasHabilitadas
+            ? itensFiltrados.length === 1 ? 'loja' : 'lojas'
+            : itensFiltrados.length === 1 ? 'profissional' : 'profissionais' }}
         </template>
         <template v-if="precisaoLabel">
-          <span v-if="total > 0 || itensFiltrados.length > 0"> · </span>{{ precisaoLabel }}
+          <span v-if="itensFiltrados.length > 0"> · </span>{{ precisaoLabel }}
         </template>
         <span v-if="loading || geoLoading" class="opacity-60"> · atualizando…</span>
       </p>

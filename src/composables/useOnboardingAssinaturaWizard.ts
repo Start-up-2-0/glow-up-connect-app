@@ -11,6 +11,7 @@ import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { useApiError } from '@/composables/useApiError'
 import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
 import type { PagamentoAssinaturaPayload, TipoAssinatura } from '@/types/assinatura.types'
+import { TIPO_ASSINATURA_PADRAO } from '@/utils/tipoAssinatura'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { lojaSetupLocation } from '@/utils/lojaSetupNavigation'
 import type {
@@ -85,7 +86,7 @@ function saveDraft(draft: OnboardingAssinaturaDraft) {
 
 export function useOnboardingAssinaturaWizard(
   planoId: number,
-  tipoAssinatura: TipoAssinatura = 'Estabelecimento',
+  tipoAssinatura: TipoAssinatura = TIPO_ASSINATURA_PADRAO,
 ) {
   const router = useRouter()
   const authStore = useAuthStore()

@@ -11,6 +11,7 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
 import type { PagamentoAssinaturaPayload, TipoAssinatura } from '@/types/assinatura.types'
+import { TIPO_ASSINATURA_PADRAO } from '@/utils/tipoAssinatura'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { lojaSetupLocation } from '@/utils/lojaSetupNavigation'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
@@ -137,7 +138,7 @@ function precisaCompletarEndereco(perfil: EstabelecimentoPerfilCompleto | null):
 
 export function useAssinaturaLogadaWizard(
   planoId: number,
-  tipoAssinatura: TipoAssinatura = 'Estabelecimento',
+  tipoAssinatura: TipoAssinatura = TIPO_ASSINATURA_PADRAO,
 ) {
   const router = useRouter()
   const authStore = useAuthStore()

@@ -1,4 +1,5 @@
 import { ROUTE_PATHS } from '@/constants/routes'
+import { FEATURE_FLAGS } from '@/config/features'
 
 export interface PageChromeMeta {
   title: string
@@ -14,8 +15,10 @@ const pages: Record<string, PageChromeMeta> = {
     crumbs: [{ label: 'Dashboard' }],
   },
   [ROUTE_PATHS.EXPLORAR]: {
-    title: 'Explorar lojas',
-    description: 'Encontre estabelecimentos e profissionais perto de você.',
+    title: FEATURE_FLAGS.lojasHabilitadas ? 'Explorar lojas' : 'Explorar profissionais',
+    description: FEATURE_FLAGS.lojasHabilitadas
+      ? 'Encontre estabelecimentos e profissionais perto de você.'
+      : 'Encontre profissionais perto de você.',
     crumbs: [{ label: 'Explorar' }],
   },
   [ROUTE_PATHS.MEUS_AGENDAMENTOS]: {
@@ -99,9 +102,14 @@ const pages: Record<string, PageChromeMeta> = {
     crumbs: [{ label: 'Configurações' }, { label: 'Preferências' }],
   },
   [ROUTE_PATHS.ONBOARDING_PLANOS]: {
-    title: 'Abrir minha loja',
-    description: 'Escolha um plano e comece a operar.',
-    crumbs: [{ label: 'Conta' }, { label: 'Abrir loja' }],
+    title: FEATURE_FLAGS.lojasHabilitadas ? 'Abrir minha loja' : 'Escolher plano',
+    description: FEATURE_FLAGS.lojasHabilitadas
+      ? 'Escolha um plano e comece a operar.'
+      : 'Escolha um plano para profissionais autônomos.',
+    crumbs: [
+      { label: 'Conta' },
+      { label: FEATURE_FLAGS.lojasHabilitadas ? 'Abrir loja' : 'Planos' },
+    ],
   },
 }
 

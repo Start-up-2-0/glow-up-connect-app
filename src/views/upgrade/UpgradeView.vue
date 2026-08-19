@@ -38,7 +38,7 @@ const planosUpgrade = computed(() => {
 onMounted(() =>
   planosStore.fetchPlanos(
     true,
-    ehProfissionalAutonomo.value ? 'ProfissionalAutonomo' : 'Estabelecimento',
+    negocioStore.tipoAssinatura ?? undefined,
   ),
 )
 </script>

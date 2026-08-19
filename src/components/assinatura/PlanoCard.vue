@@ -5,6 +5,7 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { aplicarDescontoPercentual, formatBRL, formatLimite } from '@/utils/formatters'
+import { TIPO_ASSINATURA_PADRAO } from '@/utils/tipoAssinatura'
 import type { Plano } from '@/types/plano.types'
 import type { TipoAssinatura } from '@/types/assinatura.types'
 
@@ -19,7 +20,7 @@ const props = withDefaults(
   }>(),
   {
     modoLogado: false,
-    tipoAssinatura: 'Estabelecimento',
+    tipoAssinatura: TIPO_ASSINATURA_PADRAO,
   },
 )
 
