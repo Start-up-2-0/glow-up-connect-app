@@ -22,6 +22,7 @@ import { getUpgradeInfo } from '@/constants/upgradeMessages'
 import { useAppStore } from '@/stores/app.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useLoadingStore } from '@/stores/loading.store'
+import { useNegocioStore } from '@/stores/negocio.store'
 import { MOCK_MODE } from '@/mocks/config'
 
 type QueueCallback = {
@@ -158,7 +159,12 @@ function handleSubscriptionError(error: AxiosError<ApiErrorResponse>) {
         ? String((error.response.data.details as { modulo: string }).modulo)
         : undefined
 
-    const info = getUpgradeInfo(modulo ?? '')
+    const ehProfissionalAutonomo = useNegocioStore().ehProfissionalAutonomo
+    if (ehProfissionalAutonomo && modulo === 'Profissionais') {
+      return true
+    }
+
+    const info = getUpgradeInfo(modulo ?? '', ehProfissionalAutonomo)
     useAppStore().openUpgradeModal({
       modulo,
       mensagem: info.mensagem,

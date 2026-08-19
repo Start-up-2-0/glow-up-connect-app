@@ -5,6 +5,7 @@ import HorarioDiaLojaCard from '@/components/horarios/HorarioDiaLojaCard.vue'
 import { useHorarios } from '@/composables/useHorarios'
 import type { DiaSemanaValue } from '@/constants/diasSemana'
 import { ONBOARDING_CONTRATAR_CARD_CLASS } from '@/constants/designTokens'
+import type { HorarioFuncionamento } from '@/types/negocio/horario.types'
 
 const props = withDefaults(
   defineProps<{
@@ -27,7 +28,9 @@ const {
   DIAS_SEMANA,
   loading,
   savingDia,
+  savingDiaProprio,
   horariosPorDiaLoja,
+  horariosPorDiaProprio,
   podeGerenciarLoja,
   modoDiaLoja,
   draftDiaLoja,
@@ -36,10 +39,39 @@ const {
   cancelarEdicaoDiaLoja,
   salvarDiaLoja,
   alterarStatusDiaLoja,
+  modoDiaProprio,
+  draftDiaProprio,
+  setDraftDiaProprio,
+  iniciarEdicaoDiaProprio,
+  cancelarEdicaoDiaProprio,
+  salvarDiaProprio,
+  alterarStatusDiaProprio,
+  profissionalProprioId,
 } = useHorarios(estabelecimentoIdRef, ready)
 
+const usaAtendimentoAutonomo = computed(
+  () => props.modoAutonomo && profissionalProprioId.value != null,
+)
+
 function onDraftUpdate(dia: DiaSemanaValue, draft: { horaInicio: string; horaFim: string }) {
+  if (usaAtendimentoAutonomo.value) {
+    setDraftDiaProprio(dia, draft)
+    return
+  }
   setDraftDiaLoja(dia, draft)
+}
+
+function horarioAutonomoComoLoja(dia: DiaSemanaValue): HorarioFuncionamento | null {
+  const horario = horariosPorDiaProprio.value.get(dia)
+  if (!horario) return null
+  return {
+    id: horario.id,
+    estabelecimentoId: props.estabelecimentoId,
+    diaSemana: horario.diaSemana,
+    horaInicio: horario.horaInicio,
+    horaFim: horario.horaFim,
+    ativo: horario.ativo,
+  }
 }
 </script>
 
@@ -65,21 +97,24 @@ function onDraftUpdate(dia: DiaSemanaValue, draft: { horaInicio: string; horaFim
           :key="dia.value"
           :dia="dia.value"
           :label="dia.label"
-          :horario="horariosPorDiaLoja.get(dia.value) ?? null"
-          :modo="modoDiaLoja(dia.value)"
-          :draft="draftDiaLoja(dia.value)"
-          :saving="savingDia === dia.value"
+          :horario="usaAtendimentoAutonomo ? horarioAutonomoComoLoja(dia.value) : (horariosPorDiaLoja.get(dia.value) ?? null)"
+          :modo="usaAtendimentoAutonomo ? modoDiaProprio(dia.value) : modoDiaLoja(dia.value)"
+          :draft="usaAtendimentoAutonomo ? draftDiaProprio(dia.value) : draftDiaLoja(dia.value)"
+          :saving="usaAtendimentoAutonomo ? savingDiaProprio === dia.value : savingDia === dia.value"
           :exibe-profissionais="false"
           @update:draft="onDraftUpdate(dia.value, $event)"
-          @salvar="salvarDiaLoja(dia.value)"
-          @ativar="alterarStatusDiaLoja(dia.value, true)"
-          @desativar="alterarStatusDiaLoja(dia.value, false)"
-          @editar="iniciarEdicaoDiaLoja(dia.value)"
-          @cancelar="cancelarEdicaoDiaLoja(dia.value)"
+          @salvar="usaAtendimentoAutonomo ? salvarDiaProprio(dia.value) : salvarDiaLoja(dia.value)"
+          @ativar="usaAtendimentoAutonomo ? alterarStatusDiaProprio(dia.value, true) : alterarStatusDiaLoja(dia.value, true)"
+          @desativar="usaAtendimentoAutonomo ? alterarStatusDiaProprio(dia.value, false) : alterarStatusDiaLoja(dia.value, false)"
+          @editar="usaAtendimentoAutonomo ? iniciarEdicaoDiaProprio(dia.value) : iniciarEdicaoDiaLoja(dia.value)"
+          @cancelar="usaAtendimentoAutonomo ? cancelarEdicaoDiaProprio(dia.value) : cancelarEdicaoDiaLoja(dia.value)"
         />
       </div>
 
-      <p v-if="!podeGerenciarLoja && !loading" class="mt-3 text-sm text-glow-text-subtle">
+      <p
+        v-if="!usaAtendimentoAutonomo && !podeGerenciarLoja && !loading"
+        class="mt-3 text-sm text-glow-text-subtle"
+      >
         Sem permissão para editar horários da loja neste contexto.
       </p>
     </div>
@@ -89,3 +124,4 @@ function onDraftUpdate(dia: DiaSemanaValue, draft: { horaInicio: string; horaFim
     </div>
   </div>
 </template>
+

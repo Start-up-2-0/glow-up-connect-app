@@ -86,6 +86,10 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
   const apenasHorarioProprio = computed(
     () => podeGerenciarProfissional.value && !podeGerenciarLoja.value,
   )
+  /** Autônomo e profissional de loja editam o próprio horário de atendimento, não o funcionamento da loja. */
+  const usaHorarioAtendimentoProprio = computed(
+    () => ehProfissionalAutonomo.value || apenasHorarioProprio.value,
+  )
   const exibeAbaProfissional = computed(
     () =>
       !ehProfissionalAutonomo.value &&
@@ -546,7 +550,7 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
 
       await Promise.all(tarefas)
 
-      if (apenasHorarioProprio.value && profissionalProprioId.value) {
+      if (usaHorarioAtendimentoProprio.value && profissionalProprioId.value) {
         profissionais.value = [
           {
             id: 0,
@@ -560,7 +564,11 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
             podeReceberAgendamento: true,
           },
         ]
-      } else if (temModuloProfissionais.value && possuiPermissao('ProfissionalGerenciar')) {
+      } else if (
+        temModuloProfissionais.value
+        && possuiPermissao('ProfissionalGerenciar')
+        && !ehProfissionalAutonomo.value
+      ) {
         profissionais.value = await equipeService.listarProfissionais(estabelecimentoId.value)
       } else if (
         !ehProfissionalAutonomo.value
@@ -653,7 +661,7 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
   }
 
   async function salvarDiaProprio(dia: DiaSemanaValue) {
-    if (!estabelecimentoId.value || !profissionalProprioId.value || !apenasHorarioProprio.value) {
+    if (!estabelecimentoId.value || !profissionalProprioId.value || !usaHorarioAtendimentoProprio.value) {
       return
     }
 
@@ -700,7 +708,7 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
   }
 
   async function alterarStatusDiaProprio(dia: DiaSemanaValue, ativo: boolean) {
-    if (!estabelecimentoId.value || !profissionalProprioId.value || !apenasHorarioProprio.value) {
+    if (!estabelecimentoId.value || !profissionalProprioId.value || !usaHorarioAtendimentoProprio.value) {
       return
     }
 
@@ -760,6 +768,8 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
     podeGerenciarLoja,
     podeGerenciarProfissional,
     apenasHorarioProprio,
+    usaHorarioAtendimentoProprio,
+    profissionalProprioId,
     exibeAbaProfissional,
     temModuloProfissionais,
     usaProfissionaisVitrine,

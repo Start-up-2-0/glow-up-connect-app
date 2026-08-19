@@ -97,6 +97,7 @@ watch(
     <div v-if="showForm" :class="ONBOARDING_CONTRATAR_CARD_CLASS">
       <ServicoForm
         :estabelecimento-id="estabelecimentoId"
+        :show-profissionais="!modoAutonomo"
         submit-label="Salvar serviço"
         cancel-label="Cancelar"
         @saved="onSaved"

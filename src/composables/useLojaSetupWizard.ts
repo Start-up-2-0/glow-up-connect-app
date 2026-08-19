@@ -166,9 +166,26 @@ export function useLojaSetupWizard() {
 
   async function refreshContagens(estabelecimentoId: number) {
     try {
+      const servicosPromise = servicoService.listar(estabelecimentoId).catch(() => [])
+      if (ehProfissionalAutonomo.value) {
+        const profissionalId = estabelecimentoAtivo.value?.profissionalId ?? undefined
+        const [servicos, horarios] = await Promise.all([
+          servicosPromise,
+          horarioService
+            .listarProfissionais(estabelecimentoId, { profissionalId, ativo: true })
+            .catch(() => []),
+        ])
+        contagens.value = {
+          equipe: 0,
+          servicos: servicos.filter((s) => s.ativo).length,
+          horariosAtivos: horarios.filter((h) => h.ativo).length,
+        }
+        return
+      }
+
       const [membrosPage, servicos, horarios] = await Promise.all([
         equipeService.listarMembros(estabelecimentoId, { tamanhoPagina: 50 }).catch(() => null),
-        servicoService.listar(estabelecimentoId).catch(() => []),
+        servicosPromise,
         horarioService.listarLoja(estabelecimentoId).catch(() => []),
       ])
       const membros = membrosPage?.itens ?? []

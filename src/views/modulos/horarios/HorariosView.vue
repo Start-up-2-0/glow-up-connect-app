@@ -22,6 +22,7 @@ const {
   horariosPorDiaLoja,
   horariosPorDiaProprio,
   podeGerenciarLoja,
+  usaHorarioAtendimentoProprio,
   apenasHorarioProprio,
   modoDiaLoja,
   draftDiaLoja,
@@ -71,7 +72,7 @@ const pageSubtitle = computed(() => {
 })
 
 const secaoLojaTitulo = computed(() =>
-  ehProfissionalAutonomo.value ? 'Meus dias de atendimento' : 'Horários da loja',
+  usaHorarioAtendimentoProprio.value ? 'Meus dias de atendimento' : 'Horários da loja',
 )
 
 function onDraftUpdate(dia: DiaSemanaValue, draft: { horaInicio: string; horaFim: string }) {
@@ -103,7 +104,29 @@ function horarioProprioComoLoja(dia: DiaSemanaValue): HorarioFuncionamento | nul
     <p v-if="contextError" class="horarios-page__error">{{ contextError }}</p>
 
     <template v-if="!contextLoading && !loading">
-      <section v-if="podeGerenciarLoja" class="horarios-loja">
+      <section v-if="usaHorarioAtendimentoProprio" class="horarios-loja">
+        <h2 class="horarios-section-title">{{ secaoLojaTitulo }}</h2>
+        <div class="horarios-loja-grid">
+          <HorarioDiaLojaCard
+            v-for="dia in DIAS_SEMANA"
+            :key="dia.value"
+            :dia="dia.value"
+            :label="dia.label"
+            :horario="horarioProprioComoLoja(dia.value)"
+            :modo="modoDiaProprio(dia.value)"
+            :draft="draftDiaProprio(dia.value)"
+            :saving="savingDiaProprio === dia.value"
+            @update:draft="onDraftProprioUpdate(dia.value, $event)"
+            @salvar="salvarDiaProprio(dia.value)"
+            @ativar="alterarStatusDiaProprio(dia.value, true)"
+            @desativar="alterarStatusDiaProprio(dia.value, false)"
+            @editar="iniciarEdicaoDiaProprio(dia.value)"
+            @cancelar="cancelarEdicaoDiaProprio(dia.value)"
+          />
+        </div>
+      </section>
+
+      <section v-else-if="podeGerenciarLoja" class="horarios-loja">
         <h2 class="horarios-section-title">{{ secaoLojaTitulo }}</h2>
         <div class="horarios-loja-grid">
           <HorarioDiaLojaCard
@@ -144,28 +167,6 @@ function horarioProprioComoLoja(dia: DiaSemanaValue): HorarioFuncionamento | nul
           @vincular="vincularModalProfissional"
           @remover="removerModalProfissional"
         />
-      </section>
-
-      <section v-else-if="apenasHorarioProprio" class="horarios-loja">
-        <h2 class="horarios-section-title">Meus dias de atendimento</h2>
-        <div class="horarios-loja-grid">
-          <HorarioDiaLojaCard
-            v-for="dia in DIAS_SEMANA"
-            :key="dia.value"
-            :dia="dia.value"
-            :label="dia.label"
-            :horario="horarioProprioComoLoja(dia.value)"
-            :modo="modoDiaProprio(dia.value)"
-            :draft="draftDiaProprio(dia.value)"
-            :saving="savingDiaProprio === dia.value"
-            @update:draft="onDraftProprioUpdate(dia.value, $event)"
-            @salvar="salvarDiaProprio(dia.value)"
-            @ativar="alterarStatusDiaProprio(dia.value, true)"
-            @desativar="alterarStatusDiaProprio(dia.value, false)"
-            @editar="iniciarEdicaoDiaProprio(dia.value)"
-            @cancelar="cancelarEdicaoDiaProprio(dia.value)"
-          />
-        </div>
       </section>
     </template>
   </div>
