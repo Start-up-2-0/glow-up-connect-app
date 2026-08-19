@@ -353,6 +353,8 @@ function buildEstab(
     proximaDataVencimento: '2026-09-05T00:00:00Z',
     modulos: [...(opts.modulos ?? APP_MODULES)],
     tipoAssinatura,
+    onboardingObrigatorioPendente: false,
+    proximaEtapaOnboarding: null,
     limites: {
       profissionais: ehAutonomo ? 1 : 10,
       servicos: null,

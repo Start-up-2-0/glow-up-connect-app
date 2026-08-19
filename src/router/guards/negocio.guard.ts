@@ -5,6 +5,7 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { isClienteRole } from '@/types/user.types'
+import { mapBackendStepToWizardStep } from '@/types/onboardingPublicacao.types'
 
 function rotaRequerNegocio(to: Parameters<NavigationGuard>[0]): boolean {
   return to.matched.some((record) => {
@@ -103,6 +104,33 @@ export const negocioGuard: NavigationGuard = async (to) => {
       return { path: ROUTE_PATHS.DASHBOARD }
     }
     return { path: ROUTE_PATHS.CONFIG_ASSINATURA }
+  }
+
+  const isLojaSetup = to.path === ROUTE_PATHS.ONBOARDING_LOJA_SETUP
+
+  if (
+    negocioStore.assinaturaAtiva
+    && negocioStore.role === 'Owner'
+    && negocioStore.onboardingObrigatorioPendente
+    && !isLojaSetup
+    && !isOnboarding
+    && requerAssinatura
+  ) {
+    const proximaEtapa = mapBackendStepToWizardStep(
+      negocioStore.proximaEtapaOnboarding,
+      negocioStore.ehProfissionalAutonomo,
+    )
+    return {
+      path: ROUTE_PATHS.ONBOARDING_LOJA_SETUP,
+      query: {
+        mode: 'assinatura',
+        ...(negocioStore.estabelecimentoIdSelecionado
+          ? { estabelecimentoId: String(negocioStore.estabelecimentoIdSelecionado) }
+          : {}),
+        ...(negocioStore.assinaturaId ? { assinaturaId: String(negocioStore.assinaturaId) } : {}),
+        step: proximaEtapa,
+      },
+    }
   }
 
   const requerModulo = to.matched

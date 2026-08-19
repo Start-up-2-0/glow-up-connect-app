@@ -71,7 +71,7 @@ watch(
     <div :class="ONBOARDING_CONTRATAR_CARD_CLASS">
       <h2 class="font-urbanist text-lg font-semibold text-glow-text">Equipe da loja</h2>
       <p class="mt-1 text-sm text-glow-text-subtle">
-        Quer configurar agora? Você pode deixar a loja pronta ou fazer isso depois no dashboard.
+        Cadastre pelo menos um profissional ativo para publicar a loja e receber agendamentos.
       </p>
 
       <div class="mt-4 flex flex-wrap gap-2">
@@ -109,8 +109,7 @@ watch(
       />
     </div>
 
-    <div class="flex flex-wrap justify-between gap-2">
-      <BaseButton variant="ghost" @click="emit('skip')">Fazer depois</BaseButton>
+    <div class="flex flex-wrap justify-end gap-2">
       <BaseButton variant="primary" @click="emit('continue')">Continuar</BaseButton>
     </div>
   </div>

@@ -104,8 +104,7 @@ watch(
       />
     </div>
 
-    <div class="flex flex-wrap justify-between gap-2">
-      <BaseButton variant="ghost" @click="emit('skip')">Configurar depois</BaseButton>
+    <div class="flex flex-wrap justify-end gap-2">
       <BaseButton variant="primary" @click="emit('continue')">{{ continueLabel }}</BaseButton>
     </div>
   </div>

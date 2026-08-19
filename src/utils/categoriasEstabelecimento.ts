@@ -23,7 +23,7 @@ export function opcoesCategoriaDoTipo(
 export function placeholderCategoria(tipo: TipoAssinatura): string {
   return tipo === 'ProfissionalAutonomo'
     ? 'Selecione sua área de atuação'
-    : 'Barbearia ou salão de beleza'
+    : 'Selecione a categoria do estabelecimento'
 }
 
 export function sugerirCategoriaId(

@@ -1,3 +1,5 @@
+import type { OnboardingEtapaStatus } from '@/types/onboardingPublicacao.types'
+
 export type AssinaturaOnboardingEtapa =
   | 'EscolherPlano'
   | 'CadastrarEstabelecimento'
@@ -23,6 +25,9 @@ export interface AssinaturaOnboardingContexto {
   lojasVinculadas: number
   limiteLojas: number | null
   assinaturaPremiumId: number | null
+  onboardingObrigatorioPendente?: boolean
+  proximaEtapaPublicacao?: string | null
+  etapasPublicacao?: OnboardingEtapaStatus[] | null
 }
 
 /** Steps do wizard logado (estabelecimento + autônomo). */

@@ -22,6 +22,8 @@ import type {
   LojaSetupMode,
   LojaSetupStepId,
 } from '@/types/lojaSetup.types'
+import type { OnboardingEtapaStatus } from '@/types/onboardingPublicacao.types'
+import { mapBackendStepToWizardStep } from '@/types/onboardingPublicacao.types'
 import {
   emptyLojaSetupSkipped,
   LOJA_SETUP_STEPS,
@@ -94,6 +96,7 @@ export function useLojaSetupWizard() {
   const draft = ref<LojaSetupDraft>(createDraft(mode.value))
   const estabelecimentoDraft = ref<OnboardingEstabelecimentoDraft>(emptyEstabelecimento())
   const perfil = ref<EstabelecimentoPerfilCompleto | null>(null)
+  const etapasPublicacao = ref<OnboardingEtapaStatus[]>([])
   const loading = ref(true)
   const submitting = ref(false)
   const erro = ref<string | null>(null)
@@ -128,13 +131,11 @@ export function useLojaSetupWizard() {
         ?? LOJA_SETUP_STEP_SUBTITLES[draft.value.step])
       : LOJA_SETUP_STEP_SUBTITLES[draft.value.step],
   )
-  const skippedIds = computed(() => {
-    const ids: string[] = []
-    if (draft.value.skipped.equipe) ids.push('equipe')
-    if (draft.value.skipped.servicos) ids.push('servicos')
-    if (draft.value.skipped.horarios) ids.push('horarios')
-    return ids
-  })
+  const skippedIds = computed(() => [] as string[])
+
+  const etapasConcluidas = computed(() =>
+    etapasPublicacao.value.filter((etapa) => etapa.concluida).map((etapa) => etapa.id),
+  )
 
   const pageTitle = computed(() => {
     if (mode.value === 'adicionar-unidade') return 'Adicionar loja'
@@ -189,15 +190,26 @@ export function useLojaSetupWizard() {
     }
   }
 
-  function suggestStep(estabelecimentoId: number): LojaSetupStepId {
-    const skipped = draft.value.skipped
-    if (mode.value === 'adicionar-unidade' && !estabelecimentoId) return 'loja'
-    if (!ehProfissionalAutonomo.value && !skipped.equipe && contagens.value.equipe === 0) {
-      return 'equipe'
+  async function carregarStatusPublicacao(estabelecimentoId: number) {
+    try {
+      const status = await assinaturaService.obterStatusPublicacao(estabelecimentoId)
+      etapasPublicacao.value = status.etapas
+      return status
+    } catch {
+      etapasPublicacao.value = []
+      return null
     }
-    if (!skipped.servicos && contagens.value.servicos === 0) return 'servicos'
-    if (!skipped.horarios && contagens.value.horariosAtivos === 0) return 'horarios'
-    return 'revisao'
+  }
+
+  function resolverStepInicial(
+    _estabelecimentoId: number,
+    backendStep: string | null | undefined,
+    queryStep?: string,
+  ): LojaSetupStepId {
+    if (queryStep === 'equipe' || queryStep === 'servicos' || queryStep === 'horarios' || queryStep === 'revisao') {
+      return queryStep
+    }
+    return mapBackendStepToWizardStep(backendStep, ehProfissionalAutonomo.value)
   }
 
   async function init() {
@@ -242,18 +254,35 @@ export function useLojaSetupWizard() {
       }
 
       const estabId = draft.value.estabelecimentoId
+      const queryStep = typeof route.query.step === 'string' ? route.query.step : undefined
       if (estabId) {
         await trocarEstabelecimento(estabId)
-        await Promise.all([refreshContagens(estabId), loadPerfil(estabId)])
+        const [status] = await Promise.all([
+          carregarStatusPublicacao(estabId),
+          refreshContagens(estabId),
+          loadPerfil(estabId),
+        ])
         if (mode.value === 'assinatura' || draft.value.step !== 'loja') {
-          draft.value.step = suggestStep(estabId)
+          draft.value.step = resolverStepInicial(
+            estabId,
+            status?.proximaEtapa,
+            queryStep,
+          )
         }
       } else if (mode.value === 'assinatura') {
         const ativo = estabelecimentoAtivo.value?.estabelecimentoId
         if (ativo) {
           draft.value.estabelecimentoId = ativo
-          await Promise.all([refreshContagens(ativo), loadPerfil(ativo)])
-          draft.value.step = suggestStep(ativo)
+          const [status] = await Promise.all([
+            carregarStatusPublicacao(ativo),
+            refreshContagens(ativo),
+            loadPerfil(ativo),
+          ])
+          draft.value.step = resolverStepInicial(
+            ativo,
+            status?.proximaEtapa,
+            queryStep,
+          )
         }
       } else {
         draft.value.step = 'loja'
@@ -261,7 +290,6 @@ export function useLojaSetupWizard() {
       }
 
       if (ehProfissionalAutonomo.value && draft.value.step === 'equipe') {
-        draft.value.skipped.equipe = true
         draft.value.step = 'servicos'
       }
 
@@ -319,7 +347,6 @@ export function useLojaSetupWizard() {
       ])
       notifications.push('success', `Loja "${resultado.nome}" criada.`)
       if (ehProfissionalAutonomo.value) {
-        draft.value.skipped.equipe = true
         setStep('servicos')
       } else {
         setStep('equipe')
@@ -331,19 +358,23 @@ export function useLojaSetupWizard() {
     }
   }
 
-  function skipStep(id: 'equipe' | 'servicos' | 'horarios') {
-    draft.value.skipped[id] = true
-    const order: LojaSetupStepId[] = ehProfissionalAutonomo.value
-      ? ['servicos', 'horarios', 'revisao']
-      : ['equipe', 'servicos', 'horarios', 'revisao']
-    const idx = order.indexOf(id)
-    const next = order[idx + 1] ?? 'revisao'
-    setStep(next)
+  function skipStep(_id: 'equipe' | 'servicos' | 'horarios') {
+    notifications.push(
+      'info',
+      'Esta etapa é obrigatória para publicar seu perfil e receber agendamentos.',
+    )
   }
 
   async function goNextFromOps(from: LojaSetupStepId) {
     const estabId = draft.value.estabelecimentoId
-    if (estabId) await refreshContagens(estabId)
+    if (estabId) {
+      await refreshContagens(estabId)
+      const status = await carregarStatusPublicacao(estabId)
+      if (status?.proximaEtapa) {
+        setStep(mapBackendStepToWizardStep(status.proximaEtapa, ehProfissionalAutonomo.value))
+        return
+      }
+    }
     const order: LojaSetupStepId[] = ehProfissionalAutonomo.value
       ? ['servicos', 'horarios', 'revisao']
       : ['equipe', 'servicos', 'horarios', 'revisao']
@@ -363,9 +394,42 @@ export function useLojaSetupWizard() {
   }
 
   async function concluir() {
-    clearLojaSetupDraft()
-    notifications.push('success', 'Configuração inicial concluída.')
-    await router.push(ROUTE_PATHS.DASHBOARD)
+    const estabId = draft.value.estabelecimentoId
+    if (!estabId) {
+      erro.value = 'Estabelecimento não encontrado.'
+      return
+    }
+
+    submitting.value = true
+    erro.value = null
+    try {
+      const status = await assinaturaService.recalcularPublicacao(estabId)
+      etapasPublicacao.value = status.etapas
+      await negocioStore.fetchEstabelecimentos(true)
+
+      if (status.onboardingObrigatorioPendente) {
+        const pendencias = status.etapas
+          .filter((etapa) => !etapa.concluida)
+          .flatMap((etapa) => etapa.pendencias)
+        erro.value = pendencias[0]
+          ?? 'Conclua todas as etapas obrigatórias antes de acessar o painel.'
+        draft.value.step = mapBackendStepToWizardStep(
+          status.proximaEtapa,
+          ehProfissionalAutonomo.value,
+        )
+        persist()
+        notifications.push('warning', 'Ainda faltam requisitos para publicar seu perfil.')
+        return
+      }
+
+      clearLojaSetupDraft()
+      notifications.push('success', 'Configuração concluída. Seu perfil já está público!')
+      await router.push(ROUTE_PATHS.DASHBOARD)
+    } catch (err) {
+      erro.value = resolveError(err)
+    } finally {
+      submitting.value = false
+    }
   }
 
   return {
@@ -383,6 +447,8 @@ export function useLojaSetupWizard() {
     stepperIndex,
     stepSubtitle,
     skippedIds,
+    etapasPublicacao,
+    etapasConcluidas,
     pageTitle,
     pageDescription,
     ehProfissionalAutonomo,

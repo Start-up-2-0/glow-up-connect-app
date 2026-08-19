@@ -238,6 +238,63 @@ export function registerCoreRoutes(router: MockRouter) {
       assinaturaPremiumId: podeAdicionarLoja || limite > 1 ? 1 : null,
     })
   })
+
+  router.on('get', '/assinaturas/onboarding/publicacao', (req: MockRequest) => {
+    const estabelecimentoId = Number(req.query?.estabelecimentoId ?? 1)
+    const loja = mockEstablishmentsForEmail(currentEmail()).find(
+      (e) => e.estabelecimentoId === estabelecimentoId,
+    )
+    const autonomo = loja?.tipoAssinatura === 'ProfissionalAutonomo'
+    return ok({
+      estabelecimentoId,
+      tipoAssinatura: loja?.tipoAssinatura ?? 'Estabelecimento',
+      prontoParaPublicacao: !loja?.onboardingObrigatorioPendente,
+      visivelPublicamente: !loja?.onboardingObrigatorioPendente,
+      onboardingObrigatorioPendente: loja?.onboardingObrigatorioPendente ?? false,
+      proximaEtapa: loja?.proximaEtapaOnboarding ?? null,
+      etapas: autonomo
+        ? [
+            { id: 'assinatura', titulo: 'Assinatura confirmada', concluida: true, pendencias: [] },
+            { id: 'servicos', titulo: 'Servicos', concluida: true, pendencias: [] },
+            { id: 'horarios', titulo: 'Horarios', concluida: true, pendencias: [] },
+          ]
+        : [
+            { id: 'assinatura', titulo: 'Assinatura confirmada', concluida: true, pendencias: [] },
+            { id: 'equipe', titulo: 'Equipe', concluida: true, pendencias: [] },
+            { id: 'servicos', titulo: 'Servicos', concluida: true, pendencias: [] },
+            { id: 'horarios', titulo: 'Horarios', concluida: true, pendencias: [] },
+          ],
+    })
+  })
+
+  router.on('post', '/assinaturas/onboarding/publicacao/recalcular', (req: MockRequest) => {
+    const estabelecimentoId = Number(req.query?.estabelecimentoId ?? 1)
+    const loja = mockEstablishmentsForEmail(currentEmail()).find(
+      (e) => e.estabelecimentoId === estabelecimentoId,
+    )
+    const autonomo = loja?.tipoAssinatura === 'ProfissionalAutonomo'
+    return ok({
+      estabelecimentoId,
+      tipoAssinatura: loja?.tipoAssinatura ?? 'Estabelecimento',
+      prontoParaPublicacao: true,
+      visivelPublicamente: true,
+      onboardingObrigatorioPendente: false,
+      proximaEtapa: null,
+      etapas: autonomo
+        ? [
+            { id: 'assinatura', titulo: 'Assinatura confirmada', concluida: true, pendencias: [] },
+            { id: 'servicos', titulo: 'Servicos', concluida: true, pendencias: [] },
+            { id: 'horarios', titulo: 'Horarios', concluida: true, pendencias: [] },
+          ]
+        : [
+            { id: 'assinatura', titulo: 'Assinatura confirmada', concluida: true, pendencias: [] },
+            { id: 'equipe', titulo: 'Equipe', concluida: true, pendencias: [] },
+            { id: 'servicos', titulo: 'Servicos', concluida: true, pendencias: [] },
+            { id: 'horarios', titulo: 'Horarios', concluida: true, pendencias: [] },
+          ],
+    })
+  })
+
   router.on('get', '/assinaturas/atual', () => {
     const loja = mockEstablishmentsForEmail(currentEmail())[0]
     return ok({

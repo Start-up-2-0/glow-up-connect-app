@@ -72,6 +72,12 @@ export const useNegocioStore = defineStore('negocio', () => {
   const prioridadeMarketplace = computed(
     () => estabelecimentoAtivo.value?.limites?.prioridadeListagemPublica ?? false,
   )
+  const onboardingObrigatorioPendente = computed(
+    () => estabelecimentoAtivo.value?.onboardingObrigatorioPendente ?? false,
+  )
+  const proximaEtapaOnboarding = computed(
+    () => estabelecimentoAtivo.value?.proximaEtapaOnboarding ?? null,
+  )
 
   function possuiModulo(modulo: string): boolean {
     return modulos.value.includes(modulo)
@@ -227,6 +233,8 @@ export const useNegocioStore = defineStore('negocio', () => {
     diasTrial,
     proximaDataVencimento,
     prioridadeMarketplace,
+    onboardingObrigatorioPendente,
+    proximaEtapaOnboarding,
     possuiModulo,
     possuiPermissao,
     possuiAlgumaPermissao,

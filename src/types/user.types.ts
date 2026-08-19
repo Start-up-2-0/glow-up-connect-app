@@ -110,4 +110,6 @@ export interface EstabelecimentoAcesso {
   modulos: string[]
   limites?: LimitesAssinatura
   tipoAssinatura?: 'Estabelecimento' | 'ProfissionalAutonomo' | null
+  onboardingObrigatorioPendente?: boolean
+  proximaEtapaOnboarding?: string | null
 }

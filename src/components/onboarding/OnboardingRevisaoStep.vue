@@ -75,11 +75,8 @@ const emit = defineEmits<{
           </button>
         </div>
         <p class="mt-2 text-sm text-glow-text">
-          <template v-if="skipped.equipe">Etapa pulada — configurar depois.</template>
-          <template v-else>
-            {{ contagens.equipe }}
-            {{ contagens.equipe === 1 ? 'profissional cadastrado' : 'profissionais cadastrados' }}.
-          </template>
+          {{ contagens.equipe }}
+          {{ contagens.equipe === 1 ? 'profissional cadastrado' : 'profissionais cadastrados' }}.
         </p>
       </section>
 
@@ -97,11 +94,8 @@ const emit = defineEmits<{
           </button>
         </div>
         <p class="mt-2 text-sm text-glow-text">
-          <template v-if="skipped.servicos">Etapa pulada — configurar depois.</template>
-          <template v-else>
-            {{ contagens.servicos }}
-            {{ contagens.servicos === 1 ? 'serviço cadastrado' : 'serviços cadastrados' }}.
-          </template>
+          {{ contagens.servicos }}
+          {{ contagens.servicos === 1 ? 'serviço cadastrado' : 'serviços cadastrados' }}.
         </p>
       </section>
 
@@ -119,11 +113,8 @@ const emit = defineEmits<{
           </button>
         </div>
         <p class="mt-2 text-sm text-glow-text">
-          <template v-if="skipped.horarios">Etapa pulada — configurar depois.</template>
-          <template v-else>
-            {{ contagens.horariosAtivos }}
-            {{ contagens.horariosAtivos === 1 ? 'dia ativo' : 'dias ativos' }} de funcionamento.
-          </template>
+          {{ contagens.horariosAtivos }}
+          {{ contagens.horariosAtivos === 1 ? 'dia ativo' : 'dias ativos' }} de funcionamento.
         </p>
       </section>
     </div>

@@ -151,6 +151,10 @@ async function onContinueOps(from: LojaSetupStepId) {
         @finish="concluir"
       />
 
+      <p v-if="erro && step === 'revisao'" class="text-center text-sm text-red-600 dark:text-red-400">
+        {{ erro }}
+      </p>
+
       <p
         v-else
         class="text-center text-sm text-glow-text-subtle"

@@ -166,8 +166,14 @@ export function mockPlanosResponse(
 export const MOCK_CATEGORIAS_ESTABELECIMENTO = [
   {
     id: 1,
-    nome: 'Barbearia ou salão de beleza',
-    slug: 'barbearia-ou-salao-de-beleza',
+    nome: 'Barbearia',
+    slug: 'barbearia',
+    tipoAssinatura: 'Estabelecimento' as const,
+  },
+  {
+    id: 18,
+    nome: 'Salão de Beleza',
+    slug: 'salao-de-beleza',
     tipoAssinatura: 'Estabelecimento' as const,
   },
   {
@@ -286,7 +292,7 @@ export const MOCK_PERFIL_ESTABELECIMENTO: EstabelecimentoPerfilCompleto = {
   whatsAppOptIn: true,
   whatsAppPendenteConfirmacao: false,
   categoriaId: 1,
-  categoria: 'Barbearia ou salão de beleza',
+  categoria: 'Barbearia',
   endereco: {
     cep: '49020-000',
     logradouro: 'Av. das Acácias',
