@@ -337,7 +337,7 @@ export function registerCoreRoutes(router: MockRouter) {
         telefone: user.telefone ?? '',
         email: user.email,
         categoriaId: 2,
-        categoria: 'Barbeiro ou cabeleireiro(a)',
+        categoria: 'Barbeiro',
       })
     }
     return ok({
@@ -360,7 +360,7 @@ export function registerCoreRoutes(router: MockRouter) {
         telefone: user.telefone ?? '',
         email: user.email,
         categoriaId: 2,
-        categoria: 'Barbeiro ou cabeleireiro(a)',
+        categoria: 'Barbeiro',
         ...(req.body as object),
       })
     }
