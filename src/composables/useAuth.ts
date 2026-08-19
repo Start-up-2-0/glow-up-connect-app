@@ -6,6 +6,7 @@ import { useAppStore } from '@/stores/app.store'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { isExternalRedirect } from '@/utils/authRedirect'
+import { isChunkLoadError, reloadForUpdatedApp } from '@/utils/chunkLoadError'
 import type { LoginPayload } from '@/types/auth.types'
 
 export function useAuth() {
@@ -23,7 +24,7 @@ export function useAuth() {
       window.location.assign(redirect)
       return
     }
-    await router.push(redirect ?? ROUTE_PATHS.DASHBOARD)
+    await navigateAfterAuth(redirect)
   }
 
   async function reativarConta(payload: LoginPayload, redirect?: string) {
@@ -33,7 +34,17 @@ export function useAuth() {
       window.location.assign(redirect)
       return
     }
-    await router.push(redirect ?? ROUTE_PATHS.DASHBOARD)
+    await navigateAfterAuth(redirect)
+  }
+
+  async function navigateAfterAuth(redirect?: string) {
+    const destination = redirect ?? ROUTE_PATHS.DASHBOARD
+    try {
+      await router.push(destination)
+    } catch (err) {
+      if (isChunkLoadError(err) && reloadForUpdatedApp(destination)) return
+      throw err
+    }
   }
 
   async function logout() {

@@ -13,6 +13,7 @@ import { modulosRoutes } from './routes/modulos.routes'
 import { publicRoutes } from './routes/public.routes'
 import { devRoutes } from './routes/dev.routes'
 import { notFoundRoutes } from './routes/notFound.routes'
+import { isChunkLoadError, reloadForUpdatedApp } from '@/utils/chunkLoadError'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -57,8 +58,10 @@ router.afterEach((to, from) => {
   }
 })
 
-router.onError(() => {
+router.onError((error, to) => {
   useLoadingStore().navigationEnd()
+  if (!isChunkLoadError(error)) return
+  reloadForUpdatedApp(to.fullPath)
 })
 
 export default router

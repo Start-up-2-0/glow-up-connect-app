@@ -5,6 +5,7 @@ import {
   type ApiErrorResponse,
 } from '@/types/api.types'
 import { DEFAULT_ERROR_MESSAGE, getApiErrorMessage } from '@/constants/apiErrors'
+import { isChunkLoadError } from '@/utils/chunkLoadError'
 
 export function useApiError() {
   function resolveErrorCode(error: unknown): string | undefined {
@@ -21,6 +22,10 @@ export function useApiError() {
   }
 
   function resolveError(error: unknown, fallback = DEFAULT_ERROR_MESSAGE): string {
+    if (isChunkLoadError(error)) {
+      return 'A aplicação foi atualizada. Recarregue a página para continuar.'
+    }
+
     if (!error || typeof error !== 'object') return fallback
 
     const axiosError = error as AxiosError<unknown>

@@ -194,9 +194,17 @@ if [ "$MTLS_MODE" = "true" ]; then
 			}
 		}
 
+		handle /assets/* {
+			root * dist
+			encode gzip
+			header Cache-Control "public, max-age=31536000, immutable"
+			file_server
+		}
+
 		handle {
 			root * dist
 			encode gzip
+			header Cache-Control "no-cache, no-store, must-revalidate"
 			try_files {path} /index.html
 			file_server
 		}
@@ -241,9 +249,17 @@ else
 			}
 		}
 
+		handle /assets/* {
+			root * dist
+			encode gzip
+			header Cache-Control "public, max-age=31536000, immutable"
+			file_server
+		}
+
 		handle {
 			root * dist
 			encode gzip
+			header Cache-Control "no-cache, no-store, must-revalidate"
 			try_files {path} /index.html
 			file_server
 		}

@@ -6,10 +6,13 @@ import { useAuthStore } from './stores/auth.store'
 import { useAppStore } from './stores/app.store'
 import { useConsentStore } from './stores/consent.store'
 import { registerSessionSyncCallback } from './utils/sessionSync'
+import { registerChunkLoadRecovery } from './utils/chunkLoadError'
 import { startSessionRefreshScheduler } from './composables/useSessionRefresh'
 import { ensureRequestProofPool } from './composables/useRequestProof'
 import { MOCK_MODE } from './mocks/config'
 import './assets/main.css'
+
+registerChunkLoadRecovery()
 
 const app = createApp(App)
 const pinia = createPinia()
