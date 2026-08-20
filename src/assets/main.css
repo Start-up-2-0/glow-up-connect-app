@@ -2889,11 +2889,15 @@
   }
 
   .servicos-form-tipo-card--active {
-    @apply border-glow-gold bg-glow-gold/5 ring-2 ring-glow-gold;
+    @apply border-glow-gold bg-glow-gold-selected ring-2 ring-glow-gold;
   }
 
   .servicos-form-tipo-card--idle {
-    @apply border-glow-border-soft hover:border-glow-gold/40;
+    @apply border-glow-border-soft;
+  }
+
+  .servicos-form-tipo-card--idle:hover {
+    border-color: color-mix(in srgb, var(--glow-gold) 40%, transparent);
   }
 
   .servicos-form-tipo-card__title {
