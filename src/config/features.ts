@@ -1,10 +1,12 @@
 /**
- * Flags de produto. Código de lojas permanece no repositório;
- * desligar aqui só oculta a experiência de TipoAssinatura.Estabelecimento.
+ * Flags de produto. Código permanece no repositório;
+ * desligar aqui só oculta a experiência na UI.
  *
- * Reativar em runtime: VITE_FEATURE_LOJAS=true no ambiente e rebuild.
- * Default local/dev: lojas habilitadas.
+ * Reativar em runtime: variável VITE_* correspondente = true e rebuild.
+ * Default local/dev: lojas habilitadas; troca de plano desabilitada.
  */
 export const FEATURE_FLAGS = {
   lojasHabilitadas: import.meta.env.VITE_FEATURE_LOJAS !== 'false',
+  /** Troca/upgrade de plano (fluxo Mercado Pago). Desligado até estabilizar a entrega. */
+  trocaPlanoHabilitada: import.meta.env.VITE_FEATURE_TROCA_PLANO === 'true',
 } as const

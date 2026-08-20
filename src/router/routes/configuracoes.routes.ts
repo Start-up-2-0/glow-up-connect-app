@@ -1,4 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
+import { FEATURE_FLAGS } from '@/config/features'
 import { ROUTE_NAMES, ROUTE_PATHS } from '@/constants/routes'
 
 export const configuracoesRoutes: RouteRecordRaw[] = [
@@ -56,6 +57,13 @@ export const configuracoesRoutes: RouteRecordRaw[] = [
       requerPermissao: 'NegocioEditar',
       requerAssinaturaAtiva: false,
       title: 'Trocar plano',
+    },
+    beforeEnter: () => {
+      // Troca de plano ocultada até estabilizar o fluxo de cobrança.
+      if (!FEATURE_FLAGS.trocaPlanoHabilitada) {
+        return { path: ROUTE_PATHS.CONFIG_ASSINATURA }
+      }
+      return true
     },
   },
   {

@@ -10,6 +10,7 @@ import {
   Wallet,
 } from 'lucide-vue-next'
 import AssinaturaStatusBadge from '@/components/assinatura/AssinaturaStatusBadge.vue'
+import { FEATURE_FLAGS } from '@/config/features'
 import { formatBRL, formatDate } from '@/utils/formatters'
 import type { Assinatura } from '@/types/assinatura.types'
 import type { Plano } from '@/types/plano.types'
@@ -25,6 +26,8 @@ const emit = defineEmits<{
   'trocar-plano': []
   cancelar: []
 }>()
+
+const mostrarTrocaPlano = FEATURE_FLAGS.trocaPlanoHabilitada
 
 const ciclo = computed(() => {
   const p = props.plano?.periodo?.toLowerCase() ?? 'mensal'
@@ -119,7 +122,12 @@ const rows = computed(() => [
     </ul>
 
     <div class="mt-4 flex flex-wrap gap-2 border-t border-glow-border-soft pt-4">
-      <button type="button" class="assinatura-btn-ghost" @click="emit('trocar-plano')">
+      <button
+        v-if="mostrarTrocaPlano"
+        type="button"
+        class="assinatura-btn-ghost"
+        @click="emit('trocar-plano')"
+      >
         <ArrowLeftRight :size="15" :stroke-width="1.75" />
         Trocar plano
       </button>

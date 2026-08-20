@@ -114,14 +114,20 @@ function concluirPagamento() {
 }
 
 function irTrocarPlano() {
+  if (!FEATURE_FLAGS.trocaPlanoHabilitada) return
   void router.push(ROUTE_PATHS.CONFIG_ASSINATURA_UPGRADE)
 }
 
 function irUpgrade(planoAlvoId: number) {
+  if (!FEATURE_FLAGS.trocaPlanoHabilitada) return
   void router.push({
     path: ROUTE_PATHS.CONFIG_ASSINATURA_UPGRADE,
     query: { planoId: String(planoAlvoId) },
   })
+}
+
+function irContratar() {
+  void router.push(ROUTE_PATHS.ONBOARDING_CONTRATAR)
 }
 
 function scrollComparacao() {
@@ -233,7 +239,7 @@ function abrirPolitica() {
       <p class="mb-4 text-sm text-glow-text-subtle">
         Contrate um plano para liberar a operação completa da sua loja.
       </p>
-      <BaseButton variant="primary" @click="irTrocarPlano">Ver planos</BaseButton>
+      <BaseButton variant="primary" @click="irContratar">Ver planos</BaseButton>
     </BaseCard>
 
     <CancelarAssinaturaDialog

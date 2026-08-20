@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { ArrowUpRight, Check, Minus, Sparkles } from 'lucide-vue-next'
+import { FEATURE_FLAGS } from '@/config/features'
 import { formatBRL, formatLimite } from '@/utils/formatters'
 import { getPlanoFeatures } from '@/utils/planoDisplay'
 import type { Plano } from '@/types/plano.types'
@@ -14,6 +15,8 @@ const emit = defineEmits<{
   upgrade: [planoId: number]
   'ver-planos': []
 }>()
+
+const mostrarTrocaPlano = FEATURE_FLAGS.trocaPlanoHabilitada
 
 const ordenados = computed(() =>
   [...props.planos].sort((a, b) => a.preco - b.preco),
@@ -146,7 +149,7 @@ const ctaDesc = computed(() => {
       </table>
     </div>
 
-    <div class="assinatura-cta mt-6">
+    <div v-if="mostrarTrocaPlano" class="assinatura-cta mt-6">
       <div class="flex min-w-0 items-start gap-3">
         <span
           class="inline-flex size-11 shrink-0 items-center justify-center rounded-2xl bg-glow-gold-cta/15 text-glow-gold-cta"
