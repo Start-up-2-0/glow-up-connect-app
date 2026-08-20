@@ -20,6 +20,7 @@ import {
 import { readFileAsDataUrl } from '@/utils/avatarFile'
 import { telefoneLocalFromApi, telefoneToApi } from '@/utils/formatters'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
+import type { WhatsAppConfirmacaoInstrucoes } from '@/types/whatsapp.types'
 
 const props = withDefaults(
   defineProps<{
@@ -31,17 +32,24 @@ const props = withDefaults(
     usarDadosContaPadrao?: boolean
     /** Conta possui avatar para reutilizar como foto profissional. */
     avatarContaDisponivel?: boolean
+    telefonePendenteConfirmacao?: boolean
+    whatsappInstrucoes?: WhatsAppConfirmacaoInstrucoes | null
+    whatsAppConfirmado?: boolean
   }>(),
   {
     modoAutonomo: false,
     usarDadosContaPadrao: false,
     avatarContaDisponivel: false,
+    telefonePendenteConfirmacao: false,
+    whatsappInstrucoes: null,
+    whatsAppConfirmado: false,
   },
 )
 
 const emit = defineEmits<{
   submit: [estabelecimento: OnboardingEstabelecimentoDraft]
   back: []
+  verificarWhatsApp: []
 }>()
 
 const dadosConta = {
@@ -177,6 +185,58 @@ function handleSubmit() {
 
 <template>
   <div class="space-y-6">
+    <div
+      v-if="telefonePendenteConfirmacao || whatsAppConfirmado"
+      class="rounded-xl border px-4 py-3"
+      :class="{
+        'border-amber-400/40 bg-amber-400/10': telefonePendenteConfirmacao,
+        'border-glow-border-soft bg-glow-surface-tint/60': !telefonePendenteConfirmacao && whatsAppConfirmado,
+      }"
+    >
+      <p class="font-urbanist text-sm font-bold text-glow-text">
+        <template v-if="telefonePendenteConfirmacao">Aguardando confirmação no WhatsApp</template>
+        <template v-else>Telefone validado</template>
+      </p>
+      <p class="mt-1 font-urbanist text-sm text-glow-text-muted">
+        <template v-if="telefonePendenteConfirmacao">
+          Enviamos um e-mail e uma mensagem no WhatsApp. Confirme o número para receber alertas da loja.
+        </template>
+        <template v-else>
+          Seu número já está confirmado. Revise os dados e siga para o endereço.
+        </template>
+      </p>
+      <div
+        v-if="telefonePendenteConfirmacao && whatsappInstrucoes"
+        class="mt-3 flex flex-wrap gap-2"
+      >
+        <a
+          v-if="whatsappInstrucoes.linkWhatsApp"
+          :href="whatsappInstrucoes.linkWhatsApp"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex h-9 items-center rounded-lg bg-glow-gold-cta px-3 font-satoshi text-sm font-bold text-white transition hover:brightness-95"
+        >
+          Abrir WhatsApp
+        </a>
+        <a
+          v-if="whatsappInstrucoes.linkConfirmacao"
+          :href="whatsappInstrucoes.linkConfirmacao"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex h-9 items-center rounded-lg border border-glow-border-soft bg-glow-surface px-3 font-satoshi text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface"
+        >
+          Abrir link de confirmação
+        </a>
+        <button
+          type="button"
+          class="inline-flex h-9 items-center rounded-lg border border-glow-border-soft bg-glow-surface px-3 font-satoshi text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface"
+          @click="emit('verificarWhatsApp')"
+        >
+          Já confirmei
+        </button>
+      </div>
+    </div>
+
     <p
       v-if="errorMessage || logoError || categoriaError"
       class="checkout-alert-error px-4 py-3"

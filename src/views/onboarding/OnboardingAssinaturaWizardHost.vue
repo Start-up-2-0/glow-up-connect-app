@@ -3,6 +3,7 @@ import { computed, onMounted } from 'vue'
 import OnboardingAssinaturaShell from '@/components/onboarding/OnboardingAssinaturaShell.vue'
 import OnboardingUsuarioStep from '@/components/onboarding/OnboardingUsuarioStep.vue'
 import OnboardingConfirmarEmailStep from '@/components/onboarding/OnboardingConfirmarEmailStep.vue'
+import OnboardingConfirmarWhatsAppStep from '@/components/onboarding/OnboardingConfirmarWhatsAppStep.vue'
 import OnboardingEstabelecimentoStep from '@/components/onboarding/OnboardingEstabelecimentoStep.vue'
 import OnboardingPagamentoStep from '@/components/onboarding/OnboardingPagamentoStep.vue'
 import { useOnboardingAssinaturaWizard } from '@/composables/useOnboardingAssinaturaWizard'
@@ -31,9 +32,13 @@ const {
   fieldErrors,
   captchaResetNonce,
   pendingAutoLogin,
+  whatsappInstrucoes,
+  resendingWhatsApp,
   init,
   cadastrarConta,
   confirmarEmailCodigo,
+  verificarWhatsApp,
+  reenviarWhatsApp,
   avancarParaAssinatura,
   voltarParaEstabelecimento,
   contratarPlano,
@@ -58,13 +63,18 @@ async function handleConfirmarEmail(codigo: string) {
 }
 
 function handlePublicBack() {
-  if (step.value === 'confirmar-email' && !draft.value.usuario.contaCriada) {
+  if (step.value === 'confirmar-email') {
     step.value = 'conta'
     return
   }
 
+  if (step.value === 'confirmar-whatsapp') {
+    step.value = 'confirmar-email'
+    return
+  }
+
   if (step.value === 'estabelecimento') {
-    step.value = draft.value.usuario.emailConfirmado ? 'confirmar-email' : 'conta'
+    step.value = draft.value.usuario.emailConfirmado ? 'confirmar-whatsapp' : 'conta'
   }
 }
 </script>
@@ -91,6 +101,25 @@ function handlePublicBack() {
         @submit="cadastrarConta"
       />
 
+      <OnboardingConfirmarEmailStep
+        v-else-if="step === 'confirmar-email'"
+        :email="draft.usuario.email"
+        :loading="loading"
+        :error-message="erro"
+        @confirm="handleConfirmarEmail"
+      />
+
+      <OnboardingConfirmarWhatsAppStep
+        v-else-if="step === 'confirmar-whatsapp'"
+        :email="draft.usuario.email"
+        :loading="loading"
+        :resending="resendingWhatsApp"
+        :error-message="erro"
+        :instrucoes="whatsappInstrucoes"
+        @verificar="verificarWhatsApp"
+        @reenviar="reenviarWhatsApp"
+      />
+
       <OnboardingEstabelecimentoStep
         v-else-if="step === 'estabelecimento'"
         variant="public"
@@ -113,14 +142,6 @@ function handlePublicBack() {
         :error-message="erro"
         @back="voltarParaEstabelecimento"
         @submit="contratarPlano"
-      />
-
-      <OnboardingConfirmarEmailStep
-        v-else
-        :email="draft.usuario.email"
-        :loading="loading"
-        :error-message="erro"
-        @confirm="handleConfirmarEmail"
       />
     </template>
   </OnboardingAssinaturaShell>

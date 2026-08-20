@@ -36,7 +36,7 @@ function onInvalid() {
       <p class="agendar-section-subtitle mt-2">
         Enviamos um código de 6 dígitos para
         <span class="font-semibold text-glow-gold">{{ maskedEmail }}</span
-        >. Depois disso você segue para o cadastro do estabelecimento.
+        >. Depois disso você recebe um e-mail para confirmar o WhatsApp.
       </p>
     </div>
 

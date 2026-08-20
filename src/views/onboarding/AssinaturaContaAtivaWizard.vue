@@ -219,10 +219,14 @@ function voltarDeInformacoesBasicas() {
         <OnboardingInformacoesBasicasStep
           v-if="step === 'informacoes-basicas'"
           :initial="draft.estabelecimento"
-          :loading="loading"
+          :loading="submitting || loading"
           :error-message="erro"
+          :telefone-pendente-confirmacao="telefonePendenteConfirmacao"
+          :whatsapp-instrucoes="whatsappInstrucoes"
+          :whats-app-confirmado="Boolean(userStore.profile?.whatsAppConfirmado)"
           @submit="avancarDeInformacoesBasicas"
           @back="voltarDeInformacoesBasicas"
+          @verificar-whats-app="verificarTelefoneEAvancar"
         />
 
         <OnboardingEnderecoStep

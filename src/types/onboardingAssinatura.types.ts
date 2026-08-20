@@ -1,6 +1,11 @@
 import type { TipoAssinatura } from '@/types/assinatura.types'
 
-export type OnboardingWizardStep = 'conta' | 'confirmar-email' | 'estabelecimento' | 'assinatura'
+export type OnboardingWizardStep =
+  | 'conta'
+  | 'confirmar-email'
+  | 'confirmar-whatsapp'
+  | 'estabelecimento'
+  | 'assinatura'
 
 export interface OnboardingUsuarioDraft {
   nome: string
@@ -38,7 +43,8 @@ export interface OnboardingAssinaturaDraft {
 
 export const ONBOARDING_WIZARD_STEPS = [
   { id: 'conta', label: 'Sua conta' },
+  { id: 'confirmar-email', label: 'Confirmar e-mail' },
+  { id: 'confirmar-whatsapp', label: 'Confirmar WhatsApp' },
   { id: 'estabelecimento', label: 'Estabelecimento' },
   { id: 'assinatura', label: 'Assinatura' },
-  { id: 'confirmar-email', label: 'Confirmar e-mail' },
 ] as const

@@ -68,6 +68,9 @@ export function registerCoreRoutes(router: MockRouter) {
   })
   router.on('post', '/auth/confirmar-email', () => voidOk('E-mail confirmado.'))
   router.on('post', '/auth/reenviar-confirmacao', () => voidOk('Confirmação reenviada.'))
+  router.on('post', '/auth/reenviar-confirmacao-whatsapp', () =>
+    voidOk('Se o e-mail estiver cadastrado, enviaremos novas instruções para confirmar o WhatsApp.'),
+  )
   router.on('post', '/auth/reativar-conta', (req: MockRequest) => {
     const payload = (req.body ?? {}) as { email?: string }
     const email = payload.email?.trim() ?? ''

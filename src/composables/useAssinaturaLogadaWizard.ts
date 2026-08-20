@@ -403,8 +403,10 @@ export function useAssinaturaLogadaWizard(
     }
   }
 
-  function avancarDeInformacoesBasicas(estabelecimento: OnboardingEstabelecimentoDraft) {
+  async function avancarDeInformacoesBasicas(estabelecimento: OnboardingEstabelecimentoDraft) {
     erro.value = null
+    telefonePendenteConfirmacao.value = false
+    whatsappInstrucoes.value = null
 
     if (!estabelecimento.nome.trim()) {
       erro.value = 'Informe o nome do estabelecimento.'
@@ -437,6 +439,10 @@ export function useAssinaturaLogadaWizard(
       categoriaId: estabelecimento.categoriaId,
     }
     draft.value.estabelecimentoId = null
+
+    const liberado = await garantirWhatsAppConfirmado(draft.value.estabelecimento.telefone)
+    if (!liberado) return
+
     step.value = 'endereco'
     persist()
   }
@@ -472,9 +478,6 @@ export function useAssinaturaLogadaWizard(
     }
 
     const telefoneNovo = telefoneToApi(perfil.telefone)
-    const telefoneConta = telefoneToApi(userStore.profile?.telefone)
-    const whatsConfirmado = Boolean(userStore.profile?.whatsAppConfirmado)
-    const telefoneIgual = telefonesEquivalentes(telefoneNovo, telefoneConta)
 
     draft.value.estabelecimento = {
       ...draft.value.estabelecimento,
@@ -487,10 +490,22 @@ export function useAssinaturaLogadaWizard(
     }
     draft.value.estabelecimentoId = null
 
+    const liberado = await garantirWhatsAppConfirmado(telefoneNovo)
+    if (!liberado) return
+
+    step.value = 'endereco'
+    persist()
+  }
+
+  async function garantirWhatsAppConfirmado(telefoneNovo: string): Promise<boolean> {
+    const telefoneConta = telefoneToApi(userStore.profile?.telefone)
+    const whatsConfirmado = Boolean(userStore.profile?.whatsAppConfirmado)
+    const telefoneIgual = telefonesEquivalentes(telefoneNovo, telefoneConta)
+
     if (telefoneIgual && whatsConfirmado) {
-      step.value = 'endereco'
-      persist()
-      return
+      telefonePendenteConfirmacao.value = false
+      whatsappInstrucoes.value = null
+      return true
     }
 
     submitting.value = true
@@ -504,15 +519,21 @@ export function useAssinaturaLogadaWizard(
       telefonePendenteConfirmacao.value = true
       erro.value =
         'Confirme o telefone no WhatsApp para continuar. Assim que confirmar, clique em Continuar novamente.'
+      persist()
+      return false
     } catch (err) {
       await userStore.fetchMe(true)
-      if (userStore.profile?.whatsAppConfirmado) {
+      if (
+        userStore.profile?.whatsAppConfirmado
+        && telefonesEquivalentes(telefoneNovo, userStore.profile.telefone)
+      ) {
         telefonePendenteConfirmacao.value = false
-        step.value = 'endereco'
-        persist()
-        return
+        whatsappInstrucoes.value = null
+        erro.value = null
+        return true
       }
       erro.value = resolveError(err)
+      return false
     } finally {
       submitting.value = false
     }
@@ -792,7 +813,7 @@ export function useAssinaturaLogadaWizard(
         || code === 'TELEFONE_DIVERGENTE_NAO_CONFIRMADO'
       ) {
         telefonePendenteConfirmacao.value = true
-        step.value = 'perfil'
+        step.value = ehAutonomo.value ? 'perfil' : 'informacoes-basicas'
         persist()
       }
       erro.value = resolveError(err)

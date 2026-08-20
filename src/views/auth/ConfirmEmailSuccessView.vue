@@ -63,11 +63,11 @@ onMounted(() => {
         <h1 :class="GLOW_RECOVERY_TITLE_CLASS">E-mail confirmado com sucesso!</h1>
         <p :class="[GLOW_RECOVERY_SUBTITLE_CLASS, 'mt-2']">
           <template v-if="isAssinaturaFlow">
-            Sua conta está ativa.<br />
-            Faça login para cadastrar seu estabelecimento e concluir a assinatura.
+            Sua conta está ativa. Enviamos um e-mail para confirmar o WhatsApp e receber alertas.<br />
+            Faça login para continuar a assinatura.
           </template>
           <template v-else>
-            Sua conta está ativa.<br />
+            Sua conta está ativa. Enviamos um e-mail para confirmar o WhatsApp e receber notificações.<br />
             Faça login para continuar.
           </template>
         </p>
