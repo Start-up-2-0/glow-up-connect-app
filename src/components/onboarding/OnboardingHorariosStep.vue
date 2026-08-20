@@ -103,9 +103,11 @@ function horarioAutonomoComoLoja(dia: DiaSemanaValue): HorarioFuncionamento | nu
           :saving="usaAtendimentoAutonomo ? savingDiaProprio === dia.value : savingDia === dia.value"
           :exibe-profissionais="false"
           @update:draft="onDraftUpdate(dia.value, $event)"
-          @salvar="usaAtendimentoAutonomo ? salvarDiaProprio(dia.value) : salvarDiaLoja(dia.value)"
-          @ativar="usaAtendimentoAutonomo ? alterarStatusDiaProprio(dia.value, true) : alterarStatusDiaLoja(dia.value, true)"
-          @desativar="usaAtendimentoAutonomo ? alterarStatusDiaProprio(dia.value, false) : alterarStatusDiaLoja(dia.value, false)"
+          @salvar="
+            usaAtendimentoAutonomo
+              ? ($event ? salvarDiaProprio(dia.value) : alterarStatusDiaProprio(dia.value, false))
+              : salvarDiaLoja(dia.value, { ativo: $event })
+          "
           @editar="usaAtendimentoAutonomo ? iniciarEdicaoDiaProprio(dia.value) : iniciarEdicaoDiaLoja(dia.value)"
           @cancelar="usaAtendimentoAutonomo ? cancelarEdicaoDiaProprio(dia.value) : cancelarEdicaoDiaLoja(dia.value)"
         />

@@ -121,20 +121,27 @@ export const MOCK_CLIENTES = [
 ]
 
 export const MOCK_HORARIOS_LOJA: HorarioFuncionamento[] = [
-  { id: 1, estabelecimentoId: 1, diaSemana: 'Segunda', horaInicio: '09:00', horaFim: '18:00', ativo: true },
-  { id: 2, estabelecimentoId: 1, diaSemana: 'Terca', horaInicio: '09:00', horaFim: '18:00', ativo: true },
-  { id: 3, estabelecimentoId: 1, diaSemana: 'Quarta', horaInicio: '09:00', horaFim: '18:00', ativo: true },
-  { id: 4, estabelecimentoId: 1, diaSemana: 'Quinta', horaInicio: '09:00', horaFim: '18:00', ativo: true },
-  { id: 5, estabelecimentoId: 1, diaSemana: 'Sexta', horaInicio: '09:00', horaFim: '18:00', ativo: true },
-  { id: 6, estabelecimentoId: 1, diaSemana: 'Sabado', horaInicio: '08:00', horaFim: '13:00', ativo: true },
-  { id: 7, estabelecimentoId: 1, diaSemana: 'Domingo', horaInicio: '', horaFim: '', ativo: false },
+  { id: 1, estabelecimentoId: 1, diaSemana: 'Monday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 2, estabelecimentoId: 1, diaSemana: 'Tuesday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 3, estabelecimentoId: 1, diaSemana: 'Wednesday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 4, estabelecimentoId: 1, diaSemana: 'Thursday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 5, estabelecimentoId: 1, diaSemana: 'Friday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 6, estabelecimentoId: 1, diaSemana: 'Saturday', horaInicio: '09:00:00', horaFim: '14:00:00', ativo: true },
+  { id: 7, estabelecimentoId: 1, diaSemana: 'Sunday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: false },
 ]
 
 export const MOCK_HORARIOS_PROFISSIONAIS: HorarioProfissional[] = [
-  { id: 1, profissionalId: 101, diaSemana: 'Segunda', horaInicio: '09:00', horaFim: '17:00', ativo: true },
-  { id: 2, profissionalId: 101, diaSemana: 'Terca', horaInicio: '09:00', horaFim: '17:00', ativo: true },
-  { id: 3, profissionalId: 102, diaSemana: 'Quarta', horaInicio: '10:00', horaFim: '18:00', ativo: true },
-  { id: 4, profissionalId: 102, diaSemana: 'Quinta', horaInicio: '10:00', horaFim: '18:00', ativo: true },
-  { id: 5, profissionalId: 103, diaSemana: 'Sexta', horaInicio: '09:00', horaFim: '17:00', ativo: true },
-  { id: 6, profissionalId: 103, diaSemana: 'Sabado', horaInicio: '08:00', horaFim: '13:00', ativo: true },
+  { id: 1, profissionalId: 101, diaSemana: 'Monday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 2, profissionalId: 102, diaSemana: 'Monday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 3, profissionalId: 103, diaSemana: 'Monday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 4, profissionalId: 101, diaSemana: 'Tuesday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 5, profissionalId: 102, diaSemana: 'Tuesday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 6, profissionalId: 101, diaSemana: 'Wednesday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 7, profissionalId: 102, diaSemana: 'Wednesday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 8, profissionalId: 103, diaSemana: 'Wednesday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 9, profissionalId: 101, diaSemana: 'Thursday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 10, profissionalId: 103, diaSemana: 'Friday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 11, profissionalId: 102, diaSemana: 'Friday', horaInicio: '08:00:00', horaFim: '20:00:00', ativo: true },
+  { id: 12, profissionalId: 101, diaSemana: 'Saturday', horaInicio: '09:00:00', horaFim: '14:00:00', ativo: true },
+  { id: 13, profissionalId: 102, diaSemana: 'Saturday', horaInicio: '09:00:00', horaFim: '14:00:00', ativo: true },
 ]

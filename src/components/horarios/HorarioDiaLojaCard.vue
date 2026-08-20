@@ -1,26 +1,39 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { Clock3, Pencil, Plus, Users } from 'lucide-vue-next'
+import BaseButton from '@/components/ui/BaseButton.vue'
 import HorarioStatusBadge from '@/components/horarios/HorarioStatusBadge.vue'
-import ServicoIcons from '@/components/servicos/ServicoIcons.vue'
-import type { DiaLojaDraft, DiaLojaModo } from '@/composables/useHorarios'
+import type { DiaLojaDraft, DiaLojaModo, ProfissionalHorarioOption } from '@/composables/useHorarios'
 import type { HorarioFuncionamento } from '@/types/negocio/horario.types'
 import type { DiaSemanaValue } from '@/constants/diasSemana'
+import { horaParaExibicao } from '@/constants/diasSemana'
+import { validarIntervaloHorario } from '@/utils/horarioProfissionalHelpers'
 
-const props = defineProps<{
-  dia: DiaSemanaValue
-  label: string
-  horario: HorarioFuncionamento | null
-  modo: DiaLojaModo
-  draft: DiaLojaDraft
-  saving?: boolean
-  readonly?: boolean
-  profissionaisVinculados?: number
-  exibeProfissionais?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    dia: DiaSemanaValue
+    label: string
+    horario: HorarioFuncionamento | null
+    modo: DiaLojaModo
+    draft: DiaLojaDraft
+    saving?: boolean
+    readonly?: boolean
+    profissionais?: ProfissionalHorarioOption[]
+    exibeProfissionais?: boolean
+    compactMobile?: boolean
+  }>(),
+  {
+    saving: false,
+    readonly: false,
+    profissionais: () => [],
+    exibeProfissionais: false,
+    compactMobile: false,
+  },
+)
 
 const emit = defineEmits<{
   'update:draft': [value: DiaLojaDraft]
-  salvar: []
+  salvar: [ativo: boolean]
   ativar: []
   desativar: []
   editar: []
@@ -28,194 +41,240 @@ const emit = defineEmits<{
   profissionais: []
 }>()
 
-const inputsEditable = computed(
-  () => !props.readonly && props.modo !== 'visualizacao',
-)
+const aberto = ref(true)
+const fieldError = ref<string | null>(null)
 
-const modoHint = computed(() => {
-  if (props.readonly) return ''
-  if (props.modo === 'visualizacao') {
-    return 'Horário bloqueado — clique em Editar para alterar.'
-  }
-  if (props.modo === 'edicao') {
-    return 'Editando horário — ajuste e clique em Salvar.'
-  }
-  return 'Defina o horário comercial e clique em Salvar ou Ativar.'
+/** Só o modo edição explícito — 'novo' fica em leitura (fechado). */
+const isEditing = computed(() => !props.readonly && props.modo === 'edicao')
+const isAtivo = computed(() => props.horario?.ativo === true)
+const isFechado = computed(() => !isAtivo.value)
+
+const horaInicioExibida = computed(() => {
+  if (!props.horario?.horaInicio) return null
+  return horaParaExibicao(props.horario.horaInicio)
+})
+const horaFimExibida = computed(() => {
+  if (!props.horario?.horaFim) return null
+  return horaParaExibicao(props.horario.horaFim)
 })
 
+const qtdProfissionais = computed(() => props.profissionais.length)
+
+const profissionaisLabel = computed(() => {
+  const n = qtdProfissionais.value
+  if (n === 0) return 'Nenhum profissional'
+  if (n === 1) return '1 profissional'
+  return `${n} profissionais`
+})
+
+watch(
+  () => props.modo,
+  (modo) => {
+    if (modo === 'edicao') {
+      aberto.value = true
+      fieldError.value = null
+    }
+  },
+)
+
 function updateDraft(field: keyof DiaLojaDraft, value: string) {
+  fieldError.value = null
   emit('update:draft', { ...props.draft, [field]: value })
+}
+
+function onSalvar() {
+  if (aberto.value) {
+    const erro = validarIntervaloHorario(props.draft.horaInicio, props.draft.horaFim)
+    if (erro) {
+      fieldError.value = erro
+      return
+    }
+  }
+  emit('salvar', aberto.value)
 }
 </script>
 
 <template>
   <article
     class="horario-dia-card"
-    :class="inputsEditable ? 'horario-dia-card--editavel' : 'horario-dia-card--bloqueado'"
+    :class="{
+      'horario-dia-card--editando': isEditing,
+      'horario-dia-card--fechado': !isEditing && isFechado,
+      'horario-dia-card--compact': compactMobile && !isEditing,
+    }"
   >
-    <div class="horario-dia-card__header">
-      <h3 class="horario-dia-card__title">{{ label }}</h3>
-      <HorarioStatusBadge v-if="horario" :ativo="horario.ativo" />
-      <HorarioStatusBadge v-else :ativo="false" />
-    </div>
-
-    <p v-if="modoHint" class="horario-dia-card__hint" :class="{ 'horario-dia-card__hint--editavel': inputsEditable }">
-      <svg
-        v-if="inputsEditable"
-        class="horario-dia-card__hint-icon"
-        viewBox="0 0 16 16"
-        fill="none"
-        aria-hidden="true"
-      >
-        <path
-          d="M11.333 2.00004L14.0023 4.66938L5.00233 13.6694L1.33398 14.6667L2.33131 11.0027L11.333 2.00004Z"
-          stroke="currentColor"
-          stroke-width="1.2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-      <svg
-        v-else
-        class="horario-dia-card__hint-icon"
-        viewBox="0 0 16 16"
-        fill="none"
-        aria-hidden="true"
-      >
-        <rect x="3.5" y="7" width="9" height="7" rx="1" stroke="currentColor" stroke-width="1.2" />
-        <path
-          d="M5.5 7V5.5C5.5 3.84315 6.84315 2.5 8.5 2.5C10.1569 2.5 11.5 3.84315 11.5 5.5V7"
-          stroke="currentColor"
-          stroke-width="1.2"
-          stroke-linecap="round"
-        />
-      </svg>
-      {{ modoHint }}
-    </p>
-
-    <div class="horario-dia-card__fields">
-      <div class="horario-field">
-        <span class="horario-field__label">Início de funcionamento</span>
-        <input
-          v-if="inputsEditable"
-          type="time"
-          class="horario-field__input horario-field__input--editable"
-          :value="draft.horaInicio"
-          required
-          @input="updateDraft('horaInicio', ($event.target as HTMLInputElement).value)"
-        />
-        <div v-else class="horario-field__value" aria-readonly="true">
-          {{ draft.horaInicio }}
+    <!-- Mobile compacto -->
+    <template v-if="compactMobile && !isEditing">
+      <div class="horario-dia-card__compact-row">
+        <div class="min-w-0 flex-1">
+          <div class="horario-dia-card__header">
+            <h3 class="horario-dia-card__title">{{ label }}</h3>
+            <HorarioStatusBadge :ativo="isAtivo" />
+          </div>
+          <p v-if="isAtivo && horaInicioExibida && horaFimExibida" class="horario-dia-card__range">
+            {{ horaInicioExibida }} — {{ horaFimExibida }}
+          </p>
+          <p v-else class="horario-dia-card__closed-label">Loja fechada</p>
+          <p v-if="exibeProfissionais" class="horario-dia-card__profs-count mt-1.5">
+            {{ profissionaisLabel }}
+          </p>
         </div>
+        <button
+          v-if="!readonly"
+          type="button"
+          class="horario-dia-card__edit-link"
+          @click="emit('editar')"
+        >
+          {{ isFechado ? 'Definir' : 'Editar' }}
+        </button>
       </div>
-      <div class="horario-field">
-        <span class="horario-field__label">Fim de funcionamento</span>
-        <input
-          v-if="inputsEditable"
-          type="time"
-          class="horario-field__input horario-field__input--editable"
-          :value="draft.horaFim"
-          required
-          @input="updateDraft('horaFim', ($event.target as HTMLInputElement).value)"
-        />
-        <div v-else class="horario-field__value" aria-readonly="true">
-          {{ draft.horaFim }}
+    </template>
+
+    <template v-else>
+      <div class="horario-dia-card__header">
+        <h3 class="horario-dia-card__title">{{ label }}</h3>
+        <HorarioStatusBadge v-if="!isEditing" :ativo="isAtivo" />
+      </div>
+
+      <!-- Leitura: ativo -->
+      <template v-if="!isEditing && isAtivo">
+        <div class="horario-dia-card__times-read">
+          <div class="horario-dia-card__time-block">
+            <span class="horario-dia-card__label">Início</span>
+            <div class="horario-dia-card__time-box">
+              <span class="horario-dia-card__time-text">{{ horaInicioExibida }}</span>
+              <Clock3 class="horario-dia-card__time-box-icon" aria-hidden="true" />
+            </div>
+          </div>
+          <div class="horario-dia-card__time-block">
+            <span class="horario-dia-card__label">Fim</span>
+            <div class="horario-dia-card__time-box">
+              <span class="horario-dia-card__time-text">{{ horaFimExibida }}</span>
+              <Clock3 class="horario-dia-card__time-box-icon" aria-hidden="true" />
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <button
-      v-if="exibeProfissionais"
-      type="button"
-      class="horario-dia-card__profissionais"
-      @click="emit('profissionais')"
-    >
-      <svg class="horario-dia-card__profissionais-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-        <path
-          d="M8 8C9.65685 8 11 6.65685 11 5C11 3.34315 9.65685 2 8 2C6.34315 2 5 3.34315 5 5C5 6.65685 6.34315 8 8 8Z"
-          stroke="currentColor"
-          stroke-width="1.2"
-        />
-        <path
-          d="M2.66699 14C2.66699 11.4227 4.75656 9.33333 7.33366 9.33333H8.66699C11.2441 9.33333 13.3337 11.4227 13.3337 14"
-          stroke="currentColor"
-          stroke-width="1.2"
-          stroke-linecap="round"
-        />
-      </svg>
-      Profissionais
-      <span v-if="profissionaisVinculados" class="horario-dia-card__profissionais-count">
-        {{ profissionaisVinculados }}
-      </span>
-    </button>
+        <div v-if="exibeProfissionais" class="horario-dia-card__profs">
+          <span class="horario-dia-card__label">Profissionais</span>
+          <button
+            v-if="qtdProfissionais > 0"
+            type="button"
+            class="horario-dia-card__profs-count-btn"
+            @click="emit('profissionais')"
+          >
+            <Users class="size-3.5 shrink-0" aria-hidden="true" />
+            <span>{{ profissionaisLabel }}</span>
+          </button>
+          <template v-else>
+            <p class="horario-dia-card__profs-empty">Nenhum profissional vinculado</p>
+            <button type="button" class="horario-dia-card__add-prof" @click="emit('profissionais')">
+              <Plus class="size-3.5" aria-hidden="true" />
+              Adicionar
+            </button>
+          </template>
+        </div>
 
-    <div v-if="!readonly" class="horario-dia-card__actions">
-      <template v-if="modo === 'visualizacao' && horario">
-        <button type="button" class="horarios-btn-outline horarios-btn-outline--block" @click="emit('editar')">
-          <ServicoIcons name="edit" />
-          Editar
-        </button>
         <button
-          v-if="horario.ativo"
+          v-if="!readonly"
           type="button"
-          class="horarios-btn-outline horarios-btn-outline--block"
-          :disabled="saving"
-          @click="emit('desativar')"
+          class="horario-dia-card__edit-btn"
+          data-tour="horario-edit-day"
+          @click="emit('editar')"
         >
-          <ServicoIcons name="desativar" />
-          Desativar
-        </button>
-        <button
-          v-else
-          type="button"
-          class="horarios-btn-ativar horarios-btn-ativar--block"
-          :disabled="saving"
-          @click="emit('ativar')"
-        >
-          <ServicoIcons name="ativar" />
-          Ativar
+          <Pencil class="size-3.5" aria-hidden="true" />
+          Editar dia
         </button>
       </template>
 
+      <!-- Leitura: fechado / sem horário -->
+      <template v-else-if="!isEditing">
+        <div class="horario-dia-card__closed">
+          <p class="horario-dia-card__closed-label">Loja fechada</p>
+          <p class="horario-dia-card__closed-range" aria-hidden="true">— : — às — : —</p>
+        </div>
+
+        <button
+          v-if="!readonly"
+          type="button"
+          class="horario-dia-card__define-btn"
+          data-tour="horario-edit-day"
+          @click="emit('editar')"
+        >
+          <Plus class="size-3.5" aria-hidden="true" />
+          Definir horário
+        </button>
+
+        <button
+          v-if="exibeProfissionais"
+          type="button"
+          class="horario-dia-card__profs-btn"
+          @click="emit('profissionais')"
+        >
+          <Users class="size-3.5" aria-hidden="true" />
+          Profissionais ({{ profissionais.length }})
+        </button>
+      </template>
+
+      <!-- Edição (um dia por vez) -->
       <template v-else>
-        <button
-          type="button"
-          class="horarios-btn-primary horarios-btn-primary--block"
-          :disabled="saving"
-          @click="emit('salvar')"
-        >
-          <svg class="size-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path
-              d="M3 8H13M9 4L13 8L9 12"
-              stroke="currentColor"
-              stroke-width="1.2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+        <label class="horario-dia-card__switch-row">
+          <span class="horario-dia-card__switch-label">Loja aberta neste dia</span>
+          <input v-model="aberto" type="checkbox" class="horario-toggle" />
+        </label>
+        <p v-if="!aberto" class="horario-dia-card__closed-hint">Loja fechada neste dia.</p>
+
+        <div class="horario-dia-card__times-edit" data-tour="horario-times" :class="{ 'is-disabled': !aberto }">
+          <label class="horario-dia-card__time-block">
+            <span class="horario-dia-card__label">Início</span>
+            <input
+              type="time"
+              class="horario-dia-card__input"
+              :value="draft.horaInicio"
+              :disabled="!aberto || saving"
+              required
+              @input="updateDraft('horaInicio', ($event.target as HTMLInputElement).value)"
             />
-          </svg>
-          Salvar
-        </button>
-        <button
-          v-if="modo === 'edicao'"
-          type="button"
-          class="horarios-btn-outline horarios-btn-outline--block"
-          :disabled="saving"
-          @click="emit('cancelar')"
-        >
-          <ServicoIcons name="close" />
-          Cancelar
-        </button>
-        <button
-          v-else-if="!horario || !horario.ativo"
-          type="button"
-          class="horarios-btn-ativar horarios-btn-ativar--block"
-          :disabled="saving"
-          @click="emit('ativar')"
-        >
-          <ServicoIcons name="ativar" />
-          Ativar
-        </button>
+          </label>
+          <label class="horario-dia-card__time-block">
+            <span class="horario-dia-card__label">Fim</span>
+            <input
+              type="time"
+              class="horario-dia-card__input"
+              :value="draft.horaFim"
+              :disabled="!aberto || saving"
+              required
+              @input="updateDraft('horaFim', ($event.target as HTMLInputElement).value)"
+            />
+          </label>
+        </div>
+
+        <p v-if="fieldError" class="horario-dia-card__error">{{ fieldError }}</p>
+
+        <div v-if="exibeProfissionais" class="horario-dia-card__profs" data-tour="horario-profissionais" :class="{ 'is-disabled': !aberto }">
+          <span class="horario-dia-card__label">Profissionais</span>
+          <button
+            type="button"
+            class="horario-dia-card__select-profs"
+            :disabled="!aberto || saving"
+            @click="emit('profissionais')"
+          >
+            <Users class="size-3.5" aria-hidden="true" />
+            {{ qtdProfissionais > 0 ? profissionaisLabel : 'Selecionar profissionais' }}
+          </button>
+        </div>
+
+        <div class="horario-dia-card__actions">
+          <BaseButton variant="ghost" size="sm" :disabled="saving" @click="emit('cancelar')">
+            Cancelar
+          </BaseButton>
+          <span data-tour="horario-save" class="inline-flex">
+            <BaseButton variant="primary" size="sm" :loading="saving" @click="onSalvar">
+              Salvar
+            </BaseButton>
+          </span>
+        </div>
       </template>
-    </div>
+    </template>
   </article>
 </template>

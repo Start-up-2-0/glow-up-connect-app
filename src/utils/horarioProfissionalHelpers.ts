@@ -21,8 +21,9 @@ export function resolverModoHorarioProfissional(
 }
 
 export function validarIntervaloHorario(horaInicio: string, horaFim: string): string | null {
-  if (!horaInicio || !horaFim) return 'Informe início e fim do horário.'
-  if (horaInicio >= horaFim) return 'O horário de início deve ser anterior ao fim.'
+  if (!horaInicio || !horaFim) return 'Informe um período válido de funcionamento.'
+  if (horaInicio === horaFim) return 'Informe um período válido de funcionamento.'
+  if (horaInicio > horaFim) return 'O horário de término deve ser posterior ao início.'
   return null
 }
 

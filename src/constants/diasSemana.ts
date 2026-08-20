@@ -15,8 +15,41 @@ const DIA_LABEL_MAP = Object.fromEntries(DIAS_SEMANA.map((d) => [d.value, d.labe
   string
 >
 
+/** Aliases PT-BR / variações → DayOfWeek inglês (API .NET). */
+const DIA_ALIASES: Record<string, DiaSemanaValue> = {
+  Sunday: 'Sunday',
+  Monday: 'Monday',
+  Tuesday: 'Tuesday',
+  Wednesday: 'Wednesday',
+  Thursday: 'Thursday',
+  Friday: 'Friday',
+  Saturday: 'Saturday',
+  Domingo: 'Sunday',
+  Segunda: 'Monday',
+  'Segunda-feira': 'Monday',
+  Terca: 'Tuesday',
+  Terça: 'Tuesday',
+  'Terça-feira': 'Tuesday',
+  Quarta: 'Wednesday',
+  'Quarta-feira': 'Wednesday',
+  Quinta: 'Thursday',
+  'Quinta-feira': 'Thursday',
+  Sexta: 'Friday',
+  'Sexta-feira': 'Friday',
+  Sabado: 'Saturday',
+  Sábado: 'Saturday',
+}
+
+/** Normaliza valor de dia da API/mock para o enum inglês. */
+export function normalizarDiaSemana(dia: string): DiaSemanaValue | null {
+  if (!dia) return null
+  return DIA_ALIASES[dia] ?? DIA_ALIASES[dia.trim()] ?? null
+}
+
 /** Rótulo PT-BR para valor retornado pela API (DayOfWeek em inglês). */
 export function diaSemanaLabel(dia: string): string {
+  const normalizado = normalizarDiaSemana(dia)
+  if (normalizado) return DIA_LABEL_MAP[normalizado]
   return DIA_LABEL_MAP[dia] ?? dia
 }
 
