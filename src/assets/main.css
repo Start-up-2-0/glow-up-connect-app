@@ -6062,11 +6062,7 @@
 
   /* Perfil */
   .perfil-page {
-    @apply w-full space-y-8 pb-20;
-  }
-
-  .perfil-page--dirty {
-    @apply pb-24;
+    @apply w-full space-y-6 pb-16;
   }
 
   .perfil-page__title {
@@ -6081,47 +6077,107 @@
     @apply size-1 rounded-full bg-glow-border-soft;
   }
 
-  .perfil-nav {
-    @apply flex flex-wrap gap-2;
+  .perfil-sheet,
+  .perfil-hero {
+    background: #ffffff;
+    border: 1px solid #e7e3ea;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   }
 
-  .perfil-nav__item {
-    @apply rounded-full border border-glow-border-soft bg-glow-surface px-4 py-1.5 font-urbanist text-sm font-medium text-glow-text-subtle transition hover:border-glow-gold-cta hover:text-glow-text;
+  .dark .perfil-sheet,
+  .dark .perfil-hero {
+    background: var(--glow-bg-elevated);
+    border-color: var(--glow-border-soft);
+    box-shadow: none;
+  }
+
+  .perfil-hero__body {
+    @apply flex flex-col gap-6 p-6 lg:flex-row lg:items-start lg:justify-between;
+  }
+
+  .perfil-hero__identity {
+    @apply flex min-w-0 flex-col gap-5 sm:flex-row sm:items-start;
+  }
+
+  .perfil-hero__avatar-wrap {
+    @apply relative w-fit shrink-0;
+  }
+
+  .perfil-hero__camera {
+    @apply absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-full bg-glow-gold-cta text-white transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-glow-gold-soft disabled:opacity-60;
+  }
+
+  .perfil-hero__details {
+    @apply min-w-0;
+  }
+
+  .perfil-hero__name-row {
+    @apply flex flex-wrap items-center gap-2.5;
+  }
+
+  .perfil-hero__name {
+    @apply font-satoshi text-xl font-bold text-glow-text;
+  }
+
+  .perfil-hero__role {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .perfil-hero__contact {
+    @apply mt-2 font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .perfil-hero__contact + .perfil-hero__contact {
+    @apply mt-1;
+  }
+
+  .perfil-hero__meta {
+    @apply mt-3 font-urbanist text-[13px] text-glow-text-subtle;
+  }
+
+  .perfil-hero__aside {
+    @apply w-full shrink-0 lg:max-w-[220px];
+  }
+
+  .perfil-hero__progress-head {
+    @apply mb-1.5 flex items-center justify-between font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-hero__progress-track {
+    @apply h-1.5 overflow-hidden rounded-full bg-glow-hover-surface;
+  }
+
+  .perfil-hero__progress-bar {
+    @apply block h-full rounded-full bg-glow-gold-cta transition-all duration-500;
+  }
+
+  .perfil-hero__photo-btn {
+    @apply mt-4 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-glow-border-soft bg-transparent px-3.5 font-urbanist text-xs font-medium text-glow-text transition hover:bg-glow-hover-surface focus:outline-none focus:ring-2 focus:ring-glow-gold-soft disabled:opacity-60;
   }
 
   .perfil-tabs {
-    @apply grid grid-cols-2 gap-3 lg:grid-cols-4;
+    @apply flex gap-1 overflow-x-auto border-t border-glow-border-soft px-2 sm:px-4;
   }
 
-  .perfil-tabs__card {
-    @apply flex flex-col items-start rounded-2xl border border-glow-border-soft bg-glow-surface p-3 text-left shadow-glow-sm transition hover:-translate-y-0.5 hover:border-glow-gold-cta hover:shadow-md sm:p-4;
+  .perfil-tabs--standalone {
+    @apply -mx-1 border-t-0 border-b border-glow-border-soft px-1;
   }
 
-  .perfil-tabs__card--active {
-    @apply border-glow-gold-cta bg-glow-hover-surface shadow-md;
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.04),
-      0 0 0 1px rgba(146, 103, 155, 0.2);
+  .perfil-tabs__item {
+    @apply inline-flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent px-3 py-3.5 font-urbanist text-sm font-medium text-glow-text-subtle transition hover:text-glow-text;
+  }
+
+  .perfil-tabs__item--active {
+    @apply border-glow-gold-cta text-glow-gold-cta;
   }
 
   .perfil-tabs__icon {
-    @apply text-xl;
-  }
-
-  .perfil-tabs__label {
-    @apply mt-2 font-satoshi text-sm font-bold text-glow-text;
-  }
-
-  .perfil-tabs__desc {
-    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+    @apply size-4;
   }
 
   .perfil-content-panel {
     @apply min-h-[320px];
-  }
-
-  .perfil-tab-panel__stack {
-    @apply flex flex-col gap-6 xl:col-span-8;
   }
 
   .perfil-tab-panel-enter-active,
@@ -6139,217 +6195,176 @@
     transform: translateY(-4px);
   }
 
-  .perfil-status-card {
-    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-4 shadow-glow-sm sm:p-6;
+  .perfil-profile-grid {
+    @apply grid grid-cols-1 gap-5 lg:grid-cols-[1.3fr_1fr];
   }
 
-  .perfil-status-card__head {
-    @apply mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between;
+  .perfil-sheet__header {
+    @apply flex items-start justify-between gap-3 border-b border-glow-border-soft px-6 py-5;
   }
 
-  .perfil-status-card__title {
-    @apply font-satoshi text-base font-bold text-glow-text;
+  .perfil-sheet__title {
+    @apply font-satoshi text-base font-semibold text-glow-text;
   }
 
-  .perfil-status-card__subtitle {
-    @apply mt-0.5 font-urbanist text-sm text-glow-text-subtle;
+  .perfil-sheet__desc {
+    @apply mt-1 font-urbanist text-[13px] text-glow-text-subtle;
   }
 
-  .perfil-status-card__progress {
-    @apply min-w-[180px];
+  .perfil-sheet__edit {
+    @apply -mr-1 -mt-1 inline-flex size-8 items-center justify-center rounded-lg text-glow-text-subtle transition hover:bg-glow-hover-surface hover:text-glow-gold-cta focus:outline-none focus:ring-2 focus:ring-glow-gold-soft;
   }
 
-  .perfil-status-card__progress-label {
-    @apply font-urbanist text-xs text-glow-text-subtle;
+  .perfil-sheet__body {
+    @apply px-6 py-6;
   }
 
-  .perfil-status-card__progress-track {
-    @apply mt-1 h-2 overflow-hidden rounded-full bg-glow-hover-surface;
+  .perfil-sheet__footer {
+    @apply border-t border-glow-border-soft px-6 py-4;
   }
 
-  .perfil-status-card__progress-bar {
-    @apply block h-full rounded-full bg-glow-gold-cta transition-all duration-500;
+  .perfil-fields {
+    @apply grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2;
   }
 
-  .perfil-status-card__progress-value {
-    @apply mt-1 block text-right font-urbanist text-xs font-semibold text-glow-text;
+  .perfil-field--span {
+    @apply sm:col-span-2;
   }
 
-  .perfil-status-card__list {
-    @apply grid gap-2 sm:grid-cols-2 lg:grid-cols-4;
+  .perfil-field__label {
+    @apply block font-urbanist text-xs text-glow-text-subtle;
   }
 
-  .perfil-status-card__item {
-    @apply flex items-center gap-2 rounded-xl bg-glow-hover-surface px-3 py-2 font-urbanist text-sm text-glow-text;
+  .perfil-field__value {
+    @apply mt-1 font-urbanist text-sm font-medium text-glow-text;
   }
 
-  .perfil-status-card__item--ok .perfil-status-card__icon {
-    @apply text-emerald-500;
+  .perfil-field__value--warn {
+    @apply inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400;
   }
 
-  .perfil-status-card__item--warning .perfil-status-card__icon {
-    @apply text-amber-500;
+  .perfil-field__status {
+    @apply mt-1 inline-flex items-center gap-1 font-urbanist text-xs font-medium;
   }
 
-  .perfil-layout {
-    @apply grid grid-cols-1 gap-8 xl:grid-cols-12 xl:items-start;
+  .perfil-field__status--ok {
+    @apply text-glow-success-dark;
   }
 
-  .perfil-sidebar {
-    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm xl:col-span-4;
+  .perfil-field__hint {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
   }
 
-  .perfil-sidebar__avatar-wrap {
-    @apply relative mx-auto w-fit;
+  .perfil-field__hint--warn {
+    @apply text-amber-700 dark:text-amber-400;
   }
 
-  .perfil-sidebar__avatar-overlay {
-    @apply absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-full bg-glow-purple font-urbanist text-xs font-medium text-white opacity-0 transition;
-    background-color: rgba(82, 46, 95, 0.75);
+  .perfil-field__action {
+    @apply mt-1 inline-flex font-urbanist text-sm font-medium text-glow-gold-cta transition hover:brightness-110 disabled:opacity-60;
   }
 
-  .perfil-sidebar__avatar-overlay--visible {
-    @apply opacity-100;
+  .perfil-readonly-field {
+    @apply sm:col-span-2;
   }
 
-  .perfil-sidebar__identity {
-    @apply mt-4 text-center;
+  .perfil-edit-form {
+    @apply grid grid-cols-1 gap-5;
   }
 
-  .perfil-sidebar__name {
-    @apply font-satoshi text-lg font-bold text-glow-text;
+  .perfil-edit-form__actions {
+    @apply flex flex-col-reverse gap-2 sm:flex-row sm:justify-end;
   }
 
-  .perfil-sidebar__role {
-    @apply mt-0.5 font-urbanist text-sm text-glow-text-subtle;
+  .perfil-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 font-urbanist text-xs font-medium;
   }
 
-  .perfil-sidebar__badge {
-    @apply mt-2 inline-flex rounded-full px-2.5 py-0.5 font-urbanist text-xs font-medium;
+  .perfil-badge--success {
+    @apply bg-glow-success-bg text-glow-success-dark;
   }
 
-  .perfil-sidebar__badge--active {
-    @apply bg-green-100 text-green-800;
+  .perfil-badge--danger {
+    @apply bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300;
   }
 
-  .perfil-sidebar__badge--inactive {
-    @apply bg-red-100 text-red-800;
+  .perfil-badge--plan {
+    @apply bg-glow-gold-selected text-glow-gold-cta;
   }
 
-  .perfil-sidebar__divider {
-    @apply my-4 border-t border-glow-border-soft;
+  .perfil-summary {
+    @apply flex flex-col gap-3;
   }
 
-  .perfil-sidebar__contacts {
-    @apply space-y-2.5;
+  .perfil-summary__item {
+    @apply flex items-center gap-3 rounded-[10px] border border-[#e7e3ea] px-3.5 py-3;
   }
 
-  .perfil-sidebar__contact {
-    @apply grid grid-cols-[1.5rem_1fr] gap-2 font-urbanist text-sm text-glow-text;
+  .dark .perfil-summary__item {
+    @apply border-glow-border-soft;
   }
 
-  .perfil-sidebar__edit {
-    @apply mt-4 w-full rounded-lg border border-glow-border-soft py-2 font-urbanist text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface;
+  .perfil-summary__icon {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-lg;
   }
 
-  .perfil-sections {
-    @apply flex flex-col gap-8 xl:col-span-8;
+  .perfil-summary__icon--ok {
+    @apply bg-glow-success-bg text-glow-success-dark;
   }
 
-  .perfil-tab-panel .perfil-layout {
-    @apply gap-6;
+  .perfil-summary__icon--warn {
+    @apply bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400;
   }
 
-  .perfil-card {
-    @apply scroll-mt-24 rounded-2xl border border-glow-border-soft bg-glow-surface shadow-glow-sm;
+  .perfil-summary__icon--primary {
+    @apply bg-glow-gold-selected text-glow-gold-cta;
   }
 
-  .perfil-card__header {
-    @apply border-b border-glow-border-soft px-4 py-3 sm:px-6 sm:py-4;
-  }
-
-  .perfil-card__title {
-    @apply font-satoshi text-base font-bold text-glow-text;
-  }
-
-  .perfil-card__subtitle {
-    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
-  }
-
-  .perfil-card__body {
-    @apply space-y-5 p-4 sm:p-6;
-  }
-
-  .perfil-card--alert {
-    @apply flex flex-col gap-4 border-amber-200 bg-amber-50 p-4 sm:flex-row sm:p-6;
-  }
-
-  .perfil-card__alert-icon {
-    @apply text-2xl;
-  }
-
-  .perfil-card__alert-title {
-    @apply font-satoshi text-base font-bold text-glow-text;
-  }
-
-  .perfil-card__alert-desc {
-    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
-  }
-
-  .perfil-card__alert-actions {
-    @apply mt-4 flex flex-wrap items-center gap-3;
-  }
-
-  .perfil-email-field__label {
+  .perfil-summary__title {
     @apply font-urbanist text-sm font-medium text-glow-text;
   }
 
-  .perfil-email-field__value {
-    @apply mt-2 flex flex-col gap-1 rounded-xl border border-glow-border-soft bg-glow-hover-surface px-4 py-3 font-urbanist text-sm text-glow-text;
+  .perfil-summary__desc {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
   }
 
-  .perfil-email-field__lock {
-    @apply text-xs text-glow-text-subtle;
+  .perfil-summary__status {
+    @apply shrink-0 font-urbanist text-xs font-medium;
   }
 
-  .perfil-link-btn {
-    @apply mt-2 font-urbanist text-sm font-medium text-glow-gold-cta transition hover:brightness-110;
+  .perfil-summary__status--ok {
+    @apply text-glow-success-dark;
   }
 
-  .perfil-dl {
-    @apply space-y-3 p-4 sm:p-6;
+  .perfil-summary__status--warn {
+    @apply text-amber-600 dark:text-amber-400;
   }
 
-  .perfil-dl__row {
-    @apply flex items-center justify-between gap-4 border-b border-glow-border-soft pb-3 font-urbanist text-sm last:border-0 last:pb-0;
+  .perfil-summary__status--primary {
+    @apply text-glow-gold-cta;
   }
 
-  .perfil-dl__row dt {
-    @apply text-glow-text-subtle;
+  .perfil-security {
+    @apply divide-y divide-glow-border-soft;
   }
 
-  .perfil-dl__row dd {
-    @apply font-medium text-glow-text;
+  .perfil-security__row {
+    @apply flex flex-col items-stretch gap-3 py-5 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4;
   }
 
-  .perfil-security-row {
-    @apply flex flex-col items-stretch gap-3 rounded-xl border border-glow-border-soft bg-glow-hover-surface px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4;
+  .perfil-security__row--muted {
+    @apply opacity-80;
   }
 
-  .perfil-security-row--muted {
-    @apply mt-4 opacity-80;
-  }
-
-  .perfil-security-row__label {
+  .perfil-security__label {
     @apply font-urbanist text-sm font-semibold text-glow-text;
   }
 
-  .perfil-security-row__meta {
+  .perfil-security__meta {
     @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
   }
 
   .perfil-password-form {
-    @apply mt-4 space-y-4 rounded-xl border border-glow-border-soft bg-glow-hover-surface p-4;
+    @apply space-y-4 pb-5;
   }
 
   .perfil-password-form__grid {
@@ -6377,7 +6392,7 @@
   }
 
   .perfil-sessions {
-    @apply mt-4 rounded-xl border border-glow-border-soft bg-glow-hover-surface p-4;
+    @apply py-5;
   }
 
   .perfil-sessions__title {
@@ -6389,7 +6404,7 @@
   }
 
   .perfil-sessions__item {
-    @apply rounded-lg bg-glow-surface px-3 py-2;
+    @apply rounded-lg border border-glow-border-soft px-3 py-2;
   }
 
   .perfil-sessions__device {
@@ -6405,11 +6420,11 @@
   }
 
   .perfil-prefs {
-    @apply divide-y divide-glow-border-soft p-2;
+    @apply divide-y divide-glow-border-soft;
   }
 
   .perfil-prefs__item {
-    @apply flex items-center justify-between gap-4 px-4 py-4;
+    @apply flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0;
   }
 
   .perfil-prefs__label {
@@ -6436,48 +6451,141 @@
     @apply border border-amber-200 bg-amber-50 text-amber-800;
   }
 
-  .perfil-btn {
-    @apply inline-flex h-10 items-center rounded-lg px-4 font-urbanist text-sm font-medium transition;
+  /* Perfil do estabelecimento (Minha Loja) */
+  .loja-perfil-stack {
+    @apply flex flex-col gap-5;
   }
 
-  .perfil-btn--primary {
-    @apply bg-green-600 text-white hover:bg-green-700;
+  .loja-perfil-top-grid {
+    @apply grid grid-cols-1 gap-5 lg:grid-cols-2;
   }
 
-  .perfil-polling {
-    @apply font-urbanist text-xs text-glow-text-subtle;
+  .loja-perfil-logo {
+    @apply size-[88px] rounded-[14px] bg-glow-hover-surface object-cover;
   }
 
-  .perfil-save-bar {
-    @apply fixed left-4 right-4 z-40 mx-auto flex max-w-xl items-center justify-between gap-3 rounded-xl border border-glow-border-soft bg-glow-bg-elevated px-3.5 py-2.5 shadow-glow-md md:left-[calc(16rem+1rem)] md:right-4;
-    bottom: max(1rem, env(safe-area-inset-bottom));
+  .loja-perfil-logo--empty {
+    @apply border border-dashed border-glow-border-soft;
   }
 
-  .perfil-save-bar__text {
-    @apply min-w-0 truncate font-urbanist text-[13px] font-medium text-glow-text;
+  .loja-perfil-store__main {
+    @apply flex flex-col gap-4 sm:flex-row sm:items-start;
   }
 
-  .perfil-save-bar__actions {
-    @apply flex shrink-0 items-center gap-2;
+  .loja-perfil-icon {
+    @apply flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-glow-gold-selected text-glow-gold-cta;
   }
 
-  .perfil-save-bar__cancel {
-    @apply rounded-lg px-3 py-1.5 font-urbanist text-[13px] font-medium text-glow-text-subtle transition hover:bg-glow-hover-surface hover:text-glow-text;
+  .loja-perfil-address {
+    @apply flex items-start gap-3;
   }
 
-  .perfil-save-bar__save {
-    @apply rounded-lg bg-glow-gold-cta px-3.5 py-1.5 font-urbanist text-[13px] font-semibold text-white transition hover:brightness-95 disabled:opacity-60;
+  .loja-perfil-info-grid {
+    @apply grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 xl:grid-cols-3;
   }
 
-  .perfil-save-bar-enter-active,
-  .perfil-save-bar-leave-active {
-    transition: transform 0.2s ease, opacity 0.2s ease;
+  .loja-perfil-info {
+    @apply flex items-start gap-3;
   }
 
-  .perfil-save-bar-enter-from,
-  .perfil-save-bar-leave-to {
-    transform: translateY(0.75rem);
-    opacity: 0;
+  .loja-perfil-modules {
+    @apply mt-6 border-t border-glow-border-soft pt-5;
+  }
+
+  .loja-perfil-module-list {
+    @apply mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .loja-perfil-module-list li {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .loja-perfil-empty {
+    @apply rounded-[10px] border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-5;
+  }
+
+  .loja-perfil-share {
+    @apply flex flex-col gap-3 rounded-[10px] border border-glow-border-soft bg-glow-gold-selected p-3 sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .dark .loja-perfil-share {
+    @apply bg-glow-hover-surface;
+  }
+
+  .loja-perfil-share__url {
+    @apply flex min-w-0 items-center gap-2.5 px-1;
+  }
+
+  .loja-perfil-share__actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .loja-perfil-status-dot {
+    @apply mr-1 inline-block size-1.5 rounded-full;
+  }
+
+  .loja-perfil-status-dot--ok {
+    @apply bg-glow-success-dark;
+  }
+
+  .loja-perfil-status-dot--off {
+    @apply bg-red-500;
+  }
+
+  .loja-perfil-skeleton {
+    @apply space-y-5;
+  }
+
+  .loja-perfil-skeleton__tabs {
+    @apply h-12 animate-pulse rounded-lg bg-glow-hover-surface;
+  }
+
+  .loja-perfil-skeleton__grid {
+    @apply grid grid-cols-1 gap-5 lg:grid-cols-2;
+  }
+
+  .loja-perfil-skeleton__card {
+    @apply space-y-4 rounded-xl border border-glow-border-soft bg-glow-surface p-6;
+  }
+
+  .loja-perfil-skeleton__logo-row {
+    @apply flex items-start gap-4 pt-2;
+  }
+
+  .loja-perfil-skeleton__logo {
+    @apply size-[88px] shrink-0 animate-pulse rounded-[14px] bg-glow-hover-surface;
+  }
+
+  .loja-perfil-skeleton__info-grid {
+    @apply grid grid-cols-1 gap-5 pt-2 sm:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .loja-perfil-skeleton__info {
+    @apply flex items-start gap-3;
+  }
+
+  .loja-perfil-skeleton__icon {
+    @apply size-10 shrink-0 animate-pulse rounded-[10px] bg-glow-hover-surface;
+  }
+
+  .loja-perfil-skeleton__line {
+    @apply h-3 animate-pulse rounded bg-glow-hover-surface;
+  }
+
+  .loja-perfil-skeleton__line--sm {
+    @apply w-24;
+  }
+
+  .loja-perfil-skeleton__line--md {
+    @apply w-40;
+  }
+
+  .loja-perfil-skeleton__line--lg {
+    @apply w-48;
+  }
+
+  .loja-perfil-skeleton__line--full {
+    @apply w-full;
   }
 }
 

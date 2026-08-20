@@ -2,7 +2,6 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import UserAvatar from '@/components/layout/UserAvatar.vue'
 import { AVATAR_HINT, validateAvatarFile } from '@/utils/avatarFile'
-import { normalizeAvatarSrc } from '@/utils/avatarSrc'
 
 const props = defineProps<{
   currentSrc?: string | null
@@ -23,7 +22,7 @@ const removed = ref(false)
 const displaySrc = computed(() => {
   if (removed.value) return null
   if (previewUrl.value) return previewUrl.value
-  return normalizeAvatarSrc(props.currentSrc)
+  return props.currentSrc
 })
 
 function revokePreview() {

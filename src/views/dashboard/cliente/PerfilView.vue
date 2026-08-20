@@ -1,52 +1,60 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
+import type { Component } from 'vue'
+import {
+  AlertTriangle,
+  Bell,
+  Check,
+  CircleCheck,
+  Clock3,
+  Mail,
+  Settings,
+  Shield,
+  Smartphone,
+  User,
+} from 'lucide-vue-next'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import SegmentedControl from '@/components/ui/SegmentedControl.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
-import BaseAlert from '@/components/feedback/BaseAlert.vue'
+import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
-import PerfilStatusCard from '@/components/perfil/PerfilStatusCard.vue'
 import PerfilSidebar from '@/components/perfil/PerfilSidebar.vue'
-import PerfilSaveBar from '@/components/perfil/PerfilSaveBar.vue'
 import PerfilPasswordRules from '@/components/perfil/PerfilPasswordRules.vue'
 import PerfilTabNav from '@/components/perfil/PerfilTabNav.vue'
+import PerfilSectionCard from '@/components/perfil/PerfilSectionCard.vue'
 import { useUserStore } from '@/stores/user.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
+import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useFetchOnce } from '@/composables/useFetchOnce'
 import { useWhatsAppConfirmacao } from '@/composables/useWhatsAppConfirmacao'
 import { useApiError } from '@/composables/useApiError'
 import { getUserRoleLabel } from '@/utils/userRoleLabel'
 import { compressAvatarFile } from '@/utils/avatarFile'
 import { getUnmetPasswordRules } from '@/utils/passwordRules'
-import {
-  buildPerfilStatusItems,
-  calcularProgressoPerfil,
-  formatUltimaAtualizacao,
-} from '@/utils/perfilUtils'
+import { calcularProgressoPerfil, formatUltimaAtualizacao } from '@/utils/perfilUtils'
 import type { UpdateProfilePayload } from '@/types/user.types'
-import {
-  formatTelefone,
-  telefoneLocalFromApi,
-  telefoneToApi,
-} from '@/utils/formatters'
+import { formatTelefone, telefoneLocalFromApi, telefoneToApi } from '@/utils/formatters'
 
 type PerfilTabId = 'informacoes' | 'conta' | 'seguranca' | 'notificacoes'
+type EditingSection = 'pessoal' | null
 
-const TABS = [
-  { id: 'informacoes' as const, label: 'Perfil', description: 'Dados e foto', icon: '👤' },
-  { id: 'conta' as const, label: 'Conta', description: 'Status e plano', icon: '🏷️' },
-  { id: 'seguranca' as const, label: 'Segurança', description: 'Senha e acesso', icon: '🔒' },
-  { id: 'notificacoes' as const, label: 'Notificações', description: 'Alertas e avisos', icon: '🔔' },
+const TABS: { id: PerfilTabId; label: string; icon: Component }[] = [
+  { id: 'informacoes', label: 'Perfil', icon: User },
+  { id: 'conta', label: 'Conta', icon: Settings },
+  { id: 'seguranca', label: 'Segurança', icon: Shield },
+  { id: 'notificacoes', label: 'Notificações', icon: Bell },
 ]
 
 const userStore = useUserStore()
 const notificationsStore = useNotificationsStore()
 const { profile, saving, changingPassword, regeneratingCodigo } = storeToRefs(userStore)
+const { planoNome, proximaDataVencimento } = useNegocioContext()
 const { resolveError } = useApiError()
 
 const activeTab = ref<PerfilTabId>('informacoes')
+const editingSection = ref<EditingSection>(null)
 
 const form = reactive({ nome: '', telefone: '', sexo: '' as '' | 'Masculino' | 'Feminino' })
 const SEXO_OPTIONS = [
@@ -54,8 +62,6 @@ const SEXO_OPTIONS = [
   { value: 'Feminino', label: 'Feminino' },
 ]
 const passwordForm = reactive({ senha: '', confirmarSenha: '' })
-const avatarFile = ref<File | null>(null)
-const avatarRemoved = ref(false)
 
 const profileError = ref<string | null>(null)
 const profileSuccess = ref(false)
@@ -63,6 +69,7 @@ const passwordError = ref<string | null>(null)
 const passwordSuccess = ref(false)
 const passwordExpanded = ref(false)
 const codigoCopied = ref(false)
+const savingAvatar = ref(false)
 
 const mostrarNovaSenha = ref(false)
 const mostrarConfirmarSenha = ref(false)
@@ -95,19 +102,13 @@ const whatsAppState = computed(() => {
 })
 
 const progressoPerfil = computed(() => calcularProgressoPerfil(profile.value))
-const statusItems = computed(() =>
-  profile.value ? buildPerfilStatusItems(profile.value, whatsAppState.value) : [],
+const roleLabel = computed(() => getUserRoleLabel(profile.value?.role))
+const telefoneExibido = computed(() =>
+  profile.value?.telefone ? formatTelefone(profile.value.telefone) : '',
 )
-
-const isProfileDirty = computed(() => {
-  if (!profile.value) return false
-  if (avatarFile.value || avatarRemoved.value) return true
-  return (
-    form.nome.trim() !== profile.value.nome ||
-    telefoneToApi(form.telefone) !== (profile.value.telefone ?? '') ||
-    form.sexo !== (profile.value?.sexo ?? '')
-  )
-})
+const membroDesde = computed(() => formatDate(profile.value?.createdAt))
+const planoExibido = computed(() => formatPlanoNome(planoNome.value))
+const renovacaoExibida = computed(() => formatDate(proximaDataVencimento.value))
 
 const canChangePassword = computed(() => {
   if (!passwordForm.senha || !passwordForm.confirmarSenha) return false
@@ -115,18 +116,81 @@ const canChangePassword = computed(() => {
   return getUnmetPasswordRules(passwordForm.senha).length === 0
 })
 
-const whatsAppLabel = computed(() => {
-  const map = {
-    'sem-telefone': 'Não cadastrado',
-    confirmado: 'Confirmado',
-    pendente: 'Aguardando confirmação',
-    'nao-confirmado': 'Não confirmado',
-  } as const
-  return map[whatsAppState.value]
+const resumoItems = computed(() => {
+  const contaAtiva = profile.value?.ativo !== false
+  const emailOk = Boolean(profile.value?.email)
+  const whatsOk = whatsAppState.value === 'confirmado'
+  const progresso = progressoPerfil.value
+
+  return [
+    {
+      id: 'conta',
+      icon: CircleCheck,
+      tone: contaAtiva ? 'ok' : 'warn',
+      title: contaAtiva ? 'Conta ativa' : 'Conta inativa',
+      desc: contaAtiva ? 'Sua conta está ativa' : 'Sua conta precisa de atenção',
+      status: contaAtiva ? 'Ativo' : 'Inativa',
+    },
+    {
+      id: 'email',
+      icon: Mail,
+      tone: emailOk ? 'ok' : 'warn',
+      title: 'E-mail confirmado',
+      desc: emailOk ? 'Seu e-mail está verificado' : 'Confirme seu e-mail',
+      status: emailOk ? 'Confirmado' : 'Pendente',
+    },
+    {
+      id: 'whatsapp',
+      icon: Smartphone,
+      tone: whatsOk ? 'ok' : 'warn',
+      title: whatsOk ? 'WhatsApp confirmado' : 'WhatsApp pendente',
+      desc: whatsOk ? 'Número verificado' : 'Confirme seu número',
+      status: whatsOk ? 'Confirmado' : 'Pendente',
+    },
+    {
+      id: 'perfil',
+      icon: Clock3,
+      tone: progresso >= 100 ? 'ok' : 'primary',
+      title: 'Perfil completo',
+      desc: progresso >= 100 ? 'Tudo certo por aqui' : 'Continue assim!',
+      status: `${progresso}%`,
+    },
+  ] as const
 })
 
+function dash(value?: string | null): string {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : '—'
+}
+
+function formatDate(value?: string | null): string {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleDateString('pt-BR')
+}
+
+function formatPlanoNome(nome?: string | null): string {
+  if (!nome?.trim()) return ''
+  return nome.toLowerCase().startsWith('plano') ? nome : `Plano ${nome}`
+}
+
 function selectTab(id: string) {
+  if (editingSection.value) cancelEditing()
   activeTab.value = id as PerfilTabId
+}
+
+function startEdit(section: Exclude<EditingSection, null>) {
+  if (section === 'pessoal') syncFormFromProfile()
+  profileError.value = null
+  profileSuccess.value = false
+  editingSection.value = section
+}
+
+function cancelEditing() {
+  if (editingSection.value === 'pessoal') syncFormFromProfile()
+  editingSection.value = null
+  profileError.value = null
 }
 
 function handleAlterarEmail() {
@@ -141,15 +205,25 @@ function syncFormFromProfile() {
   form.nome = profile.value.nome
   form.telefone = telefoneLocalFromApi(profile.value.telefone)
   form.sexo = profile.value?.sexo ?? ''
-  avatarFile.value = null
-  avatarRemoved.value = false
   notificacoes.whatsapp = profile.value.whatsAppOptIn ?? true
 }
 
-function onAvatarChange(file: File) {
-  avatarFile.value = file
-  avatarRemoved.value = false
+async function onAvatarChange(file: File) {
   profileError.value = null
+  profileSuccess.value = false
+  savingAvatar.value = true
+  try {
+    const compressed = await compressAvatarFile(file)
+    await userStore.updateProfile({
+      avatarBase64: compressed.dataUrl,
+      avatarContentType: compressed.contentType,
+    })
+    profileSuccess.value = true
+  } catch (err) {
+    profileError.value = resolveError(err, 'Não foi possível atualizar a foto.')
+  } finally {
+    savingAvatar.value = false
+  }
 }
 
 function onAvatarError(message: string) {
@@ -161,11 +235,9 @@ onMounted(async () => {
   syncFormFromProfile()
 })
 
-function cancelProfileChanges() {
-  syncFormFromProfile()
-  profileError.value = null
-  profileSuccess.value = false
-}
+watch(activeTab, () => {
+  if (editingSection.value) cancelEditing()
+})
 
 async function handleSaveProfile() {
   profileError.value = null
@@ -178,17 +250,10 @@ async function handleSaveProfile() {
       sexo: form.sexo || null,
     }
 
-    if (avatarRemoved.value) {
-      payload.avatarBase64 = null
-    } else if (avatarFile.value) {
-      const compressed = await compressAvatarFile(avatarFile.value)
-      payload.avatarBase64 = compressed.dataUrl
-      payload.avatarContentType = compressed.contentType
-    }
-
     await userStore.updateProfile(payload)
     syncFormFromProfile()
     profileSuccess.value = true
+    editingSection.value = null
   } catch (err) {
     profileError.value = resolveError(err, 'Não foi possível salvar o perfil.')
   }
@@ -269,189 +334,260 @@ async function handleSolicitarWhatsApp() {
 </script>
 
 <template>
-  <div class="perfil-page" :class="{ 'perfil-page--dirty': isProfileDirty }">
+  <div class="perfil-page">
     <header class="perfil-page__header">
-      <div>
-        <h1 class="perfil-page__title">Meu perfil</h1>
-        <div v-if="profile" class="perfil-page__meta">
-          <span>{{ profile.ativo ? 'Conta ativa' : 'Conta inativa' }}</span>
-          <span class="perfil-page__meta-dot" />
-          <span>Perfil {{ progressoPerfil }}% completo</span>
-          <span class="perfil-page__meta-dot" />
-          <span>Última atualização {{ formatUltimaAtualizacao(profile.updatedAt) }}</span>
-        </div>
+      <h1 class="perfil-page__title">Meu perfil</h1>
+      <div v-if="profile" class="perfil-page__meta">
+        <span>{{ profile.ativo ? 'Conta ativa' : 'Conta inativa' }}</span>
+        <span class="perfil-page__meta-dot" />
+        <span>Perfil {{ progressoPerfil }}% completo</span>
+        <span class="perfil-page__meta-dot" />
+        <span>Última atualização {{ formatUltimaAtualizacao(profile.updatedAt) }}</span>
       </div>
     </header>
 
     <template v-if="profile">
-      <PerfilTabNav :tabs="TABS" :active-id="activeTab" @select="selectTab" />
+      <ContentAlert v-if="profileError" variant="error" compact>{{ profileError }}</ContentAlert>
+      <ContentAlert v-else-if="profileSuccess" variant="success" compact>
+        Perfil atualizado com sucesso.
+      </ContentAlert>
 
-      <PerfilStatusCard
-        :items="statusItems"
-        :progresso="progressoPerfil"
-        :seguranca-label="passwordExpanded ? 'Em atualização' : 'Boa'"
-      />
+      <section class="perfil-hero">
+        <PerfilSidebar
+          :current-src="profile.avatarBase64"
+          :name="profile.nome"
+          :role-label="roleLabel"
+          :ativo="profile.ativo"
+          :email="profile.email"
+          :telefone="telefoneExibido"
+          :membro-desde="membroDesde"
+          :progresso="progressoPerfil"
+          :saving="savingAvatar"
+          @change="onAvatarChange"
+          @error="onAvatarError"
+        />
+        <PerfilTabNav :tabs="TABS" :active-id="activeTab" @select="selectTab" />
+      </section>
 
       <div class="perfil-content-panel" role="tabpanel">
         <Transition name="perfil-tab-panel" mode="out-in">
-          <!-- Tab: Perfil -->
-          <div v-if="activeTab === 'informacoes'" key="informacoes" class="perfil-tab-panel">
-            <div class="perfil-layout">
-              <PerfilSidebar
-                :current-src="profile.avatarBase64"
-                :name="form.nome || profile.nome"
-                :role-label="getUserRoleLabel(profile.role)"
-                :ativo="profile.ativo"
-                @change="onAvatarChange"
-                @error="onAvatarError"
+          <div v-if="activeTab === 'informacoes'" key="informacoes" class="perfil-profile-grid">
+            <PerfilSectionCard
+              title="Informações pessoais"
+              description="Seus dados pessoais e de contato."
+              editable
+              :editing="editingSection === 'pessoal'"
+              @edit="startEdit('pessoal')"
+            >
+              <form
+                v-if="editingSection === 'pessoal'"
+                class="perfil-edit-form"
+                @submit.prevent="handleSaveProfile"
               >
-                <template #email>{{ profile.email }}</template>
-                <template #telefone>{{ profile.telefone ? formatTelefone(profile.telefone) : 'Não informado' }}</template>
-                <template #whatsapp>{{ whatsAppLabel }}</template>
-              </PerfilSidebar>
+                <BaseInput v-model="form.nome" label="Nome completo" autocomplete="name" required />
+                <TelefoneInput
+                  v-model="form.telefone"
+                  label="Telefone"
+                  unified
+                  :show-ddi-prefix="false"
+                  hint="Formato: +55 (DDD) número"
+                />
+                <div class="flex flex-col gap-1.5">
+                  <span class="text-sm font-medium text-glow-text">Sexo</span>
+                  <SegmentedControl v-model="form.sexo" :options="SEXO_OPTIONS" aria-label="Sexo" />
+                </div>
+                <div class="perfil-readonly-field">
+                  <span class="perfil-field__label">E-mail</span>
+                  <p class="perfil-field__value">{{ profile.email }}</p>
+                  <p class="perfil-field__hint">Utilizado para login e alertas</p>
+                </div>
+                <div class="perfil-edit-form__actions">
+                  <BaseButton type="button" variant="ghost" @click="cancelEditing">Cancelar</BaseButton>
+                  <BaseButton type="submit" :loading="saving">Salvar alterações</BaseButton>
+                </div>
+              </form>
 
-              <div class="perfil-tab-panel__stack">
-                <section
-                  v-if="whatsAppState !== 'confirmado'"
-                  class="perfil-card perfil-card--alert"
-                >
-                  <div class="perfil-card__alert-icon">🟡</div>
-                  <div class="perfil-card__alert-body">
-                    <h2 class="perfil-card__alert-title">Confirme seu WhatsApp</h2>
-                    <p class="perfil-card__alert-desc">
-                      Receba lembretes automáticos de agendamento e atualizações importantes.
+              <div v-else class="perfil-fields">
+                <div class="perfil-field">
+                  <span class="perfil-field__label">Nome completo</span>
+                  <p class="perfil-field__value">{{ dash(profile.nome) }}</p>
+                </div>
+                <div class="perfil-field">
+                  <span class="perfil-field__label">E-mail</span>
+                  <p class="perfil-field__value">{{ dash(profile.email) }}</p>
+                  <span v-if="profile.email" class="perfil-field__status perfil-field__status--ok">
+                    <Check class="size-3.5" aria-hidden="true" />
+                    Confirmado
+                  </span>
+                </div>
+                <div class="perfil-field">
+                  <span class="perfil-field__label">Telefone</span>
+                  <p class="perfil-field__value">{{ dash(telefoneExibido) }}</p>
+                </div>
+                <div class="perfil-field">
+                  <span class="perfil-field__label">WhatsApp</span>
+                  <template v-if="whatsAppState === 'confirmado'">
+                    <p class="perfil-field__value">{{ dash(telefoneExibido) }}</p>
+                    <span class="perfil-field__status perfil-field__status--ok">
+                      <Check class="size-3.5" aria-hidden="true" />
+                      Confirmado
+                    </span>
+                  </template>
+                  <template v-else-if="whatsAppState === 'sem-telefone'">
+                    <p class="perfil-field__value">—</p>
+                  </template>
+                  <template v-else>
+                    <p class="perfil-field__value perfil-field__value--warn">
+                      <AlertTriangle class="size-3.5 shrink-0" aria-hidden="true" />
+                      Número não confirmado
                     </p>
-                    <div v-if="whatsAppState === 'sem-telefone'" class="perfil-card__alert-actions">
-                      <p class="perfil-card__alert-desc">Cadastre seu telefone no formulário abaixo.</p>
-                    </div>
-                    <template v-else>
-                      <div v-if="pollError" class="perfil-inline-alert perfil-inline-alert--warning">
-                        {{ pollError }}
-                      </div>
-                      <div class="perfil-card__alert-actions">
-                        <a
-                          v-if="instrucoes?.linkWhatsApp"
-                          :href="instrucoes.linkWhatsApp"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class="perfil-btn perfil-btn--primary"
-                        >
-                          Confirmar no WhatsApp
-                        </a>
-                        <BaseButton
-                          v-else
-                          variant="primary"
-                          :loading="solicitando"
-                          @click="handleSolicitarWhatsApp"
-                        >
-                          Confirmar
-                        </BaseButton>
-                        <span v-if="polling" class="perfil-polling">Aguardando confirmação…</span>
-                      </div>
-                    </template>
-                  </div>
-                </section>
-
-                <section class="perfil-card">
-                  <div class="perfil-card__header">
-                    <h2 class="perfil-card__title">Informações pessoais</h2>
-                    <p class="perfil-card__subtitle">Atualize nome e telefone de contato.</p>
-                  </div>
-
-                  <form class="perfil-card__body" @submit.prevent="handleSaveProfile">
-                    <BaseAlert v-if="profileError" variant="error">{{ profileError }}</BaseAlert>
-                    <div
-                      v-if="profileSuccess"
-                      class="perfil-inline-alert perfil-inline-alert--success"
-                      role="status"
+                    <p v-if="pollError" class="perfil-field__hint perfil-field__hint--warn">{{ pollError }}</p>
+                    <a
+                      v-if="instrucoes?.linkWhatsApp"
+                      :href="instrucoes.linkWhatsApp"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="perfil-field__action"
                     >
-                      Perfil atualizado com sucesso.
-                    </div>
-
-                    <BaseInput v-model="form.nome" label="Nome completo" autocomplete="name" required />
-
-                    <TelefoneInput
-                      v-model="form.telefone"
-                      label="Telefone"
-                      unified
-                      :show-ddi-prefix="false"
-                      hint="Formato: +55 (DDD) número"
-                    />
-
-                    <div class="flex flex-col gap-1.5">
-                      <span class="text-sm font-medium text-glow-text">Sexo</span>
-                      <SegmentedControl v-model="form.sexo" :options="SEXO_OPTIONS" aria-label="Sexo" />
-                    </div>
-
-                    <div class="perfil-email-field">
-                      <label class="perfil-email-field__label">E-mail</label>
-                      <div class="perfil-email-field__value">
-                        <span>{{ profile.email }}</span>
-                        <span class="perfil-email-field__lock">🔒 Utilizado para login e alertas</span>
-                      </div>
-                      <button
-                        type="button"
-                        class="perfil-link-btn"
-                        @click="handleAlterarEmail"
-                      >
-                        Alterar e-mail
-                      </button>
-                    </div>
-                  </form>
-                </section>
+                      Confirmar número
+                    </a>
+                    <button
+                      v-else
+                      type="button"
+                      class="perfil-field__action"
+                      :disabled="solicitando"
+                      @click="handleSolicitarWhatsApp"
+                    >
+                      Confirmar número
+                    </button>
+                    <span v-if="polling" class="perfil-field__hint">Aguardando confirmação…</span>
+                  </template>
+                </div>
+                <div class="perfil-field">
+                  <span class="perfil-field__label">Sexo</span>
+                  <p class="perfil-field__value">{{ dash(profile.sexo) }}</p>
+                </div>
               </div>
-            </div>
+            </PerfilSectionCard>
+
+            <PerfilSectionCard title="Resumo rápido" description="Uma visão geral do seu perfil.">
+              <ul class="perfil-summary">
+                <li
+                  v-for="item in resumoItems"
+                  :key="item.id"
+                  class="perfil-summary__item"
+                >
+                  <span class="perfil-summary__icon" :class="`perfil-summary__icon--${item.tone}`">
+                    <component :is="item.icon" class="size-4" aria-hidden="true" />
+                  </span>
+                  <div class="min-w-0 flex-1">
+                    <p class="perfil-summary__title">{{ item.title }}</p>
+                    <p class="perfil-summary__desc">{{ item.desc }}</p>
+                  </div>
+                  <span class="perfil-summary__status" :class="`perfil-summary__status--${item.tone}`">
+                    {{ item.status }}
+                  </span>
+                </li>
+              </ul>
+            </PerfilSectionCard>
+
+            <PerfilSectionCard
+              title="Informações da conta"
+              description="Dados relacionados à sua conta na plataforma."
+            >
+              <div class="perfil-fields">
+                <div class="perfil-field">
+                  <span class="perfil-field__label">Tipo de conta</span>
+                  <p class="perfil-field__value">{{ dash(roleLabel) }}</p>
+                </div>
+                <div class="perfil-field">
+                  <span class="perfil-field__label">Plano atual</span>
+                  <p v-if="planoExibido" class="perfil-field__value">
+                    <span class="perfil-badge perfil-badge--plan">{{ planoExibido }}</span>
+                  </p>
+                  <p v-else class="perfil-field__value">—</p>
+                </div>
+                <div class="perfil-field">
+                  <span class="perfil-field__label">Status</span>
+                  <p class="perfil-field__value">
+                    <span
+                      class="perfil-badge"
+                      :class="profile.ativo ? 'perfil-badge--success' : 'perfil-badge--danger'"
+                    >
+                      {{ profile.ativo ? 'Ativa' : 'Inativa' }}
+                    </span>
+                  </p>
+                </div>
+                <div class="perfil-field">
+                  <span class="perfil-field__label">Renovação</span>
+                  <p class="perfil-field__value">{{ dash(renovacaoExibida) }}</p>
+                </div>
+                <div class="perfil-field">
+                  <span class="perfil-field__label">Membro desde</span>
+                  <p class="perfil-field__value">{{ dash(membroDesde) }}</p>
+                </div>
+                <div class="perfil-field">
+                  <span class="perfil-field__label">Perfil completo</span>
+                  <p class="perfil-field__value">{{ progressoPerfil }}%</p>
+                </div>
+              </div>
+            </PerfilSectionCard>
           </div>
 
-          <!-- Tab: Conta -->
-          <div v-else-if="activeTab === 'conta'" key="conta" class="perfil-tab-panel">
-            <section class="perfil-card">
-              <div class="perfil-card__header">
-                <h2 class="perfil-card__title">Conta</h2>
-                <p class="perfil-card__subtitle">Informações gerais da sua conta na plataforma.</p>
+          <div v-else-if="activeTab === 'conta'" key="conta">
+            <PerfilSectionCard
+              title="Informações da conta"
+              description="Dados relacionados à sua conta na plataforma."
+            >
+              <div class="perfil-fields">
+                <div class="perfil-field">
+                  <span class="perfil-field__label">Tipo de conta</span>
+                  <p class="perfil-field__value">{{ dash(roleLabel) }}</p>
+                </div>
+                <div class="perfil-field">
+                  <span class="perfil-field__label">Plano atual</span>
+                  <p v-if="planoExibido" class="perfil-field__value">
+                    <span class="perfil-badge perfil-badge--plan">{{ planoExibido }}</span>
+                  </p>
+                  <p v-else class="perfil-field__value">—</p>
+                </div>
+                <div class="perfil-field">
+                  <span class="perfil-field__label">Status</span>
+                  <p class="perfil-field__value">
+                    <span
+                      class="perfil-badge"
+                      :class="profile.ativo ? 'perfil-badge--success' : 'perfil-badge--danger'"
+                    >
+                      {{ profile.ativo ? 'Ativa' : 'Inativa' }}
+                    </span>
+                  </p>
+                </div>
+                <div class="perfil-field">
+                  <span class="perfil-field__label">Renovação</span>
+                  <p class="perfil-field__value">{{ dash(renovacaoExibida) }}</p>
+                </div>
+                <div class="perfil-field">
+                  <span class="perfil-field__label">E-mail</span>
+                  <p class="perfil-field__value">{{ dash(profile.email) }}</p>
+                  <button type="button" class="perfil-field__action" @click="handleAlterarEmail">
+                    Alterar e-mail
+                  </button>
+                </div>
+                <div class="perfil-field">
+                  <span class="perfil-field__label">Membro desde</span>
+                  <p class="perfil-field__value">{{ dash(membroDesde) }}</p>
+                </div>
               </div>
-              <dl class="perfil-dl">
-                <div class="perfil-dl__row">
-                  <dt>Tipo</dt>
-                  <dd>{{ getUserRoleLabel(profile.role) }}</dd>
-                </div>
-                <div class="perfil-dl__row">
-                  <dt>Status</dt>
-                  <dd>{{ profile.ativo ? 'Ativa' : 'Inativa' }}</dd>
-                </div>
-                <div class="perfil-dl__row">
-                  <dt>E-mail</dt>
-                  <dd>{{ profile.email }}</dd>
-                </div>
-                <div class="perfil-dl__row">
-                  <dt>Telefone</dt>
-                  <dd>{{ profile.telefone ? formatTelefone(profile.telefone) : 'Não informado' }}</dd>
-                </div>
-                <div class="perfil-dl__row">
-                  <dt>Membro desde</dt>
-                  <dd>{{ profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('pt-BR') : '—' }}</dd>
-                </div>
-                <div class="perfil-dl__row">
-                  <dt>Perfil completo</dt>
-                  <dd>{{ progressoPerfil }}%</dd>
-                </div>
-              </dl>
-            </section>
+            </PerfilSectionCard>
           </div>
 
-          <!-- Tab: Segurança -->
-          <div v-else-if="activeTab === 'seguranca'" key="seguranca" class="perfil-tab-panel">
-            <section class="perfil-card">
-              <div class="perfil-card__header">
-                <h2 class="perfil-card__title">Segurança</h2>
-                <p class="perfil-card__subtitle">Proteja o acesso à sua conta.</p>
-              </div>
-
-              <div class="perfil-card__body">
-                <div class="perfil-security-row">
+          <div v-else-if="activeTab === 'seguranca'" key="seguranca">
+            <PerfilSectionCard title="Segurança" description="Proteja o acesso à sua conta.">
+              <div class="perfil-security">
+                <div class="perfil-security__row">
                   <div>
-                    <p class="perfil-security-row__label">Senha</p>
-                    <p class="perfil-security-row__meta">Última alteração não disponível</p>
+                    <p class="perfil-security__label">Senha</p>
+                    <p class="perfil-security__meta">Última alteração não disponível</p>
                   </div>
                   <BaseButton
                     variant="secondary"
@@ -467,7 +603,7 @@ async function handleSolicitarWhatsApp() {
                   class="perfil-password-form"
                   @submit.prevent="handleChangePassword"
                 >
-                  <BaseAlert v-if="passwordError" variant="error">{{ passwordError }}</BaseAlert>
+                  <ContentAlert v-if="passwordError" variant="error" compact>{{ passwordError }}</ContentAlert>
                   <div v-if="passwordSuccess" class="perfil-inline-alert perfil-inline-alert--success">
                     Senha alterada com sucesso.
                   </div>
@@ -512,10 +648,10 @@ async function handleSolicitarWhatsApp() {
                   </div>
                 </form>
 
-                <div class="perfil-security-row">
+                <div class="perfil-security__row">
                   <div class="min-w-0 flex-1">
-                    <p class="perfil-security-row__label">Código de agendamento</p>
-                    <p class="perfil-security-row__meta">
+                    <p class="perfil-security__label">Código de agendamento</p>
+                    <p class="perfil-security__meta">
                       Use este código no link público da loja para agendar sem e-mail e senha.
                       A sessão dura 15 minutos.
                     </p>
@@ -549,10 +685,10 @@ async function handleSolicitarWhatsApp() {
                   </div>
                 </div>
 
-                <div class="perfil-security-row perfil-security-row--muted">
+                <div class="perfil-security__row perfil-security__row--muted">
                   <div>
-                    <p class="perfil-security-row__label">Autenticação em dois fatores (2FA)</p>
-                    <p class="perfil-security-row__meta">Desativado</p>
+                    <p class="perfil-security__label">Autenticação em dois fatores (2FA)</p>
+                    <p class="perfil-security__meta">Desativado</p>
                   </div>
                   <BaseButton variant="secondary" size="sm" disabled>Ativar</BaseButton>
                 </div>
@@ -570,16 +706,11 @@ async function handleSolicitarWhatsApp() {
                   <p class="perfil-sessions__hint">Gerenciamento completo de sessões em breve.</p>
                 </div>
               </div>
-            </section>
+            </PerfilSectionCard>
           </div>
 
-          <!-- Tab: Notificações -->
-          <div v-else key="notificacoes" class="perfil-tab-panel">
-            <section class="perfil-card">
-              <div class="perfil-card__header">
-                <h2 class="perfil-card__title">Notificações</h2>
-                <p class="perfil-card__subtitle">Escolha como deseja ser avisado.</p>
-              </div>
+          <div v-else key="notificacoes">
+            <PerfilSectionCard title="Notificações" description="Escolha como deseja ser avisado.">
               <ul class="perfil-prefs">
                 <li class="perfil-prefs__item">
                   <div>
@@ -616,17 +747,10 @@ async function handleSolicitarWhatsApp() {
                   <input v-model="notificacoes.sms" type="checkbox" class="perfil-toggle" disabled />
                 </li>
               </ul>
-            </section>
+            </PerfilSectionCard>
           </div>
         </Transition>
       </div>
     </template>
-
-    <PerfilSaveBar
-      :visible="isProfileDirty && activeTab === 'informacoes'"
-      :loading="saving"
-      @cancel="cancelProfileChanges"
-      @save="handleSaveProfile"
-    />
   </div>
 </template>
