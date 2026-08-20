@@ -31,7 +31,7 @@ function fechar() {
       aria-modal="true"
       aria-labelledby="upgrade-modal-title"
     >
-      <div class="absolute inset-0 bg-black/50" @click="fechar" />
+      <div class="absolute inset-0 glow-modal-scrim" @click="fechar" />
       <div
         class="relative z-10 w-full max-w-md rounded-lg border border-glow-border-soft bg-glow-surface p-6 shadow-xl"
       >

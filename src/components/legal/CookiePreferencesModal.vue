@@ -34,7 +34,7 @@ function onAcceptAll() {
   <Teleport to="body">
     <div
       v-if="preferencesModalOpen"
-      class="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-4 sm:items-center"
+      class="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-4 backdrop-blur-md sm:items-center"
       role="dialog"
       aria-labelledby="cookie-prefs-title"
       @click.self="closePreferences"

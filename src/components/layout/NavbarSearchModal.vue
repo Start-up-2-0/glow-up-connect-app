@@ -52,7 +52,7 @@ function onKeydown(event: KeyboardEvent) {
     >
       <div
         v-if="open"
-        class="fixed inset-0 z-[100] flex items-start justify-center bg-black/40 p-4 pt-[max(1rem,env(safe-area-inset-top))] sm:items-center sm:p-6"
+        class="fixed inset-0 z-[100] flex items-start justify-center bg-black/50 p-4 pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-md sm:items-center sm:p-6"
         role="dialog"
         aria-modal="true"
         aria-label="Pesquisar"

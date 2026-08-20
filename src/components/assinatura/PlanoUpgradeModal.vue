@@ -32,7 +32,7 @@ const planosSuperiores = computed(() => {
       role="dialog"
       aria-modal="true"
     >
-      <div class="absolute inset-0 bg-black/50" @click="emit('close')" />
+      <div class="absolute inset-0 glow-modal-scrim" @click="emit('close')" />
       <div class="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-glow-border-soft bg-glow-surface p-6 shadow-xl">
         <h2 class="mb-4 font-urbanist text-lg font-semibold text-glow-text">
           Escolha um plano superior

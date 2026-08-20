@@ -193,7 +193,7 @@ function revogarCookiesTerceiros() {
         aria-modal="true"
         aria-labelledby="exclusao-titulo"
       >
-        <div class="absolute inset-0 bg-black/50" @click="fecharDialogoExclusao" />
+        <div class="absolute inset-0 glow-modal-scrim" @click="fecharDialogoExclusao" />
         <div class="relative z-10 w-full max-w-md rounded-lg border border-glow-border-soft bg-glow-surface p-6 shadow-xl">
           <h2 id="exclusao-titulo" class="mb-2 font-urbanist text-lg font-semibold text-glow-text">
             Excluir sua conta?

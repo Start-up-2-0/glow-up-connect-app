@@ -189,6 +189,14 @@
 }
 
 @layer components {
+  /*
+   * Scrim padrão de modais — escurece + desfoque do fundo.
+   * Use em layers `absolute inset-0` ou nas classes *-modal-overlay.
+   */
+  .glow-modal-scrim {
+    @apply bg-black/50 backdrop-blur-md;
+  }
+
   /* Auth — light lavanda alinhado à identidade */
   .auth-light-shell {
     --glow-bg-base: #ebe7f7;
@@ -1854,7 +1862,7 @@
 
   .loja-lista-modal-overlay {
     /* Acima do shell (sidebar/topbar ~2010–2020) para o overlay cobrir o menu. */
-    @apply fixed inset-0 z-[3000] flex items-end justify-center bg-black/45 p-0 sm:items-center sm:p-4;
+    @apply fixed inset-0 z-[3000] flex items-end justify-center bg-black/50 p-0 backdrop-blur-md sm:items-center sm:p-4;
   }
 
   .loja-lista-modal {
@@ -3047,7 +3055,7 @@
   }
 
   .servicos-modal-overlay {
-    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4;
+    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-0 backdrop-blur-md sm:items-center sm:p-4;
   }
 
   .servicos-modal {
@@ -3292,7 +3300,7 @@
 
   .equipe-modal-overlay {
     /* Acima do shell (sidebar/topbar ~2010–2020) para o overlay cobrir toda a UI. */
-    @apply fixed inset-0 z-[3000] flex items-end justify-center bg-black/55 p-0 backdrop-blur-[3px] sm:items-center sm:p-4;
+    @apply fixed inset-0 z-[3000] flex items-end justify-center bg-black/50 p-0 backdrop-blur-md sm:items-center sm:p-4;
   }
 
   .equipe-modal {
@@ -4858,7 +4866,7 @@
   }
 
   .financeiro-modal-overlay {
-    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4;
+    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-0 backdrop-blur-md sm:items-center sm:p-4;
   }
 
   .financeiro-modal {
@@ -4882,7 +4890,7 @@
   }
 
   .financeiro-drawer-overlay {
-    @apply fixed inset-0 z-[90] bg-black/30;
+    @apply fixed inset-0 z-[90] bg-black/40 backdrop-blur-md;
   }
 
   .financeiro-drawer {

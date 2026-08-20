@@ -20,7 +20,7 @@ const emit = defineEmits<{
       role="dialog"
       aria-modal="true"
     >
-      <div class="absolute inset-0 bg-black/50" @click="emit('cancel')" />
+      <div class="absolute inset-0 glow-modal-scrim" @click="emit('cancel')" />
       <div class="relative z-10 w-full max-w-md rounded-lg border border-glow-border-soft bg-glow-surface p-6 shadow-xl">
         <h2 class="mb-2 font-urbanist text-lg font-semibold text-glow-text">
           Cancelar assinatura?
