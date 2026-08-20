@@ -38,7 +38,6 @@ const {
   iniciarEdicaoDiaLoja,
   cancelarEdicaoDiaLoja,
   salvarDiaLoja,
-  alterarStatusDiaLoja,
   modoDiaProprio,
   draftDiaProprio,
   setDraftDiaProprio,
