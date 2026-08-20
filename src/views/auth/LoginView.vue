@@ -106,21 +106,20 @@ async function handleSubmit() {
     <div class="absolute inset-0 bg-gray-900/60" aria-hidden="true" />
 
     <div class="relative z-10 flex w-full max-w-md flex-col items-center">
-      <!-- Marca acima do card -->
-      <RouterLink
-        :to="ROUTE_PATHS.HOME"
-        class="mb-6 flex items-center gap-3 text-white no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
-      >
-        <img
-          :src="loginCrest"
-          alt=""
-          class="h-10 w-10 shrink-0 object-contain"
-        />
-        <span class="font-satoshi text-2xl font-bold tracking-tight">Glow Up Connect</span>
-      </RouterLink>
-
       <!-- Card de login -->
       <div class="w-full rounded-lg bg-white p-6 shadow-xl sm:p-8">
+        <RouterLink
+          :to="ROUTE_PATHS.HOME"
+          class="mb-4 flex justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-glow-gold-cta/40 focus-visible:ring-offset-2"
+          aria-label="Glow Up Connect — ir para o início"
+        >
+          <img
+            :src="loginCrest"
+            alt=""
+            class="h-12 w-auto max-w-[220px] object-contain object-center sm:h-14 sm:max-w-[260px]"
+          />
+        </RouterLink>
+
         <h1 class="mb-2 font-satoshi text-2xl font-bold leading-tight text-glow-text">
           Entre na sua conta
         </h1>

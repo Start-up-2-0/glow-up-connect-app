@@ -60,9 +60,9 @@ onUnmounted(() => document.removeEventListener('keydown', onGlobalKeydown))
           class="relative z-10 flex shrink-0 items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-glow-gold-cta/40"
           aria-label="Ir para o início"
         >
-          <!-- Altura visual grande: o PNG tem padding interno; a navbar continua em 56px -->
+          <!-- PNG com padding interno: altura um pouco acima da barra (56px) para o crest + texto lerem bem -->
           <AppLogo
-            logo-class="h-[4.75rem] w-auto max-w-[220px] object-contain object-left sm:h-[5.25rem] sm:max-w-[248px]"
+            logo-class="h-11 w-auto max-w-[148px] object-contain object-left sm:h-12 sm:max-w-[168px]"
           />
         </RouterLink>
       </div>
