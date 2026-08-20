@@ -190,11 +190,25 @@
 
 @layer components {
   /*
-   * Scrim padrão de modais — escurece + desfoque do fundo.
-   * Use em layers `absolute inset-0` ou nas classes *-modal-overlay.
+   * Overlay padrão de modais (referência: HorarioDiaProfissionaisModal / equipe).
+   * z-index acima do shell; scrim + blur fora de animações de opacity no próprio layer.
    */
+  .glow-modal-overlay,
+  .equipe-modal-overlay,
+  .servicos-modal-overlay,
+  .financeiro-modal-overlay,
+  .loja-lista-modal-overlay {
+    @apply fixed inset-0 z-[3000] flex items-end justify-center p-0 sm:items-center sm:p-4;
+    background-color: rgba(0, 0, 0, 0.5);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+
   .glow-modal-scrim {
-    @apply bg-black/50 backdrop-blur-md;
+    @apply absolute inset-0;
+    background-color: rgba(0, 0, 0, 0.5);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
 
   /* Auth — light lavanda alinhado à identidade */
@@ -1860,11 +1874,6 @@
     @apply inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-glow-gold-cta font-satoshi text-sm font-bold text-white shadow-md transition active:scale-[0.99] hover:brightness-95;
   }
 
-  .loja-lista-modal-overlay {
-    /* Acima do shell (sidebar/topbar ~2010–2020) para o overlay cobrir o menu. */
-    @apply fixed inset-0 z-[3000] flex items-end justify-center bg-black/50 p-0 backdrop-blur-md sm:items-center sm:p-4;
-  }
-
   .loja-lista-modal {
     @apply flex max-h-[88dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl border border-glow-border-soft bg-glow-surface shadow-xl sm:rounded-2xl;
   }
@@ -3054,10 +3063,6 @@
     @apply flex size-[76px] items-center justify-center rounded-full border border-dashed border-glow-border-soft bg-glow-hover-surface text-glow-text-subtle transition hover:border-glow-gold hover:text-glow-gold;
   }
 
-  .servicos-modal-overlay {
-    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-0 backdrop-blur-md sm:items-center sm:p-4;
-  }
-
   .servicos-modal {
     @apply flex max-h-[92dvh] w-full max-w-[441px] flex-col overflow-hidden rounded-t-2xl border-[0.5px] border-glow-border-soft bg-glow-surface shadow-xl sm:max-h-[90dvh] sm:rounded-xl;
   }
@@ -3296,11 +3301,6 @@
 
   .equipe-empty-state__description {
     @apply max-w-md font-satoshi text-base text-glow-text-muted sm:text-xl;
-  }
-
-  .equipe-modal-overlay {
-    /* Acima do shell (sidebar/topbar ~2010–2020) para o overlay cobrir toda a UI. */
-    @apply fixed inset-0 z-[3000] flex items-end justify-center bg-black/50 p-0 backdrop-blur-md sm:items-center sm:p-4;
   }
 
   .equipe-modal {
@@ -4865,10 +4865,6 @@
     @apply border-green-200 bg-green-50 text-green-800;
   }
 
-  .financeiro-modal-overlay {
-    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-0 backdrop-blur-md sm:items-center sm:p-4;
-  }
-
   .financeiro-modal {
     @apply flex max-h-[92dvh] w-full max-w-[490px] flex-col overflow-hidden rounded-t-2xl border-[0.5px] border-glow-border-soft bg-glow-surface shadow-xl sm:max-h-[90dvh] sm:rounded-xl;
   }
@@ -4890,7 +4886,10 @@
   }
 
   .financeiro-drawer-overlay {
-    @apply fixed inset-0 z-[90] bg-black/40 backdrop-blur-md;
+    @apply fixed inset-0 z-[90];
+    background-color: rgba(0, 0, 0, 0.4);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
 
   .financeiro-drawer {

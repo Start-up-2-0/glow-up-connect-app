@@ -44,15 +44,10 @@ function onKeydown(event: KeyboardEvent) {
 
 <template>
   <Teleport to="body">
-    <Transition
-      enter-active-class="transition-opacity duration-200"
-      leave-active-class="transition-opacity duration-200"
-      enter-from-class="opacity-0"
-      leave-to-class="opacity-0"
-    >
+    <Transition name="equipe-modal">
       <div
         v-if="open"
-        class="fixed inset-0 z-[100] flex items-start justify-center bg-black/50 p-4 pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-md sm:items-center sm:p-6"
+        class="glow-modal-overlay items-start pt-[max(1rem,env(safe-area-inset-top))] sm:items-center"
         role="dialog"
         aria-modal="true"
         aria-label="Pesquisar"

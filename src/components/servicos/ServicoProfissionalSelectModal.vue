@@ -61,105 +61,93 @@ function confirmar() {
 
 <template>
   <Teleport to="body">
-    <Transition
-      enter-active-class="transition-opacity duration-200"
-      leave-active-class="transition-opacity duration-200"
-      enter-from-class="opacity-0"
-      leave-to-class="opacity-0"
-    >
+    <Transition name="equipe-modal">
       <div
         v-if="open"
-        class="servicos-modal-overlay"
+        class="equipe-modal-overlay"
+        role="presentation"
         @click.self="close"
       >
-        <Transition
-          enter-active-class="servicos-modal-enter-active"
-          leave-active-class="servicos-modal-leave-active"
-          enter-from-class="servicos-modal-enter-from"
-          leave-to-class="servicos-modal-leave-to"
+        <div
+          class="servicos-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="servico-prof-modal-title"
         >
-          <div
-            v-if="open"
-            class="servicos-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="servico-prof-modal-title"
-          >
-            <div class="servicos-modal__header">
-              <div class="servicos-modal__header-top">
-                <h2 id="servico-prof-modal-title" class="servicos-modal__title">
-                  {{ title ?? 'Selecionar profissionais' }}
-                </h2>
-                <button
-                  type="button"
-                  class="servicos-modal__close-icon"
-                  aria-label="Fechar"
-                  @click="close"
-                >
-                  <ServicoIcons name="close" />
-                </button>
-              </div>
-              <p class="servicos-modal__subtitle">
-                {{ subtitle ?? 'Escolha quem poderá executar este serviço.' }}
-              </p>
-            </div>
-
-            <div class="servicos-modal__toolbar">
-              <button type="button" class="servicos-prof-select-all" @click="toggleTodos">
-                <input
-                  type="checkbox"
-                  class="servico-prof-vinculo-card__checkbox"
-                  :checked="todosSelecionados"
-                  tabindex="-1"
-                  aria-hidden="true"
-                  @click.prevent
-                />
-                Selecionar todos
-              </button>
-              <span class="servicos-modal__count">
-                {{ selecionadosCount }} de {{ profissionais.length }}
-              </span>
-            </div>
-
-            <div class="servicos-modal__list">
+          <div class="servicos-modal__header">
+            <div class="servicos-modal__header-top">
+              <h2 id="servico-prof-modal-title" class="servicos-modal__title">
+                {{ title ?? 'Selecionar profissionais' }}
+              </h2>
               <button
-                v-for="prof in profissionais"
-                :key="prof.profissionalId"
                 type="button"
-                class="servicos-modal__option"
-                @click="toggle(prof.profissionalId)"
+                class="servicos-modal__close-icon"
+                aria-label="Fechar"
+                @click="close"
               >
-                <input
-                  type="checkbox"
-                  class="servico-prof-vinculo-card__checkbox"
-                  :checked="draftIds.includes(prof.profissionalId)"
-                  tabindex="-1"
-                  aria-hidden="true"
-                  @click.prevent
-                />
-                <span class="servico-prof-vinculo-card__avatar">
-                  {{ iniciaisNome(prof.nomePublico) }}
-                </span>
-                <div class="servicos-modal__option-info">
-                  <span class="servico-prof-vinculo-card__name">{{ prof.nomePublico }}</span>
-                  <ServicoProfissionalRating
-                    :nota-media="prof.notaMedia"
-                    :total-avaliacoes="prof.totalAvaliacoes"
-                  />
-                </div>
+                <ServicoIcons name="close" />
               </button>
             </div>
-
-            <div class="servicos-modal__footer">
-              <button type="button" class="servicos-modal__dismiss" @click="close">
-                Fechar
-              </button>
-              <button type="button" class="servicos-modal__confirm" @click="confirmar">
-                Concluir escolha
-              </button>
-            </div>
+            <p class="servicos-modal__subtitle">
+              {{ subtitle ?? 'Escolha quem poderá executar este serviço.' }}
+            </p>
           </div>
-        </Transition>
+
+          <div class="servicos-modal__toolbar">
+            <button type="button" class="servicos-prof-select-all" @click="toggleTodos">
+              <input
+                type="checkbox"
+                class="servico-prof-vinculo-card__checkbox"
+                :checked="todosSelecionados"
+                tabindex="-1"
+                aria-hidden="true"
+                @click.prevent
+              />
+              Selecionar todos
+            </button>
+            <span class="servicos-modal__count">
+              {{ selecionadosCount }} de {{ profissionais.length }}
+            </span>
+          </div>
+
+          <div class="servicos-modal__list">
+            <button
+              v-for="prof in profissionais"
+              :key="prof.profissionalId"
+              type="button"
+              class="servicos-modal__option"
+              @click="toggle(prof.profissionalId)"
+            >
+              <input
+                type="checkbox"
+                class="servico-prof-vinculo-card__checkbox"
+                :checked="draftIds.includes(prof.profissionalId)"
+                tabindex="-1"
+                aria-hidden="true"
+                @click.prevent
+              />
+              <span class="servico-prof-vinculo-card__avatar">
+                {{ iniciaisNome(prof.nomePublico) }}
+              </span>
+              <div class="servicos-modal__option-info">
+                <span class="servico-prof-vinculo-card__name">{{ prof.nomePublico }}</span>
+                <ServicoProfissionalRating
+                  :nota-media="prof.notaMedia"
+                  :total-avaliacoes="prof.totalAvaliacoes"
+                />
+              </div>
+            </button>
+          </div>
+
+          <div class="servicos-modal__footer">
+            <button type="button" class="servicos-modal__dismiss" @click="close">
+              Fechar
+            </button>
+            <button type="button" class="servicos-modal__confirm" @click="confirmar">
+              Concluir escolha
+            </button>
+          </div>
+        </div>
       </div>
     </Transition>
   </Teleport>

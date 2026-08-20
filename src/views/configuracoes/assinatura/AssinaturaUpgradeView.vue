@@ -108,7 +108,7 @@ async function executarTroca() {
     <Teleport to="body">
       <div
         v-if="confirmarDowngrade"
-        class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+        class="fixed inset-0 z-[3000] flex items-center justify-center p-4"
       >
       <div class="absolute inset-0 glow-modal-scrim" @click="confirmarDowngrade = false" />
         <div class="relative z-10 w-full max-w-md rounded-lg border border-glow-border-soft bg-glow-surface p-6">

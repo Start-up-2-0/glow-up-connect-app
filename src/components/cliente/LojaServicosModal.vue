@@ -40,11 +40,12 @@ function precoLabel(servico: ServicoPublico) {
 
 <template>
   <Teleport to="body">
-    <div
-      v-if="open"
-      class="loja-lista-modal-overlay"
-      @click.self="close"
-    >
+    <Transition name="equipe-modal">
+      <div
+        v-if="open"
+        class="loja-lista-modal-overlay"
+        @click.self="close"
+      >
       <div
         class="loja-lista-modal"
         role="dialog"
@@ -95,5 +96,6 @@ function precoLabel(servico: ServicoPublico) {
         </div>
       </div>
     </div>
+    </Transition>
   </Teleport>
 </template>

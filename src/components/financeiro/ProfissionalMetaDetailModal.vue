@@ -74,12 +74,7 @@ function close() {
 
 <template>
   <Teleport to="body">
-    <Transition
-      enter-active-class="transition-opacity duration-200"
-      leave-active-class="transition-opacity duration-200"
-      enter-from-class="opacity-0"
-      leave-to-class="opacity-0"
-    >
+    <Transition name="equipe-modal">
       <div
         v-if="open && profissional"
         class="financeiro-modal-overlay"
