@@ -2593,6 +2593,10 @@
     @apply space-y-6;
   }
 
+  .servicos-page--form {
+    @apply space-y-3;
+  }
+
   .servicos-page__header {
     @apply flex flex-col gap-4 border-b border-glow-border-soft pb-6 sm:flex-row sm:items-start sm:justify-between;
   }
@@ -2664,11 +2668,11 @@
   }
 
   .servicos-btn-form-primary {
-    @apply flex h-10 flex-1 items-center justify-center rounded-xl bg-glow-gold-cta px-2.5 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply flex h-11 flex-1 touch-manipulation items-center justify-center rounded-xl bg-glow-gold-cta px-2.5 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:h-10;
   }
 
   .servicos-btn-form-secondary {
-    @apply flex h-[37px] flex-1 items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+    @apply flex h-11 flex-1 touch-manipulation items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:h-[37px];
   }
 
   .servicos-cards-grid {
@@ -2849,15 +2853,19 @@
   }
 
   .servicos-form-panel {
-    @apply mx-auto w-full max-w-[721px] rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-4 shadow-sm sm:px-[50px] sm:py-10;
+    @apply mx-auto w-full max-w-[721px] rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-3 shadow-sm sm:p-4 sm:px-[50px] sm:py-10;
   }
 
   .servicos-form-panel__fields {
-    @apply space-y-6;
+    @apply space-y-4 sm:space-y-6;
   }
 
   .servicos-form-panel__row {
-    @apply grid gap-6 sm:grid-cols-2;
+    @apply grid grid-cols-2 gap-3 sm:gap-6;
+  }
+
+  .servicos-form-panel__row > * {
+    @apply min-w-0;
   }
 
   .servicos-form-label {
@@ -2865,7 +2873,35 @@
   }
 
   .servicos-form-input {
-    @apply h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-canvas px-[18px] font-inter text-sm text-glow-text outline-none transition placeholder:font-inter placeholder:text-sm placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:opacity-60;
+    @apply h-12 w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-canvas px-3.5 font-inter text-base text-glow-text outline-none transition placeholder:font-inter placeholder:text-base placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:opacity-60 sm:h-[49px] sm:px-[18px] sm:text-sm sm:placeholder:text-sm;
+  }
+
+  .servicos-form-textarea {
+    @apply min-h-[88px] w-full resize-y rounded-lg border-[0.3px] border-glow-border-soft bg-glow-canvas px-3.5 py-3 font-inter text-base text-glow-text outline-none transition placeholder:font-inter placeholder:text-base placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:opacity-60 sm:px-[18px] sm:text-sm sm:placeholder:text-sm;
+  }
+
+  .servicos-form-tipo-grid {
+    @apply grid grid-cols-2 gap-2 sm:gap-3;
+  }
+
+  .servicos-form-tipo-card {
+    @apply flex h-full flex-col rounded-xl border px-3 py-2.5 text-left transition sm:p-3;
+  }
+
+  .servicos-form-tipo-card--active {
+    @apply border-glow-gold bg-glow-gold/5 ring-2 ring-glow-gold;
+  }
+
+  .servicos-form-tipo-card--idle {
+    @apply border-glow-border-soft hover:border-glow-gold/40;
+  }
+
+  .servicos-form-tipo-card__title {
+    @apply block font-satoshi text-[13px] font-semibold leading-snug text-glow-text sm:text-sm;
+  }
+
+  .servicos-form-tipo-card__desc {
+    @apply mt-1 line-clamp-3 block font-urbanist text-[11px] leading-snug text-glow-text-subtle sm:text-xs;
   }
 
   .servicos-form-input--error {
@@ -2881,7 +2917,11 @@
   }
 
   .servicos-form-profissionais-header {
-    @apply flex flex-wrap items-center justify-between gap-3;
+    @apply flex flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3;
+  }
+
+  .servicos-form-profissionais-header .servicos-btn-outline {
+    @apply h-11 w-full sm:h-9 sm:w-auto;
   }
 
   .servicos-form-profissionais-box {
@@ -2897,7 +2937,37 @@
   }
 
   .servicos-form-actions {
-    @apply mt-8 flex flex-col gap-3 sm:flex-row;
+    @apply mt-6 flex flex-row gap-3 sm:mt-8;
+  }
+
+  .servicos-form-panel--page {
+    @apply pb-[5.5rem] sm:pb-10;
+  }
+
+  @media (max-width: 639px) {
+    .servicos-page--form {
+      margin-left: -1rem;
+      margin-right: -1rem;
+      margin-bottom: -1rem;
+    }
+
+    .servicos-form-panel--page {
+      @apply max-w-none rounded-none border-x-0 px-4 pt-4 shadow-none;
+      padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
+    }
+
+    .servicos-form-panel--page .servicos-form-actions {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 30;
+      margin-top: 0;
+      border-top: 1px solid var(--glow-border-soft);
+      background: var(--glow-surface);
+      padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+      box-shadow: 0 -8px 24px color-mix(in srgb, var(--glow-text) 8%, transparent);
+    }
   }
 
   .servico-prof-chip {
@@ -3072,11 +3142,11 @@
   }
 
   .servico-form-currency .flex > span {
-    @apply h-[49px] rounded-l-lg border-[0.3px] border-r-0 border-glow-border-soft;
+    @apply h-12 rounded-l-lg border-[0.3px] border-r-0 border-glow-border-soft sm:h-[49px];
   }
 
   .servico-form-currency .flex > input {
-    @apply servicos-form-input h-[49px] rounded-r-lg;
+    @apply servicos-form-input rounded-r-lg;
   }
 
   .servico-prof-rating {

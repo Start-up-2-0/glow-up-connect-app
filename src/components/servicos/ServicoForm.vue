@@ -23,6 +23,8 @@ const props = withDefaults(
     servicoId?: number | null
     /** Exibe seleção de profissionais (default: se módulo Profissionais). */
     showProfissionais?: boolean
+    /** Layout da tela de cadastro/edição (sticky actions no mobile). */
+    pageLayout?: boolean
     submitLabel?: string
     cancelLabel?: string
     showCancel?: boolean
@@ -30,6 +32,7 @@ const props = withDefaults(
   {
     servicoId: null,
     showProfissionais: undefined,
+    pageLayout: false,
     submitLabel: 'Salvar',
     cancelLabel: 'Cancelar',
     showCancel: true,
@@ -260,6 +263,7 @@ defineExpose({ resetForm, saving, loading, notFound })
     <form
       v-else-if="!loading"
       class="servicos-form-panel"
+      :class="{ 'servicos-form-panel--page': pageLayout }"
       @submit.prevent="handleSubmit"
     >
       <div class="servicos-form-panel__fields">
@@ -288,11 +292,12 @@ defineExpose({ resetForm, saving, loading, notFound })
           </div>
 
           <div class="servicos-form-field">
-            <label class="servicos-form-label" for="servico-duracao">Duração (em minutos)</label>
+            <label class="servicos-form-label" for="servico-duracao">Duração (min)</label>
             <input
               id="servico-duracao"
               :value="String(form.duracaoMinutos)"
               type="number"
+              inputmode="numeric"
               min="1"
               class="servicos-form-input"
               :class="{ 'servicos-form-input--error': !!errors.duracaoMinutos }"
@@ -307,21 +312,21 @@ defineExpose({ resetForm, saving, loading, notFound })
 
         <div class="servicos-form-field">
           <span class="servicos-form-label">Tipo do serviço</span>
-          <div class="grid gap-3 sm:grid-cols-2">
+          <div class="servicos-form-tipo-grid">
             <button
               v-for="opcao in tipoOpcoes"
               :key="opcao.value"
               type="button"
-              class="rounded-xl border p-3 text-left transition"
+              class="servicos-form-tipo-card"
               :class="
                 form.tipoServico === opcao.value
-                  ? 'border-glow-gold bg-glow-gold/5 ring-2 ring-glow-gold'
-                  : 'border-glow-border-soft hover:border-glow-gold/40'
+                  ? 'servicos-form-tipo-card--active'
+                  : 'servicos-form-tipo-card--idle'
               "
               @click="form.tipoServico = opcao.value"
             >
-              <span class="block font-satoshi text-sm font-semibold text-glow-text">{{ opcao.titulo }}</span>
-              <span class="mt-1 block font-urbanist text-xs text-glow-text-subtle">{{ opcao.descricao }}</span>
+              <span class="servicos-form-tipo-card__title">{{ opcao.titulo }}</span>
+              <span class="servicos-form-tipo-card__desc">{{ opcao.descricao }}</span>
             </button>
           </div>
         </div>
@@ -344,11 +349,11 @@ defineExpose({ resetForm, saving, loading, notFound })
 
         <div class="servicos-form-field">
           <label class="servicos-form-label" for="servico-descricao">Descrição (opcional)</label>
-          <input
+          <textarea
             id="servico-descricao"
             v-model="form.descricao"
-            type="text"
-            class="servicos-form-input"
+            rows="3"
+            class="servicos-form-textarea"
             placeholder="Corte de cabelo curto e raspado à máquina"
           />
         </div>

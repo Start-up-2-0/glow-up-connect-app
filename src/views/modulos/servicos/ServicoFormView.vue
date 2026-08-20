@@ -2,7 +2,6 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ServicoForm from '@/components/servicos/ServicoForm.vue'
-import ServicoPageHeader from '@/components/servicos/ServicoPageHeader.vue'
 import { SERVICOS_PAGE_CLASS } from '@/constants/designTokens'
 import { ROUTE_NAMES, ROUTE_PATHS } from '@/constants/routes'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
@@ -22,11 +21,6 @@ const servicoId = computed(() => {
 const formReady = ref(false)
 
 const pageTitle = computed(() => (isNovo.value ? 'Novo serviço' : 'Editar serviço'))
-const pageSubtitle = computed(() =>
-  isNovo.value
-    ? 'Cadastre um novo serviço oferecido pelo estabelecimento.'
-    : 'Atualize as informações do serviço.',
-)
 
 function onSaved() {
   void router.push(ROUTE_PATHS.SERVICOS)
@@ -46,18 +40,14 @@ watch(
 </script>
 
 <template>
-  <div :class="SERVICOS_PAGE_CLASS">
-    <ServicoPageHeader
-      :title="pageTitle"
-      :subtitle="pageSubtitle"
-      :back-to="ROUTE_PATHS.SERVICOS"
-      back-label="Voltar à listagem"
-    />
+  <div :class="[SERVICOS_PAGE_CLASS, 'servicos-page--form']">
+    <h1 class="sr-only">{{ pageTitle }}</h1>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
 
     <ServicoForm
       v-if="formReady && estabelecimentoId && !contextLoading"
+      page-layout
       :estabelecimento-id="estabelecimentoId"
       :servico-id="servicoId"
       @saved="onSaved"

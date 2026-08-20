@@ -141,15 +141,8 @@ watch(
       </div>
 
       <!-- Form novo -->
-      <div v-else-if="telaAtiva === 'form-novo'" :class="SERVICOS_PAGE_CLASS">
-        <ServicoPageHeader
-          title="Novo serviço"
-          subtitle="Cadastre um novo serviço oferecido pelo estabelecimento."
-          :back-to="ROUTE_PATHS.DEV_SERVICOS_FIGMA"
-          back-label="Voltar à listagem"
-        />
-
-        <form class="servicos-form-panel" @submit.prevent>
+      <div v-else-if="telaAtiva === 'form-novo'" :class="[SERVICOS_PAGE_CLASS, 'servicos-page--form']">
+        <form class="servicos-form-panel servicos-form-panel--page" @submit.prevent>
           <div class="servicos-form-panel__fields">
             <div class="servicos-form-field">
               <label class="servicos-form-label" for="preview-servico-nome">Serviço</label>
@@ -214,15 +207,8 @@ watch(
       </div>
 
       <!-- Form preenchido -->
-      <div v-else-if="telaAtiva === 'form-preenchido'" :class="SERVICOS_PAGE_CLASS">
-        <ServicoPageHeader
-          title="Novo serviço"
-          subtitle="Cadastre um novo serviço oferecido pelo estabelecimento."
-          :back-to="ROUTE_PATHS.DEV_SERVICOS_FIGMA"
-          back-label="Voltar à listagem"
-        />
-
-        <form class="servicos-form-panel" @submit.prevent>
+      <div v-else-if="telaAtiva === 'form-preenchido'" :class="[SERVICOS_PAGE_CLASS, 'servicos-page--form']">
+        <form class="servicos-form-panel servicos-form-panel--page" @submit.prevent>
           <div class="servicos-form-panel__fields">
             <div class="servicos-form-field">
               <label class="servicos-form-label" for="preview-servico-nome-filled">Serviço</label>
@@ -395,15 +381,8 @@ watch(
       </div>
 
       <!-- Modal -->
-      <div v-else-if="telaAtiva === 'modal'" :class="SERVICOS_PAGE_CLASS">
-        <ServicoPageHeader
-          title="Novo serviço"
-          subtitle="Cadastre um novo serviço oferecido pelo estabelecimento."
-          :back-to="ROUTE_PATHS.DEV_SERVICOS_FIGMA"
-          back-label="Voltar à listagem"
-        />
-
-        <form class="servicos-form-panel opacity-40" @submit.prevent>
+      <div v-else-if="telaAtiva === 'modal'" :class="[SERVICOS_PAGE_CLASS, 'servicos-page--form']">
+        <form class="servicos-form-panel servicos-form-panel--page opacity-40" @submit.prevent>
           <div class="servicos-form-panel__fields">
             <div class="servicos-form-field">
               <label class="servicos-form-label">Serviço</label>
