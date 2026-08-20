@@ -13,6 +13,7 @@ import ToastContainer from '@/components/feedback/ToastContainer.vue'
 import GlobalLoader from '@/components/loading/GlobalLoader.vue'
 import CookieConsentBanner from '@/components/legal/CookieConsentBanner.vue'
 import CookiePreferencesModal from '@/components/legal/CookiePreferencesModal.vue'
+import GlowGuideHost from '@/tutorials/components/GlowGuideHost.vue'
 import { useConsent } from '@/composables/useConsent'
 import { ROUTE_NAMES } from '@/constants/routes'
 
@@ -56,6 +57,7 @@ const routerViewKey = computed(() => {
   </component>
   <ToastContainer />
   <GlobalLoader />
+  <GlowGuideHost />
   <CookieConsentBanner v-if="showBanner" />
   <CookiePreferencesModal />
 </template>

@@ -10,10 +10,12 @@ import AgendaCalendarWeek from '@/components/agenda/AgendaCalendarWeek.vue'
 import AgendaCalendarDay from '@/components/agenda/AgendaCalendarDay.vue'
 import SegmentedControl from '@/components/ui/SegmentedControl.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import GlowGuideLauncher from '@/tutorials/components/GlowGuideLauncher.vue'
 import { AGENDA_CALENDAR_MAX_PAGES, AGENDA_CALENDAR_PAGE_SIZE } from '@/constants/agendaFilters'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useAgendaCalendar } from '@/composables/useAgendaCalendar'
+import { usePageTutorial } from '@/tutorials/hooks/usePageTutorial'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { agendaNegocioService } from '@/services/agendaNegocioService'
@@ -35,6 +37,7 @@ const { estabelecimentoId, ready, error: contextError, loading: contextLoading }
 const { possuiPermissao } = useNegocioContext()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
+const { startPageTutorial } = usePageTutorial('agenda')
 const {
   view,
   cursorDate,
@@ -164,7 +167,9 @@ watch([statusFilter, apiDateRange], () => {
   <div class="agenda-page agenda-page--calendar">
     <AgendaPageHeader :title="title" :subtitle="subtitle" :date-label="rangeLabel">
       <template #actions>
-        <div class="agenda-cal-nav" role="group" aria-label="Navegar no calendário">
+        <GlowGuideLauncher class="max-sm:hidden" @click="startPageTutorial" />
+        <GlowGuideLauncher class="sm:hidden" compact @click="startPageTutorial" />
+        <div class="agenda-cal-nav" data-tour="agenda-nav" role="group" aria-label="Navegar no calendário">
           <BaseButton variant="ghost" size="sm" class="min-w-9 shadow-none" aria-label="Período anterior" @click="goPrev">
             <span aria-hidden="true">‹</span>
           </BaseButton>
@@ -173,7 +178,7 @@ watch([statusFilter, apiDateRange], () => {
             <span aria-hidden="true">›</span>
           </BaseButton>
         </div>
-        <div class="agenda-cal-views">
+        <div class="agenda-cal-views" data-tour="agenda-views">
           <SegmentedControl
             :model-value="view"
             :options="viewOptions"
@@ -183,15 +188,17 @@ watch([statusFilter, apiDateRange], () => {
         </div>
       </template>
       <template #filters>
-        <AgendaFigmaFilter
-          v-model="statusFilter"
-          label="Filtrar por Status"
-          :options="statusOptions"
-        >
-          <template #icon>
-            <AgendaStatusFilterIcon />
-          </template>
-        </AgendaFigmaFilter>
+        <div data-tour="agenda-status-filter">
+          <AgendaFigmaFilter
+            v-model="statusFilter"
+            label="Filtrar por Status"
+            :options="statusOptions"
+          >
+            <template #icon>
+              <AgendaStatusFilterIcon />
+            </template>
+          </AgendaFigmaFilter>
+        </div>
       </template>
     </AgendaPageHeader>
 
@@ -201,7 +208,7 @@ watch([statusFilter, apiDateRange], () => {
       <LoadingSpinner label="Carregando agenda" />
     </div>
 
-    <div v-else class="agenda-cal-shell" :class="{ 'agenda-cal-shell--busy': loading }">
+    <div v-else class="agenda-cal-shell" data-tour="agenda-calendar" :class="{ 'agenda-cal-shell--busy': loading }">
       <p v-if="!loading && events.length === 0" class="agenda-cal-empty">
         Nenhum agendamento neste período.
       </p>

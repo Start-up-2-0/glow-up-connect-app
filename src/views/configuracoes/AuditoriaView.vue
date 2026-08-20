@@ -8,6 +8,10 @@ import { useApiError } from '@/composables/useApiError'
 import { auditoriaService } from '@/services/auditoriaService'
 import type { AuditoriaRegistro } from '@/services/auditoriaService'
 import { formatDateTime } from '@/utils/formatters'
+import GlowGuideLauncher from '@/tutorials/components/GlowGuideLauncher.vue'
+import { usePageTutorial } from '@/tutorials/hooks/usePageTutorial'
+
+const { startPageTutorial } = usePageTutorial('audit')
 
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
@@ -35,14 +39,20 @@ watch(ready, (isReady) => {
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div>
-      <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-        Auditoria
-      </h1>
-      <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-        Trilha de operações registradas no estabelecimento.
-      </p>
+  <div class="space-y-4 lg:space-y-6" data-tour="audit-page">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
+          Auditoria
+        </h1>
+        <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
+          Trilha de operações registradas no estabelecimento.
+        </p>
+      </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <GlowGuideLauncher class="max-sm:hidden" @click="startPageTutorial" />
+        <GlowGuideLauncher class="sm:hidden" compact @click="startPageTutorial" />
+      </div>
     </div>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>

@@ -29,6 +29,10 @@ import { formatDate } from '@/utils/formatters'
 import { getAvatarInitial, normalizeAvatarSrc } from '@/utils/avatarSrc'
 import type { AssinaturaOnboardingContexto } from '@/types/assinaturaOnboarding.types'
 import type { EstabelecimentoAcesso } from '@/types/user.types'
+import GlowGuideLauncher from '@/tutorials/components/GlowGuideLauncher.vue'
+import { usePageTutorial } from '@/tutorials/hooks/usePageTutorial'
+
+const { startPageTutorial } = usePageTutorial('stores')
 
 const router = useRouter()
 const {
@@ -194,7 +198,7 @@ function irAdicionarLoja() {
 </script>
 
 <template>
-  <div class="flex w-full flex-col gap-5 pb-8" @click="fecharMenu">
+  <div class="flex w-full flex-col gap-5 pb-8" data-tour="stores-page" @click="fecharMenu">
     <!-- Cabeçalho -->
     <header class="flex flex-wrap items-start justify-between gap-4">
       <div class="min-w-0">
@@ -205,15 +209,19 @@ function irAdicionarLoja() {
           Visualize e gerencie as lojas vinculadas à sua conta Premium.
         </p>
       </div>
-      <RouterLink :to="ROUTE_PATHS.FINANCEIRO_REDE" class="shrink-0">
-        <button
-          type="button"
-          class="inline-flex h-10 items-center justify-center rounded-lg border border-glow-gold-cta/50 bg-glow-bg-elevated px-4 font-urbanist text-sm font-medium text-glow-gold-cta transition hover:bg-glow-gold-selected focus:outline-none focus:ring-2 focus:ring-glow-gold/30"
-        >
-          <Network :size="16" class="mr-1.5" />
-          Painel da rede
-        </button>
-      </RouterLink>
+      <div class="flex shrink-0 flex-wrap items-center gap-2">
+        <GlowGuideLauncher class="max-sm:hidden" @click="startPageTutorial" />
+        <GlowGuideLauncher class="sm:hidden" compact @click="startPageTutorial" />
+        <RouterLink :to="ROUTE_PATHS.FINANCEIRO_REDE" class="shrink-0">
+          <button
+            type="button"
+            class="inline-flex h-10 items-center justify-center rounded-lg border border-glow-gold-cta/50 bg-glow-bg-elevated px-4 font-urbanist text-sm font-medium text-glow-gold-cta transition hover:bg-glow-gold-selected focus:outline-none focus:ring-2 focus:ring-glow-gold/30"
+          >
+            <Network :size="16" class="mr-1.5" />
+            Painel da rede
+          </button>
+        </RouterLink>
+      </div>
     </header>
 
     <!-- Uso do plano -->

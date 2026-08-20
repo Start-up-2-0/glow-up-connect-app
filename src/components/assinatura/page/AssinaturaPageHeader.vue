@@ -22,12 +22,15 @@ defineProps<{
         }}
       </p>
     </div>
-    <RouterLink
-      :to="ROUTE_PATHS.CONFIG_ASSINATURA_FATURAS"
-      class="assinatura-btn-secondary inline-flex items-center gap-2"
-    >
-      <FileText :size="16" :stroke-width="1.75" />
-      Ver faturas
-    </RouterLink>
+    <div class="flex shrink-0 flex-wrap items-center gap-2">
+      <RouterLink
+        :to="ROUTE_PATHS.CONFIG_ASSINATURA_FATURAS"
+        class="assinatura-btn-secondary inline-flex items-center gap-2"
+      >
+        <FileText :size="16" :stroke-width="1.75" />
+        Ver faturas
+      </RouterLink>
+      <slot name="actions" />
+    </div>
   </header>
 </template>

@@ -35,6 +35,10 @@ import type { FinanceiroDashboard } from '@/types/negocio/financeiro.types'
 import type { CriarMovimentoPayload, MovimentoDirecao } from '@/types/negocio/financeiro.types'
 import type { ExportFormato, FluxoCaixa } from '@/types/negocio/caixa.types'
 import { formatCurrency } from '@/utils/formatters'
+import GlowGuideLauncher from '@/tutorials/components/GlowGuideLauncher.vue'
+import { usePageTutorial } from '@/tutorials/hooks/usePageTutorial'
+
+const { startPageTutorial } = usePageTutorial('finance')
 
 const router = useRouter()
 const route = useRoute()
@@ -236,7 +240,7 @@ watch(
 </script>
 
 <template>
-  <div :class="[FINANCEIRO_PAGE_CLASS, 'space-y-5']">
+  <div :class="[FINANCEIRO_PAGE_CLASS, 'space-y-5']" data-tour="finance-page">
     <header class="space-y-4">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div class="min-w-0">
@@ -247,15 +251,19 @@ watch(
             Situação financeira do período — entradas, saídas, saldo e evolução.
           </p>
         </div>
-        <div v-if="podeGerenciar()" class="flex flex-wrap gap-2">
-          <button type="button" class="financeiro-btn-outline" @click="abrirForm('saida')">
-            <Plus class="size-4" aria-hidden="true" />
-            Nova saída
-          </button>
-          <button type="button" class="financeiro-btn-primary" @click="abrirForm('entrada')">
-            <Plus class="size-4" aria-hidden="true" />
-            Nova entrada
-          </button>
+        <div class="flex flex-wrap items-center gap-2">
+          <GlowGuideLauncher class="max-sm:hidden" @click="startPageTutorial" />
+          <GlowGuideLauncher class="sm:hidden" compact @click="startPageTutorial" />
+          <template v-if="podeGerenciar()">
+            <button type="button" class="financeiro-btn-outline" @click="abrirForm('saida')">
+              <Plus class="size-4" aria-hidden="true" />
+              Nova saída
+            </button>
+            <button type="button" class="financeiro-btn-primary" @click="abrirForm('entrada')">
+              <Plus class="size-4" aria-hidden="true" />
+              Nova entrada
+            </button>
+          </template>
         </div>
       </div>
 

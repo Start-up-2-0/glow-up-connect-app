@@ -36,9 +36,13 @@ import { getUnmetPasswordRules } from '@/utils/passwordRules'
 import { calcularProgressoPerfil, formatUltimaAtualizacao } from '@/utils/perfilUtils'
 import type { UpdateProfilePayload } from '@/types/user.types'
 import { formatTelefone, telefoneLocalFromApi, telefoneToApi } from '@/utils/formatters'
+import GlowGuideLauncher from '@/tutorials/components/GlowGuideLauncher.vue'
+import { usePageTutorial } from '@/tutorials/hooks/usePageTutorial'
 
 type PerfilTabId = 'informacoes' | 'conta' | 'seguranca' | 'notificacoes'
 type EditingSection = 'pessoal' | null
+
+const { startPageTutorial } = usePageTutorial('profile')
 
 const TABS: { id: PerfilTabId; label: string; icon: Component }[] = [
   { id: 'informacoes', label: 'Perfil', icon: User },
@@ -334,15 +338,21 @@ async function handleSolicitarWhatsApp() {
 </script>
 
 <template>
-  <div class="perfil-page">
-    <header class="perfil-page__header">
-      <h1 class="perfil-page__title">Meu perfil</h1>
-      <div v-if="profile" class="perfil-page__meta">
-        <span>{{ profile.ativo ? 'Conta ativa' : 'Conta inativa' }}</span>
-        <span class="perfil-page__meta-dot" />
-        <span>Perfil {{ progressoPerfil }}% completo</span>
-        <span class="perfil-page__meta-dot" />
-        <span>Última atualização {{ formatUltimaAtualizacao(profile.updatedAt) }}</span>
+  <div class="perfil-page" data-tour="profile-page">
+    <header class="perfil-page__header flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="perfil-page__title">Meu perfil</h1>
+        <div v-if="profile" class="perfil-page__meta">
+          <span>{{ profile.ativo ? 'Conta ativa' : 'Conta inativa' }}</span>
+          <span class="perfil-page__meta-dot" />
+          <span>Perfil {{ progressoPerfil }}% completo</span>
+          <span class="perfil-page__meta-dot" />
+          <span>Última atualização {{ formatUltimaAtualizacao(profile.updatedAt) }}</span>
+        </div>
+      </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <GlowGuideLauncher class="max-sm:hidden" @click="startPageTutorial" />
+        <GlowGuideLauncher class="sm:hidden" compact @click="startPageTutorial" />
       </div>
     </header>
 

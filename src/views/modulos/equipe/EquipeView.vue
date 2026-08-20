@@ -32,8 +32,12 @@ import type {
   MembroEquipeItem,
 } from '@/types/negocio/equipe.types'
 import { formatTelefone } from '@/utils/formatters'
+import GlowGuideLauncher from '@/tutorials/components/GlowGuideLauncher.vue'
+import { usePageTutorial } from '@/tutorials/hooks/usePageTutorial'
 
 const PAGE_SIZE = 6
+
+const { startPageTutorial } = usePageTutorial('team')
 
 const route = useRoute()
 const router = useRouter()
@@ -266,12 +270,14 @@ watch(ready, (isReady) => {
 </script>
 
 <template>
-  <div :class="[EQUIPE_PAGE_CLASS, 'space-y-5']">
+  <div :class="[EQUIPE_PAGE_CLASS, 'space-y-5']" data-tour="team-page">
     <EquipePageHeader
       title="Equipe"
       subtitle="Pessoas que fazem parte do seu negócio."
     >
       <template #actions>
+        <GlowGuideLauncher class="max-sm:hidden" @click="startPageTutorial" />
+        <GlowGuideLauncher class="sm:hidden" compact @click="startPageTutorial" />
         <div class="relative" data-equipe-add-menu>
           <button
             type="button"

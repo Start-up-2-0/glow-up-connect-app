@@ -15,6 +15,7 @@ import type { ProfissionalEquipe } from '@/types/negocio/equipe.types'
 import type { Servico, TipoServico } from '@/types/negocio/servico.types'
 import { compressAvatarFile } from '@/utils/avatarFile'
 import { isValidCurrencyValue } from '@/utils/formatters'
+import { emitTutorialEvent } from '@/tutorials/engine/eventBus'
 
 const props = withDefaults(
   defineProps<{
@@ -206,6 +207,7 @@ async function handleSubmit() {
     if (isNovo.value) {
       salvo = await servicoService.criar(props.estabelecimentoId, payload)
       notifications.push('success', 'Serviço criado.')
+      emitTutorialEvent('servico.created', { id: salvo.id })
     } else {
       salvo = await servicoService.atualizar(props.estabelecimentoId, props.servicoId!, payload)
       notifications.push('success', 'Serviço atualizado.')
@@ -274,6 +276,7 @@ defineExpose({ resetForm, saving, loading, notFound })
             v-model="form.nome"
             type="text"
             class="servicos-form-input"
+            data-tour="servico-nome"
             :class="{ 'servicos-form-input--error': !!errors.nome }"
             placeholder="Ex: Corte Buzz Cut com fade"
             required
@@ -281,7 +284,7 @@ defineExpose({ resetForm, saving, loading, notFound })
           <p v-if="errors.nome" class="servicos-form-field__error">{{ errors.nome }}</p>
         </div>
 
-        <div class="servicos-form-panel__row">
+        <div class="servicos-form-panel__row" data-tour="servico-preco-duracao">
           <div class="servicos-form-field servico-form-currency">
             <CurrencyInput
               v-model="form.precoBase"
@@ -300,6 +303,7 @@ defineExpose({ resetForm, saving, loading, notFound })
               inputmode="numeric"
               min="1"
               class="servicos-form-input"
+              data-tour="servico-duracao"
               :class="{ 'servicos-form-input--error': !!errors.duracaoMinutos }"
               placeholder="Ex: 30"
               @input="form.duracaoMinutos = Number(($event.target as HTMLInputElement).value)"
@@ -310,7 +314,7 @@ defineExpose({ resetForm, saving, loading, notFound })
           </div>
         </div>
 
-        <div class="servicos-form-field">
+        <div class="servicos-form-field" data-tour="servico-tipo">
           <span class="servicos-form-label">Tipo do serviço</span>
           <div class="servicos-form-tipo-grid">
             <button
@@ -358,7 +362,7 @@ defineExpose({ resetForm, saving, loading, notFound })
           />
         </div>
 
-        <div v-if="temModuloProfissionais" class="servicos-form-field">
+        <div v-if="temModuloProfissionais" class="servicos-form-field" data-tour="servico-profissionais">
           <div class="servicos-form-profissionais-header">
             <label class="servicos-form-label">Profissionais</label>
             <button
@@ -395,7 +399,12 @@ defineExpose({ resetForm, saving, loading, notFound })
       </div>
 
       <div class="servicos-form-actions">
-        <button type="submit" class="servicos-btn-form-primary" :disabled="saving">
+        <button
+          type="submit"
+          class="servicos-btn-form-primary"
+          data-tour="servico-save"
+          :disabled="saving"
+        >
           {{ saving ? 'Salvando…' : submitLabel }}
         </button>
         <button

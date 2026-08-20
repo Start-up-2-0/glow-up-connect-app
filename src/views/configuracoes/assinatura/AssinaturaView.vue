@@ -25,6 +25,10 @@ import { formatDate } from '@/utils/formatters'
 import type { AssinaturaOnboardingContexto } from '@/types/assinaturaOnboarding.types'
 import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
 import '@/components/assinatura/page/assinaturaPage.css'
+import GlowGuideLauncher from '@/tutorials/components/GlowGuideLauncher.vue'
+import { usePageTutorial } from '@/tutorials/hooks/usePageTutorial'
+
+const { startPageTutorial } = usePageTutorial('subscription')
 
 const router = useRouter()
 const {
@@ -146,8 +150,13 @@ function abrirPolitica() {
 </script>
 
 <template>
-  <div class="assinatura-page flex w-full flex-col gap-5 pb-8">
-    <AssinaturaPageHeader />
+  <div class="assinatura-page flex w-full flex-col gap-5 pb-8" data-tour="subscription-page">
+    <AssinaturaPageHeader>
+      <template #actions>
+        <GlowGuideLauncher class="max-sm:hidden" @click="startPageTutorial" />
+        <GlowGuideLauncher class="sm:hidden" compact @click="startPageTutorial" />
+      </template>
+    </AssinaturaPageHeader>
 
     <TrialStatusBanner
       v-if="assinatura?.emTrial && assinatura.proximaDataVencimento"

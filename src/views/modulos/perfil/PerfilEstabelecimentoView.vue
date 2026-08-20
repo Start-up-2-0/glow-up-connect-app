@@ -52,9 +52,13 @@ import { buildAtualizarPerfilPayload } from '@/utils/perfilPayload'
 import { readFileAsDataUrl } from '@/utils/avatarFile'
 import { maskCep } from '@/utils/cep'
 import { storeToRefs } from 'pinia'
+import GlowGuideLauncher from '@/tutorials/components/GlowGuideLauncher.vue'
+import { usePageTutorial } from '@/tutorials/hooks/usePageTutorial'
 
 type LojaPerfilTabId = 'informacoes' | 'conta' | 'links' | 'configuracoes'
 type EditingSection = 'basico' | 'endereco' | null
+
+const { startPageTutorial } = usePageTutorial('store-profile')
 
 const TABS: { id: LojaPerfilTabId; label: string; icon: Component }[] = [
   { id: 'informacoes', label: 'Informações da loja', icon: Store },
@@ -376,12 +380,18 @@ watch(activeTab, () => {
 </script>
 
 <template>
-  <div class="perfil-page loja-perfil">
-    <header class="perfil-page__header">
-      <h1 class="perfil-page__title">Perfil do estabelecimento</h1>
-      <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-        Edite nome, logo e endereço da sua loja.
-      </p>
+  <div class="perfil-page loja-perfil" data-tour="store-profile-page">
+    <header class="perfil-page__header flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="perfil-page__title">Perfil do estabelecimento</h1>
+        <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
+          Edite nome, logo e endereço da sua loja.
+        </p>
+      </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <GlowGuideLauncher class="max-sm:hidden" @click="startPageTutorial" />
+        <GlowGuideLauncher class="sm:hidden" compact @click="startPageTutorial" />
+      </div>
     </header>
 
     <ContentAlert v-if="contextError" variant="error" compact>{{ contextError }}</ContentAlert>

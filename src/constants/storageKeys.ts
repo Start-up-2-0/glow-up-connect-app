@@ -8,6 +8,7 @@ export const STORAGE_KEYS = {
   THEME_VERSION: 'guc_theme_version',
   ESTABELECIMENTO_ID: 'guc_estabelecimento_id',
   SIDEBAR_COLLAPSED: 'guc_sidebar_collapsed',
+  GLOW_GUIDE: 'guc_glow_guide',
 } as const
 
 export const TOKEN_HEADER =

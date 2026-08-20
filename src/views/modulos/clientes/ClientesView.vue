@@ -8,6 +8,10 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { clienteNegocioService } from '@/services/clienteNegocioService'
 import { formatTelefone, formatDateTime } from '@/utils/formatters'
+import GlowGuideLauncher from '@/tutorials/components/GlowGuideLauncher.vue'
+import { usePageTutorial } from '@/tutorials/hooks/usePageTutorial'
+
+const { startPageTutorial } = usePageTutorial('clients')
 
 interface ClienteItem {
   nome: string
@@ -55,14 +59,20 @@ watch(ready, (isReady) => {
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div>
-      <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-        Clientes
-      </h1>
-      <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-        CRM com histórico consolidado de agendamentos (Premium).
-      </p>
+  <div class="space-y-4 lg:space-y-6" data-tour="clients-page">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
+          Clientes
+        </h1>
+        <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
+          CRM com histórico consolidado de agendamentos (Premium).
+        </p>
+      </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <GlowGuideLauncher class="max-sm:hidden" @click="startPageTutorial" />
+        <GlowGuideLauncher class="sm:hidden" compact @click="startPageTutorial" />
+      </div>
     </div>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>

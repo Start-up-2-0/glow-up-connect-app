@@ -27,6 +27,10 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useAssinaturaStore } from '@/stores/assinatura.store'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { formatCurrency } from '@/utils/formatters'
+import GlowGuideLauncher from '@/tutorials/components/GlowGuideLauncher.vue'
+import { usePageTutorial } from '@/tutorials/hooks/usePageTutorial'
+
+const { startPageTutorial } = usePageTutorial('dashboard')
 
 const router = useRouter()
 const negocioStore = useNegocioStore()
@@ -191,13 +195,21 @@ watch(
 </script>
 
 <template>
-  <div class="negocio-dash flex w-full flex-col gap-5">
-    <ClienteDashHeader
-      :titulo="welcomeTitulo"
-      :subtitulo="welcomeSubtitulo"
-      :chip="headerChip"
-      :loading="loading"
-    />
+  <div class="negocio-dash flex w-full flex-col gap-5" data-tour="dashboard-page">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0 flex-1">
+        <ClienteDashHeader
+          :titulo="welcomeTitulo"
+          :subtitulo="welcomeSubtitulo"
+          :chip="headerChip"
+          :loading="loading"
+        />
+      </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <GlowGuideLauncher class="max-sm:hidden" @click="startPageTutorial" />
+        <GlowGuideLauncher class="sm:hidden" compact @click="startPageTutorial" />
+      </div>
+    </div>
 
     <TrialStatusBanner
       v-if="

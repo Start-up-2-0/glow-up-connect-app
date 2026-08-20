@@ -10,6 +10,10 @@ import { useAuth } from '@/composables/useAuth'
 import { useConsent } from '@/composables/useConsent'
 import { privacidadeService } from '@/services/privacidadeService'
 import { legalUrl } from '@/utils/landingUrl'
+import GlowGuideLauncher from '@/tutorials/components/GlowGuideLauncher.vue'
+import { usePageTutorial } from '@/tutorials/hooks/usePageTutorial'
+
+const { startPageTutorial } = usePageTutorial('preferences')
 
 const notifications = useNotificationsStore()
 const negocioStore = useNegocioStore()
@@ -98,12 +102,18 @@ function revogarCookiesTerceiros() {
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div>
-      <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Privacidade</h1>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Exercite seus direitos previstos na LGPD e gerencie cookies.
-      </p>
+  <div class="space-y-4 lg:space-y-6" data-tour="preferences-page">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Privacidade</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Exercite seus direitos previstos na LGPD e gerencie cookies.
+        </p>
+      </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <GlowGuideLauncher class="max-sm:hidden" @click="startPageTutorial" />
+        <GlowGuideLauncher class="sm:hidden" compact @click="startPageTutorial" />
+      </div>
     </div>
 
     <BaseCard class="space-y-4">
