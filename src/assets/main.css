@@ -2673,7 +2673,7 @@
 
   .servicos-cards-grid {
     @apply grid w-full gap-3;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
   }
 
   .servicos-cards-grid > * {
