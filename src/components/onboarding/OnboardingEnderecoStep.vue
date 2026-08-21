@@ -2,15 +2,25 @@
 import { ref } from 'vue'
 import EnderecoForm from '@/components/form/EnderecoForm.vue'
 import OnboardingContratarFormActions from '@/components/onboarding/OnboardingContratarFormActions.vue'
-import { ONBOARDING_CONTRATAR_CARD_CLASS, ONBOARDING_CONTRATAR_FORM_CLASS } from '@/constants/designTokens'
+import { ONBOARDING_CONTRATAR_FORM_CLASS } from '@/constants/designTokens'
 import type { EnderecoFormFields } from '@/types/endereco.types'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 
-const props = defineProps<{
-  initial: OnboardingEstabelecimentoDraft
-  loading?: boolean
-  errorMessage?: string | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    initial: OnboardingEstabelecimentoDraft
+    loading?: boolean
+    errorMessage?: string | null
+    modoAutonomo?: boolean
+    submitLabel?: string
+    backLabel?: string
+  }>(),
+  {
+    modoAutonomo: false,
+    submitLabel: 'Continuar',
+    backLabel: 'Voltar',
+  },
+)
 
 const emit = defineEmits<{
   submit: [estabelecimento: OnboardingEstabelecimentoDraft]
@@ -36,10 +46,10 @@ function handleSubmit() {
 </script>
 
 <template>
-  <div :class="ONBOARDING_CONTRATAR_CARD_CLASS">
+  <div class="space-y-6">
     <p
       v-if="errorMessage"
-      class="checkout-alert-error mb-6 px-4 py-3"
+      class="checkout-alert-error px-4 py-3"
       role="alert"
     >
       {{ errorMessage }}
@@ -52,7 +62,12 @@ function handleSubmit() {
         id-prefix="onb-end"
       />
 
-      <OnboardingContratarFormActions :loading="loading" @back="emit('back')" />
+      <OnboardingContratarFormActions
+        :submit-label="submitLabel"
+        :back-label="backLabel"
+        :loading="loading"
+        @back="emit('back')"
+      />
     </form>
   </div>
 </template>

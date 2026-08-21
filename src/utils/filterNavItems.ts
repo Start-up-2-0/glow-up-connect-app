@@ -1,7 +1,10 @@
-import type { NavChildItem, NavItem } from '@/constants/navigation'
+import type { NavChildItem, NavItem, NavSection } from '@/constants/navigation'
 
 export interface NavFilterContext {
   assinaturaAtiva: boolean
+  ehProfissionalAutonomo?: boolean
+  ehOwner?: boolean
+  permiteMultiLoja?: boolean
   possuiModulo: (modulo: string) => boolean
   possuiPermissao: (permissao: string) => boolean
   possuiAlgumModulo: (modulos: string[]) => boolean
@@ -17,15 +20,32 @@ function itemPermitido(
     | 'requerPermissao'
     | 'requerPermissoes'
     | 'requerAssinatura'
+    | 'ocultarParaAutonomo'
+    | 'requerRoleOwner'
+    | 'requerMultiLoja'
   >,
   context: NavFilterContext,
 ): boolean {
+  if (item.ocultarParaAutonomo && context.ehProfissionalAutonomo) {
+    return false
+  }
+
+  if (item.requerRoleOwner && !context.ehOwner) {
+    return false
+  }
+
+  if (item.requerMultiLoja && !context.permiteMultiLoja) {
+    return false
+  }
+
   if (item.requerAssinatura !== false && !context.assinaturaAtiva) {
     const temRequisito =
       item.requerModulo ||
       item.requerModulos?.length ||
       item.requerPermissao ||
-      item.requerPermissoes?.length
+      item.requerPermissoes?.length ||
+      item.requerRoleOwner ||
+      item.requerMultiLoja
 
     if (temRequisito) return false
   }
@@ -68,4 +88,16 @@ export function filterNavItems(navItems: NavItem[], context: NavFilterContext): 
       return itemPermitido(item, context) ? item : null
     })
     .filter((item): item is NavItem => item !== null)
+}
+
+export function filterNavSections(
+  sections: NavSection[],
+  context: NavFilterContext,
+): NavSection[] {
+  return sections
+    .map((section) => ({
+      ...section,
+      items: filterNavItems(section.items, context),
+    }))
+    .filter((section) => section.items.length > 0)
 }

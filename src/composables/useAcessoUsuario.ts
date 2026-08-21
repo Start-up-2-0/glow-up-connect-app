@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/user.store'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { getUserRoleLabel } from '@/utils/userRoleLabel'
 import { establishmentRoleLabel } from '@/constants/establishmentRoles'
+import { lojaAgendarUrl } from '@/constants/routes'
 import { isClienteRole } from '@/types/user.types'
 
 export function useAcessoUsuario() {
@@ -43,11 +44,11 @@ export function useAcessoUsuario() {
     estabelecimentos.value.some((e) => e.role === 'Owner' && e.assinaturaAtiva),
   )
 
+  /** Link público de agendamento (hospedado na landing). */
   const linkAgendamentoPublico = computed(() => {
     const ativo = estabelecimentoAtivo.value
     if (!ativo?.publicGuid || !ativo.profissionalPublicGuid) return null
-    const base = `${window.location.origin}/loja/${ativo.publicGuid}/agendar`
-    return `${base}?profissional=${ativo.profissionalPublicGuid}`
+    return lojaAgendarUrl(ativo.publicGuid, ativo.profissionalPublicGuid)
   })
 
   return {

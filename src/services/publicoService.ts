@@ -12,11 +12,13 @@ import type {
   ServicoPublico,
 } from '@/types/agendamento.types'
 import type {
+  EstabelecimentoCategoria,
   EstabelecimentoPublico,
   EstabelecimentosProximosResponse,
   ListarProximosParams,
   ObterEstabelecimentoParams,
 } from '@/types/estabelecimento.types'
+import type { TipoAssinatura } from '@/types/assinatura.types'
 import type { ProfissionalVitrinePublico } from '@/types/negocio/profissionalVitrine.types'
 
 function unwrap<T>(response: { data: ApiSuccessResponse<T> }): T {
@@ -46,6 +48,15 @@ export const publicoService = {
       .get<ApiSuccessResponse<EstabelecimentosProximosResponse>>(
         '/publico/estabelecimentos/proximos',
         { params },
+      )
+      .then(unwrap)
+  },
+
+  listarCategorias(tipoAssinatura?: TipoAssinatura) {
+    return api
+      .get<ApiSuccessResponse<EstabelecimentoCategoria[]>>(
+        '/publico/estabelecimentos/categorias',
+        { params: tipoAssinatura ? { tipoAssinatura } : undefined },
       )
       .then(unwrap)
   },

@@ -32,10 +32,10 @@
 
 ## Funcionalidades para checklist
 
-- Multiusuario
+- Multiusuário
 - Agenda compartilhada
-- Confirmacao WhatsApp ao cliente
-- Dashboard basico / relatorios basicos
+- Confirmação WhatsApp ao cliente
+- Dashboard básico / relatórios básicos
 
 ## CTA upgrade
 

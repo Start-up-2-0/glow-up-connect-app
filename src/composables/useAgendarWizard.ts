@@ -16,6 +16,7 @@ import {
   toAgendaTimeOnlyString,
   toDateOnlyFromIsoUtc,
   toDateOnlyString,
+  telefoneToApi,
 } from '@/utils/formatters'
 import {
   clearAgendarWizardDraft,
@@ -23,6 +24,11 @@ import {
   writeAgendarWizardDraft,
   type ModoIdentidadeAgendamento,
 } from '@/utils/agendarWizardStorage'
+import {
+  normalizarSelecaoServicos,
+  podeSelecionarServico,
+  toggleServicoSelecionado,
+} from '@/utils/servicoSelecao'
 
 const DISPONIBILIDADE_JANELA_DIAS = 31
 
@@ -58,6 +64,12 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
     if (semPreferenciaProfissional.value) return 'Sem preferência'
     const prof = profissionais.value.find((p) => p.publicGuid === activeProfissionalGuid.value)
     return prof?.nomePublico ?? contexto.value?.profissional?.nomePublico ?? '—'
+  })
+
+  const profissionalSelecionadoFoto = computed(() => {
+    if (semPreferenciaProfissional.value) return null
+    const prof = profissionais.value.find((p) => p.publicGuid === activeProfissionalGuid.value)
+    return prof?.foto ?? contexto.value?.profissional?.foto ?? null
   })
 
   const estabelecimentoNome = computed(
@@ -260,7 +272,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
     if (!draft) return
 
     modoIdentidade.value = draft.modoIdentidade
-    selectedServicoIds.value = draft.selectedServicoIds
+    selectedServicoIds.value = normalizarSelecaoServicos(draft.selectedServicoIds, servicos.value)
     selectedDate.value = draft.selectedDate
     observacao.value = draft.observacao
     clienteNome.value = draft.clienteNome
@@ -347,7 +359,10 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
     try {
       servicos.value = await publicoService.listarServicosLoja(publicGuid, guidProfissionalApi())
       const permitidos = new Set(servicos.value.map((servico) => servico.id))
-      selectedServicoIds.value = selectedServicoIds.value.filter((id) => permitidos.has(id))
+      selectedServicoIds.value = normalizarSelecaoServicos(
+        selectedServicoIds.value.filter((id) => permitidos.has(id)),
+        servicos.value,
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erro ao carregar serviços.'
       throw err
@@ -423,11 +438,22 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
   }
 
   function toggleServico(id: number) {
-    const index = selectedServicoIds.value.indexOf(id)
-    if (index >= 0) {
-      selectedServicoIds.value = selectedServicoIds.value.filter((sid) => sid !== id)
-    } else {
-      selectedServicoIds.value = [...selectedServicoIds.value, id]
+    selectedServicoIds.value = toggleServicoSelecionado(
+      selectedServicoIds.value,
+      id,
+      servicos.value,
+    )
+  }
+
+  function estadoSelecaoServico(servico: ServicoPublico) {
+    const resultado = podeSelecionarServico(
+      selectedServicoIds.value,
+      servico,
+      servicos.value,
+    )
+    return {
+      disabled: !resultado.ok && !selectedServicoIds.value.includes(servico.id),
+      motivoBloqueio: resultado.motivo,
     }
   }
 
@@ -460,10 +486,6 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
 
   async function continuarDeProfissional() {
     if (modoProfissional.value === 'sem_preferencia') {
-      if (isVisitante.value && modoIdentidade.value === 'register') {
-        error.value = 'Para criar conta, escolha um profissional específico.'
-        return
-      }
       semPreferenciaProfissional.value = true
       activeProfissionalGuid.value = ''
       step.value = 'servicos'
@@ -494,13 +516,9 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
   function escolherIdentidade(modo: ModoIdentidadeAgendamento) {
     modoIdentidade.value = modo
     error.value = null
-    if (modo === 'guest') {
+    if (modo === 'guest' || modo === 'register') {
       step.value = 'contato'
       return
-    }
-    if (modo === 'register') {
-      step.value = initialProfissionalGuid ? 'servicos' : 'profissional'
-      if (initialProfissionalGuid) void loadServicos()
     }
   }
 
@@ -516,7 +534,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
   function voltarDeProfissional() {
     error.value = null
     if (isVisitante.value) {
-      if (modoIdentidade.value === 'guest') {
+      if (modoIdentidade.value === 'guest' || modoIdentidade.value === 'register') {
         step.value = 'contato'
         return
       }
@@ -530,7 +548,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
 
   function voltarDeServicos() {
     error.value = null
-    if (modoIdentidade.value === 'guest') {
+    if (modoIdentidade.value === 'guest' || modoIdentidade.value === 'register') {
       step.value = 'contato'
       return
     }
@@ -612,7 +630,8 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
   }
 
   function validarDadosContato(): boolean {
-    if (!isVisitante.value || modoIdentidade.value !== 'guest') return true
+    if (!isVisitante.value) return true
+    if (modoIdentidade.value !== 'guest' && modoIdentidade.value !== 'register') return true
 
     const nome = clienteNome.value.trim()
     const email = clienteEmail.value.trim()
@@ -681,20 +700,16 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
       }
 
       if (isVisitante.value && modoIdentidade.value === 'register') {
-        if (!profGuid) {
-          throw new Error('Escolha um profissional específico para criar conta e agendar.')
-        }
         if (!validarCadastro()) {
           throw new Error(error.value ?? 'Dados de cadastro inválidos.')
         }
 
         const criado = await publicoService.criarAgendamentoComCadastro(publicGuid, {
           ...payloadBase,
-          profissionalPublicGuid: profGuid,
           cadastro: {
             nome: clienteNome.value.trim(),
             email: clienteEmail.value.trim(),
-            telefone: clienteTelefone.value.trim(),
+            telefone: telefoneToApi(clienteTelefone.value),
             senha: cadastroSenha.value,
           },
         })
@@ -716,7 +731,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
           ...payloadBase,
           clienteNome: clienteNome.value.trim(),
           clienteEmail: clienteEmail.value.trim(),
-          clienteTelefone: clienteTelefone.value.trim(),
+          clienteTelefone: telefoneToApi(clienteTelefone.value),
         })
         agendamentoCriado.value = criado
         step.value = 'sucesso'
@@ -751,7 +766,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
         return
       }
 
-      if (isVisitante.value && modoIdentidade.value === 'guest' && !contatoGuestPreenchido()) {
+      if (isVisitante.value && (modoIdentidade.value === 'guest' || modoIdentidade.value === 'register') && !contatoGuestPreenchido()) {
         step.value = 'contato'
         return
       }
@@ -773,7 +788,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
       return
     }
 
-    if (isVisitante.value && modoIdentidade.value === 'guest' && !contatoGuestPreenchido()) {
+    if (isVisitante.value && (modoIdentidade.value === 'guest' || modoIdentidade.value === 'register') && !contatoGuestPreenchido()) {
       step.value = 'contato'
       return
     }
@@ -797,6 +812,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
     profissionalVinculado,
     profissionais,
     profissionalSelecionadoNome,
+    profissionalSelecionadoFoto,
     estabelecimentoNome,
     servicos,
     slots,
@@ -819,6 +835,7 @@ export function useAgendarWizard(publicGuid: string, initialProfissionalGuid = '
     activeProfissionalGuid,
     semPreferenciaProfissional,
     toggleServico,
+    estadoSelecaoServico,
     escolherIdentidade,
     escolherModoProfissional,
     selecionarProfissional,

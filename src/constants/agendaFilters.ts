@@ -9,3 +9,5 @@ export const AGENDA_SORT_FILTER_OPTIONS: ReadonlyArray<{ value: AgendaOrdenacao;
 
 export const AGENDA_DEFAULT_ORDENACAO: AgendaOrdenacao = 'atendimento_desc'
 export const AGENDA_PAGE_SIZE = 12
+export const AGENDA_CALENDAR_PAGE_SIZE = 50
+export const AGENDA_CALENDAR_MAX_PAGES = 20

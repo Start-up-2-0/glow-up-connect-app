@@ -114,13 +114,13 @@ Ver payload integral em [payload-assinatura.md#payload-1--estabelecimento-novo-c
     "status": "Trial",
     "gateway": "MercadoPago",
     "inicio": "2026-06-07T00:00:00Z",
-    "fim": null,
+    "fim": "2026-06-21T00:00:00Z",
     "diaVencimento": 10,
-    "proximaDataVencimento": "2026-07-10T00:00:00Z",
-    "proximaDataGeracaoCobranca": "2026-07-08T00:00:00Z",
-    "proximaDataAlerta": "2026-07-07T00:00:00Z",
+    "proximaDataVencimento": "2026-06-21T00:00:00Z",
+    "proximaDataGeracaoCobranca": "2026-06-14T00:00:00Z",
+    "proximaDataAlerta": "2026-06-14T00:00:00Z",
     "emTrial": true,
-    "diasTrial": 30,
+    "diasTrial": 14,
     "pagamentoInicial": null
   }
 }
@@ -181,7 +181,7 @@ Rota: `/configuracoes/assinatura/upgrade`
 | Componente | Responsabilidade |
 |------------|------------------|
 | `PlanoCard` | Card da vitrine com modulos e preco |
-| `PromocaoBanner` | Vagas restantes + trial 30 dias |
+| `PromocaoBanner` | Vagas restantes + trial 14 dias |
 | `DiaVencimentoSelect` | Select 5/10/15/20 |
 | `MercadoPagoCardForm` | Tokenizacao do cartao |
 | `AssinaturaStatusBadge` | Trial / Ativa / Pendente |

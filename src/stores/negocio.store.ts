@@ -24,8 +24,10 @@ export const useNegocioStore = defineStore('negocio', () => {
   const estabelecimentos = ref<EstabelecimentoAcesso[]>([])
   const estabelecimentoIdSelecionado = ref<number | null>(readEstabelecimentoId())
   const loading = ref(false)
+  const estabelecimentosLoaded = ref(false)
   const trocandoEstabelecimento = ref(false)
   const contextoVersao = ref(0)
+  let fetchEstabelecimentosInFlight: Promise<EstabelecimentoAcesso[]> | null = null
 
   const estabelecimentoAtivo = computed(() => {
     if (estabelecimentoIdSelecionado.value === null) return null
@@ -39,9 +41,16 @@ export const useNegocioStore = defineStore('negocio', () => {
   const modulos = computed(() => estabelecimentoAtivo.value?.modulos ?? [])
   const permissoes = computed(() => estabelecimentoAtivo.value?.permissoes ?? [])
   const assinaturaAtiva = computed(() => estabelecimentoAtivo.value?.assinaturaAtiva ?? false)
+  const assinaturaStatus = computed(() => estabelecimentoAtivo.value?.assinaturaStatus ?? null)
   const assinaturaId = computed(() => estabelecimentoAtivo.value?.assinaturaId ?? null)
   const planoId = computed(() => estabelecimentoAtivo.value?.planoId ?? null)
   const planoNome = computed(() => estabelecimentoAtivo.value?.planoNome ?? null)
+  const tipoAssinatura = computed(
+    () => estabelecimentoAtivo.value?.tipoAssinatura ?? null,
+  )
+  const ehProfissionalAutonomo = computed(
+    () => tipoAssinatura.value === 'ProfissionalAutonomo',
+  )
   const role = computed(() => estabelecimentoAtivo.value?.role ?? null)
   const limites = computed(
     () =>
@@ -62,6 +71,12 @@ export const useNegocioStore = defineStore('negocio', () => {
   )
   const prioridadeMarketplace = computed(
     () => estabelecimentoAtivo.value?.limites?.prioridadeListagemPublica ?? false,
+  )
+  const onboardingObrigatorioPendente = computed(
+    () => estabelecimentoAtivo.value?.onboardingObrigatorioPendente ?? false,
+  )
+  const proximaEtapaOnboarding = computed(
+    () => estabelecimentoAtivo.value?.proximaEtapaOnboarding ?? null,
   )
 
   function possuiModulo(modulo: string): boolean {
@@ -110,25 +125,36 @@ export const useNegocioStore = defineStore('negocio', () => {
   }
 
   async function fetchEstabelecimentos(force = false) {
-    if (estabelecimentos.value.length > 0 && !force) {
+    if (estabelecimentosLoaded.value && !force) {
       resolverEstabelecimentoPadrao()
       return estabelecimentos.value
     }
 
-    loading.value = true
-    try {
-      const data = await negocioService.listarEstabelecimentos()
-      estabelecimentos.value = data
-      resolverEstabelecimentoPadrao()
-      return estabelecimentos.value
-    } catch {
-      estabelecimentos.value = []
-      estabelecimentoIdSelecionado.value = null
-      persistEstabelecimentoId(null)
-      return estabelecimentos.value
-    } finally {
-      loading.value = false
+    if (fetchEstabelecimentosInFlight && !force) {
+      return fetchEstabelecimentosInFlight
     }
+
+    loading.value = true
+    fetchEstabelecimentosInFlight = (async () => {
+      try {
+        const data = await negocioService.listarEstabelecimentos()
+        estabelecimentos.value = data
+        estabelecimentosLoaded.value = true
+        resolverEstabelecimentoPadrao()
+        return estabelecimentos.value
+      } catch {
+        estabelecimentos.value = []
+        estabelecimentosLoaded.value = true
+        estabelecimentoIdSelecionado.value = null
+        persistEstabelecimentoId(null)
+        return estabelecimentos.value
+      } finally {
+        loading.value = false
+        fetchEstabelecimentosInFlight = null
+      }
+    })()
+
+    return fetchEstabelecimentosInFlight
   }
 
   async function trocarEstabelecimento(id: number) {
@@ -156,8 +182,8 @@ export const useNegocioStore = defineStore('negocio', () => {
   }
 
   async function ensureContext() {
-    if (estabelecimentos.value.length === 0) {
-      await fetchEstabelecimentos(true)
+    if (!estabelecimentosLoaded.value) {
+      await fetchEstabelecimentos()
     } else {
       resolverEstabelecimentoPadrao()
     }
@@ -177,6 +203,8 @@ export const useNegocioStore = defineStore('negocio', () => {
 
   function clear() {
     estabelecimentos.value = []
+    estabelecimentosLoaded.value = false
+    fetchEstabelecimentosInFlight = null
     estabelecimentoIdSelecionado.value = null
     contextoVersao.value = 0
     persistEstabelecimentoId(null)
@@ -186,21 +214,27 @@ export const useNegocioStore = defineStore('negocio', () => {
     estabelecimentos,
     estabelecimentoIdSelecionado,
     loading,
+    estabelecimentosLoaded,
     trocandoEstabelecimento,
     contextoVersao,
     estabelecimentoAtivo,
     modulos,
     permissoes,
     assinaturaAtiva,
+    assinaturaStatus,
     assinaturaId,
     planoId,
     planoNome,
+    tipoAssinatura,
+    ehProfissionalAutonomo,
     role,
     limites,
     emTrial,
     diasTrial,
     proximaDataVencimento,
     prioridadeMarketplace,
+    onboardingObrigatorioPendente,
+    proximaEtapaOnboarding,
     possuiModulo,
     possuiPermissao,
     possuiAlgumaPermissao,

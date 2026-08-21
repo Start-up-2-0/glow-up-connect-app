@@ -9,6 +9,7 @@ import { userService } from '@/services/userService'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { equipeAdicionarBotaoConfirmar } from '@/constants/equipeAdicionarAcoes'
 import { getUnmetPasswordRules } from '@/utils/passwordRules'
+import { compressAvatarFile, validateAvatarFile } from '@/utils/avatarFile'
 import type { EstablishmentUserRole } from '@/types/negocio/equipe.types'
 
 export type ModoCadastro = 'convite' | 'criar'
@@ -35,6 +36,9 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
   const nomePublico = ref('')
   const role = ref<EstablishmentUserRole>(options.initialRole ?? 'Receptionist')
   const podeReceberAgendamento = ref(true)
+  const fotoFile = ref<File | null>(null)
+  const fotoPreview = ref<string | null>(null)
+  const fotoError = ref<string | undefined>()
   const saving = ref(false)
   const sucessoDetalhe = ref<string | null>(null)
   const linkConvite = ref<string | null>(null)
@@ -58,6 +62,32 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
     telefoneError.value = undefined
     senhaError.value = undefined
     confirmarSenhaError.value = undefined
+    fotoError.value = undefined
+  }
+
+  function limparFoto() {
+    if (fotoPreview.value?.startsWith('blob:')) {
+      URL.revokeObjectURL(fotoPreview.value)
+    }
+    fotoFile.value = null
+    fotoPreview.value = null
+    fotoError.value = undefined
+  }
+
+  function onFotoChange(file: File | null) {
+    limparFoto()
+    if (!file) return
+    const erro = validateAvatarFile(file)
+    if (erro) {
+      fotoError.value = erro
+      return
+    }
+    fotoFile.value = file
+    fotoPreview.value = URL.createObjectURL(file)
+  }
+
+  function onFotoError(message: string) {
+    fotoError.value = message
   }
 
   function resetForm() {
@@ -69,6 +99,7 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
     nomePublico.value = ''
     role.value = options.initialRole ?? 'Receptionist'
     podeReceberAgendamento.value = true
+    limparFoto()
     sucessoDetalhe.value = null
     linkConvite.value = null
     clearFormFeedback()
@@ -135,21 +166,16 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
     linkConvite.value = null
 
     try {
-      const resultado = ehProfissional.value
-        ? await conviteService.criarConviteProfissional(estabelecimentoId.value, {
-            email: emailTrim,
-            nomePublico: nomePublico.value.trim() || undefined,
-            podeReceberAgendamento: podeReceberAgendamento.value,
-          })
-        : await conviteService.criarConviteUsuario(estabelecimentoId.value, {
-            email: emailTrim,
-            role: role.value as 'Admin' | 'Manager' | 'Receptionist',
-          })
+      const resultado = await conviteService.criarLink(estabelecimentoId.value, {
+        role: role.value,
+        limiteUsuarios: 1,
+        podeReceberAgendamento: ehProfissional.value ? podeReceberAgendamento.value : undefined,
+      })
 
-      linkConvite.value = resultado.linkConvite ?? resultado.convite?.linkConvite ?? null
+      linkConvite.value = resultado.linkConvite
       sucessoDetalhe.value =
-        'Envie o link abaixo. Se já tem conta, a pessoa faz login e aceita. Se não, cria a conta com este e-mail e aceita o convite.'
-      notifications.push('success', 'Convite criado com sucesso.')
+        'Copie e envie o link. A pessoa abre na página pública, faz login ou cadastro e entra na equipe.'
+      notifications.push('success', 'Link de convite criado com sucesso.')
     } catch (err) {
       formError.value = resolveError(err, 'Não foi possível criar o convite.')
     } finally {
@@ -160,11 +186,20 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
   async function tentarVincularProfissional(emailTrim: string, telefoneTrim: string): Promise<boolean> {
     if (!estabelecimentoId.value) return false
     try {
+      let foto: string | undefined
+      let fotoContentType: string | undefined
+      if (fotoFile.value) {
+        const compressed = await compressAvatarFile(fotoFile.value)
+        foto = compressed.dataUrl
+        fotoContentType = compressed.contentType
+      }
       await equipeService.vincularProfissional(estabelecimentoId.value, {
         email: emailTrim || undefined,
         telefone: telefoneTrim || undefined,
         nomePublico: nomePublico.value.trim() || undefined,
         podeReceberAgendamento: podeReceberAgendamento.value,
+        foto,
+        fotoContentType,
       })
       return true
     } catch {
@@ -242,22 +277,21 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
           return
         }
 
-        const resultado = await conviteService.criarConviteProfissional(estabelecimentoId.value, {
-          email: emailTrim,
-          telefone: telefoneTrim || undefined,
-          nomePublico: nomePublico.value.trim() || nomeTrim,
+        const resultado = await conviteService.criarLink(estabelecimentoId.value, {
+          role: 'Profissional',
+          limiteUsuarios: 1,
           podeReceberAgendamento: podeReceberAgendamento.value,
         })
 
-        linkConvite.value = resultado.linkConvite ?? resultado.convite?.linkConvite ?? null
+        linkConvite.value = resultado.linkConvite
         if (contaRecémCriada) {
           sucessoDetalhe.value =
             'Conta criada. Peça para confirmar o e-mail e aceitar o convite pelo link abaixo.'
         } else {
           sucessoDetalhe.value =
-            'Convite gerado. Peça para confirmar o e-mail e aceitar pelo link abaixo.'
+            'Link gerado. Peça para confirmar o e-mail e aceitar pelo link abaixo.'
         }
-        notifications.push('success', 'Convite de profissional criado.')
+        notifications.push('success', 'Link de convite de profissional criado.')
         return
       }
 
@@ -303,6 +337,9 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
     nomePublico,
     role,
     podeReceberAgendamento,
+    fotoFile,
+    fotoPreview,
+    fotoError,
     saving,
     sucessoDetalhe,
     linkConvite,
@@ -315,6 +352,9 @@ export function useEquipeAdicionarForm(options: UseEquipeAdicionarFormOptions) {
     ehProfissional,
     submitLabel,
     resetForm,
+    onFotoChange,
+    onFotoError,
+    limparFoto,
     copiarLink,
     handleSubmit,
   }

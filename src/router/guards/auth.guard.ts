@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/user.store'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { isOnboardingCheckoutPath } from '@/utils/authRedirect'
+import { MOCK_MODE } from '@/mocks/config'
 
 export const authGuard: NavigationGuard = async (to) => {
   if (import.meta.env.DEV && to.matched.some((record) => record.meta.devPreview)) {
@@ -93,7 +94,8 @@ export const authGuard: NavigationGuard = async (to) => {
       return { path: ROUTE_PATHS.DASHBOARD }
     }
 
-    if (assinaturaOnboardingLogado) {
+    // Em mock, permite reentrar no onboarding mesmo com assinatura ativa (QA do wizard).
+    if (assinaturaOnboardingLogado && !MOCK_MODE) {
       const possuiAssinaturaAtivaComoDono = negocioStore.estabelecimentos.some(
         (e) => e.role === 'Owner' && e.assinaturaAtiva,
       )

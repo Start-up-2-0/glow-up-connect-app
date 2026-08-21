@@ -8,18 +8,22 @@ import {
   ONBOARDING_CONTRATAR_DROPZONE_TEXT_CLASS,
   ONBOARDING_CONTRATAR_LABEL_CLASS,
 } from '@/constants/designTokens'
-
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-const MAX_SIZE_BYTES = 5 * 1024 * 1024
+import { validateAvatarFile } from '@/utils/avatarFile'
 
 const props = withDefaults(
   defineProps<{
     label?: string
     variant?: 'auth' | 'contratar'
+    /** Data URL ou URL já disponível (ex.: avatar da conta). */
+    previewUrl?: string | null
+    /** Texto auxiliar quando há preview sem arquivo novo. */
+    previewHint?: string
   }>(),
   {
     label: 'Avatar',
     variant: 'auth',
+    previewUrl: null,
+    previewHint: undefined,
   },
 )
 
@@ -44,6 +48,8 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
 const fileName = ref<string | null>(null)
 
+const hasPreview = computed(() => Boolean(props.previewUrl?.trim()))
+
 function validateAndEmit(file: File | null) {
   if (!file) {
     fileName.value = null
@@ -51,13 +57,9 @@ function validateAndEmit(file: File | null) {
     return
   }
 
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    emit('error', 'Formato inválido. Use JPEG, PNG ou WebP.')
-    return
-  }
-
-  if (file.size > MAX_SIZE_BYTES) {
-    emit('error', 'Arquivo muito grande. Máximo 5 MB.')
+  const validationError = validateAvatarFile(file)
+  if (validationError) {
+    emit('error', validationError)
     return
   }
 
@@ -106,7 +108,14 @@ function openPicker() {
         @change="onFileChange"
       />
       <div class="flex items-center justify-center gap-2.5 px-4">
+        <img
+          v-if="hasPreview"
+          :src="previewUrl!"
+          alt=""
+          class="size-12 shrink-0 rounded-full object-cover"
+        />
         <svg
+          v-else
           class="h-6 w-6 shrink-0 text-glow-gold"
           viewBox="0 0 24 24"
           fill="currentColor"
@@ -118,6 +127,8 @@ function openPicker() {
         </svg>
         <p :class="placeholderClass">
           <span v-if="fileName">{{ fileName }}</span>
+          <span v-else-if="previewHint">{{ previewHint }}</span>
+          <span v-else-if="hasPreview">Foto selecionada. Clique para alterar.</span>
           <span v-else>Solte arquivos para anexar ou navegue até eles.</span>
         </p>
       </div>

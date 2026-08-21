@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import FinanceiroPageHeader from '@/components/financeiro/FinanceiroPageHeader.vue'
 import FinanceiroQuickFilters from '@/components/financeiro/FinanceiroQuickFilters.vue'
@@ -22,7 +21,7 @@ const props = defineProps<{
   embedded?: boolean
 }>()
 
-const { ready, error: contextError, loading: contextLoading } = useEstabelecimentoView()
+const { ready, error: contextError } = useEstabelecimentoView()
 const { assinaturaId } = useNegocioContext()
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
@@ -94,8 +93,6 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
       title="Assinatura não encontrada"
       description="Selecione a unidade matriz com assinatura Premium ativa."
     />
-    <LoadingSpinner v-else-if="contextLoading || (loading && !resumo)" />
-
     <template v-else-if="resumo">
       <div class="financeiro-kpi-grid">
         <FinanceiroKpiCard

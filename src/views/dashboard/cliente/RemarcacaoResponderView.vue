@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import { publicoService } from '@/services/publicoService'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
@@ -64,9 +63,8 @@ async function responder(acao: 'aceitar' | 'recusar') {
     <h1 class="font-satoshi text-xl font-bold text-glow-text">Sugestão de reagendamento</h1>
 
     <BaseAlert v-if="error" variant="error">{{ error }}</BaseAlert>
-    <LoadingSpinner v-if="loading" />
 
-    <BaseCard v-else-if="proposta && !responded">
+    <BaseCard v-if="!loading && proposta && !responded">
       <dl class="space-y-2 font-urbanist text-sm">
         <div v-if="proposta.estabelecimentoNome" class="flex justify-between gap-4">
           <dt class="text-glow-text-subtle">Loja</dt>

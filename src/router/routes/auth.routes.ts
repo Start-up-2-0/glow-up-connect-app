@@ -30,6 +30,12 @@ export const authRoutes: RouteRecordRaw[] = [
     meta: { layout: 'auth', guestOnly: true, title: 'Entrar' },
   },
   {
+    path: ROUTE_PATHS.CONTA_EM_EXCLUSAO,
+    name: ROUTE_NAMES.CONTA_EM_EXCLUSAO,
+    component: () => import('@/views/auth/ContaEmExclusaoView.vue'),
+    meta: { layout: 'auth', guestOnly: true, title: 'Conta em exclusão' },
+  },
+  {
     path: ROUTE_PATHS.REGISTER,
     name: ROUTE_NAMES.REGISTER,
     component: () => import('@/views/auth/RegisterView.vue'),
@@ -78,4 +84,11 @@ export const authRoutes: RouteRecordRaw[] = [
     meta: { layout: 'auth', guestOnly: true, title: 'Senha redefinida' },
   },
   ...confirmEmailLegacyRedirects,
+  {
+    path: ROUTE_PATHS.RESET_PASSWORD_LEGACY,
+    redirect: (to) => ({
+      path: ROUTE_PATHS.RESET_PASSWORD,
+      query: to.query,
+    }),
+  },
 ]

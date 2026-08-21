@@ -61,12 +61,7 @@ function onFileChange(event: Event) {
 
 <template>
   <Teleport to="body">
-    <Transition
-      enter-active-class="transition-opacity duration-200"
-      leave-active-class="transition-opacity duration-200"
-      enter-from-class="opacity-0"
-      leave-to-class="opacity-0"
-    >
+    <Transition name="equipe-modal">
       <div v-if="open" class="financeiro-modal-overlay" role="dialog" aria-modal="true" @click.self="close">
         <div class="financeiro-modal">
           <div class="financeiro-modal__header">

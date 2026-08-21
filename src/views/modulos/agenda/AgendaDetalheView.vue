@@ -5,7 +5,6 @@ import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import AgendamentoStatusBadge from '@/components/cliente/AgendamentoStatusBadge.vue'
 import CancelarAgendamentoModal from '@/components/cliente/CancelarAgendamentoModal.vue'
-import AgendamentoDetailHeader from '@/components/agenda/detail/AgendamentoDetailHeader.vue'
 import AgendamentoDetailField from '@/components/agenda/detail/AgendamentoDetailField.vue'
 import AgendamentoDetailSection from '@/components/agenda/detail/AgendamentoDetailSection.vue'
 import AgendamentoDetailServices from '@/components/agenda/detail/AgendamentoDetailServices.vue'
@@ -36,7 +35,6 @@ import {
 } from '@/utils/agendamentoAtendimento'
 import {
   formatAgendaDetailSubtitle,
-  formatCurrency,
   formatTelefone,
   toAgendaTimeOnlyString,
   toDateOnlyFromIsoUtc,
@@ -53,7 +51,7 @@ const agendamento = ref<AgendaGeral | null>(null)
 const historico = ref<AgendamentoHistorico[]>([])
 const loading = ref(false)
 const actionLoading = ref(false)
-const atendimentoItemLoadingId = ref<number | null>(null)
+const atendimentoLoading = ref(false)
 const cancelModalOpen = ref(false)
 const sugerirModalOpen = ref(false)
 const receberModalOpen = ref(false)
@@ -157,6 +155,18 @@ const showConcluirAtendimentoGeral = computed(
   () => !!itemParaConcluir.value && podeFinalizarAtendimento.value,
 )
 
+const showActionBar = computed(
+  () =>
+    !!(
+      (showConfirmar.value && podeGerenciarAgenda.value) ||
+      showReceber.value ||
+      (podeSugerirRemarcacao.value && podeGerenciarAgenda.value) ||
+      (showCancelar.value && podeGerenciarAgenda.value) ||
+      showIniciarAtendimentoGeral.value ||
+      showConcluirAtendimentoGeral.value
+    ),
+)
+
 const iniciarGeralHabilitado = computed(() => {
   const item = itemParaIniciar.value
   if (!item || !agendamento.value) return false
@@ -251,51 +261,48 @@ async function handleConfirmar() {
   }
 }
 
-async function handleIniciarAtendimento(itemId: number | string) {
+async function handleIniciarAgendamento() {
   if (!estabelecimentoId.value || !agendamento.value) return
-  const item = agendamento.value.itens.find((i) => i.id === Number(itemId))
-  if (
-    item &&
-    !podeIniciarItemAtendimento(item.status, agendamento.value.status, item.inicio, item.fim)
-  ) {
+  const itens = agendamento.value.itens.filter((item) =>
+    podeIniciarItemAtendimento(item.status, agendamento.value!.status, item.inicio, item.fim),
+  )
+  if (itens.length === 0) {
     notifications.push(
       'warning',
-      motivoInicioIndisponivel(item.inicio) ?? 'Não é possível iniciar este atendimento agora.',
+      tituloIniciarGeral.value ?? 'Não é possível iniciar este atendimento agora.',
     )
     return
   }
-  atendimentoItemLoadingId.value = Number(itemId)
+  atendimentoLoading.value = true
   try {
-    await agendaNegocioService.iniciarAtendimento(estabelecimentoId.value, Number(itemId))
+    for (const item of itens) {
+      await agendaNegocioService.iniciarAtendimento(estabelecimentoId.value, item.id)
+    }
     notifications.push('success', 'Atendimento iniciado.')
     await load()
   } catch (err) {
     notifications.push('error', resolveError(err))
+    await load()
   } finally {
-    atendimentoItemLoadingId.value = null
+    atendimentoLoading.value = false
   }
 }
 
-async function handleFinalizarAtendimento(itemId: number | string) {
-  if (!estabelecimentoId.value) return
-  atendimentoItemLoadingId.value = Number(itemId)
+async function handleConcluirAgendamento() {
+  if (!estabelecimentoId.value || !itemParaConcluir.value) return
+  atendimentoLoading.value = true
   try {
-    await agendaNegocioService.finalizarAtendimento(estabelecimentoId.value, Number(itemId))
+    await agendaNegocioService.finalizarAtendimento(
+      estabelecimentoId.value,
+      itemParaConcluir.value.id,
+    )
     notifications.push('success', 'Atendimento concluído.')
     await load()
   } catch (err) {
     notifications.push('error', resolveError(err))
   } finally {
-    atendimentoItemLoadingId.value = null
+    atendimentoLoading.value = false
   }
-}
-
-async function handleIniciarPrimeiroDisponivel() {
-  if (itemParaIniciar.value) await handleIniciarAtendimento(itemParaIniciar.value.id)
-}
-
-async function handleConcluirPrimeiroDisponivel() {
-  if (itemParaConcluir.value) await handleFinalizarAtendimento(itemParaConcluir.value.id)
 }
 
 async function handleReceber(payload: {
@@ -377,165 +384,153 @@ watch(
 <template>
   <div class="agendamento-detail-page">
     <AgendamentoDetailHeader
-      title="Detalhe do agendamento"
+      :title="agendamento?.clienteNome ?? 'Detalhe do agendamento'"
       :subtitle="subtitle"
       :back-to="ROUTE_PATHS.AGENDA"
-    />
+    >
+      <template v-if="agendamento" #meta>
+        <div
+          v-if="agendamento.status === 'PendenteConfirmacao'"
+          class="agendamento-detail-pending-alert"
+        >
+          <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 4.5V8.5M8 11.5H8.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2" />
+          </svg>
+          Aguardando confirmação
+        </div>
+        <AgendamentoStatusBadge v-else :status="agendamento.status" />
+      </template>
+    </AgendamentoDetailHeader>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
-    <LoadingSpinner v-if="loading" />
+
+    <div v-if="loading" class="flex justify-center py-16">
+      <LoadingSpinner label="Carregando agendamento" />
+    </div>
 
     <template v-else-if="agendamento">
       <div class="agendamento-detail-grid">
         <div class="agendamento-detail-column">
-          <AgendamentoDetailSection title="Resumo">
-            <div class="agendamento-detail-panel__header">
-              <span />
-              <div
-                v-if="agendamento.status === 'PendenteConfirmacao'"
-                class="agendamento-detail-pending-alert"
-              >
-                <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path d="M8 4.5V8.5M8 11.5H8.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                  <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2" />
-                </svg>
-                Aguardando confirmação
-              </div>
-              <AgendamentoStatusBadge v-else :status="agendamento.status" />
-            </div>
+          <AgendamentoDetailSection title="Cliente">
+            <div class="agendamento-detail-fields-grid">
+              <AgendamentoDetailField label="Nome">
+                <template #icon>
+                  <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.2" />
+                    <path d="M5 19c0-3 3.1-5 7-5s7 2 7 5" stroke="currentColor" stroke-width="1.2" />
+                  </svg>
+                </template>
+                {{ agendamento.clienteNome }}
+              </AgendamentoDetailField>
 
-            <AgendamentoDetailField label="Cliente">
-              <template #icon>
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.2" />
-                  <path d="M5 19c0-3 3.1-5 7-5s7 2 7 5" stroke="currentColor" stroke-width="1.2" />
-                </svg>
-              </template>
-              {{ agendamento.clienteNome }}
-            </AgendamentoDetailField>
+              <AgendamentoDetailField v-if="agendamento.clienteEmail" label="E-mail">
+                <template #icon>
+                  <svg class="size-4" viewBox="0 0 16 14" fill="none" aria-hidden="true">
+                    <rect x="1" y="2" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+                    <path d="M1 4L8 8.5L15 4" stroke="currentColor" stroke-width="1.2" />
+                  </svg>
+                </template>
+                {{ agendamento.clienteEmail }}
+              </AgendamentoDetailField>
 
-            <AgendamentoDetailField v-if="agendamento.clienteEmail" label="E-mail">
-              <template #icon>
-                <svg class="size-4" viewBox="0 0 16 14" fill="none" aria-hidden="true">
-                  <rect x="1" y="2" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2" />
-                  <path d="M1 4L8 8.5L15 4" stroke="currentColor" stroke-width="1.2" />
-                </svg>
-              </template>
-              {{ agendamento.clienteEmail }}
-            </AgendamentoDetailField>
-
-            <AgendamentoDetailField v-if="agendamento.clienteTelefone" label="Telefone">
-              <template #icon>
-                <svg class="size-4" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                  <path d="M5 3h2l1.5 4-2 1.5a9 9 0 0 0 4 4L12 10.5 16 12v2a2 2 0 0 1-2 2C7.6 16 2 10.4 2 3a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.2" />
-                </svg>
-              </template>
-              {{ formatTelefone(agendamento.clienteTelefone) }}
-            </AgendamentoDetailField>
-
-            <div class="agendamento-detail-divider" />
-
-            <div class="agendamento-detail-total-row">
-              <span class="agendamento-detail-total-label">Valor total</span>
-              <span class="agendamento-detail-total-value">
-                {{ formatCurrency(agendamento.valorTotal) }}
-              </span>
+              <AgendamentoDetailField v-if="agendamento.clienteTelefone" label="Telefone">
+                <template #icon>
+                  <svg class="size-4" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                    <path d="M5 3h2l1.5 4-2 1.5a9 9 0 0 0 4 4L12 10.5 16 12v2a2 2 0 0 1-2 2C7.6 16 2 10.4 2 3a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.2" />
+                  </svg>
+                </template>
+                {{ formatTelefone(agendamento.clienteTelefone) }}
+              </AgendamentoDetailField>
             </div>
 
             <div v-if="agendamento.observacao" class="space-y-2">
+              <div class="agendamento-detail-divider" />
               <p class="agendamento-detail-obs-label">Observação</p>
               <div class="agendamento-detail-obs-box">{{ agendamento.observacao }}</div>
             </div>
+
+            <AgendamentoDetailServices embedded :itens="serviceItens" />
           </AgendamentoDetailSection>
 
-          <div
-            v-if="
-              showConfirmar ||
-              showReceber ||
-              podeSugerirRemarcacao ||
-              showCancelar ||
-              showIniciarAtendimentoGeral ||
-              showConcluirAtendimentoGeral
-            "
-            class="agendamento-detail-actions"
-          >
-            <button
-              v-if="showReceber"
-              type="button"
-              class="agendamento-detail-btn agendamento-detail-btn--confirm min-w-[185px]"
-              :disabled="actionLoading"
-              @click="receberModalOpen = true"
-            >
-              Receber pagamento
-            </button>
-            <button
-              v-if="showConfirmar && podeGerenciarAgenda"
-              type="button"
-              class="agendamento-detail-btn agendamento-detail-btn--confirm"
-              :disabled="actionLoading"
-              @click="handleConfirmar"
-            >
-              <svg class="size-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-              Confirmar
-            </button>
-            <button
-              v-if="showIniciarAtendimentoGeral"
-              type="button"
-              class="agendamento-detail-btn agendamento-detail-btn--confirm min-w-[185px]"
-              :disabled="!!atendimentoItemLoadingId || !iniciarGeralHabilitado"
-              :title="tituloIniciarGeral"
-              @click="handleIniciarPrimeiroDisponivel"
-            >
-              Iniciar atendimento
-            </button>
-            <button
-              v-if="showConcluirAtendimentoGeral"
-              type="button"
-              class="agendamento-detail-btn agendamento-detail-btn--secondary min-w-[185px]"
-              :disabled="!!atendimentoItemLoadingId"
-              @click="handleConcluirPrimeiroDisponivel"
-            >
-              Concluir atendimento
-            </button>
-            <button
-              v-if="podeSugerirRemarcacao && podeGerenciarAgenda"
-              type="button"
-              class="agendamento-detail-btn agendamento-detail-btn--secondary min-w-[185px]"
-              :disabled="actionLoading"
-              @click="openSugerirRemarcacao"
-            >
-              Sugerir novo horário
-            </button>
-            <button
-              v-if="showCancelar && podeGerenciarAgenda"
-              type="button"
-              class="agendamento-detail-btn agendamento-detail-btn--danger"
-              :disabled="actionLoading"
-              @click="cancelModalOpen = true"
-            >
-              Cancelar
-            </button>
+          <div v-if="showActionBar" class="agendamento-detail-actions agendamento-detail-actions--toolbar">
+            <div class="agendamento-detail-actions__secondary">
+              <button
+                v-if="showConfirmar && podeGerenciarAgenda"
+                type="button"
+                class="agendamento-detail-btn agendamento-detail-btn--confirm"
+                :disabled="actionLoading || atendimentoLoading"
+                @click="handleConfirmar"
+              >
+                <svg class="size-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Confirmar
+              </button>
+              <button
+                v-if="showReceber"
+                type="button"
+                class="agendamento-detail-btn agendamento-detail-btn--secondary"
+                :disabled="actionLoading || atendimentoLoading"
+                @click="receberModalOpen = true"
+              >
+                Receber pagamento
+              </button>
+              <button
+                v-if="podeSugerirRemarcacao && podeGerenciarAgenda"
+                type="button"
+                class="agendamento-detail-btn agendamento-detail-btn--secondary"
+                :disabled="actionLoading || atendimentoLoading"
+                @click="openSugerirRemarcacao"
+              >
+                Sugerir novo horário
+              </button>
+              <button
+                v-if="showCancelar && podeGerenciarAgenda"
+                type="button"
+                class="agendamento-detail-btn agendamento-detail-btn--danger"
+                :disabled="actionLoading || atendimentoLoading"
+                @click="cancelModalOpen = true"
+              >
+                Cancelar
+              </button>
+            </div>
+
+            <div class="agendamento-detail-actions__primary">
+              <button
+                v-if="showIniciarAtendimentoGeral"
+                type="button"
+                class="agendamento-detail-btn agendamento-detail-btn--confirm"
+                :disabled="actionLoading || atendimentoLoading || !iniciarGeralHabilitado"
+                :title="tituloIniciarGeral"
+                @click="handleIniciarAgendamento"
+              >
+                Iniciar atendimento
+              </button>
+              <button
+                v-if="showConcluirAtendimentoGeral"
+                type="button"
+                class="agendamento-detail-btn agendamento-detail-btn--confirm"
+                :disabled="actionLoading || atendimentoLoading"
+                @click="handleConcluirAgendamento"
+              >
+                Concluir atendimento
+              </button>
+              <p
+                v-if="showIniciarAtendimentoGeral && !iniciarGeralHabilitado && tituloIniciarGeral"
+                class="agendamento-detail-action-hint"
+              >
+                {{ tituloIniciarGeral }}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div class="agendamento-detail-column">
-          <AgendamentoDetailServices
-            :itens="serviceItens"
-            :agendamento-status="agendamento.status"
-            :pode-iniciar="podeIniciarAtendimento"
-            :pode-finalizar="podeFinalizarAtendimento"
-            :action-loading-id="atendimentoItemLoadingId"
-            @iniciar="handleIniciarAtendimento"
-            @finalizar="handleFinalizarAtendimento"
-          />
-          <AgendamentoDetailHistorico v-if="visaoGeral" :itens="historico" />
-        </div>
+        <AgendamentoDetailHistorico v-if="visaoGeral" :itens="historico" />
       </div>
     </template>
 
-    <BaseAlert v-else variant="error">Agendamento não encontrado.</BaseAlert>
+    <BaseAlert v-else-if="!loading" variant="error">Agendamento não encontrado.</BaseAlert>
 
     <CancelarAgendamentoModal v-model="cancelModalOpen" @confirm="handleCancelar" />
 

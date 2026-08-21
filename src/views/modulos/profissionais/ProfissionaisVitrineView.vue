@@ -3,7 +3,6 @@ import { ref, watch } from 'vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNotificationsStore } from '@/stores/notifications.store'
@@ -168,9 +167,7 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
       </form>
     </BaseCard>
 
-    <LoadingSpinner v-if="contextLoading || loading" />
-
-    <template v-else-if="ready">
+    <template v-if="!contextLoading && !loading && ready">
       <BaseCard v-if="profissionais.length === 0 && !showForm">
         <EmptyState
           title="Nenhum profissional na vitrine"

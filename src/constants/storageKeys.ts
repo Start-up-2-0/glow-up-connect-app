@@ -1,10 +1,14 @@
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: 'guc_access_token',
   REFRESH_TOKEN: 'guc_refresh_token',
+  SESSION_ACTIVE: 'guc_session_active',
   EXPIRES_AT: 'guc_expires_at',
   REFRESH_EXPIRES_AT: 'guc_refresh_expires_at',
   THEME: 'guc_theme',
+  THEME_VERSION: 'guc_theme_version',
   ESTABELECIMENTO_ID: 'guc_estabelecimento_id',
+  SIDEBAR_COLLAPSED: 'guc_sidebar_collapsed',
+  GLOW_GUIDE: 'guc_glow_guide',
 } as const
 
 export const TOKEN_HEADER =

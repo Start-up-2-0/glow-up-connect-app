@@ -70,6 +70,13 @@ export function maskTelefoneLocal(digits: string): string {
   return `(${ddd}) ${rest.slice(0, 4)}-${rest.slice(4)}`
 }
 
+/** Máscara unificada com DDI (+55) em um único campo. */
+export function maskTelefoneUnified(digits: string): string {
+  const local = maskTelefoneLocal(digits)
+  if (!local) return ''
+  return `+55 ${local}`
+}
+
 export function formatTelefone(telefone: string | null | undefined): string {
   if (!telefone) return '—'
   const digits = normalizeTelefone(telefone)
@@ -107,6 +114,8 @@ export function getAgendaWallClockParts(reference = new Date()): {
   year: number
   month: number
   day: number
+  hours: number
+  minutes: number
 } {
   const shifted = new Date(
     reference.getTime() + (reference.getTimezoneOffset() + AGENDA_UTC_OFFSET_MINUTES) * 60_000,
@@ -115,6 +124,8 @@ export function getAgendaWallClockParts(reference = new Date()): {
     year: shifted.getUTCFullYear(),
     month: shifted.getUTCMonth(),
     day: shifted.getUTCDate(),
+    hours: shifted.getUTCHours(),
+    minutes: shifted.getUTCMinutes(),
   }
 }
 
@@ -215,6 +226,12 @@ export function formatCurrency(value: number): string {
 }
 
 export const formatBRL = formatCurrency
+
+export function aplicarDescontoPercentual(preco: number, percentual: number): number {
+  if (percentual <= 0) return preco
+  if (percentual >= 100) return 0
+  return Math.round(preco * (1 - percentual / 100) * 100) / 100
+}
 
 /** Limite de centavos no input monetário (R$ 9.999.999,99). */
 export const CURRENCY_CENTS_MAX = 999_999_999
@@ -392,6 +409,35 @@ export function addDaysToDateOnly(isoDate: string, days: number): string {
   return toDateOnlyString(date)
 }
 
+function parseIsoToDateOnlyParts(iso: string): string {
+  return iso.includes('T') ? toDateOnlyFromIsoUtc(iso) : iso.slice(0, 10)
+}
+
+function dateOnlyToLocalDate(isoDate: string): Date {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+function startOfTodayLocal(): Date {
+  const now = new Date()
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate())
+}
+
+function calendarDaysBetween(from: Date, to: Date): number {
+  return Math.floor((to.getTime() - from.getTime()) / 86_400_000)
+}
+
+/** Dias restantes até a primeira cobrança (fim do trial). */
+export function calcularDiasRestantesTrial(options: {
+  diasTrial: number
+  proximaDataVencimento: string
+  inicio?: string | null
+}): number {
+  const hoje = startOfTodayLocal()
+  const vencimento = dateOnlyToLocalDate(parseIsoToDateOnlyParts(options.proximaDataVencimento))
+  return Math.max(0, calendarDaysBetween(hoje, vencimento))
+}
+
 export function toTimeOnlyString(date: Date): string {
   return date.toTimeString().slice(0, 8)
 }
@@ -409,6 +455,7 @@ export function agendamentoStatusLabel(status: string): string {
   const labels: Record<string, string> = {
     PendentePagamento: 'Pagamento pendente',
     Confirmado: 'Confirmado',
+    Agendado: 'Agendado',
     EmAtendimento: 'Em atendimento',
     Concluido: 'Concluído',
     Cancelado: 'Cancelado',

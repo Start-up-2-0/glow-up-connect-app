@@ -5,8 +5,8 @@ export const privacidadeService = {
     return api.get('/privacidade/meus-dados')
   },
 
-  solicitarExclusao() {
-    return api.post('/privacidade/solicitar-exclusao')
+  solicitarExclusao(senha: string) {
+    return api.post('/privacidade/solicitar-exclusao', { senha })
   },
 
   revogarConsentimento() {

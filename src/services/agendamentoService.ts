@@ -8,6 +8,7 @@ import type {
   CriarAgendamentoPayload,
   RemarcarAgendamentoPayload,
 } from '@/types/agendamento.types'
+import type { DashboardClienteResponse } from '@/types/dashboard.types'
 
 function unwrap<T>(response: { data: ApiSuccessResponse<T> }): T {
   return response.data.data
@@ -17,6 +18,12 @@ export const agendamentoService = {
   criar(payload: CriarAgendamentoPayload) {
     return api
       .post<ApiSuccessResponse<AgendamentoCliente>>('/agendamentos', payload)
+      .then(unwrap)
+  },
+
+  obterDashboard() {
+    return api
+      .get<ApiSuccessResponse<DashboardClienteResponse>>('/agendamentos/me/dashboard')
       .then(unwrap)
   },
 

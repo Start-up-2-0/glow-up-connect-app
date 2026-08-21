@@ -76,7 +76,7 @@ function onPaste(event: ClipboardEvent) {
 </script>
 
 <template>
-  <div class="flex w-full justify-between gap-2.5 sm:gap-3">
+  <div class="flex w-full min-w-0 justify-between gap-1.5 sm:gap-3">
     <input
       v-for="(_, index) in 6"
       :key="index"
@@ -87,7 +87,7 @@ function onPaste(event: ClipboardEvent) {
       maxlength="1"
       autocomplete="one-time-code"
       :disabled="disabled"
-      class="size-[68px] rounded-2xl border-[0.5px] border-glow-gold bg-white text-center font-inter text-[36px] font-semibold text-glow-text outline-none transition focus:border-glow-gold focus:ring-2 focus:ring-glow-gold/30 disabled:opacity-60 sm:size-[68px]"
+      class="aspect-square min-h-11 min-w-0 max-w-[68px] flex-1 rounded-xl border-[0.5px] border-glow-gold bg-white text-center font-inter text-2xl font-semibold text-glow-text outline-none transition focus:border-glow-gold focus:ring-2 focus:ring-glow-gold/30 disabled:opacity-60 sm:rounded-2xl sm:text-[36px]"
       @input="onInput(index, $event)"
       @keydown="onKeydown(index, $event)"
       @paste="onPaste"

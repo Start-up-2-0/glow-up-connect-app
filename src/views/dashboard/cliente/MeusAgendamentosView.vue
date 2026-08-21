@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
+import { useRouter } from 'vue-router'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import AgendaPageHeader from '@/components/agenda/AgendaPageHeader.vue'
 import AgendaFigmaFilter from '@/components/agenda/AgendaFigmaFilter.vue'
@@ -14,9 +14,10 @@ import AgendamentoCard from '@/components/agenda/AgendamentoCard.vue'
 import { AGENDA_DEFAULT_ORDENACAO, AGENDA_PAGE_SIZE } from '@/constants/agendaFilters'
 import { useAgendamentosStore } from '@/stores/agendamentos.store'
 import { useMeusAgendamentosFilters } from '@/composables/useAgendaPageFilters'
-import { agendamentoDetalhePath } from '@/constants/routes'
+import { agendamentoAvaliarPath, agendamentoDetalhePath } from '@/constants/routes'
 import type { AgendamentoCliente } from '@/types/agendamento.types'
 
+const router = useRouter()
 const store = useAgendamentosStore()
 const { itens, total, loading } = storeToRefs(store)
 
@@ -42,11 +43,19 @@ const {
 const totalPaginas = computed(() => Math.max(1, Math.ceil(total.value / AGENDA_PAGE_SIZE)))
 
 function avaliacaoSubtitle(item: AgendamentoCliente): string | undefined {
-  if (item.avaliacaoStatus === 'Pendente') return 'Avaliação pendente'
+  if (item.avaliacaoStatus === 'Pendente') return 'Concluído · Avalie seu atendimento'
   if (item.avaliacaoStatus === 'Realizada' && item.avaliacaoResumo) {
-    return `Avaliado · Loja ${item.avaliacaoResumo.notaEstabelecimento}/5`
+    return `Avaliado · Loja ${item.avaliacaoResumo.notaEstabelecimento}/5 · Prof. ${item.avaliacaoResumo.notaProfissional}/5`
   }
   return undefined
+}
+
+function podeAvaliar(item: AgendamentoCliente): boolean {
+  return item.avaliacaoStatus === 'Pendente'
+}
+
+function irAvaliar(item: AgendamentoCliente) {
+  void router.push(agendamentoAvaliarPath(item.id))
 }
 
 async function load() {
@@ -124,15 +133,13 @@ watch([statusFilter, periodFilter, customDateRange, sortFilter], () => {
       </template>
     </AgendaPageHeader>
 
-    <LoadingSpinner v-if="loading && itens.length === 0" />
-
     <EmptyState
-      v-else-if="itens.length === 0"
+      v-if="itens.length === 0 && !loading"
       title="Nenhum agendamento"
       description="Quando você agendar em uma loja, seus horários aparecerão aqui."
     />
 
-    <template v-else>
+    <template v-else-if="itens.length > 0">
       <div class="agenda-cards-grid">
         <AgendamentoCard
           v-for="item in itens"
@@ -143,6 +150,8 @@ watch([statusFilter, periodFilter, customDateRange, sortFilter], () => {
           :valor-total="item.valorTotal"
           :status="item.status"
           :to="agendamentoDetalhePath(item.id)"
+          :pode-avaliar="podeAvaliar(item)"
+          @avaliar="irAvaliar(item)"
         />
       </div>
 

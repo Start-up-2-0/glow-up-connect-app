@@ -2,6 +2,8 @@ import api from './api'
 import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
   AvaliacaoContexto,
+  AvaliacaoResumoPublico,
+  AvaliacoesNegocioPaginadas,
   AvaliacoesPaginadas,
   CriarAvaliacaoPayload,
 } from '@/types/avaliacao.types'
@@ -42,6 +44,23 @@ export const avaliacaoService = {
     return api
       .get<ApiSuccessResponse<AvaliacoesPaginadas>>(
         `/publico/avaliacoes/estabelecimentos/${publicGuid}`,
+        { params: { pagina, tamanhoPagina } },
+      )
+      .then(unwrap)
+  },
+
+  obterResumoNegocio(estabelecimentoId: number) {
+    return api
+      .get<ApiSuccessResponse<AvaliacaoResumoPublico>>(
+        `/estabelecimentos/${estabelecimentoId}/avaliacoes/resumo`,
+      )
+      .then(unwrap)
+  },
+
+  listarNegocio(estabelecimentoId: number, pagina = 1, tamanhoPagina = 10) {
+    return api
+      .get<ApiSuccessResponse<AvaliacoesNegocioPaginadas>>(
+        `/estabelecimentos/${estabelecimentoId}/avaliacoes`,
         { params: { pagina, tamanhoPagina } },
       )
       .then(unwrap)

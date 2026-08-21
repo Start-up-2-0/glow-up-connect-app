@@ -3,14 +3,12 @@ import axios, {
   type AxiosInstance,
   type InternalAxiosRequestConfig,
 } from 'axios'
-import { API_BASE_URL, TOKEN_HEADER } from '@/constants/storageKeys'
+import { API_BASE_URL } from '@/constants/storageKeys'
 import { ROUTE_PATHS } from '@/constants/routes'
 import type { ApiErrorResponse } from '@/types/api.types'
 import type { AuthTokens } from '@/types/auth.types'
 import {
   clearSessionStorage,
-  getAccessToken,
-  setAccessToken,
 } from '@/utils/storage'
 import { syncSession } from '@/utils/sessionSync'
 import {
@@ -23,19 +21,22 @@ import {
 import { getUpgradeInfo } from '@/constants/upgradeMessages'
 import { useAppStore } from '@/stores/app.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
+import { useLoadingStore } from '@/stores/loading.store'
+import { useNegocioStore } from '@/stores/negocio.store'
+import { MOCK_MODE } from '@/mocks/config'
 
 type QueueCallback = {
-  resolve: (token: string) => void
+  resolve: () => void
   reject: (error: unknown) => void
 }
 
 let isRefreshing = false
 let failedQueue: QueueCallback[] = []
 
-function processQueue(error: unknown, token: string | null = null) {
+function processQueue(error: unknown) {
   failedQueue.forEach(({ resolve, reject }) => {
     if (error) reject(error)
-    else if (token) resolve(token)
+    else resolve()
   })
   failedQueue = []
 }
@@ -47,6 +48,20 @@ function isPublicApiPath(url?: string): boolean {
   return PUBLIC_API_PATHS.some((path) => url.includes(path))
 }
 
+/** Caminhos de infraestrutura / listas com skeleton local que não devem acionar o loading global. */
+const LOADING_EXCLUDED_PATHS = [
+  '/auth/refresh',
+  '/security/request-proof',
+  '/agendamentos/me',
+  '/dashboard',
+  '/publico/estabelecimentos/proximos',
+]
+
+function isExcludedLoadingPath(url?: string): boolean {
+  if (!url) return false
+  return LOADING_EXCLUDED_PATHS.some((path) => url.includes(path))
+}
+
 function shouldAttemptRefresh(error: AxiosError<ApiErrorResponse>, url?: string) {
   if (error.response?.status !== 401) return false
   if (!url) return false
@@ -56,33 +71,43 @@ function shouldAttemptRefresh(error: AxiosError<ApiErrorResponse>, url?: string)
   return !code || code === 'TOKEN_EXPIRED' || code === 'INVALID_TOKEN' || code === 'UNAUTHORIZED'
 }
 
+function sanitizeRedirectPath(path: string): string {
+  // Garante que o caminho seja relativo e não comece com // ou @
+  if (!path.startsWith('/') || path.startsWith('//') || path.includes('@')) {
+    return '/'
+  }
+  // Remove caracteres potencialmente perigosos.
+  // Permitimos apenas caracteres alfanuméricos, /, ?, =, &, - e _
+  const sanitized = path.replace(/[^a-zA-Z0-9/?=&\-_]/g, '')
+  return sanitized || '/'
+}
+
 function redirectToLogin() {
   clearSessionStorage()
   const isAuthRoute = window.location.pathname.startsWith('/auth')
   if (!isAuthRoute) {
-    const redirect = encodeURIComponent(window.location.pathname + window.location.search)
+    const sanitizedPath = sanitizeRedirectPath(window.location.pathname + window.location.search)
+    const redirect = encodeURIComponent(sanitizedPath)
     window.location.href = `${ROUTE_PATHS.LOGIN}?redirect=${redirect}`
   }
 }
 
-async function refreshAccessToken(client: AxiosInstance): Promise<string> {
+async function refreshAccessToken(client: AxiosInstance): Promise<void> {
   const { data } = await client.post<{ success: boolean; data: AuthTokens }>(
     '/auth/refresh',
     {},
     {
-      headers: { [TOKEN_HEADER]: undefined },
       withCredentials: true,
     },
   )
 
   const tokens = data.data
   syncSession({
-    token: tokens.token,
+    token: '',
     refreshToken: '',
     expiresAt: tokens.expiresAt,
     refreshExpiresAt: tokens.refreshExpiresAt,
   })
-  return tokens.token
 }
 
 const api: AxiosInstance = axios.create({
@@ -95,20 +120,39 @@ const api: AxiosInstance = axios.create({
   timeout: 30_000,
 })
 
+type GlowRequestConfig = InternalAxiosRequestConfig & { _glowLoading?: boolean }
+
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-  const token = getAccessToken()
-  if (token && config.headers) {
-    config.headers[TOKEN_HEADER] = token
-  }
+  const glowConfig = config as GlowRequestConfig
+  const trackLoading = !isExcludedLoadingPath(config.url)
 
-  if (!isExemptRequestProofPath(config.url)) {
-    const proof = await acquireRequestProof(config.method, config.url)
-    if (proof && config.headers) {
-      config.headers[REQUEST_PROOF_HEADER] = proof
+  try {
+    // Modo mockado: intercepta a chamada no adapter, sem tocar na rede real.
+    if (MOCK_MODE) {
+      const { getMockAdapter } = await import('@/mocks')
+      config.adapter = getMockAdapter() as unknown as InternalAxiosRequestConfig['adapter']
+    } else if (!isExemptRequestProofPath(config.url)) {
+      // Auth via cookie HttpOnly (guc_access); não injeta token no header.
+      const proof = await acquireRequestProof(config.method, config.url)
+      if (proof && config.headers) {
+        config.headers[REQUEST_PROOF_HEADER] = proof
+      }
     }
-  }
 
-  return config
+    // Só marca loading depois da preparação — evita overlay preso se o proof falhar.
+    if (trackLoading) {
+      useLoadingStore().start()
+      glowConfig._glowLoading = true
+    }
+
+    return config
+  } catch (error) {
+    if (glowConfig._glowLoading) {
+      useLoadingStore().finish()
+      glowConfig._glowLoading = false
+    }
+    return Promise.reject(error)
+  }
 })
 
 function handleSubscriptionError(error: AxiosError<ApiErrorResponse>) {
@@ -125,7 +169,12 @@ function handleSubscriptionError(error: AxiosError<ApiErrorResponse>) {
         ? String((error.response.data.details as { modulo: string }).modulo)
         : undefined
 
-    const info = getUpgradeInfo(modulo ?? '')
+    const ehProfissionalAutonomo = useNegocioStore().ehProfissionalAutonomo
+    if (ehProfissionalAutonomo && modulo === 'Profissionais') {
+      return true
+    }
+
+    const info = getUpgradeInfo(modulo ?? '', ehProfissionalAutonomo)
     useAppStore().openUpgradeModal({
       modulo,
       mensagem: info.mensagem,
@@ -143,11 +192,22 @@ function handleSubscriptionError(error: AxiosError<ApiErrorResponse>) {
 }
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const cfg = response.config as GlowRequestConfig
+    if (cfg._glowLoading) {
+      useLoadingStore().finish()
+      cfg._glowLoading = false
+    }
+    return response
+  },
   async (error: AxiosError<ApiErrorResponse>) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & {
+    const originalRequest = error.config as GlowRequestConfig & {
       _retry?: boolean
       _proofRetry?: boolean
+    }
+    if (originalRequest?._glowLoading) {
+      useLoadingStore().finish()
+      originalRequest._glowLoading = false
     }
     const requestUrl = originalRequest?.url
 
@@ -172,9 +232,12 @@ api.interceptors.response.use(
 
     if (error.response?.status === 429) {
       const code = error.response.data?.code
-      const message =
-        error.response.data?.message ??
-        'Muitas requisições. Aguarde alguns segundos e tente novamente.'
+      const defaultMessage = 'Muitas requisições. Por favor, tente novamente mais tarde.'
+
+      const message = code === 'IP_BLOCKED_24H'
+        ? defaultMessage
+        : error.response.data?.message ?? defaultMessage
+
       useNotificationsStore().push(
         code === 'IP_BLOCKED_24H' ? 'error' : 'warning',
         message,
@@ -195,25 +258,20 @@ api.interceptors.response.use(
     }
 
     if (isRefreshing) {
-      return new Promise<string>((resolve, reject) => {
+      return new Promise<void>((resolve, reject) => {
         failedQueue.push({ resolve, reject })
-      }).then((token) => {
-        originalRequest.headers[TOKEN_HEADER] = token
-        return api(originalRequest)
-      })
+      }).then(() => api(originalRequest))
     }
 
     originalRequest._retry = true
     isRefreshing = true
 
     try {
-      const newToken = await refreshAccessToken(api)
-      setAccessToken(newToken)
-      processQueue(null, newToken)
-      originalRequest.headers[TOKEN_HEADER] = newToken
+      await refreshAccessToken(api)
+      processQueue(null)
       return api(originalRequest)
     } catch (refreshError) {
-      processQueue(refreshError, null)
+      processQueue(refreshError)
       redirectToLogin()
       return Promise.reject(refreshError)
     } finally {

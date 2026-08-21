@@ -1,25 +1,47 @@
 <script setup lang="ts">
-import logoUrl from '@/assets/logo/logo.png'
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import logoLight from '@/assets/logo/logo_original.webp'
+import logoDark from '@/assets/logo/logo_orignal_dark.webp'
+import { useAppStore } from '@/stores/app.store'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     compact?: boolean
     mobile?: boolean
     sidebar?: boolean
     logoClass?: string
+    /** Força logo clara (fundos lavanda fixos) */
+    light?: boolean
   }>(),
-  { compact: false, mobile: false, sidebar: false },
+  { compact: false, mobile: false, sidebar: false, light: false },
 )
+
+const { isDark } = storeToRefs(useAppStore())
+
+const logoUrl = computed(() => {
+  if (props.light) return logoLight
+  return isDark.value ? logoDark : logoLight
+})
+
+/** Se logoClass define o tamanho, não aplica defaults que conflitam. */
+const sizeClass = computed(() => {
+  if (props.logoClass) return ''
+  if (props.compact) return 'h-10 w-10'
+  if (props.sidebar) return 'app-logo--sidebar'
+  if (props.mobile) return 'h-[136px] w-[190px]'
+  return 'h-[128px] w-[168px]'
+})
 </script>
 
 <template>
   <img
     :src="logoUrl"
     alt="Glow Up Connect"
-    :class="[
-      'object-contain object-left',
-      compact ? 'h-10 w-10' : sidebar ? 'size-[107px]' : mobile ? 'h-[120px] w-[168px]' : 'h-[112px] w-[148px]',
-      logoClass,
-    ]"
+    width="168"
+    height="128"
+    decoding="async"
+    :fetchpriority="compact || sidebar ? 'low' : 'high'"
+    :class="['object-contain object-left', sizeClass, logoClass]"
   />
 </template>

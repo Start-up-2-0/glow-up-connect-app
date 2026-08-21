@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import FinanceiroPageHeader from '@/components/financeiro/FinanceiroPageHeader.vue'
 import FinanceiroEmptyState from '@/components/financeiro/FinanceiroEmptyState.vue'
@@ -84,9 +83,8 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
     </div>
 
     <ContentAlert v-if="contextError" variant="error">{{ contextError }}</ContentAlert>
-    <LoadingSpinner v-if="contextLoading || loading" />
 
-    <template v-else>
+    <template v-if="!contextLoading && !loading">
       <FinanceiroEmptyState
         v-if="itens.length === 0"
         title="Nenhum item de conciliação"
@@ -99,7 +97,7 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
         </template>
       </FinanceiroEmptyState>
 
-      <div v-else class="financeiro-table-wrap">
+      <div v-else class="financeiro-table-wrap hidden md:block">
         <table class="financeiro-table">
           <thead>
             <tr>
@@ -120,6 +118,30 @@ watch(ready, (isReady) => { if (isReady) void load() }, { immediate: true })
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="space-y-3 md:hidden">
+        <div
+          v-for="item in itens"
+          :key="item.id"
+          class="financeiro-table__row-card"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0 flex-1">
+              <p class="font-urbanist font-medium text-glow-text">{{ item.descricaoExtrato }}</p>
+              <p class="text-sm text-glow-text-subtle">{{ formatDate(item.dataExtrato) }}</p>
+            </div>
+            <p class="shrink-0 font-satoshi font-bold text-glow-text">
+              {{ formatCurrency(item.valorExtrato) }}
+            </p>
+          </div>
+          <div class="mt-2 flex items-center justify-between gap-2">
+            <FinanceiroStatusBadge :status="item.conciliado ? 'Conciliado' : 'Pendente'" />
+            <span class="font-urbanist text-sm text-glow-text-subtle">
+              {{ item.lancamentoCaixaId ? `Lanç. #${item.lancamentoCaixaId}` : 'Sem lançamento' }}
+            </span>
+          </div>
+        </div>
       </div>
     </template>
 

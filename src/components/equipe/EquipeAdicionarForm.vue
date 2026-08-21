@@ -3,6 +3,8 @@ import { computed, toRef } from 'vue'
 import ContentAlert from '@/components/feedback/ContentAlert.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import AuthPasswordRules from '@/components/auth/recovery/AuthPasswordRules.vue'
+import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
+import UserAvatar from '@/components/layout/UserAvatar.vue'
 import { ROLES_CADASTRO_EQUIPE } from '@/constants/establishmentRoles'
 import {
   useEquipeAdicionarForm,
@@ -37,6 +39,8 @@ const {
   nomePublico,
   role,
   podeReceberAgendamento,
+  fotoPreview,
+  fotoError,
   saving,
   sucessoDetalhe,
   linkConvite,
@@ -49,6 +53,9 @@ const {
   ehProfissional,
   submitLabel,
   resetForm,
+  onFotoChange,
+  onFotoError,
+  limparFoto,
   copiarLink,
   handleSubmit,
 } = useEquipeAdicionarForm({
@@ -71,11 +78,11 @@ defineExpose({ resetForm })
       <div class="equipe-link-success">
         <p class="equipe-link-success__title">Link pronto!</p>
         <p class="equipe-link-success__text">
-          Envie o link abaixo para o usuário para que ele possa aceitar. Lembre-se de colar o link
+          Envie o link abaixo para o usuário para que ele possa aceitar. Lembre-se de abrir o link
           em outra aba do navegador.
         </p>
         <p class="equipe-link-success__text">
-          Também há a possibilidade do usuário aceitar o convite pelo e-mail; o destino é o mesmo.
+          Também é possível que o usuário aceite o convite pelo e-mail; o destino é o mesmo.
         </p>
         <div class="equipe-link-success__url-box">
           <p class="equipe-link-success__url">{{ linkConvite }}</p>
@@ -106,7 +113,7 @@ defineExpose({ resetForm })
               type="email"
               class="equipe-form-input"
               :class="{ 'border-red-500': !!emailError }"
-              placeholder="Ex: usuario@exemplo.com"
+              placeholder="Ex: usuário@exemplo.com"
               required
             />
             <p v-if="emailError" class="equipe-form-field__error">{{ emailError }}</p>
@@ -174,7 +181,7 @@ defineExpose({ resetForm })
                   type="email"
                   class="equipe-form-input"
                   :class="{ 'border-red-500': !!emailError }"
-                  placeholder="Ex: usuario@exemplo.com"
+                  placeholder="Ex: usuário@exemplo.com"
                   required
                 />
                 <p v-if="emailError" class="equipe-form-field__error">{{ emailError }}</p>
@@ -247,6 +254,30 @@ defineExpose({ resetForm })
                   placeholder="Como aparecerá para os clientes"
                 />
               </div>
+
+              <div class="equipe-form-field space-y-3">
+                <AuthAvatarUpload
+                  label="Foto do profissional"
+                  @change="onFotoChange"
+                  @error="onFotoError"
+                />
+                <p class="equipe-form-field__hint">
+                  Imagem de apresentação aos clientes. Independente do avatar da conta de acesso.
+                  Opcional — sem foto, usamos um avatar padrão.
+                </p>
+                <div v-if="fotoPreview" class="flex items-center gap-3">
+                  <UserAvatar :src="fotoPreview" :name="nomePublico || nome" size="lg" />
+                  <button
+                    type="button"
+                    class="font-urbanist text-xs font-semibold text-glow-text-subtle hover:text-glow-text"
+                    @click="limparFoto"
+                  >
+                    Remover foto
+                  </button>
+                </div>
+                <p v-if="fotoError" class="equipe-form-field__error">{{ fotoError }}</p>
+              </div>
+
               <label class="flex cursor-pointer items-center gap-3 font-urbanist text-sm text-glow-text">
                 <input
                   v-model="podeReceberAgendamento"

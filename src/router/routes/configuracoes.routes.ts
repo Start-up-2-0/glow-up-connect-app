@@ -1,7 +1,22 @@
 import type { RouteRecordRaw } from 'vue-router'
+import { FEATURE_FLAGS } from '@/config/features'
 import { ROUTE_NAMES, ROUTE_PATHS } from '@/constants/routes'
 
 export const configuracoesRoutes: RouteRecordRaw[] = [
+  {
+    path: ROUTE_PATHS.MINHAS_LOJAS,
+    name: ROUTE_NAMES.MINHAS_LOJAS,
+    component: () => import('@/views/configuracoes/MinhasLojasView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerRoleOwner: true,
+      requerMultiLoja: true,
+      requerAssinaturaAtiva: true,
+      title: 'Minhas lojas',
+    },
+  },
   {
     path: ROUTE_PATHS.CONFIG_ASSINATURA,
     name: ROUTE_NAMES.CONFIG_ASSINATURA,
@@ -42,6 +57,13 @@ export const configuracoesRoutes: RouteRecordRaw[] = [
       requerPermissao: 'NegocioEditar',
       requerAssinaturaAtiva: false,
       title: 'Trocar plano',
+    },
+    beforeEnter: () => {
+      // Troca de plano ocultada até estabilizar o fluxo de cobrança.
+      if (!FEATURE_FLAGS.trocaPlanoHabilitada) {
+        return { path: ROUTE_PATHS.CONFIG_ASSINATURA }
+      }
+      return true
     },
   },
   {

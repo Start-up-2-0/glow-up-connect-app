@@ -16,7 +16,6 @@ const props = withDefaults(
   defineProps<{
     plano: Plano
     promocao: PromocaoLancamento | null
-    diasPermitidos: number[]
     submitting?: boolean
     aguardandoPagamento?: boolean
     errorMessage?: string | null
@@ -31,12 +30,11 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   back: []
-  submit: [diaVencimento: number, pagamento?: PagamentoAssinaturaPayload]
+  submit: [pagamento?: PagamentoAssinaturaPayload]
 }>()
 
 const cardFormRef = ref<InstanceType<typeof MercadoPagoCardForm> | null>(null)
 const pixFormRef = ref<InstanceType<typeof PagamentoPixForm> | null>(null)
-const diaVencimento = ref<number | null>(props.diasPermitidos[1] ?? props.diasPermitidos[0] ?? 10)
 const metodoPagamento = ref<MetodoPagamentoAssinatura>('cartao')
 const erroLocal = ref<string | null>(null)
 const tokenizando = ref(false)
@@ -48,12 +46,13 @@ const trialAtivo = computed(
   () => props.promocao?.disponivel && (!usarCheckoutPro ? metodoPagamento.value === 'cartao' : true),
 )
 
-const diasTrialPromocao = computed(() => props.promocao?.diasTrial ?? 30)
+const diasTrialPromocao = computed(() => props.promocao?.diasTrial ?? 14)
+const descontoPromocao = computed(() => props.promocao?.percentualDescontoMensalidade ?? 0)
 
 const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
 
 const ctaLabel = computed(() => {
-  if (props.aguardandoPagamento) return 'Aguardando confirmação...'
+  if (props.aguardandoPagamento) return 'Aguardando confirmação do pagamento...'
   if (tokenizando.value) return 'Validando cartão...'
   if (usarCheckoutPro && !trialAtivo.value) {
     return `Continuar para pagamento — ${formatBRL(totalHoje.value)}`
@@ -88,13 +87,8 @@ function validarCpfPix(cpf: string): string | null {
 async function handleSubmit() {
   erroLocal.value = null
 
-  if (diaVencimento.value === null) {
-    erroLocal.value = 'Selecione o dia de vencimento da cobrança.'
-    return
-  }
-
   if (usarCheckoutPro) {
-    emit('submit', diaVencimento.value)
+    emit('submit')
     return
   }
 
@@ -105,7 +99,7 @@ async function handleSubmit() {
       erroLocal.value = erroCpf
       return
     }
-    emit('submit', diaVencimento.value, criarPagamentoPix(cpf))
+    emit('submit', criarPagamentoPix(cpf))
     return
   }
 
@@ -118,7 +112,7 @@ async function handleSubmit() {
       }
       return
     }
-    emit('submit', diaVencimento.value, pagamento)
+    emit('submit', pagamento)
   } finally {
     tokenizando.value = false
   }
@@ -153,10 +147,7 @@ async function handleSubmit() {
             variant="contratar"
             :plano="plano"
             :promocao="promocao"
-            :dias-permitidos="diasPermitidos"
-            :dia-vencimento="diaVencimento"
             :metodo-pagamento="metodoPagamento"
-            @update:dia-vencimento="diaVencimento = $event"
           />
         </div>
       </section>
@@ -175,14 +166,14 @@ async function handleSubmit() {
               v-if="usarCheckoutPro && trialAtivo"
               class="onboarding-contratar-info-box"
             >
-              Você ganha {{ diasTrialPromocao }} dias grátis para testar todos os módulos.
+              Você ganha {{ diasTrialPromocao }} dias grátis e {{ descontoPromocao }}% de desconto vitalício na mensalidade.
               Não há cobrança hoje — a primeira fatura será gerada ao fim do período de teste, com link de pagamento por e-mail e WhatsApp.
             </div>
             <div
               v-else-if="usarCheckoutPro"
               class="onboarding-contratar-info-box"
             >
-              Você será redirecionado ao Mercado Pago para escolher o meio de pagamento (cartão, PIX, boleto e outros).
+              O Mercado Pago será aberto em uma nova aba. Esta página permanece aberta para confirmar o pagamento.
               O estabelecimento só será criado após a confirmação do pagamento.
             </div>
 
@@ -271,10 +262,7 @@ async function handleSubmit() {
         <CheckoutResumoPlano
           :plano="plano"
           :promocao="promocao"
-          :dias-permitidos="diasPermitidos"
-          :dia-vencimento="diaVencimento"
           :metodo-pagamento="metodoPagamento"
-          @update:dia-vencimento="diaVencimento = $event"
         />
       </section>
 
@@ -292,14 +280,14 @@ async function handleSubmit() {
               v-if="usarCheckoutPro && trialAtivo"
               class="rounded-xl border border-glow-border-soft bg-glow-surface/60 p-4 text-sm text-glow-text-subtle"
             >
-              Você ganha {{ diasTrialPromocao }} dias grátis para testar todos os módulos.
+              Você ganha {{ diasTrialPromocao }} dias grátis e {{ descontoPromocao }}% de desconto vitalício na mensalidade.
               Não há cobrança hoje — a primeira fatura será gerada ao fim do período de teste, com link de pagamento por e-mail e WhatsApp.
             </div>
             <div
               v-else-if="usarCheckoutPro"
               class="rounded-xl border border-glow-border-soft bg-glow-surface/60 p-4 text-sm text-glow-text-subtle"
             >
-              Você será redirecionado ao Mercado Pago para escolher o meio de pagamento (cartão, PIX, boleto e outros).
+              O Mercado Pago será aberto em uma nova aba. Esta página permanece aberta para confirmar o pagamento.
               O estabelecimento só será criado após a confirmação do pagamento.
             </div>
 

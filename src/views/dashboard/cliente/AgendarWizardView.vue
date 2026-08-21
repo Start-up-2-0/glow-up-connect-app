@@ -2,7 +2,6 @@
 import { computed, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import AgendarWizardStepper from '@/components/agendar/AgendarWizardStepper.vue'
 import AgendarProfissionalCard from '@/components/agendar/AgendarProfissionalCard.vue'
 import AgendarOpcaoCard from '@/components/agendar/AgendarOpcaoCard.vue'
@@ -12,6 +11,7 @@ import AgendarCalendario from '@/components/agendar/AgendarCalendario.vue'
 import AgendarRevisaoStep from '@/components/agendar/AgendarRevisaoStep.vue'
 import AgendarSucessoConfirmacao from '@/components/agendar/AgendarSucessoConfirmacao.vue'
 import ClientePageHeader from '@/components/cliente/ClientePageHeader.vue'
+import UserAvatar from '@/components/layout/UserAvatar.vue'
 import { useAgendarWizard } from '@/composables/useAgendarWizard'
 import { useApiError } from '@/composables/useApiError'
 import { useNotificationsStore } from '@/stores/notifications.store'
@@ -33,6 +33,7 @@ import {
   formatDateOnlyMedium,
   toDateOnlyFromIsoUtc,
 } from '@/utils/formatters'
+import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -61,6 +62,7 @@ const {
   isModoInterno,
   profissionais,
   profissionalSelecionadoNome,
+  profissionalSelecionadoFoto,
   estabelecimentoNome,
   activeProfissionalGuid,
   servicos,
@@ -77,6 +79,7 @@ const {
   valorEstimado,
   duracaoTotal,
   toggleServico,
+  estadoSelecaoServico,
   escolherIdentidade,
   escolherModoProfissional,
   selecionarProfissional,
@@ -179,13 +182,6 @@ const showRevisaoCliente = computed(
   () => isVisitante.value && (modoIdentidade.value === 'guest' || modoIdentidade.value === 'register'),
 )
 
-function profissionalIniciais(nome: string): string {
-  const parts = nome.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return '?'
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
-}
-
 onMounted(async () => {
   try {
     await init()
@@ -280,9 +276,7 @@ async function handleConfirmar() {
 
       <BaseAlert v-else-if="error" variant="error" class="mb-6">{{ error }}</BaseAlert>
 
-      <LoadingSpinner v-if="loading && step === 'profissional' && profissionais.length === 0" />
-
-      <template v-else-if="wizardAtivo">
+      <template v-if="wizardAtivo">
         <AgendarWizardStepper
           v-if="figmaStep.showStepper"
           :step-index="figmaStep.index"
@@ -371,21 +365,19 @@ async function handleConfirmar() {
                 v-model="clienteEmail"
                 type="email"
                 autocomplete="email"
-                placeholder="ex: usuario01@exemplo.com"
+                placeholder="ex: usuário01@exemplo.com"
                 :class="[GLOW_INPUT_CLASS, 'mt-2']"
               />
             </div>
-            <div>
-              <label :class="GLOW_LABEL_CLASS" for="agendar-telefone">Telefone</label>
-              <input
-                id="agendar-telefone"
-                v-model="clienteTelefone"
-                type="tel"
-                autocomplete="tel"
-                placeholder="(00) 0 0000-0000"
-                :class="[GLOW_INPUT_CLASS, 'mt-2']"
-              />
-            </div>
+            <TelefoneInput
+              id="agendar-telefone"
+              v-model="clienteTelefone"
+              label="Telefone"
+              variant="dashboard"
+              autocomplete="tel"
+              required
+              placeholder="(00) 0 0000-0000"
+            />
           </div>
 
           <button
@@ -446,7 +438,7 @@ async function handleConfirmar() {
               <div class="min-w-0 text-left">
                 <p class="font-urbanist text-sm font-semibold text-glow-text">Sem preferência</p>
                 <p class="mt-1 font-urbanist text-xs text-glow-text-subtle">
-                  A loja quem escolhe o profissional disponível.
+                  A loja é quem escolhe o profissional disponível.
                 </p>
               </div>
             </button>
@@ -464,12 +456,11 @@ async function handleConfirmar() {
               :class="{ 'agendar-prof-pick-card--selected': activeProfissionalGuid === prof.publicGuid }"
               @click="selecionarProfissional(prof.publicGuid)"
             >
-              <div
-                class="flex size-10 shrink-0 items-center justify-center rounded-full bg-glow-text/10 font-urbanist text-sm font-semibold text-glow-text"
-                aria-hidden="true"
-              >
-                {{ profissionalIniciais(prof.nomePublico) }}
-              </div>
+              <UserAvatar
+                :src="prof.foto"
+                :name="prof.nomePublico"
+                size="md"
+              />
               <span class="font-urbanist text-sm font-medium text-glow-text">{{ prof.nomePublico }}</span>
             </button>
           </div>
@@ -492,36 +483,41 @@ async function handleConfirmar() {
         </div>
 
         <!-- Serviços -->
-        <div v-else-if="step === 'servicos'" class="space-y-5" :class="{ 'pb-36': showResumoFooter }">
+        <div
+          v-else-if="step === 'servicos'"
+          class="space-y-5"
+          :class="{ 'pb-36': showResumoFooter && !isModoInterno }"
+        >
           <AgendarProfissionalCard
             v-if="profissionalSelecionadoNome !== '—'"
             :nome="profissionalSelecionadoNome"
+            :foto="profissionalSelecionadoFoto"
             :estabelecimento-nome="estabelecimentoNome"
           />
 
-          <LoadingSpinner v-if="loading" />
+          <h2 class="agendar-section-title">Selecione os serviços</h2>
 
-          <template v-else>
-            <h2 class="agendar-section-title">Selecione os serviços</h2>
+          <p v-if="servicos.length === 0" class="font-urbanist text-sm text-glow-text-subtle">
+            Nenhum serviço disponível no momento.
+          </p>
 
-            <p v-if="servicos.length === 0" class="font-urbanist text-sm text-glow-text-subtle">
-              Nenhum serviço disponível no momento.
-            </p>
-
-            <div class="max-h-[420px] space-y-3 overflow-y-auto pr-1">
-              <AgendarServicoCard
-                v-for="servico in servicos"
-                :key="servico.id"
-                :nome="servico.nome"
-                :descricao="servico.descricao"
-                :duracao-minutos="servico.duracaoMinutosEstimada"
-                :preco-minimo="servico.precoMinimo"
-                :preco-maximo="servico.precoMaximo"
-                :selected="selectedServicoIds.includes(servico.id)"
-                @toggle="toggleServico(servico.id)"
-              />
-            </div>
-          </template>
+          <div class="max-h-[420px] space-y-3 overflow-y-auto pr-1">
+            <AgendarServicoCard
+              v-for="servico in servicos"
+              :key="servico.id"
+              :nome="servico.nome"
+              :descricao="servico.descricao"
+              :duracao-minutos="servico.duracaoMinutosEstimada"
+              :preco-minimo="servico.precoMinimo"
+              :preco-maximo="servico.precoMaximo"
+              :imagem="servico.imagem"
+              :tipo-servico="servico.tipoServico"
+              :selected="selectedServicoIds.includes(servico.id)"
+              :disabled="estadoSelecaoServico(servico).disabled"
+              :motivo-bloqueio="estadoSelecaoServico(servico).motivoBloqueio"
+              @toggle="toggleServico(servico.id)"
+            />
+          </div>
 
           <AgendarResumoFooter
             v-if="showResumoFooter"
@@ -529,6 +525,8 @@ async function handleConfirmar() {
             :duracao-total="duracaoTotal"
             :valor-total="valorEstimado"
             :loading="loading"
+            :variant="isModoInterno ? 'inline' : 'fixed'"
+            :wide="isModoInterno"
             @continuar="handleNextFromServicos"
           />
         </div>
@@ -539,17 +537,15 @@ async function handleConfirmar() {
             Selecione um dia disponível para seu atendimento.
           </h2>
 
-          <LoadingSpinner v-if="loading" />
-
           <p
-            v-else-if="datasAtendimento.length === 0"
+            v-if="!loading && datasAtendimento.length === 0"
             class="font-urbanist text-sm text-glow-text-subtle"
           >
-            Não há dias de atendimento disponíveis com os serviços selecionados.
+            {{ error ?? 'Não há dias de atendimento disponíveis com os serviços selecionados.' }}
           </p>
 
           <AgendarCalendario
-            v-else
+            v-else-if="datasAtendimento.length > 0"
             :selected-date="selectedDate"
             :datas-permitidas="datasAtendimento"
             :min-date="minSelectableDate"
@@ -569,16 +565,14 @@ async function handleConfirmar() {
             </p>
           </div>
 
-          <LoadingSpinner v-if="loading" />
-
           <p
-            v-else-if="slotsDoDia.length === 0"
+            v-if="!loading && slotsDoDia.length === 0"
             class="font-urbanist text-sm text-glow-text-subtle"
           >
             Nenhum horário livre nesta data. Escolha outro dia disponível.
           </p>
 
-          <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <div v-else-if="slotsDoDia.length > 0" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             <button
               v-for="(slot, index) in slotsDoDia"
               :key="`${slot.inicio}-${index}`"
@@ -609,6 +603,7 @@ async function handleConfirmar() {
           :cliente-email="clienteEmail"
           :cliente-telefone="clienteTelefone"
           :profissional-nome="profissionalSelecionadoNome"
+          :profissional-foto="profissionalSelecionadoFoto"
           :estabelecimento-nome="estabelecimentoNome"
           :servicos="selectedServicos"
           :data-label="revisaoDataLabel"

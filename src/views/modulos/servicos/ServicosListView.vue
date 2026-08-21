@@ -2,17 +2,18 @@
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import ServicoCard from '@/components/servicos/ServicoCard.vue'
 import ServicoEmptyState from '@/components/servicos/ServicoEmptyState.vue'
 import ServicoIcons from '@/components/servicos/ServicoIcons.vue'
 import ServicoPageHeader from '@/components/servicos/ServicoPageHeader.vue'
 import ServicoPagination from '@/components/servicos/ServicoPagination.vue'
+import GlowGuideLauncher from '@/tutorials/components/GlowGuideLauncher.vue'
 import { SERVICOS_PAGE_CLASS } from '@/constants/designTokens'
 import { ROUTE_PATHS, servicoEditarPath, servicoProfissionaisPath } from '@/constants/routes'
 import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNegocioContext } from '@/composables/useNegocioContext'
+import { useGlowGuide } from '@/tutorials/hooks/useGlowGuide'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
@@ -30,6 +31,7 @@ const negocioStore = useNegocioStore()
 const { limites, estabelecimentoAtivo } = storeToRefs(negocioStore)
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
+const { start: startTutorial } = useGlowGuide()
 
 const servicos = ref<Servico[]>([])
 const loading = ref(false)
@@ -37,6 +39,11 @@ const togglingId = ref<number | null>(null)
 const pagina = ref(1)
 
 const podeGerenciar = computed(() => possuiPermissao('ServicoGerenciar'))
+const pageTutorialId = computed(() => (podeGerenciar.value ? 'first-service' : 'services'))
+
+function onStartTutorial() {
+  void startTutorial(pageTutorialId.value)
+}
 const ehVisaoProfissional = computed(() => ehProfissionalOperacional.value && !podeGerenciar.value)
 const profissionalProprioId = computed(() => estabelecimentoAtivo.value?.profissionalId ?? null)
 const temModuloProfissionais = computed(() => possuiModulo('Profissionais'))
@@ -159,34 +166,37 @@ watch(
 </script>
 
 <template>
-  <div :class="SERVICOS_PAGE_CLASS">
+  <div :class="SERVICOS_PAGE_CLASS" data-tour="servicos-page">
     <ServicoPageHeader :title="pageTitle" :subtitle="pageSubtitle">
-      <template v-if="podeGerenciar" #actions>
-        <span
-          v-if="limiteServicos !== null"
-          class="self-center font-urbanist text-xs text-glow-text-subtle"
-        >
-          {{ usoServicos }}/{{ formatLimite(limiteServicos) }}
-        </span>
-        <button
-          type="button"
-          class="servicos-btn-primary servicos-btn-primary--header"
-          :disabled="limiteAtingido"
-          :title="limiteTooltip"
-          @click="irNovo"
-        >
-          <ServicoIcons name="plus" />
-          Novo serviço
-        </button>
+      <template #actions>
+        <GlowGuideLauncher class="max-sm:hidden" @click="onStartTutorial" />
+        <GlowGuideLauncher class="sm:hidden" compact @click="onStartTutorial" />
+        <template v-if="podeGerenciar">
+          <span
+            v-if="limiteServicos !== null"
+            class="self-center font-urbanist text-xs text-glow-text-subtle"
+          >
+            {{ usoServicos }}/{{ formatLimite(limiteServicos) }}
+          </span>
+          <button
+            type="button"
+            class="servicos-btn-primary servicos-btn-primary--header"
+            data-tour="servicos-novo"
+            :disabled="limiteAtingido"
+            :title="limiteTooltip"
+            @click="irNovo"
+          >
+            <ServicoIcons name="plus" />
+            Novo serviço
+          </button>
+        </template>
       </template>
     </ServicoPageHeader>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
 
-    <LoadingSpinner v-if="contextLoading || (loading && servicos.length === 0)" />
-
     <ServicoEmptyState
-      v-else-if="servicos.length === 0"
+      v-if="!contextLoading && !loading && servicos.length === 0"
       :title="emptyTitle"
       :description="emptyDescription"
       :show-action="podeGerenciar"
@@ -195,7 +205,7 @@ watch(
       @action="irNovo"
     />
 
-    <template v-else>
+    <template v-else-if="servicos.length > 0">
       <div class="servicos-cards-grid">
         <ServicoCard
           v-for="servico in servicosPaginados"

@@ -10,7 +10,7 @@ const switchId = 'sidebar-theme-switch'
 
 <template>
   <div
-    class="flex w-full items-center justify-between gap-3 rounded-lg border border-glow-border-soft bg-glow-canvas px-3 py-2.5"
+    class="flex w-full items-center justify-between gap-3 rounded-lg border border-glow-border-soft bg-glow-bg-highlight px-3 py-2.5"
   >
     <label
       :for="switchId"

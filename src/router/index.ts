@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { APP_NAME } from '@/constants/storageKeys'
+import { useLoadingStore } from '@/stores/loading.store'
 import { authGuard } from './guards/auth.guard'
+import { featuresGuard } from './guards/features.guard'
 import { negocioGuard } from './guards/negocio.guard'
 import { authRoutes } from './routes/auth.routes'
 import { dashboardRoutes } from './routes/dashboard.routes'
@@ -11,6 +13,7 @@ import { modulosRoutes } from './routes/modulos.routes'
 import { publicRoutes } from './routes/public.routes'
 import { devRoutes } from './routes/dev.routes'
 import { notFoundRoutes } from './routes/notFound.routes'
+import { isChunkLoadError, reloadForUpdatedApp } from '@/utils/chunkLoadError'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,24 +28,40 @@ const router = createRouter({
     ...clienteRoutes,
     ...notFoundRoutes,
   ],
-  scrollBehavior(to, _from, savedPosition) {
+  scrollBehavior(to, from, savedPosition) {
     if (savedPosition) return savedPosition
     if (to.hash) {
       return { el: to.hash, top: 88, behavior: 'smooth' }
     }
+    // Troca só de query/hash na mesma rota não deve jogar o usuário para o topo.
+    if (from.matched.length && to.path === from.path) return false
     return { top: 0, left: 0 }
   },
 })
 
+// Loading global de navegação: mostra ao iniciar e esconde quando resolver (ou errar).
+router.beforeEach((to, from) => {
+  if (from.matched.length && to.path === from.path) return true
+  useLoadingStore().navigationStart('Preparando sua experiência...')
+  return true
+})
 router.beforeEach(authGuard)
+router.beforeEach(featuresGuard)
 router.beforeEach(negocioGuard)
 
-router.afterEach((to) => {
+router.afterEach((to, from) => {
+  useLoadingStore().navigationEnd()
   const title = to.meta.title as string | undefined
   document.title = title ? `${title} | ${APP_NAME}` : APP_NAME
-  if (!to.hash) {
+  if (!to.hash && to.path !== from.path) {
     window.scrollTo(0, 0)
   }
+})
+
+router.onError((error, to) => {
+  useLoadingStore().navigationEnd()
+  if (!isChunkLoadError(error)) return
+  reloadForUpdatedApp(to.fullPath)
 })
 
 export default router

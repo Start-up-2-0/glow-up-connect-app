@@ -1,14 +1,34 @@
 <script setup lang="ts">
+import { onUnmounted, watch } from 'vue'
 import { useAppStore } from '@/stores/app.store'
-import AppSidebar from '@/components/layout/AppSidebar.vue'
+import AppShellSidebar from '@/components/shell/AppShellSidebar.vue'
+import AppShellTopbar from '@/components/shell/AppShellTopbar.vue'
 import UpgradeModal from '@/components/access/UpgradeModal.vue'
 
 const appStore = useAppStore()
+
+const BODY_DRAWER_CLASS = 'guc-mobile-drawer-open'
+
+function syncDrawerBodyClass(open: boolean) {
+  if (typeof document === 'undefined') return
+  const isMobile = window.matchMedia('(max-width: 767px)').matches
+  document.body.classList.toggle(BODY_DRAWER_CLASS, open && isMobile)
+}
+
+watch(
+  () => appStore.sidebarOpen,
+  (open) => syncDrawerBodyClass(open),
+  { immediate: true },
+)
+
+onUnmounted(() => {
+  document.body.classList.remove(BODY_DRAWER_CLASS)
+})
 </script>
 
 <template>
-  <div class="dashboard-shell flex h-dvh min-h-0 overflow-hidden bg-glow-canvas">
-    <AppSidebar class="hidden h-dvh min-h-0 shrink-0 lg:flex" />
+  <div class="min-h-dvh bg-glow-canvas antialiased text-glow-text">
+    <AppShellTopbar />
 
     <Transition
       enter-active-class="transition-opacity duration-200"
@@ -18,48 +38,22 @@ const appStore = useAppStore()
     >
       <div
         v-if="appStore.sidebarOpen"
-        class="fixed inset-0 z-40 bg-black/40 lg:hidden"
+        class="fixed inset-0 z-[2000] bg-[rgba(13,8,37,0.55)] backdrop-blur-[1px] md:hidden"
         aria-hidden="true"
         @click="appStore.setSidebarOpen(false)"
       />
     </Transition>
 
-    <Transition
-      enter-active-class="transition-transform duration-300 ease-out"
-      leave-active-class="transition-transform duration-300 ease-in"
-      enter-from-class="-translate-x-full"
-      leave-to-class="-translate-x-full"
+    <AppShellSidebar />
+
+    <main
+      class="min-h-dvh overflow-x-hidden p-4 pt-16 md:ml-64"
+      :class="{ 'guc-main--drawer-open': appStore.sidebarOpen }"
     >
-      <AppSidebar
-        v-if="appStore.sidebarOpen"
-        mobile
-        class="fixed inset-y-0 left-0 z-50 lg:hidden"
-      />
-    </Transition>
-
-    <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-      <header
-        v-if="!appStore.sidebarOpen"
-        class="flex shrink-0 items-center border-b border-glow-border-soft bg-glow-surface px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] lg:hidden"
-      >
-        <button
-          type="button"
-          class="flex size-10 items-center justify-center rounded border border-glow-border-soft bg-glow-canvas text-glow-text"
-          aria-label="Abrir menu"
-          @click="appStore.toggleSidebar()"
-        >
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <path d="M4 6H16M4 10H16M4 14H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-          </svg>
-        </button>
-      </header>
-
-      <main class="dashboard-main min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain">
-        <div class="dashboard-main__inner">
-          <slot />
-        </div>
-      </main>
-    </div>
+      <div class="w-full">
+        <slot />
+      </div>
+    </main>
 
     <UpgradeModal />
   </div>

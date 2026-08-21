@@ -10,9 +10,10 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { useApiError } from '@/composables/useApiError'
 import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
-import type { PagamentoAssinaturaPayload } from '@/types/assinatura.types'
+import type { PagamentoAssinaturaPayload, TipoAssinatura } from '@/types/assinatura.types'
+import { TIPO_ASSINATURA_PADRAO } from '@/utils/tipoAssinatura'
 import { ROUTE_PATHS } from '@/constants/routes'
-import { redirectToLandingPlanos } from '@/utils/landingUrl'
+import { lojaSetupLocation } from '@/utils/lojaSetupNavigation'
 import type {
   OnboardingAssinaturaDraft,
   OnboardingEstabelecimentoDraft,
@@ -21,6 +22,14 @@ import type {
 } from '@/types/onboardingAssinatura.types'
 import { telefoneToApi } from '@/utils/formatters'
 import { draftEnderecoToApi, validateEnderecoForSubmit } from '@/utils/enderecoPayload'
+import {
+  MENSAGEM_LINK_EXPIRADO,
+  MENSAGEM_PAGAMENTO_CONCLUIDO,
+  MENSAGEM_REFRESH_FALHOU,
+  obterDeadlinePollPagamento,
+  sincronizarSessaoPosAssinatura,
+} from '@/utils/sessaoPosAssinatura'
+import type { WhatsAppConfirmacaoInstrucoes } from '@/types/whatsapp.types'
 
 const STORAGE_KEY = 'guc_onboarding_assinatura'
 
@@ -48,12 +57,14 @@ function emptyEstabelecimento(): OnboardingEstabelecimentoDraft {
     estado: '',
     complemento: '',
     logoDataUrl: null,
+    categoriaId: undefined,
   }
 }
 
-function createDraft(planoId: number): OnboardingAssinaturaDraft {
+function createDraft(planoId: number, tipoAssinatura: TipoAssinatura): OnboardingAssinaturaDraft {
   return {
     planoId,
+    tipoAssinatura,
     step: 'conta',
     usuario: emptyUsuario(),
     estabelecimento: emptyEstabelecimento(),
@@ -74,7 +85,10 @@ function saveDraft(draft: OnboardingAssinaturaDraft) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
 }
 
-export function useOnboardingAssinaturaWizard(planoId: number) {
+export function useOnboardingAssinaturaWizard(
+  planoId: number,
+  tipoAssinatura: TipoAssinatura = TIPO_ASSINATURA_PADRAO,
+) {
   const router = useRouter()
   const authStore = useAuthStore()
   const userStore = useUserStore()
@@ -82,7 +96,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
   const assinaturaStore = useAssinaturaStore()
   const negocioStore = useNegocioStore()
   const notifications = useNotificationsStore()
-  const { setStoredEmail, confirmByCode } = useConfirmEmail()
+  const { setStoredEmail, confirmByCode, resendWhatsAppConfirmation } = useConfirmEmail()
   const { resolveError, resolveErrorCode, resolveFieldErrors } = useApiError()
   const {
     pixQrCode,
@@ -92,8 +106,12 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
   } = useAssinaturaPagamentoResposta()
 
   const storedDraft = loadDraft()
+  const draftCompativel =
+    storedDraft != null
+    && storedDraft.planoId === planoId
+    && (storedDraft.tipoAssinatura ?? 'Estabelecimento') === tipoAssinatura
   const draft = ref<OnboardingAssinaturaDraft>(
-    storedDraft?.planoId === planoId ? storedDraft : createDraft(planoId),
+    draftCompativel ? storedDraft! : createDraft(planoId, tipoAssinatura),
   )
   const loading = ref(false)
   const submitting = ref(false)
@@ -101,6 +119,8 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
   const fieldErrors = ref<Record<string, string[]>>({})
   const captchaResetNonce = ref(0)
   const pendingAutoLogin = ref<{ email: string; senha: string } | null>(null)
+  const whatsappInstrucoes = ref<WhatsAppConfirmacaoInstrucoes | null>(null)
+  const resendingWhatsApp = ref(false)
   const step = computed({
     get: () => draft.value.step,
     set: (value: OnboardingWizardStep) => {
@@ -114,9 +134,11 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
 
   const stepperIndex = computed(() => {
     if (step.value === 'conta') return 0
-    if (step.value === 'estabelecimento') return 1
-    if (step.value === 'assinatura') return 2
-    return 3
+    if (step.value === 'confirmar-email') return 1
+    if (step.value === 'confirmar-whatsapp') return 2
+    if (step.value === 'estabelecimento') return 3
+    if (step.value === 'assinatura') return 4
+    return 0
   })
 
   function persist() {
@@ -132,13 +154,13 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     loading.value = true
     try {
       if (!planoId || Number.isNaN(planoId)) {
-        redirectToLandingPlanos()
+        await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
         return
       }
 
-      await planosStore.fetchPlanos()
+      await planosStore.fetchPlanos(false, tipoAssinatura)
       if (!plano.value) {
-        redirectToLandingPlanos()
+        await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
         return
       }
 
@@ -153,8 +175,10 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
           draft.value.usuario.email = userStore.profile.email
           draft.value.usuario.telefone = userStore.profile.telefone ?? draft.value.usuario.telefone
 
-          if (step.value === 'conta') {
-            step.value = draft.value.usuario.emailConfirmado ? 'estabelecimento' : 'confirmar-email'
+          if (step.value === 'conta' || step.value === 'confirmar-email') {
+            step.value = proximoPassoAposConta()
+          } else if (step.value === 'confirmar-whatsapp' && userStore.profile.whatsAppConfirmado) {
+            step.value = 'estabelecimento'
           }
 
           if (!draft.value.estabelecimento.email) {
@@ -181,6 +205,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     confirmarEmail: string
     senha: string
     confirmarSenha: string
+    sexo?: 'Masculino' | 'Feminino'
     avatarBase64?: string
     avatarContentType?: string
     captchaToken?: string
@@ -230,6 +255,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
         email: payload.email.trim(),
         telefone: telefoneApi,
         senha: payload.senha,
+        sexo: payload.sexo ?? null,
         avatarBase64: payload.avatarBase64,
         avatarContentType: payload.avatarContentType,
         captchaToken: payload.captchaToken,
@@ -261,6 +287,16 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     }
   }
 
+  function proximoPassoAposConta(): OnboardingWizardStep {
+    if (!draft.value.usuario.emailConfirmado && !userStore.profile?.ativo) {
+      return 'confirmar-email'
+    }
+    if (!userStore.profile?.whatsAppConfirmado) {
+      return 'confirmar-whatsapp'
+    }
+    return 'estabelecimento'
+  }
+
   async function finalizarPosCadastro(requerConfirmacaoEmail: boolean) {
     if (!draft.value.estabelecimento.email) {
       draft.value.estabelecimento.email = draft.value.usuario.email
@@ -269,11 +305,15 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
       draft.value.estabelecimento.telefone = draft.value.usuario.telefone
     }
 
+    if (authStore.isAuthenticated && !userStore.profile) {
+      await userStore.fetchMe()
+    }
+
     if (requerConfirmacaoEmail) {
-      step.value = 'estabelecimento'
+      step.value = 'confirmar-email'
     } else {
       draft.value.usuario.emailConfirmado = true
-      step.value = 'estabelecimento'
+      step.value = proximoPassoAposConta()
     }
     persist()
   }
@@ -289,10 +329,27 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
       }
 
       draft.value.usuario.emailConfirmado = true
-      await userStore.fetchMe()
-      clearDraft()
-      notifications.push('success', 'Conta confirmada! Bem-vindo ao dashboard.')
-      await router.push(ROUTE_PATHS.DASHBOARD)
+      persist()
+      notifications.push('success', 'Conta confirmada! Confirme o WhatsApp pelo e-mail que enviamos.')
+
+      if (authStore.isAuthenticated) {
+        await userStore.fetchMe(true)
+        await negocioStore.fetchEstabelecimentos(true)
+      }
+
+      if (negocioStore.assinaturaAtiva) {
+        clearDraft()
+        await router.push(
+          lojaSetupLocation({
+            mode: 'assinatura',
+            estabelecimentoId: negocioStore.estabelecimentoIdSelecionado,
+          }),
+        )
+        return true
+      }
+
+      step.value = proximoPassoAposConta()
+      persist()
       return true
     } catch (err) {
       erro.value = resolveError(err)
@@ -305,6 +362,51 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
   function irParaConfirmacaoEmail() {
     step.value = 'confirmar-email'
     persist()
+  }
+
+  async function verificarWhatsApp() {
+    erro.value = null
+    loading.value = true
+    try {
+      if (authStore.isAuthenticated) {
+        await userStore.fetchMe(true)
+        if (userStore.profile?.whatsAppConfirmado) {
+          step.value = 'estabelecimento'
+          persist()
+          return
+        }
+      }
+      erro.value =
+        'Ainda não detectamos a confirmação. Envie a mensagem no WhatsApp e tente de novo.'
+    } catch (err) {
+      erro.value = resolveError(err)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function reenviarWhatsApp() {
+    if (resendingWhatsApp.value) return
+    erro.value = null
+    resendingWhatsApp.value = true
+    try {
+      if (authStore.isAuthenticated) {
+        whatsappInstrucoes.value = await userService.solicitarConfirmacaoWhatsApp()
+        notifications.push('success', 'Enviamos novas instruções para o WhatsApp e o e-mail.')
+        return
+      }
+
+      const result = await resendWhatsAppConfirmation(draft.value.usuario.email)
+      if (!result.ok) {
+        erro.value = 'Não foi possível reenviar as instruções. Tente novamente.'
+        return
+      }
+      notifications.push('info', result.message)
+    } catch (err) {
+      erro.value = resolveError(err)
+    } finally {
+      resendingWhatsApp.value = false
+    }
   }
 
   function avancarParaAssinatura(estabelecimento: OnboardingEstabelecimentoDraft) {
@@ -337,27 +439,42 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     persist()
   }
 
-  async function aguardarAtivacao() {
+  async function aguardarAtivacao(expiraEm?: string | null) {
     aguardandoPagamento.value = true
-    const maxTentativas = 30
-    for (let i = 0; i < maxTentativas; i++) {
+    const deadline = obterDeadlinePollPagamento(expiraEm)
+    while (Date.now() < deadline) {
       await new Promise((r) => setTimeout(r, 2000))
-      await negocioStore.fetchEstabelecimentos(true)
+      try {
+        await negocioStore.fetchEstabelecimentos(true)
+      } catch {
+        // Continua aguardando o webhook.
+      }
       if (negocioStore.assinaturaAtiva) {
         aguardandoPagamento.value = false
-        notifications.push('success', 'Pagamento confirmado! Confirme seu e-mail para acessar o dashboard.')
-        irParaConfirmacaoEmail()
+        const sessaoOk = await sincronizarSessaoPosAssinatura()
+        if (!sessaoOk) {
+          notifications.push('warning', MENSAGEM_REFRESH_FALHOU)
+        }
+        notifications.push('success', MENSAGEM_PAGAMENTO_CONCLUIDO)
+        if (!userStore.profile?.ativo) {
+          irParaConfirmacaoEmail()
+          return
+        }
+        clearDraft()
+        await router.push(
+          lojaSetupLocation({
+            mode: 'assinatura',
+            estabelecimentoId: negocioStore.estabelecimentoIdSelecionado,
+          }),
+        )
         return
       }
     }
     aguardandoPagamento.value = false
-    notifications.push(
-      'info',
-      'Pagamento em processamento. Atualize a página em alguns instantes.',
-    )
+    notifications.push('info', MENSAGEM_LINK_EXPIRADO)
   }
 
-  async function contratarPlano(diaVencimento: number, pagamento?: PagamentoAssinaturaPayload) {
+  async function contratarPlano(pagamento?: PagamentoAssinaturaPayload) {
     erro.value = null
 
     if (!plano.value) {
@@ -374,24 +491,43 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
 
     const negocio = draft.value.estabelecimento
     const endereco = draftEnderecoToApi(negocio)
+    const tipo = draft.value.tipoAssinatura
 
     submitting.value = true
     try {
-      const result = await assinaturaStore.criarAssinatura({
-        planoId: plano.value.id,
-        tipoAssinatura: 'Estabelecimento',
-        estabelecimento: {
-          nome: negocio.nome.trim(),
-          descricao: negocio.descricao.trim(),
-          logo: negocio.logoDataUrl!,
-          telefone: telefoneToApi(negocio.telefone),
-          email: negocio.email.trim(),
-          endereco,
-        },
-        gateway: 'MercadoPago',
-        diaVencimento,
-        ...(pagamento ? { pagamento } : {}),
-      })
+      const result = await assinaturaStore.criarAssinatura(
+        tipo === 'ProfissionalAutonomo'
+          ? {
+              planoId: plano.value.id,
+              tipoAssinatura: 'ProfissionalAutonomo',
+              profissionalAutonomo: {
+                nomePublico: negocio.nome.trim(),
+                biografia: negocio.descricao.trim() || undefined,
+                logo: negocio.logoDataUrl!,
+                telefone: telefoneToApi(negocio.telefone),
+                email: negocio.email.trim(),
+                categoriaId: negocio.categoriaId,
+                endereco,
+              },
+              gateway: 'MercadoPago',
+              ...(pagamento ? { pagamento } : {}),
+            }
+          : {
+              planoId: plano.value.id,
+              tipoAssinatura: 'Estabelecimento',
+              estabelecimento: {
+                nome: negocio.nome.trim(),
+                descricao: negocio.descricao.trim(),
+                logo: negocio.logoDataUrl!,
+                telefone: telefoneToApi(negocio.telefone),
+                email: negocio.email.trim(),
+                categoriaId: negocio.categoriaId ?? undefined,
+                endereco,
+              },
+              gateway: 'MercadoPago',
+              ...(pagamento ? { pagamento } : {}),
+            },
+      )
 
       assinaturaStore.setAssinatura(result)
       await userStore.fetchMe()
@@ -407,7 +543,13 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
             return
           }
           clearDraft()
-          await router.push(ROUTE_PATHS.DASHBOARD)
+          await router.push(
+            lojaSetupLocation({
+              mode: 'assinatura',
+              estabelecimentoId:
+                result.estabelecimentoId ?? negocioStore.estabelecimentoIdSelecionado,
+            }),
+          )
         },
         onDashboard: async () => {
           notifications.push('success', 'Assinatura iniciada com sucesso!')
@@ -416,7 +558,13 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
             return
           }
           clearDraft()
-          await router.push(ROUTE_PATHS.DASHBOARD)
+          await router.push(
+            lojaSetupLocation({
+              mode: 'assinatura',
+              estabelecimentoId:
+                result.estabelecimentoId ?? negocioStore.estabelecimentoIdSelecionado,
+            }),
+          )
         },
         aguardarAtivacao,
       })
@@ -440,6 +588,7 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     stepperIndex,
     plano,
     promocao,
+    ehAutonomo: computed(() => draft.value.tipoAssinatura === 'ProfissionalAutonomo'),
     loading,
     submitting,
     aguardandoPagamento,
@@ -449,9 +598,13 @@ export function useOnboardingAssinaturaWizard(planoId: number) {
     fieldErrors,
     captchaResetNonce,
     pendingAutoLogin,
+    whatsappInstrucoes,
+    resendingWhatsApp,
     init,
     cadastrarConta,
     confirmarEmailCodigo,
+    verificarWhatsApp,
+    reenviarWhatsApp,
     avancarParaAssinatura,
     voltarParaEstabelecimento,
     contratarPlano,

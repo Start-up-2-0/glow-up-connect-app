@@ -40,19 +40,11 @@ export interface ForgotPasswordRequest {
   email: string
 }
 
-export interface VerifyResetCodeRequest {
-  email: string
-  codigo: string
-}
-
 export interface ResetPasswordRequest {
-  email: string
+  token?: string
+  codigo?: string
   senha: string
   confirmarSenha: string
-}
-
-export interface ResendResetCodeRequest {
-  email: string
 }
 
 export type AuthErrorCode =
@@ -63,9 +55,9 @@ export type AuthErrorCode =
   | 'EMAIL_NAO_CONFIRMADO'
   | 'USER_BLOCKED'
   | 'USER_INACTIVE'
+  | 'CONTA_EM_EXCLUSAO'
   | 'EMAIL_JA_CADASTRADO'
   | 'CONFIRMACAO_EMAIL_INVALIDA'
   | 'AVATAR_INVALIDO'
   | 'RESET_SENHA_INVALIDO'
-  | 'RESET_CODIGO_INVALIDO'
   | 'NOT_IMPLEMENTED'

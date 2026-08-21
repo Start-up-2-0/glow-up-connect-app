@@ -45,8 +45,7 @@ async function handleSubmit() {
     <header class="mb-10 w-full text-center">
       <h1 :class="GLOW_RECOVERY_TITLE_CLASS">Esqueceu a sua senha?</h1>
       <p :class="[GLOW_RECOVERY_SUBTITLE_CLASS, 'mt-2']">
-        Informe o e-mail da sua conta. Enviaremos um código de 6<br />
-        dígitos para resetar a sua senha
+        Informe o e-mail da sua conta. Enviaremos um código de 6 dígitos para redefinir a sua senha.
       </p>
     </header>
 
@@ -59,7 +58,7 @@ async function handleSubmit() {
           type="email"
           autocomplete="email"
           required
-          placeholder="ex: usuario01@exemplo.com"
+          placeholder="ex: usuário01@exemplo.com"
           :class="GLOW_RECOVERY_INPUT_CLASS"
         />
       </div>

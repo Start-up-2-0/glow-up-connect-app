@@ -32,12 +32,12 @@ Inclui **todos os modulos do Essencial** mais os abaixo.
 
 Tudo do Essencial, mais:
 
-- Ate 5 unidades na mesma assinatura
+- Até 5 unidades na mesma assinatura
 - Painel consolidado da rede
 - CRM de clientes
 - Auditoria de negocio
 - Controle de caixa e fluxo financeiro
-- Comissao automatica
+- Comissão automática
 - Prioridade na busca e listagem do marketplace
 
 ## Planos anteriores

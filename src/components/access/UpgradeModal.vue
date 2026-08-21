@@ -26,12 +26,12 @@ function fechar() {
   <Teleport to="body">
     <div
       v-if="upgradeModal.open"
-      class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      class="fixed inset-0 z-[3000] flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="upgrade-modal-title"
     >
-      <div class="absolute inset-0 bg-black/50" @click="fechar" />
+      <div class="absolute inset-0 glow-modal-scrim" @click="fechar" />
       <div
         class="relative z-10 w-full max-w-md rounded-lg border border-glow-border-soft bg-glow-surface p-6 shadow-xl"
       >

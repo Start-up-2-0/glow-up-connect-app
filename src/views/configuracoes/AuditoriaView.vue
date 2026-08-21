@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useNotificationsStore } from '@/stores/notifications.store'
@@ -9,6 +8,10 @@ import { useApiError } from '@/composables/useApiError'
 import { auditoriaService } from '@/services/auditoriaService'
 import type { AuditoriaRegistro } from '@/services/auditoriaService'
 import { formatDateTime } from '@/utils/formatters'
+import GlowGuideLauncher from '@/tutorials/components/GlowGuideLauncher.vue'
+import { usePageTutorial } from '@/tutorials/hooks/usePageTutorial'
+
+const { startPageTutorial } = usePageTutorial('audit')
 
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
@@ -36,27 +39,34 @@ watch(ready, (isReady) => {
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6">
-    <div>
-      <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-        Auditoria
-      </h1>
-      <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-        Trilha de operações registradas no estabelecimento.
-      </p>
+  <div class="space-y-4 lg:space-y-6" data-tour="audit-page">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
+          Auditoria
+        </h1>
+        <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
+          Trilha de operações registradas no estabelecimento.
+        </p>
+      </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <GlowGuideLauncher class="max-sm:hidden" @click="startPageTutorial" />
+        <GlowGuideLauncher class="sm:hidden" compact @click="startPageTutorial" />
+      </div>
     </div>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
-    <LoadingSpinner v-else-if="contextLoading || (loading && registros.length === 0)" />
 
-    <BaseCard v-else-if="registros.length === 0">
+    <BaseCard
+      v-if="!contextError && !contextLoading && !loading && registros.length === 0"
+    >
       <EmptyState
         title="Nenhum registro"
         description="As ações operacionais aparecerão aqui conforme forem realizadas."
       />
     </BaseCard>
 
-    <div v-else class="space-y-2">
+    <div v-else-if="registros.length > 0" class="space-y-2">
       <div
         v-for="registro in registros"
         :key="registro.id"

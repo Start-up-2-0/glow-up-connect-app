@@ -4,14 +4,17 @@ import { negocioPath } from '@/utils/negocioApi'
 import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
   AtualizarComissaoPayload,
+  AtualizarMetaPayload,
   BaixarContaPayload,
   CaixaResumo,
   ComissaoExtrato,
+  ComissaoMetasFiltro,
   ComissaoProfissional,
   ConciliacaoItem,
   ContaPagar,
   ContaReceber,
   CriarComissaoPayload,
+  CriarMetaPayload,
   ExportFormato,
   FinanceiroBuscaResultado,
   FluxoCaixa,
@@ -19,6 +22,10 @@ import type {
   LancamentoCaixaFiltro,
   LancamentoCaixaPaginado,
   FinanceiroResumo,
+  Meta,
+  MetaComissaoDetalhe,
+  MetaComissaoProfissional,
+  MetaProgressoProfissional,
   ReceberAgendamentoPayload,
   ReceberAgendamentoResultado,
   RegistrarAjusteCaixaPayload,
@@ -310,6 +317,88 @@ export const caixaService = {
     return api
       .patch<ApiSuccessResponse<ContaPagar>>(
         negocioPath(estabelecimentoId, `/financeiro/contas-pagar/${contaId}/cancelar`),
+      )
+      .then(unwrapApi)
+  },
+
+  listarMetas(estabelecimentoId: number) {
+    return api
+      .get<ApiSuccessResponse<Meta[]>>(
+        negocioPath(estabelecimentoId, '/financeiro/metas'),
+      )
+      .then(unwrapApi)
+  },
+
+  criarMeta(estabelecimentoId: number, payload: CriarMetaPayload) {
+    return api
+      .post<ApiSuccessResponse<Meta>>(
+        negocioPath(estabelecimentoId, '/financeiro/metas'),
+        payload,
+      )
+      .then(unwrapApi)
+  },
+
+  atualizarMeta(
+    estabelecimentoId: number,
+    metaId: number,
+    payload: AtualizarMetaPayload,
+  ) {
+    return api
+      .put<ApiSuccessResponse<Meta>>(
+        negocioPath(estabelecimentoId, `/financeiro/metas/${metaId}`),
+        payload,
+      )
+      .then(unwrapApi)
+  },
+
+  desativarMeta(estabelecimentoId: number, metaId: number) {
+    return api.patch(
+      negocioPath(estabelecimentoId, `/financeiro/metas/${metaId}/desativar`),
+    )
+  },
+
+  listarProgressoMetas(estabelecimentoId: number, metaId?: number, mes?: number, ano?: number) {
+    const params: Record<string, number> = {}
+    if (metaId !== undefined) params.metaId = metaId
+    if (mes !== undefined) params.mes = mes
+    if (ano !== undefined) params.ano = ano
+    return api
+      .get<ApiSuccessResponse<MetaProgressoProfissional[]>>(
+        negocioPath(estabelecimentoId, '/financeiro/metas/progresso'),
+        { params },
+      )
+      .then(unwrapApi)
+  },
+
+  /* ---------- Gerenciador de metas de comissão (refatoração) ---------- */
+
+  listarMetasComissao(estabelecimentoId: number, filtro?: ComissaoMetasFiltro) {
+    return api
+      .get<ApiSuccessResponse<MetaComissaoProfissional[]>>(
+        negocioPath(estabelecimentoId, '/financeiro/metas/comissoes'),
+        { params: filtro },
+      )
+      .then(unwrapApi)
+  },
+
+  obterMetaComissaoDetalhe(estabelecimentoId: number, metaId: number) {
+    return api
+      .get<ApiSuccessResponse<MetaComissaoDetalhe>>(
+        negocioPath(estabelecimentoId, `/financeiro/metas/comissoes/${metaId}`),
+      )
+      .then(unwrapApi)
+  },
+
+  reativarMeta(estabelecimentoId: number, metaId: number) {
+    return api
+      .patch(negocioPath(estabelecimentoId, `/financeiro/metas/${metaId}/reativar`))
+      .then(unwrapApi)
+  },
+
+  concluirMeta(estabelecimentoId: number, metaId: number) {
+    return api
+      .post<ApiSuccessResponse<MetaComissaoProfissional>>(
+        negocioPath(estabelecimentoId, `/financeiro/metas/${metaId}/concluir`),
       )
       .then(unwrapApi)
   },

@@ -50,9 +50,10 @@ export const useAssinaturaStore = defineStore('assinatura', () => {
   async function cancelar(assinaturaId: number) {
     loading.value = true
     try {
-      await assinaturaService.cancelar(assinaturaId)
-      assinatura.value = null
+      const data = await assinaturaService.cancelar(assinaturaId)
+      assinatura.value = data
       await useNegocioStore().fetchEstabelecimentos(true)
+      return data
     } finally {
       loading.value = false
     }

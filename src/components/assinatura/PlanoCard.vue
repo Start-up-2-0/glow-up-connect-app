@@ -4,8 +4,10 @@ import { RouterLink } from 'vue-router'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { ROUTE_PATHS } from '@/constants/routes'
-import { formatBRL, formatLimite } from '@/utils/formatters'
+import { aplicarDescontoPercentual, formatBRL, formatLimite } from '@/utils/formatters'
+import { TIPO_ASSINATURA_PADRAO } from '@/utils/tipoAssinatura'
 import type { Plano } from '@/types/plano.types'
+import type { TipoAssinatura } from '@/types/assinatura.types'
 
 const props = withDefaults(
   defineProps<{
@@ -13,16 +15,30 @@ const props = withDefaults(
     destacado?: boolean
     desabilitado?: boolean
     modoLogado?: boolean
+    percentualDesconto?: number | null
+    tipoAssinatura?: TipoAssinatura
   }>(),
   {
     modoLogado: false,
+    tipoAssinatura: TIPO_ASSINATURA_PADRAO,
   },
 )
 
 const checkoutLink = computed(() => ({
   path: props.modoLogado ? ROUTE_PATHS.ONBOARDING_CONTRATAR : ROUTE_PATHS.ONBOARDING_ASSINATURA,
-  query: { planoId: String(props.plano.id) },
+  query: {
+    planoId: String(props.plano.id),
+    tipoAssinatura: props.tipoAssinatura,
+  },
 }))
+
+const temDesconto = computed(() => (props.percentualDesconto ?? 0) > 0)
+
+const precoComDesconto = computed(() =>
+  temDesconto.value
+    ? aplicarDescontoPercentual(props.plano.preco, props.percentualDesconto!)
+    : props.plano.preco,
+)
 </script>
 
 <template>
@@ -47,10 +63,24 @@ const checkoutLink = computed(() => ({
 
     <p class="mb-4 text-sm text-glow-text-subtle">{{ plano.descricao }}</p>
 
-    <p class="mb-4 font-satoshi text-2xl font-bold text-glow-text">
-      {{ formatBRL(plano.preco) }}
-      <span class="text-sm font-normal text-glow-text-subtle">/mês</span>
-    </p>
+    <div class="mb-4">
+      <template v-if="temDesconto">
+        <p class="text-sm font-medium text-glow-text-muted line-through">
+          {{ formatBRL(plano.preco) }}/mês
+        </p>
+        <p class="font-satoshi text-2xl font-bold text-glow-text">
+          {{ formatBRL(precoComDesconto) }}
+          <span class="text-sm font-normal text-glow-text-subtle">/mês</span>
+        </p>
+        <p class="mt-1 text-xs font-semibold text-glow-gold">
+          {{ percentualDesconto }}% off para sempre
+        </p>
+      </template>
+      <p v-else class="font-satoshi text-2xl font-bold text-glow-text">
+        {{ formatBRL(plano.preco) }}
+        <span class="text-sm font-normal text-glow-text-subtle">/mês</span>
+      </p>
+    </div>
 
     <ul class="mb-4 space-y-1 text-sm text-glow-text-subtle">
       <li>Usuários: {{ formatLimite(plano.limiteUsuarios) }}</li>

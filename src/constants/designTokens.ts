@@ -1,36 +1,54 @@
-/** Design tokens semânticos — Glow Up Connect */
+/** Design tokens semânticos — Glow Up Connect (identidade roxa/lilás) */
 export const GLOW_COLORS = {
-  /** Marca */
-  gold: '#ffbf00',
-  goldDark: '#c59400',
-  goldCta: '#e6ad01',
-  primary: '#3c5ccf',
-  secondary: '#a38a2d',
+  /** Paleta oficial */
+  purpleBlack: '#0d0825',
+  lilacWhite: '#ebe7f7',
+  purpleDark: '#2c154b',
+  grayPurple: '#61526b',
+  purpleMedium: '#522e5f',
+  lilacMedium: '#92679b',
+  grayLilac: '#9e94aa',
+  purpleLight: '#755e8a',
+  lilacLight: '#cfb0da',
+  lavender: '#b4a5ca',
+  burntRose: '#995d5f',
+  wineBrown: '#4e2c30',
 
-  /** Texto (light) */
-  text: '#282828',
-  textMuted: 'rgba(40, 40, 40, 0.4)',
-  textSoft: 'rgba(40, 40, 40, 0.8)',
-  surface: '#f3f3f3',
+  /** Marca / accent (aliases legados glow-gold → lilás) */
+  gold: '#cfb0da',
+  goldDark: '#92679b',
+  goldCta: '#92679b',
+  primary: '#5b7fd4',
+  secondary: '#995d5f',
 
-  /** Elevação dark premium */
-  darkBase: '#0c0a08',
-  darkSurface: '#1a1714',
-  darkElevated: '#2a2520',
-  darkHighlight: '#3d3528',
-  darkText: '#f5f2eb',
+  /** Light theme */
+  text: '#0d0825',
+  textMuted: '#61526b',
+  textSoft: '#3d2a5c',
+  surface: '#f3f0f8',
+  elevated: '#faf9fd',
+  base: '#ebe7f7',
+
+  /** Dark theme — cinza/branco + dourado */
+  darkBase: '#0a0806',
+  darkSurface: '#1a1612',
+  darkElevated: '#2c2620',
+  darkHighlight: '#3f382e',
+  darkText: '#f5f0e8',
+  darkGold: '#ffbf00',
+  darkGoldDark: '#c59400',
+  darkGoldCta: '#e6ad01',
 
   /** Status */
-  success: '#54804e',
-  successBg: '#c4f2cc',
+  success: '#4a9e6e',
+  successBg: 'rgba(74, 158, 110, 0.14)',
   successAction: '#4bc281',
-  error: '#cf3f3f',
-  neutral: '#7a7b7a',
-  warning: '#aa682d',
+  error: '#995d5f',
+  neutral: '#61526b',
+  warning: '#995d5f',
 
-  /** Gradientes decorativos */
-  gradientFrom: 'rgba(163, 138, 45, 0.2)',
-  gradientTo: 'rgba(60, 92, 207, 0.2)',
+  gradientFrom: 'rgba(146, 103, 155, 0.2)',
+  gradientTo: 'rgba(82, 46, 95, 0.2)',
 } as const
 
 /** Posicionamento da imagem de splash conforme Figma (ImgBackground) */
@@ -39,50 +57,59 @@ export const GLOW_SPLASH_IMAGE_CLASS =
 
 /** Largura do painel esquerdo no layout 1920px (955px) */
 export const GLOW_SPLASH_PANEL_CLASS =
-  'relative hidden min-h-screen shrink-0 overflow-hidden lg:block lg:w-[955px] lg:max-w-[50%]'
+  'relative hidden min-h-dvh shrink-0 overflow-hidden lg:block lg:w-[955px] lg:max-w-[50%]'
 
 export const GLOW_INPUT_CLASS =
-  'h-[49px] w-full rounded-lg border-[0.3px] border-glow-text/40 bg-white px-4 font-satoshi text-zinc-800 placeholder:font-inter placeholder:text-sm placeholder:font-normal placeholder:text-zinc-600/60 outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold'
+  'h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-bg-elevated px-4 font-satoshi text-glow-text placeholder:font-inter placeholder:text-sm placeholder:font-normal placeholder:text-glow-placeholder outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold'
 
-export const GLOW_LABEL_CLASS = 'font-satoshi text-sm font-normal text-zinc-800'
+export const GLOW_LABEL_CLASS = 'font-satoshi text-sm font-normal text-glow-text'
 
-export const GLOW_PLACEHOLDER_TEXT_CLASS = 'font-inter text-sm font-normal text-zinc-600/60'
+export const GLOW_PLACEHOLDER_TEXT_CLASS = 'font-inter text-sm font-normal text-glow-placeholder'
 
 export const GLOW_LINK_ACCENT_CLASS =
   'font-satoshi text-sm font-bold text-glow-gold-dark hover:underline'
 
-export const GLOW_BODY_TEXT_CLASS = 'font-satoshi text-sm font-normal text-zinc-800'
+export const GLOW_BODY_TEXT_CLASS = 'font-satoshi text-sm font-normal text-glow-text'
 
-/** Fundo branco fixo — telas de auth não seguem o tema dark do app (Figma) */
+/** Fundo lavanda fixo — telas de auth não seguem o tema dark do app */
 export const GLOW_LOGIN_PAGE_CLASS =
-  'flex min-h-screen items-center justify-center bg-white px-6 py-10'
+  'flex min-h-dvh items-center justify-center bg-glow-bg-base px-4 py-[max(2.5rem,env(safe-area-inset-top))] pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-10'
 
 export const GLOW_LOGIN_CONTENT_CLASS = 'flex w-full max-w-[494px] flex-col items-center'
+
+export const GLOW_AUTH_LOGO_CLASS =
+  'mb-[22px] h-28 w-28 shrink-0 object-contain sm:h-[168px] sm:w-[168px]'
+
+export const GLOW_AUTH_TITLE_CLASS =
+  'font-satoshi text-2xl font-bold leading-tight text-glow-text sm:text-[32px] sm:leading-normal'
+
+export const GLOW_AUTH_SUBTITLE_CLASS =
+  'mt-[5px] font-satoshi text-lg font-normal leading-snug text-glow-text-muted sm:text-xl sm:leading-normal'
 
 /** Grid 2 colunas do formulário de cadastro (Figma telaCadastro) */
 export const GLOW_AUTH_FORM_GRID_CLASS = 'grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-x-2'
 
 export const GLOW_AUTH_PANEL_CLASS =
-  'relative z-10 flex min-h-screen w-full flex-1 items-center justify-center bg-white px-6 py-10 lg:-ml-[54px] lg:rounded-l-panel lg:px-16'
+  'relative z-10 flex min-h-dvh w-full flex-1 items-center justify-center bg-glow-bg-elevated px-6 py-10 lg:-ml-[54px] lg:rounded-l-panel lg:px-16'
 
 export const GLOW_AUTH_PANEL_BORDERED_CLASS =
-  'relative z-10 flex min-h-screen w-full flex-1 items-center justify-center border-glow-text/40 bg-white px-6 py-10 lg:-ml-[54px] lg:rounded-l-panel lg:border lg:px-16'
+  'relative z-10 flex min-h-dvh w-full flex-1 items-center justify-center border-glow-border-soft bg-glow-bg-elevated px-6 py-10 lg:-ml-[54px] lg:rounded-l-panel lg:border lg:px-16'
 
 export const GLOW_AVATAR_DROPZONE_CLASS =
-  'flex h-[49px] w-full cursor-pointer items-center rounded-lg border border-dashed border-glow-text/60 transition hover:border-glow-gold'
+  'flex h-[49px] w-full cursor-pointer items-center rounded-lg border border-dashed border-glow-border-soft transition hover:border-glow-gold'
 
 export const GLOW_BUTTON_PRIMARY_CLASS =
-  'flex h-[53px] w-full items-center justify-center rounded bg-glow-gold px-[10px] text-xl font-medium text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70'
+  'flex h-[53px] w-full items-center justify-center rounded bg-glow-gold-cta px-[10px] text-xl font-medium text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70'
 
 export const GLOW_LINK_CLASS = 'text-sm font-bold text-glow-gold-dark hover:underline'
 
 export const GLOW_RECOVERY_LAYOUT_CLASS =
-  'flex min-h-screen flex-col items-center justify-start bg-white px-6 pb-10 pt-10 sm:pt-16'
+  'flex min-h-dvh flex-col items-center justify-start bg-glow-bg-base px-4 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[max(2.5rem,env(safe-area-inset-top))] sm:px-6 sm:pb-10 sm:pt-16'
 
 export const GLOW_RECOVERY_CONTENT_CLASS = 'flex w-full max-w-[461px] shrink-0 flex-col items-stretch'
 
 export const GLOW_RECOVERY_TITLE_CLASS =
-  'text-center font-inter text-[36px] font-semibold leading-normal text-glow-text'
+  'text-center font-inter text-2xl font-semibold leading-tight text-glow-text sm:text-[36px] sm:leading-normal'
 
 export const GLOW_RECOVERY_SUBTITLE_CLASS =
   'text-center font-inter text-base font-normal text-glow-text-muted'
@@ -90,16 +117,16 @@ export const GLOW_RECOVERY_SUBTITLE_CLASS =
 export const GLOW_RECOVERY_LABEL_CLASS = 'font-inter text-base font-normal text-glow-text'
 
 export const GLOW_RECOVERY_INPUT_CLASS =
-  'h-[50px] w-full rounded border-[0.5px] border-glow-text/40 px-4 font-inter text-base text-glow-text placeholder:font-inter placeholder:text-sm placeholder:text-zinc-600/60 outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold'
+  'h-[50px] w-full rounded border-[0.5px] border-glow-border-soft px-4 font-inter text-base text-glow-text placeholder:font-inter placeholder:text-sm placeholder:text-glow-placeholder outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold'
 
 export const GLOW_RECOVERY_BTN_SECONDARY_CLASS =
-  'flex h-[53px] w-full items-center justify-center rounded border-[0.5px] border-glow-text/60 bg-white font-inter text-base font-medium text-glow-text transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60'
+  'flex h-[53px] w-full items-center justify-center rounded border-[0.5px] border-glow-border-soft bg-glow-bg-elevated font-inter text-base font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60'
 
 export const GLOW_RECOVERY_BTN_LOCKED_CLASS =
-  'flex h-[53px] w-full items-center justify-center gap-2.5 rounded border-[0.5px] border-glow-disabled bg-white font-inter text-base font-medium text-glow-disabled cursor-not-allowed'
+  'flex h-[53px] w-full items-center justify-center gap-2.5 rounded border-[0.5px] border-glow-disabled bg-glow-bg-elevated font-inter text-base font-medium text-glow-disabled cursor-not-allowed'
 
 export const GLOW_RECOVERY_BACK_LINK_CLASS =
-  'inline-flex items-center gap-2.5 py-2.5 font-inter text-xs font-normal text-glow-text/60 transition hover:text-glow-text'
+  'inline-flex items-center gap-2.5 py-2.5 font-inter text-xs font-normal text-glow-text-muted transition hover:text-glow-text'
 
 export const GLOW_RECOVERY_ALERT_CLASS =
   'flex w-full items-center gap-2.5 rounded bg-glow-error-bg px-2.5 py-2.5 font-inter text-xs font-medium text-glow-error'
@@ -108,13 +135,13 @@ export const GLOW_RECOVERY_ALERT_CLASS =
 export const AGENDAR_WIZARD_CONTENT_CLASS = 'mx-auto w-full max-w-[695px]'
 
 export const AGENDAR_CARD_CLASS =
-  'rounded-xl border-[0.5px] border-glow-text/25 bg-white'
+  'rounded-xl border-[0.5px] border-glow-border-soft bg-glow-bg-elevated'
 
 export const AGENDAR_BTN_OUTLINE_CLASS =
-  'inline-flex h-[34px] items-center justify-center gap-2 rounded-xl border-[0.5px] border-glow-text/40 px-4 font-inter text-sm text-glow-text transition hover:bg-zinc-50'
+  'inline-flex h-[34px] items-center justify-center gap-2 rounded-xl border-[0.5px] border-glow-border-soft px-4 font-inter text-sm text-glow-text transition hover:bg-glow-hover-surface'
 
 export const AGENDAR_BTN_CONTINUE_CLASS =
-  'flex h-10 w-full items-center justify-center rounded bg-glow-gold px-2.5 font-satoshi text-base font-bold text-glow-text transition hover:brightness-95 disabled:cursor-not-allowed disabled:bg-glow-neutral-bg disabled:text-glow-disabled'
+  'flex h-10 w-full items-center justify-center rounded bg-glow-gold-cta px-2.5 font-satoshi text-base font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:bg-glow-neutral-bg disabled:text-glow-disabled'
 
 export const AGENDAR_BTN_CONTINUE_MUTED_CLASS =
   'flex h-10 w-full items-center justify-center rounded bg-glow-neutral-bg px-2.5 font-satoshi text-base font-bold text-glow-disabled disabled:cursor-not-allowed'
@@ -127,14 +154,14 @@ export const ONBOARDING_CONTRATAR_PAGE_CLASS =
   '-mx-4 -mt-4 min-h-full bg-glow-canvas px-4 pb-8 pt-9 lg:-mx-6 lg:-mt-6 lg:px-8'
 
 export const ONBOARDING_CONTRATAR_CARD_CLASS =
-  'rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-6 py-8 shadow-glow-sm sm:px-10 sm:py-10'
+  'onboarding-contratar-card px-6 py-8 sm:px-10 sm:py-10'
 
 export const ONBOARDING_CONTRATAR_FORM_CLASS = 'flex w-full flex-col gap-6'
 
 export const ONBOARDING_CONTRATAR_FIELD_CLASS = 'flex flex-col gap-2'
 
 export const ONBOARDING_CONTRATAR_INPUT_CLASS =
-  'h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-hover-surface px-[18px] font-inter text-sm text-glow-text placeholder:font-inter placeholder:text-sm placeholder:text-glow-placeholder outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold'
+  'onboarding-contratar-input h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft px-[18px] font-inter text-sm text-glow-text placeholder:font-inter placeholder:text-sm placeholder:text-glow-placeholder outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold'
 
 export const ONBOARDING_CONTRATAR_LABEL_CLASS =
   'font-satoshi text-sm font-normal text-glow-text'
@@ -146,13 +173,13 @@ export const ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS =
   'flex h-10 w-full items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3.5 font-satoshi text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60'
 
 export const ONBOARDING_CONTRATAR_DROPZONE_CLASS =
-  'flex h-[49px] w-full cursor-pointer items-center rounded-lg border border-dashed border-glow-border-soft bg-glow-hover-surface transition hover:border-glow-gold'
+  'onboarding-contratar-input flex h-[49px] w-full cursor-pointer items-center rounded-lg border border-dashed border-glow-border-soft transition hover:border-glow-gold'
 
 export const ONBOARDING_CONTRATAR_DROPZONE_TEXT_CLASS =
   'font-inter text-sm text-glow-placeholder'
 
 export const ONBOARDING_CONTRATAR_TELEFONE_PREFIX_CLASS =
-  'inline-flex h-[49px] shrink-0 items-center rounded-l-lg border-[0.3px] border-r-0 border-glow-border-soft bg-glow-hover-surface px-[18px] font-inter text-sm text-glow-text-subtle'
+  'onboarding-contratar-input inline-flex h-[49px] shrink-0 items-center rounded-l-lg border-[0.3px] border-r-0 border-glow-border-soft px-[18px] font-inter text-sm text-glow-text-subtle'
 
 /** Área cliente — Explorar lojas / Detalhe (Figma) */
 export const CLIENTE_PAGE_HEADER_CLASS = 'cliente-page-header'
@@ -168,8 +195,7 @@ export const CLIENTE_PAGE_DIVIDER_CLASS = 'cliente-page-divider'
 export const CLIENTE_BTN_OUTLINE_CLASS =
   'cliente-btn-outline inline-flex h-[34px] shrink-0 items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 font-urbanist text-sm font-normal text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60'
 
-export const CLIENTE_CARD_CLASS =
-  'cliente-card rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface'
+export const CLIENTE_CARD_CLASS = 'cliente-card glow-card'
 
 export const CLIENTE_BTN_CTA_CLASS =
   'cliente-btn-cta inline-flex h-10 w-full items-center justify-center gap-2.5 rounded-xl bg-glow-gold-cta px-2.5 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60'
@@ -197,4 +223,4 @@ export const SIDEBAR_NAV_ITEM_CLASS =
   'group flex h-11 w-full items-center gap-3 rounded-lg py-2 pl-2 pr-2 transition-colors hover:bg-glow-surface-tint'
 
 export const SIDEBAR_NAV_ITEM_ACTIVE_CLASS =
-  'bg-glow-gold-selected pl-4 font-medium shadow-[inset_2px_0_0_var(--glow-gold-cta)]'
+  'bg-glow-gold-selected pl-4 font-medium text-glow-text shadow-[inset_3px_0_0_var(--glow-gold-cta)]'

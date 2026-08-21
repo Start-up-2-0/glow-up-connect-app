@@ -6,6 +6,7 @@ export type OnboardingUiVariant = 'public' | 'dashboard' | 'contratar'
 export const PUBLIC_ONBOARDING_FLOW_STEPS = [
   { id: 'conta', label: 'Sua conta' },
   { id: 'confirmar-email', label: 'Confirmar e-mail' },
+  { id: 'confirmar-whatsapp', label: 'Confirmar WhatsApp' },
   { id: 'estabelecimento', label: 'Estabelecimento' },
   { id: 'assinatura', label: 'Assinatura' },
 ] as const satisfies ReadonlyArray<{ id: OnboardingWizardStep; label: string }>

@@ -1,0 +1,443 @@
+import type { MockRouter, MockRequest } from '../match'
+import { ok, okRaw, voidOk, error } from '../response'
+import {
+  MOCK_CLIENTE_EMAIL,
+  mockEstablishmentsForEmail,
+  mockPushExtraEstablishment,
+  mockUserForEmail,
+} from '../seed/usuario'
+import {
+  MOCK_ASSINATURA,
+  MOCK_COBRANCAS,
+  MOCK_DADOS_PRIVACIDADE,
+  MOCK_PERFIL_ESTABELECIMENTO,
+  MOCK_REDE,
+  mockPlanosResponse,
+} from '../seed/plataforma'
+
+function isoFromNow(hours: number): string {
+  const d = new Date(Date.now() + hours * 3600_000)
+  return d.toISOString()
+}
+
+/** Identidade atual do mock (e-mail de login) — persiste na sessão. */
+const SESSION_EMAIL_KEY = 'guc_mock_email'
+
+function currentEmail(): string {
+  const v = sessionStorage.getItem(SESSION_EMAIL_KEY)
+  return v && v.trim().length ? v : ''
+}
+
+function setCurrentEmail(email: string) {
+  sessionStorage.setItem(SESSION_EMAIL_KEY, (email ?? '').trim())
+}
+
+export function registerCoreRoutes(router: MockRouter) {
+  /* ---------- Auth ---------- */
+  router.on('post', '/auth/login', (req: MockRequest) => {
+    const payload = (req.body ?? {}) as { email?: string }
+    const email = payload.email?.trim() ?? ''
+    setCurrentEmail(email)
+    const user = mockUserForEmail(email)
+    return ok({
+      token: '',
+      refreshToken: '',
+      expiresAt: isoFromNow(2),
+      refreshExpiresAt: isoFromNow(48),
+      usuario: {
+        id: user.id,
+        nome: user.nome,
+        email: user.email,
+        role: user.role,
+        avatarBase64: user.avatarBase64 ?? null,
+      },
+      requerConfirmacaoEmail: false,
+    })
+  })
+  router.on('post', '/auth/logout', () => {
+    sessionStorage.removeItem(SESSION_EMAIL_KEY)
+    return voidOk('Logout realizado.')
+  })
+  router.on('post', '/auth/refresh', () => {
+    return ok({
+      token: '',
+      refreshToken: '',
+      expiresAt: isoFromNow(2),
+      refreshExpiresAt: isoFromNow(48),
+    })
+  })
+  router.on('post', '/auth/confirmar-email', () => voidOk('E-mail confirmado.'))
+  router.on('post', '/auth/reenviar-confirmacao', () => voidOk('Confirmação reenviada.'))
+  router.on('post', '/auth/reenviar-confirmacao-whatsapp', () =>
+    voidOk('Se o e-mail estiver cadastrado, enviaremos novas instruções para confirmar o WhatsApp.'),
+  )
+  router.on('post', '/auth/reativar-conta', (req: MockRequest) => {
+    const payload = (req.body ?? {}) as { email?: string }
+    const email = payload.email?.trim() ?? ''
+    setCurrentEmail(email)
+    const user = mockUserForEmail(email)
+    return ok({
+      token: '',
+      refreshToken: '',
+      expiresAt: isoFromNow(2),
+      refreshExpiresAt: isoFromNow(48),
+      usuario: {
+        id: user.id,
+        nome: user.nome,
+        email: user.email,
+        role: user.role,
+        avatarBase64: user.avatarBase64 ?? null,
+      },
+      requerConfirmacaoEmail: false,
+    })
+  })
+
+  /* ---------- Recovery ---------- */
+  router.on('post', '/auth/forgot-password', () =>
+    voidOk('Se o e-mail estiver cadastrado, enviaremos instruções para redefinir a senha.'),
+  )
+  router.on('post', '/auth/reset-password', () =>
+    voidOk('Senha redefinida com sucesso. Você já pode fazer login.'),
+  )
+
+  /* ---------- Usuário ---------- */
+  // Cadastro cria uma conta de cliente no mock (role Cliente).
+  router.on('post', '/usuario', (req: MockRequest) => {
+    const payload = (req.body ?? {}) as { nome?: string; email?: string; telefone?: string; sexo?: string }
+    const email = payload.email ?? MOCK_CLIENTE_EMAIL
+    setCurrentEmail(email)
+    return okRaw({
+      id: 99,
+      nome: payload.nome ?? 'Cliente Teste',
+      email,
+      telefone: payload.telefone ?? '',
+      role: 1,
+      sexo: payload.sexo ?? null,
+      ativo: true,
+      mensagem: 'Usuário criado com sucesso.',
+    })
+  })
+  router.on('put', '/usuario/me', (req: MockRequest) => {
+    // Aplica o patch (nome/telefone/sexo/avatar) ao usuário atual para refletir a edição de perfil.
+    const payload = (req.body ?? {}) as {
+      nome?: string
+      telefone?: string
+      sexo?: string
+      avatarBase64?: string | null
+    }
+    const email = currentEmail()
+    const patchedRaw = sessionStorage.getItem(`guc_mock_user_patch_${email}`)
+    const user = {
+      ...(patchedRaw
+        ? (JSON.parse(patchedRaw) as ReturnType<typeof mockUserForEmail>)
+        : mockUserForEmail(email)),
+    }
+    if (payload.nome !== undefined) user.nome = payload.nome
+    if (payload.telefone !== undefined) {
+      const telefoneMudou = (payload.telefone ?? '') !== (user.telefone ?? '')
+      user.telefone = payload.telefone
+      if (telefoneMudou) {
+        user.whatsAppConfirmado = false
+        user.whatsAppPendenteConfirmacao = true
+      }
+    }
+    if (payload.sexo !== undefined) user.sexo = payload.sexo as 'Masculino' | 'Feminino'
+    if (payload.avatarBase64 !== undefined) user.avatarBase64 = payload.avatarBase64
+    sessionStorage.setItem(`guc_mock_user_patch_${email}`, JSON.stringify(user))
+    return okRaw(user)
+  })
+  router.on('get', '/usuario/me', () => {
+    const email = currentEmail()
+    const patched = sessionStorage.getItem(`guc_mock_user_patch_${email}`)
+    if (patched) {
+      try {
+        return okRaw(JSON.parse(patched))
+      } catch {
+        /* fall through */
+      }
+    }
+    return okRaw(mockUserForEmail(email))
+  })
+  router.on('delete', '/usuario/me', () => voidOk('Conta excluída.'))
+  router.on('put', '/usuario/me/senha', () => voidOk('Senha alterada.'))
+  router.on('get', '/usuario/me/estabelecimentos', () => {
+    // Escopo de filiais por identidade/plano (dono por plano; não-dono só a própria).
+    return okRaw(mockEstablishmentsForEmail(currentEmail()))
+  })
+  router.on('post', '/usuario/me/whatsapp/opt-in', () => voidOk('Preferência atualizada.'))
+  router.on('post', '/usuario/me/whatsapp/solicitar-confirmacao', () => {
+    const email = currentEmail()
+    const patchedRaw = sessionStorage.getItem(`guc_mock_user_patch_${email}`)
+    const user = patchedRaw
+      ? (JSON.parse(patchedRaw) as ReturnType<typeof mockUserForEmail>)
+      : { ...mockUserForEmail(email) }
+    user.whatsAppPendenteConfirmacao = true
+    user.whatsAppConfirmado = false
+    sessionStorage.setItem(`guc_mock_user_patch_${email}`, JSON.stringify(user))
+
+    // Simula webhook: confirma após ~2s para o poll / "Já confirmei" funcionarem no mock.
+    window.setTimeout(() => {
+      const latestRaw = sessionStorage.getItem(`guc_mock_user_patch_${email}`)
+      const latest = latestRaw
+        ? (JSON.parse(latestRaw) as ReturnType<typeof mockUserForEmail>)
+        : { ...mockUserForEmail(email) }
+      latest.whatsAppConfirmado = true
+      latest.whatsAppPendenteConfirmacao = false
+      sessionStorage.setItem(`guc_mock_user_patch_${email}`, JSON.stringify(latest))
+    }, 2000)
+
+    const telefone = (user.telefone ?? '5511999999999').replace(/\D/g, '')
+    const token = btoa(telefone)
+    return ok({
+      numeroPlataforma: '5511999999999',
+      tokenConfirmacao: token,
+      linkConfirmacao: `http://localhost:3000/c/${token}`,
+      linkWhatsApp: `https://wa.me/5511999999999?text=${encodeURIComponent(token)}`,
+      whatsAppEnviado: true,
+      emailEnviado: true,
+    })
+  })
+
+  /* ---------- Planos ---------- */
+  router.on('get', '/planos', (req) => {
+    const tipo =
+      req.query.tipoAssinatura === 'ProfissionalAutonomo'
+        ? 'ProfissionalAutonomo'
+        : 'Estabelecimento'
+    return ok(mockPlanosResponse(tipo))
+  })
+
+  /* ---------- Assinatura ---------- */
+  router.on('get', '/assinaturas/onboarding/contexto', () => {
+    const lojas = mockEstablishmentsForEmail(currentEmail()).filter((e) => e.role === 'Owner')
+    // Mock: permite testar o wizard de contratação mesmo com tenant já existente.
+    // Contas sem loja (cliente / autonomo.novo) e também as com loja entram em AssinarPlano.
+    if (lojas.length === 0) {
+      return ok({
+        temEstabelecimentoProprio: false,
+        estabelecimentos: [],
+        proximaEtapa: 'AssinarPlano',
+        estabelecimentoIdSugerido: null,
+        podeAdicionarLoja: false,
+        lojasVinculadas: 0,
+        limiteLojas: null,
+        assinaturaPremiumId: null,
+      })
+    }
+
+    const limite = lojas[0]?.limites?.estabelecimentos ?? 1
+    const lojasVinculadas = lojas.length
+    const podeAdicionarLoja = lojasVinculadas > 0 && limite > 1 && lojasVinculadas < limite
+
+    // Força AssinarPlano no mock para QA do onboarding (não redireciona para Gerenciar).
+    return ok({
+      temEstabelecimentoProprio: false,
+      estabelecimentos: [],
+      proximaEtapa: 'AssinarPlano',
+      estabelecimentoIdSugerido: null,
+      podeAdicionarLoja,
+      lojasVinculadas,
+      limiteLojas: limite > 1 ? limite : null,
+      assinaturaPremiumId: podeAdicionarLoja || limite > 1 ? 1 : null,
+    })
+  })
+
+  router.on('get', '/assinaturas/onboarding/publicacao', (req: MockRequest) => {
+    const estabelecimentoId = Number(req.query?.estabelecimentoId ?? 1)
+    const loja = mockEstablishmentsForEmail(currentEmail()).find(
+      (e) => e.estabelecimentoId === estabelecimentoId,
+    )
+    const autonomo = loja?.tipoAssinatura === 'ProfissionalAutonomo'
+    return ok({
+      estabelecimentoId,
+      tipoAssinatura: loja?.tipoAssinatura ?? 'Estabelecimento',
+      prontoParaPublicacao: !loja?.onboardingObrigatorioPendente,
+      visivelPublicamente: !loja?.onboardingObrigatorioPendente,
+      onboardingObrigatorioPendente: loja?.onboardingObrigatorioPendente ?? false,
+      proximaEtapa: loja?.proximaEtapaOnboarding ?? null,
+      etapas: autonomo
+        ? [
+            { id: 'assinatura', titulo: 'Assinatura confirmada', concluida: true, pendencias: [] },
+            { id: 'servicos', titulo: 'Servicos', concluida: true, pendencias: [] },
+            { id: 'horarios', titulo: 'Horarios', concluida: true, pendencias: [] },
+          ]
+        : [
+            { id: 'assinatura', titulo: 'Assinatura confirmada', concluida: true, pendencias: [] },
+            { id: 'equipe', titulo: 'Equipe', concluida: true, pendencias: [] },
+            { id: 'servicos', titulo: 'Servicos', concluida: true, pendencias: [] },
+            { id: 'horarios', titulo: 'Horarios', concluida: true, pendencias: [] },
+          ],
+    })
+  })
+
+  router.on('post', '/assinaturas/onboarding/publicacao/recalcular', (req: MockRequest) => {
+    const estabelecimentoId = Number(req.query?.estabelecimentoId ?? 1)
+    const loja = mockEstablishmentsForEmail(currentEmail()).find(
+      (e) => e.estabelecimentoId === estabelecimentoId,
+    )
+    const autonomo = loja?.tipoAssinatura === 'ProfissionalAutonomo'
+    return ok({
+      estabelecimentoId,
+      tipoAssinatura: loja?.tipoAssinatura ?? 'Estabelecimento',
+      prontoParaPublicacao: true,
+      visivelPublicamente: true,
+      onboardingObrigatorioPendente: false,
+      proximaEtapa: null,
+      etapas: autonomo
+        ? [
+            { id: 'assinatura', titulo: 'Assinatura confirmada', concluida: true, pendencias: [] },
+            { id: 'servicos', titulo: 'Servicos', concluida: true, pendencias: [] },
+            { id: 'horarios', titulo: 'Horarios', concluida: true, pendencias: [] },
+          ]
+        : [
+            { id: 'assinatura', titulo: 'Assinatura confirmada', concluida: true, pendencias: [] },
+            { id: 'equipe', titulo: 'Equipe', concluida: true, pendencias: [] },
+            { id: 'servicos', titulo: 'Servicos', concluida: true, pendencias: [] },
+            { id: 'horarios', titulo: 'Horarios', concluida: true, pendencias: [] },
+          ],
+    })
+  })
+
+  router.on('get', '/assinaturas/atual', () => {
+    const loja = mockEstablishmentsForEmail(currentEmail())[0]
+    return ok({
+      ...MOCK_ASSINATURA,
+      planoId: loja?.planoId ?? MOCK_ASSINATURA.planoId,
+      estabelecimentoId: loja?.estabelecimentoId ?? MOCK_ASSINATURA.estabelecimentoId,
+    })
+  })
+  router.on('get', '/assinaturas/:assinaturaId/cobrancas', () => {
+    const loja = mockEstablishmentsForEmail(currentEmail())[0]
+    const valor = loja?.planoNome === 'Essencial' ? 49.9 : loja?.planoId === 3 ? 79.9 : 159.9
+    return ok(
+      MOCK_COBRANCAS.map((c) => ({
+        ...c,
+        valor: loja?.tipoAssinatura === 'ProfissionalAutonomo' ? valor : c.valor,
+      })),
+    )
+  })
+  router.on('post', '/assinaturas', () => {
+    const loja = mockEstablishmentsForEmail(currentEmail())[0]
+    return ok({
+      ...MOCK_ASSINATURA,
+      planoId: loja?.planoId ?? MOCK_ASSINATURA.planoId,
+      estabelecimentoId: loja?.estabelecimentoId ?? MOCK_ASSINATURA.estabelecimentoId,
+    })
+  })
+  router.on('post', '/assinaturas/:assinaturaId/trocar-plano', () => {
+    const loja = mockEstablishmentsForEmail(currentEmail())[0]
+    return ok({
+      ...MOCK_ASSINATURA,
+      planoId: loja?.planoId ?? MOCK_ASSINATURA.planoId,
+      estabelecimentoId: loja?.estabelecimentoId ?? MOCK_ASSINATURA.estabelecimentoId,
+    })
+  })
+  router.on('post', '/assinaturas/:assinaturaId/cancelar', () => {
+    const loja = mockEstablishmentsForEmail(currentEmail())[0]
+    return ok({
+      ...MOCK_ASSINATURA,
+      planoId: loja?.planoId ?? MOCK_ASSINATURA.planoId,
+      estabelecimentoId: loja?.estabelecimentoId ?? MOCK_ASSINATURA.estabelecimentoId,
+      status: 'Cancelada',
+    })
+  })
+  router.on('post', '/assinaturas/:assinaturaId/estabelecimentos', (req: MockRequest) => {
+    const lojas = mockEstablishmentsForEmail(currentEmail())
+    const owner = lojas.find((e) => e.role === 'Owner')
+    if (!owner) {
+      return error(
+        'UsuarioSemPermissaoAssinatura',
+        'Apenas o proprietário pode adicionar unidades.',
+        403,
+      )
+    }
+    const limite = owner.limites?.estabelecimentos ?? 1
+    const vinculadas = lojas.filter((e) => e.role === 'Owner').length
+    if (limite <= 1 || vinculadas >= limite) {
+      return error(
+        'LimiteEstabelecimentosExcedido',
+        'Limite de estabelecimentos do plano atingido.',
+        400,
+      )
+    }
+    const payload = (req.body ?? {}) as {
+      estabelecimento?: { nome?: string; logo?: string }
+    }
+    const nome = payload.estabelecimento?.nome ?? 'Nova Unidade'
+    const nextId = Math.max(0, ...lojas.map((e) => e.estabelecimentoId)) + 1
+    const nova = {
+      ...owner,
+      estabelecimentoId: nextId,
+      publicGuid: `mock-guid-${nextId}`,
+      nome,
+      logo: payload.estabelecimento?.logo ?? '',
+    }
+    mockPushExtraEstablishment(nova)
+    return ok({
+      estabelecimentoId: nextId,
+      nome,
+      assinaturaId: 1,
+    })
+  })
+
+  /* ---------- Estabelecimento perfil ---------- */
+  router.on('get', '/estabelecimentos/:estabelecimentoId/perfil', (req: MockRequest) => {
+    const email = currentEmail()
+    const loja = mockEstablishmentsForEmail(email).find(
+      (e) => String(e.estabelecimentoId) === String(req.params.estabelecimentoId),
+    ) ?? mockEstablishmentsForEmail(email)[0]
+    const user = mockUserForEmail(email)
+    if (loja?.tipoAssinatura === 'ProfissionalAutonomo') {
+      return ok({
+        ...MOCK_PERFIL_ESTABELECIMENTO,
+        id: loja.estabelecimentoId,
+        publicGuid: loja.publicGuid,
+        nome: loja.nome,
+        descricao: 'Profissional autônomo — atendimento individual.',
+        telefone: user.telefone ?? '',
+        email: user.email,
+        categoriaId: 2,
+        categoria: 'Barbeiro',
+      })
+    }
+    return ok({
+      ...MOCK_PERFIL_ESTABELECIMENTO,
+      id: loja?.estabelecimentoId ?? MOCK_PERFIL_ESTABELECIMENTO.id,
+      nome: loja?.nome ?? MOCK_PERFIL_ESTABELECIMENTO.nome,
+    })
+  })
+  router.on('put', '/estabelecimentos/:estabelecimentoId/perfil', (req: MockRequest) => {
+    const email = currentEmail()
+    const loja = mockEstablishmentsForEmail(email)[0]
+    const user = mockUserForEmail(email)
+    if (loja?.tipoAssinatura === 'ProfissionalAutonomo') {
+      return ok({
+        ...MOCK_PERFIL_ESTABELECIMENTO,
+        id: loja.estabelecimentoId,
+        publicGuid: loja.publicGuid,
+        nome: loja.nome,
+        descricao: 'Profissional autônomo — atendimento individual.',
+        telefone: user.telefone ?? '',
+        email: user.email,
+        categoriaId: 2,
+        categoria: 'Barbeiro',
+        ...(req.body as object),
+      })
+    }
+    return ok(MOCK_PERFIL_ESTABELECIMENTO)
+  })
+
+  /* ---------- Rede ---------- */
+  router.on('get', '/rede/resumo', () => ok(MOCK_REDE))
+
+  /* ---------- Privacidade ---------- */
+  router.on('get', '/privacidade/meus-dados', () => ok(MOCK_DADOS_PRIVACIDADE))
+  router.on('post', '/privacidade/solicitar-exclusao', () => voidOk('Exclusão solicitada.'))
+  router.on('post', '/privacidade/revogar-consentimento', () => voidOk('Consentimento revogado.'))
+
+  /* ---------- WhatsApp estabelecimento ---------- */
+  router.on('post', '/estabelecimentos/:estabelecimentoId/whatsapp/solicitar-confirmacao', () => {
+    return ok({ solicitado: true, numero: '(79) 3200-0000' })
+  })
+  router.on('post', '/estabelecimentos/:estabelecimentoId/whatsapp/opt-in', () => voidOk('Preferência atualizada.'))
+}

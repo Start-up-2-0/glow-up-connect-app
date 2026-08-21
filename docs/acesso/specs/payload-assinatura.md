@@ -244,14 +244,14 @@ A API valida e persiste `logo` com as **mesmas regras do avatar** (`IAvatarBase6
     "status": "Trial",
     "gateway": "MercadoPago",
     "inicio": "2026-06-07T12:00:00Z",
-    "fim": null,
+    "fim": "2026-06-21T00:00:00Z",
     "pagamentoInicial": null,
     "diaVencimento": 10,
-    "proximaDataVencimento": "2026-07-10T00:00:00Z",
-    "proximaDataGeracaoCobranca": "2026-07-08T00:00:00Z",
-    "proximaDataAlerta": "2026-07-07T00:00:00Z",
+    "proximaDataVencimento": "2026-06-21T00:00:00Z",
+    "proximaDataGeracaoCobranca": "2026-06-14T00:00:00Z",
+    "proximaDataAlerta": "2026-06-14T00:00:00Z",
     "emTrial": true,
-    "diasTrial": 30
+    "diasTrial": 14
   }
 }
 ```

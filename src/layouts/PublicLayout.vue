@@ -13,7 +13,7 @@ const registerLink = computed(() => authRouteWithRedirect(ROUTE_PATHS.REGISTER, 
 
 <template>
   <div class="min-h-dvh bg-glow-canvas">
-    <header class="border-b border-glow-border-soft bg-glow-surface">
+    <header class="border-b border-glow-border-soft bg-glow-surface pt-[max(0px,env(safe-area-inset-top))]">
       <div class="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 lg:px-6">
         <RouterLink to="/" class="font-urbanist text-lg font-semibold text-glow-text">
           {{ APP_NAME }}

@@ -27,6 +27,7 @@ const expanded = ref(false)
 
 function isChildRouteActive(to?: string) {
   if (!to) return false
+  if (to === '/financeiro' || to === '/configuracoes/assinatura') return route.path === to
   return route.path === to || route.path.startsWith(`${to}/`)
 }
 

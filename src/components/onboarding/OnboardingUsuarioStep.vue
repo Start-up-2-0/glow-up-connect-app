@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import AuthPasswordToggle from '@/components/auth/AuthPasswordToggle.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import AuthRecaptcha from '@/components/auth/AuthRecaptcha.vue'
+import SegmentedControl from '@/components/ui/SegmentedControl.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import {
   AGENDAR_BTN_CONTINUE_CLASS,
@@ -13,6 +14,7 @@ import {
 import type { OnboardingUsuarioDraft } from '@/types/onboardingAssinatura.types'
 import { telefoneLocalFromApi } from '@/utils/formatters'
 import { useCaptcha } from '@/composables/useCaptcha'
+import { compressAvatarFile } from '@/utils/avatarFile'
 
 const props = defineProps<{
   initial: OnboardingUsuarioDraft
@@ -32,6 +34,7 @@ const emit = defineEmits<{
       confirmarEmail: string
       senha: string
       confirmarSenha: string
+      sexo?: 'Masculino' | 'Feminino'
       avatarBase64?: string
       avatarContentType?: string
       captchaToken?: string
@@ -51,7 +54,14 @@ const confirmarSenha = ref('')
 const mostrarSenha = ref(false)
 const mostrarConfirmarSenha = ref(false)
 const avatarFile = ref<File | null>(null)
+const sexo = ref<'' | 'Masculino' | 'Feminino'>('')
 const captchaError = ref('')
+const avatarError = ref('')
+
+const SEXO_OPTIONS = [
+  { value: 'Masculino', label: 'Masculino' },
+  { value: 'Feminino', label: 'Feminino' },
+]
 
 const FIELD_KEYS = {
   nome: ['Nome', 'nome'],
@@ -68,15 +78,6 @@ function getFieldError(...keys: readonly string[]): string | undefined {
   return undefined
 }
 
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
-}
-
 async function handleSubmit() {
   const captchaToken = captchaRef.value?.getToken()
   if (captchaEnabled && !captchaToken) {
@@ -84,6 +85,7 @@ async function handleSubmit() {
     return
   }
   captchaError.value = ''
+  avatarError.value = ''
 
   const payload = {
     nome: nome.value,
@@ -92,6 +94,7 @@ async function handleSubmit() {
     confirmarEmail: confirmarEmail.value,
     senha: senha.value,
     confirmarSenha: confirmarSenha.value,
+    sexo: sexo.value || undefined,
   } as {
     nome: string
     telefone: string
@@ -99,14 +102,22 @@ async function handleSubmit() {
     confirmarEmail: string
     senha: string
     confirmarSenha: string
+    sexo?: 'Masculino' | 'Feminino'
     avatarBase64?: string
     avatarContentType?: string
     captchaToken?: string
   }
 
   if (avatarFile.value) {
-    payload.avatarBase64 = await readFileAsDataUrl(avatarFile.value)
-    payload.avatarContentType = avatarFile.value.type
+    try {
+      const compressed = await compressAvatarFile(avatarFile.value)
+      payload.avatarBase64 = compressed.dataUrl
+      payload.avatarContentType = compressed.contentType
+    } catch (err) {
+      avatarError.value =
+        err instanceof Error ? err.message : 'Não foi possível otimizar a imagem. Tente outra foto.'
+      return
+    }
   }
 
   payload.captchaToken = captchaToken
@@ -150,6 +161,11 @@ async function handleSubmit() {
           </p>
         </div>
 
+        <div class="flex flex-col gap-2 sm:col-span-2">
+          <span :class="GLOW_LABEL_CLASS">Sexo</span>
+          <SegmentedControl v-model="sexo" :options="SEXO_OPTIONS" aria-label="Sexo" />
+        </div>
+
         <TelefoneInput
           id="onb-telefone"
           v-model="telefone"
@@ -169,7 +185,7 @@ async function handleSubmit() {
             type="email"
             autocomplete="email"
             required
-            placeholder="ex: usuario01@exemplo.com"
+            placeholder="ex: usuário01@exemplo.com"
             :class="GLOW_INPUT_CLASS"
           />
           <p v-if="getFieldError(...FIELD_KEYS.email)" class="text-sm text-red-600">
@@ -178,14 +194,14 @@ async function handleSubmit() {
         </div>
 
         <div class="flex flex-col gap-2">
-          <label for="onb-confirmar-email" :class="GLOW_LABEL_CLASS">Confirmar E-mail</label>
+          <label for="onb-confirmar-email" :class="GLOW_LABEL_CLASS">Confirmar e-mail</label>
           <input
             id="onb-confirmar-email"
             v-model="confirmarEmail"
             type="email"
             autocomplete="email"
             required
-            placeholder="ex: usuario01@exemplo.com"
+            placeholder="ex: usuário01@exemplo.com"
             :class="GLOW_INPUT_CLASS"
           />
         </div>
@@ -208,7 +224,7 @@ async function handleSubmit() {
         </div>
 
         <div class="relative flex flex-col gap-2">
-          <label for="onb-confirmar-senha" :class="GLOW_LABEL_CLASS">Confirmar Senha</label>
+          <label for="onb-confirmar-senha" :class="GLOW_LABEL_CLASS">Confirmar senha</label>
           <input
             id="onb-confirmar-senha"
             v-model="confirmarSenha"
@@ -225,7 +241,13 @@ async function handleSubmit() {
         </div>
 
         <div class="sm:col-span-2">
-          <AuthAvatarUpload @change="(file) => (avatarFile = file)" @error="() => {}" />
+          <AuthAvatarUpload
+            @change="(file) => (avatarFile = file)"
+            @error="(msg) => (avatarError = msg)"
+          />
+          <p v-if="avatarError" class="mt-2 text-sm text-red-600" role="alert">
+            {{ avatarError }}
+          </p>
         </div>
       </div>
 

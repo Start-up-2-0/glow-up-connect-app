@@ -75,12 +75,7 @@ function handleConfirm() {
 
 <template>
   <Teleport to="body">
-    <Transition
-      enter-active-class="transition-opacity duration-200"
-      leave-active-class="transition-opacity duration-200"
-      enter-from-class="opacity-0"
-      leave-to-class="opacity-0"
-    >
+    <Transition name="equipe-modal">
       <div
         v-if="open"
         class="financeiro-modal-overlay"
@@ -120,7 +115,7 @@ function handleConfirm() {
             />
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="font-urbanist text-sm font-medium text-glow-text">Início vigência</label>
+                <label class="font-urbanist text-sm font-medium text-glow-text">Início da vigência</label>
                 <input
                   v-model="inicioVigencia"
                   type="date"

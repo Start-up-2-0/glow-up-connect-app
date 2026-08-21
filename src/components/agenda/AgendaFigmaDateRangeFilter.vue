@@ -99,8 +99,8 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
     :class="{
       'agenda-figma-filter--open': open,
       'agenda-figma-filter--active': hasAppliedValue,
+      'agenda-figma-filter--wide': minWidth !== '171px',
     }"
-    :style="{ minWidth }"
   >
     <button
       type="button"

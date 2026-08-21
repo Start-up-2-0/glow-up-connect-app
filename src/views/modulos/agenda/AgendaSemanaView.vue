@@ -6,7 +6,7 @@ import { ROUTE_PATHS } from '@/constants/routes'
 const router = useRouter()
 
 onMounted(() => {
-  void router.replace({ path: ROUTE_PATHS.AGENDA, query: { periodo: 'semana' } })
+  void router.replace({ path: ROUTE_PATHS.AGENDA, query: { visao: 'semana' } })
 })
 </script>
 

@@ -1,9 +1,17 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import EnderecoForm from '@/components/form/EnderecoForm.vue'
+import { publicoService } from '@/services/publicoService'
+import type { EstabelecimentoCategoria } from '@/types/estabelecimento.types'
+import {
+  opcoesCategoriaDoTipo,
+  placeholderCategoria,
+  sugerirCategoriaId,
+} from '@/utils/categoriasEstabelecimento'
 import OnboardingContratarFormActions from '@/components/onboarding/OnboardingContratarFormActions.vue'
 import {
   AGENDAR_BTN_CONTINUE_CLASS,
@@ -33,6 +41,7 @@ const props = withDefaults(
     submitLabel?: string
     backLabel?: string
     showBack?: boolean
+    modoAutonomo?: boolean
   }>(),
   {
     variant: 'public',
@@ -40,6 +49,7 @@ const props = withDefaults(
     submitLabel: 'Continuar para assinatura',
     backLabel: 'Voltar',
     showBack: false,
+    modoAutonomo: false,
   },
 )
 
@@ -93,12 +103,39 @@ const logoDataUrl = ref<string | null>(props.initial.logoDataUrl)
 const logoError = ref<string | null>(null)
 const enderecoError = ref<string | null>(null)
 
+const categorias = ref<EstabelecimentoCategoria[]>([])
+const categoriaId = ref<string>(props.initial.categoriaId ? String(props.initial.categoriaId) : '')
+const categoriaError = ref<string | null>(null)
+
+const tipoCategoria = computed(() =>
+  props.modoAutonomo ? 'ProfissionalAutonomo' as const : 'Estabelecimento' as const,
+)
+
+const categoriaOptions = computed(() =>
+  opcoesCategoriaDoTipo(categorias.value, tipoCategoria.value),
+)
+
+const categoriaPlaceholder = computed(() => placeholderCategoria(tipoCategoria.value))
+
+onMounted(async () => {
+  try {
+    categorias.value = await publicoService.listarCategorias(tipoCategoria.value)
+    categoriaId.value = sugerirCategoriaId(
+      categorias.value,
+      tipoCategoria.value,
+      categoriaId.value,
+    )
+  } catch {
+    categorias.value = []
+  }
+})
+
 const shellClass = computed(() => {
   if (isContratar.value && !props.embedded) return ONBOARDING_CONTRATAR_CARD_CLASS
   return isPublic.value ? 'space-y-6' : ''
 })
 
-const alertMessage = computed(() => props.errorMessage || logoError.value || enderecoError.value)
+const alertMessage = computed(() => props.errorMessage || logoError.value || enderecoError.value || categoriaError.value)
 
 async function onLogoChange(file: File | null) {
   logoError.value = null
@@ -115,6 +152,7 @@ async function onLogoChange(file: File | null) {
 
 function handleSubmit() {
   enderecoError.value = null
+  categoriaError.value = null
 
   if (isContratar.value) {
     const validationError = validateEnderecoForSubmit(endereco.value)
@@ -122,6 +160,14 @@ function handleSubmit() {
       enderecoError.value = validationError
       return
     }
+  }
+
+  // Área de atuação (ofício) — obrigatória para loja e autônomo.
+  if (!categoriaId.value) {
+    categoriaError.value = props.modoAutonomo
+      ? 'Selecione a área em que você atua.'
+      : 'Selecione a área de atuação do negócio.'
+    return
   }
 
   emit('submit', {
@@ -137,6 +183,7 @@ function handleSubmit() {
     estado: estado.value,
     complemento: complemento.value,
     logoDataUrl: logoDataUrl.value,
+    categoriaId: Number(categoriaId.value),
   })
 }
 </script>
@@ -145,7 +192,7 @@ function handleSubmit() {
   <div :class="shellClass">
     <header v-if="!isContratar" :class="isPublic ? '' : 'mb-6'">
       <h1 :class="isPublic ? 'agendar-section-title' : 'font-satoshi text-2xl font-bold text-glow-text'">
-        Cadastre seu estabelecimento
+        {{ modoAutonomo ? 'Cadastre seu perfil profissional' : 'Cadastre seu estabelecimento' }}
       </h1>
       <p
         :class="
@@ -154,7 +201,11 @@ function handleSubmit() {
             : 'mt-1 text-sm text-glow-text-subtle'
         "
       >
-        Informe os dados do negócio que será vinculado à assinatura.
+        {{
+          modoAutonomo
+            ? 'Informe os dados do seu perfil profissional que será vinculado à assinatura.'
+            : 'Informe os dados do negócio que será vinculado à assinatura.'
+        }}
       </p>
     </header>
 
@@ -163,10 +214,14 @@ function handleSubmit() {
         class="font-satoshi font-bold text-glow-text"
         :class="embedded ? 'text-xl' : 'text-2xl'"
       >
-        Cadastre seu estabelecimento
+        {{ modoAutonomo ? 'Cadastre seu perfil profissional' : 'Cadastre seu estabelecimento' }}
       </h1>
       <p class="mt-2 font-satoshi text-base text-glow-text-subtle">
-        Informe os dados do negócio que será vinculado à assinatura.
+        {{
+          modoAutonomo
+            ? 'Informe os dados do seu perfil profissional que será vinculado à assinatura.'
+            : 'Informe os dados do negócio que será vinculado à assinatura.'
+        }}
       </p>
     </header>
 
@@ -185,33 +240,55 @@ function handleSubmit() {
       <template v-if="isContratar">
         <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
           <label :for="`${fieldIdPrefix}-nome`" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
-            Nome do estabelecimento
+            {{ modoAutonomo ? 'Nome profissional' : 'Nome do estabelecimento' }}
           </label>
           <input
             :id="`${fieldIdPrefix}-nome`"
             v-model="nome"
             type="text"
             required
-            placeholder="Informe o nome do seu estabelecimento"
+            :placeholder="
+              modoAutonomo
+                ? 'Informe seu nome profissional'
+                : 'Informe o nome do seu estabelecimento'
+            "
             :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
           />
         </div>
 
         <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
           <label :for="`${fieldIdPrefix}-descricao`" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
-            Descrição (opcional)
+            {{ modoAutonomo ? 'Sobre mim (opcional)' : 'Descrição (opcional)' }}
           </label>
           <input
             :id="`${fieldIdPrefix}-descricao`"
             v-model="descricao"
             type="text"
-            placeholder="Breve apresentação do seu negócio"
+            :placeholder="
+              modoAutonomo
+                ? 'Breve apresentação sobre você'
+                : 'Breve apresentação do seu negócio'
+            "
             :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
           />
         </div>
 
+        <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
+          <label :for="`${fieldIdPrefix}-categoria`" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
+            {{ modoAutonomo ? 'Em que área você atua?' : 'Área de atuação' }}
+          </label>
+          <BaseSelect
+            :id="`${fieldIdPrefix}-categoria`"
+            v-model="categoriaId"
+            :options="categoriaOptions"
+            :placeholder="categoriaPlaceholder"
+            :error="categoriaError ?? undefined"
+            required
+          />
+        </div>
+
         <AuthAvatarUpload
-          label="Logo do estabelecimento"
+          :label="modoAutonomo ? 'Foto profissional' : 'Logo do estabelecimento'"
           variant="contratar"
           @change="onLogoChange"
           @error="(msg) => (logoError = msg)"
@@ -219,14 +296,14 @@ function handleSubmit() {
 
         <div :class="ONBOARDING_CONTRATAR_FIELD_CLASS">
           <label :for="`${fieldIdPrefix}-email`" :class="ONBOARDING_CONTRATAR_LABEL_CLASS">
-            E-mail comercial
+            {{ modoAutonomo ? 'E-mail' : 'E-mail comercial' }}
           </label>
           <input
             :id="`${fieldIdPrefix}-email`"
             v-model="email"
             type="email"
             required
-            placeholder="ex: usuario01@gmail.com"
+            placeholder="ex: usuário01@gmail.com"
             :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
           />
         </div>
@@ -234,7 +311,7 @@ function handleSubmit() {
         <TelefoneInput
           :id="`${fieldIdPrefix}-telefone`"
           v-model="telefone"
-          label="Telefone comercial"
+          :label="modoAutonomo ? 'Telefone' : 'Telefone comercial'"
           variant="contratar"
           required
           placeholder="(00) 0 0000-0000"
@@ -258,49 +335,77 @@ function handleSubmit() {
       <template v-else>
         <div :class="GLOW_AUTH_FORM_GRID_CLASS">
           <div class="flex flex-col gap-2 sm:col-span-2">
-            <label :for="`${fieldIdPrefix}-nome`" :class="GLOW_LABEL_CLASS">Nome do estabelecimento</label>
+            <label :for="`${fieldIdPrefix}-nome`" :class="GLOW_LABEL_CLASS">
+              {{ modoAutonomo ? 'Nome profissional' : 'Nome do estabelecimento' }}
+            </label>
             <input
               :id="`${fieldIdPrefix}-nome`"
               v-model="nome"
               type="text"
               required
-              placeholder="Nome do seu negócio"
+              :placeholder="modoAutonomo ? 'Seu nome profissional' : 'Nome do seu negócio'"
               :class="GLOW_INPUT_CLASS"
             />
           </div>
 
           <div class="flex flex-col gap-2 sm:col-span-2">
-            <label :for="`${fieldIdPrefix}-descricao`" :class="GLOW_LABEL_CLASS">Descrição</label>
+            <label :for="`${fieldIdPrefix}-descricao`" :class="GLOW_LABEL_CLASS">
+              {{ modoAutonomo ? 'Sobre mim' : 'Descrição' }}
+            </label>
             <input
               :id="`${fieldIdPrefix}-descricao`"
               v-model="descricao"
               type="text"
-              placeholder="Opcional — breve apresentação do negócio"
+              :placeholder="
+                modoAutonomo
+                  ? 'Opcional — breve apresentação sobre você'
+                  : 'Opcional — breve apresentação do negócio'
+              "
               :class="GLOW_INPUT_CLASS"
             />
           </div>
 
+          <div class="flex flex-col gap-2 sm:col-span-2">
+            <label :for="`${fieldIdPrefix}-categoria`" :class="GLOW_LABEL_CLASS">
+              {{ modoAutonomo ? 'Em que área você atua?' : 'Área de atuação' }}
+            </label>
+            <BaseSelect
+              :id="`${fieldIdPrefix}-categoria`"
+              v-model="categoriaId"
+              :options="categoriaOptions"
+              :placeholder="categoriaPlaceholder"
+              :error="categoriaError ?? undefined"
+              required
+            />
+          </div>
+
           <div class="sm:col-span-2">
-            <AuthAvatarUpload label="Logo" @change="onLogoChange" @error="(msg) => (logoError = msg)" />
+            <AuthAvatarUpload
+              :label="modoAutonomo ? 'Foto profissional' : 'Logo'"
+              @change="onLogoChange"
+              @error="(msg) => (logoError = msg)"
+            />
           </div>
 
           <TelefoneInput
             :id="`${fieldIdPrefix}-telefone`"
             v-model="telefone"
-            label="Telefone comercial"
+            :label="modoAutonomo ? 'Telefone' : 'Telefone comercial'"
             variant="auth"
             required
             placeholder="(00) 0 0000-0000"
           />
 
           <div class="flex flex-col gap-2">
-            <label :for="`${fieldIdPrefix}-email`" :class="GLOW_LABEL_CLASS">E-mail comercial</label>
+            <label :for="`${fieldIdPrefix}-email`" :class="GLOW_LABEL_CLASS">
+              {{ modoAutonomo ? 'E-mail' : 'E-mail comercial' }}
+            </label>
             <input
               :id="`${fieldIdPrefix}-email`"
               v-model="email"
               type="email"
               required
-              placeholder="contato@seunegocio.com"
+              :placeholder="modoAutonomo ? 'ex: usuário01@gmail.com' : 'contato@seunegocio.com'"
               :class="GLOW_INPUT_CLASS"
             />
           </div>

@@ -10,6 +10,7 @@ export const useUserStore = defineStore('user', () => {
   const estabelecimentosLoading = ref(false)
   const saving = ref(false)
   const changingPassword = ref(false)
+  const regeneratingCodigo = ref(false)
 
   function setUser(user: User | null) {
     profile.value = user
@@ -82,6 +83,22 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  async function regenerarCodigoAgendamento() {
+    regeneratingCodigo.value = true
+    try {
+      const codigo = await userService.regenerarCodigoAgendamento()
+      if (profile.value) {
+        profile.value = {
+          ...profile.value,
+          codigoAgendamento: codigo,
+        }
+      }
+      return codigo
+    } finally {
+      regeneratingCodigo.value = false
+    }
+  }
+
   return {
     profile,
     estabelecimentos,
@@ -89,12 +106,14 @@ export const useUserStore = defineStore('user', () => {
     estabelecimentosLoading,
     saving,
     changingPassword,
+    regeneratingCodigo,
     setUser,
     setUserFromSummary,
     clear,
     fetchMe,
     updateProfile,
     changePassword,
+    regenerarCodigoAgendamento,
     fetchEstabelecimentos,
   }
 })

@@ -3,10 +3,12 @@ export type TipoAssinatura = 'Estabelecimento' | 'ProfissionalAutonomo'
 export type StatusAssinatura =
   | 'Trial'
   | 'Ativa'
+  | 'Inadimplente'
   | 'PendentePagamento'
   | 'Cancelada'
   | 'Suspensa'
   | 'Expirada'
+  | 'CancelamentoAgendado'
 
 export type StatusCobranca =
   | 'Pendente'
@@ -33,6 +35,8 @@ export interface EstabelecimentoOnboarding {
   logo: string
   telefone?: string
   email?: string
+  /** Categoria do estabelecimento (id do catálogo de categorias). */
+  categoriaId?: number
   endereco: EnderecoOnboarding
 }
 
@@ -42,6 +46,8 @@ export interface ProfissionalAutonomoOnboarding {
   logo: string
   telefone?: string
   email?: string
+  /** Área de atuação (mesmo catálogo do marketplace). */
+  categoriaId?: number
   endereco: EnderecoOnboarding
 }
 
@@ -61,13 +67,13 @@ export interface CriarAssinaturaPayload {
   estabelecimentoId?: number
   profissionalAutonomo?: ProfissionalAutonomoOnboarding
   gateway: 'MercadoPago'
-  diaVencimento: number
   pagamento?: PagamentoAssinaturaPayload
 }
 
 export interface PagamentoInicial {
   checkoutUrl?: string | null
   qrCode?: string | null
+  expiraEm?: string | null
 }
 
 export interface Assinatura {
@@ -78,12 +84,14 @@ export interface Assinatura {
   gateway: string
   inicio: string
   fim: string | null
-  diaVencimento: number
+  canceladoEm?: string | null
+  dataReferenciaCiclo: string
   proximaDataVencimento: string
   proximaDataGeracaoCobranca: string
   proximaDataAlerta: string
   emTrial: boolean
   diasTrial: number
+  percentualDescontoPermanente?: number | null
   pagamentoInicial: PagamentoInicial | null
   requerConfirmacaoEmail?: boolean
 }

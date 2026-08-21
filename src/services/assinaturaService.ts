@@ -1,5 +1,5 @@
 import api from './api'
-import type { ApiSuccessResponse, ApiSuccessResponseVoid } from '@/types/api.types'
+import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
   Assinatura,
   AdicionarEstabelecimentoPayload,
@@ -9,6 +9,7 @@ import type {
   TrocarPlanoPayload,
 } from '@/types/assinatura.types'
 import type { AssinaturaOnboardingContexto } from '@/types/assinaturaOnboarding.types'
+import type { OnboardingPublicacaoStatus } from '@/types/onboardingPublicacao.types'
 
 function unwrap<T>(response: { data: ApiSuccessResponse<T> }): T {
   return response.data.data
@@ -18,6 +19,24 @@ export const assinaturaService = {
   obterContextoOnboarding() {
     return api
       .get<ApiSuccessResponse<AssinaturaOnboardingContexto>>('/assinaturas/onboarding/contexto')
+      .then(unwrap)
+  },
+
+  obterStatusPublicacao(estabelecimentoId: number) {
+    return api
+      .get<ApiSuccessResponse<OnboardingPublicacaoStatus>>('/assinaturas/onboarding/publicacao', {
+        params: { estabelecimentoId },
+      })
+      .then(unwrap)
+  },
+
+  recalcularPublicacao(estabelecimentoId: number) {
+    return api
+      .post<ApiSuccessResponse<OnboardingPublicacaoStatus>>(
+        '/assinaturas/onboarding/publicacao/recalcular',
+        null,
+        { params: { estabelecimentoId } },
+      )
       .then(unwrap)
   },
 
@@ -33,8 +52,8 @@ export const assinaturaService = {
 
   cancelar(assinaturaId: number) {
     return api
-      .post<ApiSuccessResponseVoid>(`/assinaturas/${assinaturaId}/cancelar`)
-      .then((response) => response.data)
+      .post<ApiSuccessResponse<Assinatura>>(`/assinaturas/${assinaturaId}/cancelar`)
+      .then(unwrap)
   },
 
   listarCobrancas(assinaturaId: number) {

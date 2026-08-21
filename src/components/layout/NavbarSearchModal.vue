@@ -8,7 +8,7 @@ const props = withDefaults(
   defineProps<{
     placeholder?: string
   }>(),
-  { placeholder: 'Pesquisar...' },
+  { placeholder: 'Buscar...' },
 )
 
 const query = ref('')
@@ -44,18 +44,13 @@ function onKeydown(event: KeyboardEvent) {
 
 <template>
   <Teleport to="body">
-    <Transition
-      enter-active-class="transition-opacity duration-200"
-      leave-active-class="transition-opacity duration-200"
-      enter-from-class="opacity-0"
-      leave-to-class="opacity-0"
-    >
+    <Transition name="equipe-modal">
       <div
         v-if="open"
-        class="fixed inset-0 z-[100] flex items-start justify-center bg-black/40 p-4 pt-[max(1rem,env(safe-area-inset-top))] sm:items-center sm:p-6"
+        class="glow-modal-overlay items-start pt-[max(1rem,env(safe-area-inset-top))] sm:items-center"
         role="dialog"
         aria-modal="true"
-        aria-label="Pesquisar"
+        aria-label="Buscar"
         @click="onOverlayClick"
         @keydown="onKeydown"
       >
@@ -67,31 +62,29 @@ function onKeydown(event: KeyboardEvent) {
         >
           <div
             v-if="open"
-            class="w-full max-w-lg overflow-hidden rounded-xl border border-glow-border-soft bg-glow-surface shadow-xl"
+            class="w-full max-w-xl overflow-hidden rounded-2xl border border-glow-border-soft bg-glow-surface shadow-[0_24px_60px_-28px_rgba(15,23,42,0.55)] ring-1 ring-black/5"
             @click.stop
           >
-            <div class="flex items-center gap-3 border-b border-glow-border-soft px-4 py-3">
-              <IconSearch class="shrink-0 text-glow-text" :size="20" />
+            <div class="flex items-center gap-3 border-b border-glow-border-soft px-4 py-3.5">
+              <IconSearch class="shrink-0 text-glow-text-subtle" :size="20" />
               <input
                 ref="inputRef"
                 v-model="query"
                 type="search"
                 :placeholder="props.placeholder"
-                class="min-w-0 flex-1 border-0 bg-transparent font-urbanist text-sm text-glow-text placeholder:text-glow-placeholder focus:outline-none focus:ring-0"
+                class="min-w-0 flex-1 border-0 bg-transparent font-urbanist text-base text-glow-text placeholder:text-glow-placeholder focus:outline-none focus:ring-0"
               />
-              <button
-                type="button"
-                class="shrink-0 rounded px-2 py-1 font-urbanist text-xs font-medium text-glow-text-subtle transition-colors hover:bg-black/[0.03] hover:text-glow-text"
-                @click="close"
+              <kbd
+                class="shrink-0 rounded-md border border-glow-border-soft bg-glow-canvas px-2 py-1 font-urbanist text-[11px] font-semibold text-glow-text-soft"
               >
                 Esc
-              </button>
+              </kbd>
             </div>
 
-            <div class="max-h-80 overflow-y-auto px-4 py-4">
+            <div class="max-h-80 overflow-y-auto px-4 py-5">
               <slot>
                 <p class="text-center font-urbanist text-sm text-glow-text-subtle">
-                  Digite para buscar nas páginas disponíveis no seu menu.
+                  Digite para navegar — atalho global Ctrl + K.
                 </p>
               </slot>
             </div>

@@ -5,8 +5,6 @@ import { storeToRefs } from 'pinia'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
-import DiaVencimentoSelect from '@/components/assinatura/DiaVencimentoSelect.vue'
 import MercadoPagoCardForm from '@/components/assinatura/MercadoPagoCardForm.vue'
 import PromocaoLancamentoBanner from '@/components/assinatura/PromocaoLancamentoBanner.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
@@ -17,11 +15,21 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useUserStore } from '@/stores/user.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
+import { useLoading } from '@/composables/useLoading'
 import { ROUTE_PATHS } from '@/constants/routes'
-import { redirectToLandingPlanos } from '@/utils/landingUrl'
+import { resolveTipoAssinatura } from '@/utils/tipoAssinatura'
 import { formatBRL, telefoneToApi } from '@/utils/formatters'
 import { USER_ROLE } from '@/types/user.types'
-import { redirectToThirdPartyUrl } from '@/utils/thirdPartyRedirect'
+import { openThirdPartyUrl } from '@/utils/thirdPartyRedirect'
+import {
+  MENSAGEM_AGUARDANDO_PAGAMENTO,
+  MENSAGEM_LINK_EXPIRADO,
+  MENSAGEM_PAGAMENTO_CONCLUIDO,
+  MENSAGEM_REFRESH_FALHOU,
+  obterDeadlinePollPagamento,
+  sincronizarSessaoPosAssinatura,
+} from '@/utils/sessaoPosAssinatura'
+
 const route = useRoute()
 const router = useRouter()
 const planosStore = usePlanosStore()
@@ -30,6 +38,7 @@ const negocioStore = useNegocioStore()
 const userStore = useUserStore()
 const notifications = useNotificationsStore()
 const { resolveError, resolveErrorCode } = useApiError()
+const globalLoading = useLoading()
 
 const { promocao, loading: planosLoading } = storeToRefs(planosStore)
 const { loading: submitting } = storeToRefs(assinaturaStore)
@@ -41,7 +50,6 @@ const erro = ref<string | null>(null)
 const planoId = computed(() => Number(route.query.planoId))
 const plano = computed(() => planosStore.getPlanoById(planoId.value))
 
-const diaVencimento = ref<number | null>(null)
 const nome = ref('')
 const telefone = ref('')
 const email = ref('')
@@ -54,12 +62,10 @@ const estado = ref('')
 const complemento = ref('')
 const logoFile = ref<File | null>(null)
 
-const diasPermitidos = computed(
-  () => promocao.value?.diasVencimentoPermitidos ?? [5, 10, 15, 20],
-)
-
 const isAutonomo = computed(
-  () => userStore.profile?.role === USER_ROLE.PROFISSIONAL_AUTONOMO,
+  () =>
+    resolveTipoAssinatura(String(route.query.tipoAssinatura ?? '')) === 'ProfissionalAutonomo'
+    || userStore.profile?.role === USER_ROLE.PROFISSIONAL_AUTONOMO,
 )
 
 onMounted(async () => {
@@ -68,47 +74,58 @@ onMounted(async () => {
   }
 
   try {
-    await planosStore.fetchPlanos()
+    await planosStore.fetchPlanos(
+      false,
+      resolveTipoAssinatura(String(route.query.tipoAssinatura ?? '')),
+    )
   } catch (err) {
     erro.value = resolveError(err)
     return
   }
 
   if (!plano.value) {
-    redirectToLandingPlanos()
+    await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
     return
   }
 
-  diaVencimento.value = diasPermitidos.value[1] ?? 10
   email.value = userStore.profile?.email ?? ''
   nome.value = userStore.profile?.nome ?? ''
 })
 
-async function aguardarAtivacao() {
+async function aguardarAtivacao(expiraEm?: string | null) {
   aguardandoPagamento.value = true
-  const maxTentativas = 30
-  for (let i = 0; i < maxTentativas; i++) {
-    await new Promise((r) => setTimeout(r, 2000))
-    await negocioStore.fetchEstabelecimentos(true)
-    if (negocioStore.assinaturaAtiva) {
-      aguardandoPagamento.value = false
-      notifications.push('success', 'Pagamento confirmado! Bem-vindo ao dashboard.')
-      await router.push(ROUTE_PATHS.DASHBOARD)
-      return
+  globalLoading.open({ message: MENSAGEM_AGUARDANDO_PAGAMENTO })
+  try {
+    const deadline = obterDeadlinePollPagamento(expiraEm)
+    while (Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 2000))
+      try {
+        await negocioStore.fetchEstabelecimentos(true)
+      } catch {
+        // Continua aguardando o webhook.
+      }
+      if (negocioStore.assinaturaAtiva) {
+        const sessaoOk = await sincronizarSessaoPosAssinatura()
+        if (!sessaoOk) {
+          notifications.push('warning', MENSAGEM_REFRESH_FALHOU)
+        }
+        notifications.push('success', MENSAGEM_PAGAMENTO_CONCLUIDO)
+        await router.push(ROUTE_PATHS.DASHBOARD)
+        return
+      }
     }
+    notifications.push('info', MENSAGEM_LINK_EXPIRADO)
+  } finally {
+    aguardandoPagamento.value = false
+    globalLoading.close()
   }
-  aguardandoPagamento.value = false
-  notifications.push(
-    'info',
-    'Pagamento em processamento. Atualize a página em alguns instantes.',
-  )
 }
 
 async function finalizarCheckout() {
   erro.value = null
 
-  if (!plano.value || diaVencimento.value === null) {
-    erro.value = 'Selecione o plano e o dia de vencimento.'
+  if (!plano.value) {
+    erro.value = 'Selecione o plano.'
     return
   }
 
@@ -122,7 +139,13 @@ async function finalizarCheckout() {
     return
   }
 
-  const logo = await readFileAsDataUrl(logoFile.value)
+  let logo: string
+  try {
+    logo = await readFileAsDataUrl(logoFile.value)
+  } catch (err) {
+    erro.value = err instanceof Error ? err.message : 'Não foi possível otimizar a logo. Tente outra imagem.'
+    return
+  }
 
   const endereco = {
     cep: cep.value,
@@ -149,7 +172,6 @@ async function finalizarCheckout() {
           endereco,
         },
         gateway: 'MercadoPago' as const,
-        diaVencimento: diaVencimento.value,
         pagamento,
       }
     : {
@@ -163,7 +185,6 @@ async function finalizarCheckout() {
           endereco,
         },
         gateway: 'MercadoPago' as const,
-        diaVencimento: diaVencimento.value,
         pagamento,
       }
 
@@ -179,10 +200,15 @@ async function finalizarCheckout() {
 
     if (result.status === 'PendentePagamento') {
       if (result.pagamentoInicial?.checkoutUrl) {
-        redirectToThirdPartyUrl(result.pagamentoInicial.checkoutUrl)
-        return
+        const modo = openThirdPartyUrl(result.pagamentoInicial.checkoutUrl)
+        if (modo === 'denied') {
+          return
+        }
+        if (modo === 'same-tab') {
+          return
+        }
       }
-      await aguardarAtivacao()
+      await aguardarAtivacao(result.pagamentoInicial?.expiraEm)
       return
     }
 
@@ -214,13 +240,14 @@ function onLogoError(message: string) {
       <p v-if="plano" class="mt-1 text-sm text-glow-text-subtle">
         Plano {{ plano.nome }} — {{ formatBRL(plano.preco) }}/mês
       </p>
+      <p class="mt-2 text-sm text-glow-text-subtle">
+        A renovação será calculada automaticamente a partir da data de contratação.
+      </p>
     </div>
 
     <PromocaoLancamentoBanner v-if="promocao?.disponivel" :promocao="promocao" />
 
-    <LoadingSpinner v-if="planosLoading" />
-
-    <template v-else-if="plano">
+    <template v-if="!planosLoading && plano">
       <BaseCard title="Dados do negócio">
         <div class="space-y-4">
           <BaseInput v-model="nome" :label="isAutonomo ? 'Nome público' : 'Nome'" />
@@ -241,13 +268,6 @@ function onLogoError(message: string) {
         </div>
       </BaseCard>
 
-      <BaseCard title="Cobrança">
-        <DiaVencimentoSelect
-          v-model="diaVencimento"
-          :dias-permitidos="diasPermitidos"
-        />
-      </BaseCard>
-
       <BaseCard title="Cartão de crédito">
         <MercadoPagoCardForm ref="cardFormRef" />
       </BaseCard>
@@ -260,7 +280,7 @@ function onLogoError(message: string) {
         :loading="submitting || aguardandoPagamento"
         @click="finalizarCheckout"
       >
-        {{ aguardandoPagamento ? 'Processando pagamento...' : 'Contratar plano' }}
+        {{ aguardandoPagamento ? 'Aguardando confirmação do pagamento...' : 'Contratar plano' }}
       </BaseButton>
     </template>
   </div>

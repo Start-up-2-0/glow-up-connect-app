@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import AuthRecoveryLayout from '@/components/auth/recovery/AuthRecoveryLayout.vue'
 import AuthRecoveryBackLink from '@/components/auth/recovery/AuthRecoveryBackLink.vue'
 import AuthRecoveryAlert from '@/components/auth/recovery/AuthRecoveryAlert.vue'
@@ -17,8 +17,9 @@ import {
   GLOW_RECOVERY_TITLE_CLASS,
 } from '@/constants/designTokens'
 
+const route = useRoute()
 const router = useRouter()
-const { getStoredEmail, resetPassword, validatePassword } = useForgotPassword()
+const { getStoredCode, resetPassword, validatePassword } = useForgotPassword()
 const { resolveError } = useApiError()
 
 const senha = ref('')
@@ -29,12 +30,18 @@ const loading = ref(false)
 const mismatchError = ref(false)
 const errorMessage = ref('')
 
+const queryToken = computed(() => {
+  const token = route.query.token
+  return typeof token === 'string' ? token.trim() : ''
+})
+
 const canSubmit = computed(
   () => validatePassword(senha.value, confirmarSenha.value).valid,
 )
 
 onMounted(() => {
-  if (!getStoredEmail()) {
+  if (queryToken.value) return
+  if (!getStoredCode()) {
     void router.replace(ROUTE_PATHS.FORGOT_PASSWORD)
   }
 })
@@ -56,6 +63,7 @@ async function handleSubmit() {
     await resetPassword({
       senha: senha.value,
       confirmarSenha: confirmarSenha.value,
+      token: queryToken.value || undefined,
     })
     await router.push(ROUTE_PATHS.RESET_PASSWORD_SUCCESS)
   } catch (err) {
@@ -93,7 +101,7 @@ async function handleSubmit() {
 
       <div class="relative flex flex-col gap-2">
         <label for="confirmar-nova-senha" :class="GLOW_RECOVERY_LABEL_CLASS">
-          Confirmar Senha
+          Confirmar senha
         </label>
         <input
           id="confirmar-nova-senha"
@@ -111,7 +119,7 @@ async function handleSubmit() {
       </div>
 
       <AuthRecoveryAlert v-if="mismatchError">
-        As senhas não coincidem. Por favor verifique-as novamente.
+        As senhas não coincidem. Por favor, verifique-as novamente.
       </AuthRecoveryAlert>
 
       <AuthRecoveryAlert v-if="errorMessage">

@@ -2,6 +2,8 @@ import { computed, ref, watch, type Ref } from 'vue'
 import { horarioService } from '@/services/horarioService'
 import { equipeService } from '@/services/equipeService'
 import { profissionalVitrineService } from '@/services/profissionalVitrineService'
+import { storeToRefs } from 'pinia'
+import { useNegocioStore } from '@/stores/negocio.store'
 import { useNegocioContext } from '@/composables/useNegocioContext'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
@@ -9,6 +11,7 @@ import {
   DIAS_SEMANA,
   horaParaApi,
   horaParaExibicao,
+  normalizarDiaSemana,
   type DiaSemanaValue,
 } from '@/constants/diasSemana'
 import type { HorarioFuncionamento, HorarioProfissional, ProfissionalDiaHorarioConfig, HorarioProfissionalModoConfig } from '@/types/negocio/horario.types'
@@ -18,6 +21,7 @@ import {
   validarIntervaloHorario,
   horarioDentroDoFuncionamentoLoja,
 } from '@/utils/horarioProfissionalHelpers'
+import { emitTutorialEvent } from '@/tutorials/engine/eventBus'
 
 export type DiaLojaModo = 'novo' | 'visualizacao' | 'edicao'
 
@@ -30,6 +34,15 @@ export interface ProfissionalHorarioOption {
   profissionalId: number
   nomePublico: string
   avatarUrl?: string | null
+  cargo?: string | null
+}
+
+export interface HorarioMassaPayload {
+  dias: DiaSemanaValue[]
+  horaInicio: string
+  horaFim: string
+  aplicarProfissionais: boolean
+  profissionalIds: number[]
 }
 
 const HORA_PADRAO_INICIO = '08:00'
@@ -41,6 +54,7 @@ function emptyDiaDraft(): DiaLojaDraft {
 
 export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<boolean>) {
   const { possuiModulo, possuiPermissao, estabelecimentoAtivo } = useNegocioContext()
+  const { ehProfissionalAutonomo } = storeToRefs(useNegocioStore())
   const notifications = useNotificationsStore()
   const { resolveError } = useApiError()
 
@@ -62,13 +76,16 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
   const modalProfissionaisErro = ref<string | null>(null)
 
   const temModuloProfissionais = computed(() => possuiModulo('Profissionais'))
-  const usaProfissionaisVitrine = computed(() => !temModuloProfissionais.value)
+  /** Vitrine de profissionais é só para loja sem módulo Equipe — não se aplica ao autônomo. */
+  const usaProfissionaisVitrine = computed(
+    () => !ehProfissionalAutonomo.value && !temModuloProfissionais.value,
+  )
   const listaProfissionaisHorario = computed<ProfissionalHorarioOption[]>(() =>
     temModuloProfissionais.value
       ? profissionais.value.map((p) => ({
           profissionalId: p.profissionalId,
           nomePublico: p.nomePublico,
-          avatarUrl: null,
+          avatarUrl: p.foto ?? null,
         }))
       : profissionaisVitrine.value,
   )
@@ -80,15 +97,21 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
   const apenasHorarioProprio = computed(
     () => podeGerenciarProfissional.value && !podeGerenciarLoja.value,
   )
+  /** Autônomo e profissional de loja editam o próprio horário de atendimento, não o funcionamento da loja. */
+  const usaHorarioAtendimentoProprio = computed(
+    () => ehProfissionalAutonomo.value || apenasHorarioProprio.value,
+  )
   const exibeAbaProfissional = computed(
     () =>
-      temModuloProfissionais.value ||
-      usaProfissionaisVitrine.value ||
-      apenasHorarioProprio.value,
+      !ehProfissionalAutonomo.value &&
+      (temModuloProfissionais.value ||
+        usaProfissionaisVitrine.value ||
+        apenasHorarioProprio.value),
   )
 
   const podeGerenciarProfissionaisPorDia = computed(
     () =>
+      !ehProfissionalAutonomo.value &&
       podeGerenciarLoja.value &&
       exibeAbaProfissional.value &&
       listaProfissionaisHorario.value.length > 0,
@@ -99,11 +122,43 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
     for (const dia of DIAS_SEMANA) {
       map.set(
         dia.value,
-        horariosProfissionais.value.filter((h) => h.diaSemana === dia.value && h.ativo).length,
+        horariosProfissionais.value.filter((h) => {
+          const d = normalizarDiaSemana(h.diaSemana)
+          return d === dia.value && h.ativo
+        }).length,
       )
     }
     return map
   })
+
+  const profissionaisListaPorDia = computed(() => {
+    const map = new Map<DiaSemanaValue, ProfissionalHorarioOption[]>()
+    const porId = new Map(
+      listaProfissionaisHorario.value.map((p) => [p.profissionalId, p] as const),
+    )
+    for (const dia of DIAS_SEMANA) {
+      const lista: ProfissionalHorarioOption[] = []
+      for (const h of horariosProfissionais.value) {
+        const d = normalizarDiaSemana(h.diaSemana)
+        if (d !== dia.value || !h.ativo) continue
+        const base = porId.get(h.profissionalId)
+        lista.push({
+          profissionalId: h.profissionalId,
+          nomePublico: base?.nomePublico ?? `Profissional #${h.profissionalId}`,
+          avatarUrl: base?.avatarUrl ?? null,
+          cargo: base?.cargo ?? null,
+        })
+      }
+      map.set(dia.value, lista)
+    }
+    return map
+  })
+
+  const resumoHorarioComercialAtivo = computed(() =>
+    horariosLoja.value.some((h) => h.ativo),
+  )
+
+  const savingMassa = ref(false)
 
   const modalProfissionaisDiaLabel = computed(() => {
     if (!modalProfissionaisDia.value) return ''
@@ -128,7 +183,8 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
   const horariosPorDiaLoja = computed(() => {
     const map = new Map<DiaSemanaValue, HorarioFuncionamento>()
     for (const h of horariosLoja.value) {
-      map.set(h.diaSemana as DiaSemanaValue, h)
+      const dia = normalizarDiaSemana(h.diaSemana)
+      if (dia) map.set(dia, h)
     }
     return map
   })
@@ -137,9 +193,9 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
     const map = new Map<DiaSemanaValue, HorarioProfissional>()
     if (!profissionalProprioId.value) return map
     for (const h of horariosProfissionais.value) {
-      if (h.profissionalId === profissionalProprioId.value) {
-        map.set(h.diaSemana as DiaSemanaValue, h)
-      }
+      if (h.profissionalId !== profissionalProprioId.value) continue
+      const dia = normalizarDiaSemana(h.diaSemana)
+      if (dia) map.set(dia, h)
     }
     return map
   })
@@ -174,7 +230,7 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
       ...draftsLoja.value,
       [dia]: draftDiaLoja(dia),
     }
-    editingDiasLoja.value = new Set([...editingDiasLoja.value, dia])
+    editingDiasLoja.value = new Set([dia])
   }
 
   function cancelarEdicaoDiaLoja(dia: DiaSemanaValue) {
@@ -222,7 +278,11 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
       ...draftsProprio.value,
       [dia]: draftDiaProprio(dia),
     }
-    editingDiasProprio.value = new Set([...editingDiasProprio.value, dia])
+    editingDiasProprio.value = new Set([dia])
+  }
+
+  function labelDia(dia: DiaSemanaValue): string {
+    return DIAS_SEMANA.find((d) => d.value === dia)?.label ?? dia
   }
 
   function cancelarEdicaoDiaProprio(dia: DiaSemanaValue) {
@@ -277,7 +337,8 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
     modalProfissionaisConfigs.value = listaProfissionaisHorario.value.map((p) => {
       const existente =
         horariosProfissionais.value.find(
-          (h) => h.profissionalId === p.profissionalId && h.diaSemana === dia,
+          (h) =>
+            h.profissionalId === p.profissionalId && normalizarDiaSemana(h.diaSemana) === dia,
         ) ?? null
 
       const lojaInicio = lojaAtiva ? horaParaExibicao(loja!.horaInicio) : draft.horaInicio
@@ -412,7 +473,8 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
 
     const existente =
       horariosProfissionais.value.find(
-        (h) => h.profissionalId === profissionalId && h.diaSemana === dia,
+        (h) =>
+          h.profissionalId === profissionalId && normalizarDiaSemana(h.diaSemana) === dia,
       ) ?? null
 
     updateModalProfissionalConfig(profissionalId, {
@@ -538,7 +600,7 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
 
       await Promise.all(tarefas)
 
-      if (apenasHorarioProprio.value && profissionalProprioId.value) {
+      if (usaHorarioAtendimentoProprio.value && profissionalProprioId.value) {
         profissionais.value = [
           {
             id: 0,
@@ -552,9 +614,17 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
             podeReceberAgendamento: true,
           },
         ]
-      } else if (temModuloProfissionais.value && possuiPermissao('ProfissionalGerenciar')) {
+      } else if (
+        temModuloProfissionais.value
+        && possuiPermissao('ProfissionalGerenciar')
+        && !ehProfissionalAutonomo.value
+      ) {
         profissionais.value = await equipeService.listarProfissionais(estabelecimentoId.value)
-      } else if (!temModuloProfissionais.value && possuiPermissao('ProfissionalGerenciar')) {
+      } else if (
+        !ehProfissionalAutonomo.value
+        && !temModuloProfissionais.value
+        && possuiPermissao('ProfissionalGerenciar')
+      ) {
         const vitrine = await profissionalVitrineService.listar(estabelecimentoId.value)
         profissionaisVitrine.value = vitrine
           .filter((p) => p.ativo)
@@ -563,6 +633,9 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
             nomePublico: p.nomePublico,
             avatarUrl: p.logo || null,
           }))
+      } else {
+        profissionais.value = []
+        profissionaisVitrine.value = []
       }
 
       editingDiasLoja.value = new Set()
@@ -576,9 +649,15 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
     }
   }
 
-  async function salvarDiaLoja(dia: DiaSemanaValue) {
+  async function salvarDiaLoja(dia: DiaSemanaValue, opts?: { ativo?: boolean }) {
     if (!estabelecimentoId.value || !podeGerenciarLoja.value) return
     const draft = draftDiaLoja(dia)
+    const intervaloErro = validarIntervaloHorario(draft.horaInicio, draft.horaFim)
+    if (intervaloErro) {
+      notifications.push('error', intervaloErro)
+      return
+    }
+
     savingDia.value = dia
     try {
       const payload = {
@@ -587,20 +666,34 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
         horaFim: horaParaApi(draft.horaFim),
       }
       const existente = horariosPorDiaLoja.value.get(dia)
+      let horario: HorarioFuncionamento
       if (existente) {
-        const atualizado = await horarioService.atualizarLoja(
+        horario = await horarioService.atualizarLoja(
           estabelecimentoId.value,
           existente.id,
           payload,
         )
-        horariosLoja.value = horariosLoja.value.map((h) => (h.id === existente.id ? atualizado : h))
-        notifications.push('success', 'Horário atualizado.')
+        horariosLoja.value = horariosLoja.value.map((h) => (h.id === existente.id ? horario : h))
       } else {
-        const criado = await horarioService.criarLoja(estabelecimentoId.value, payload)
-        horariosLoja.value = [...horariosLoja.value, criado]
-        notifications.push('success', 'Horário salvo.')
+        horario = await horarioService.criarLoja(estabelecimentoId.value, payload)
+        horariosLoja.value = [...horariosLoja.value, horario]
       }
+
+      if (opts?.ativo !== undefined && horario.ativo !== opts.ativo) {
+        horario = await horarioService.alterarStatusLoja(
+          estabelecimentoId.value,
+          horario.id,
+          opts.ativo,
+        )
+        horariosLoja.value = horariosLoja.value.map((h) => (h.id === horario.id ? horario : h))
+      }
+
+      notifications.push(
+        'success',
+        `Horário de ${labelDia(dia).toLowerCase()} atualizado`,
+      )
       cancelarEdicaoDiaLoja(dia)
+      emitTutorialEvent('horario.dia.saved', { dia, scope: 'loja' })
     } catch (err) {
       notifications.push('error', resolveError(err, 'Não foi possível salvar o horário.'))
     } finally {
@@ -615,6 +708,11 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
       let horario = horariosPorDiaLoja.value.get(dia)
       if (!horario) {
         const draft = draftDiaLoja(dia)
+        const intervaloErro = validarIntervaloHorario(draft.horaInicio, draft.horaFim)
+        if (intervaloErro) {
+          notifications.push('error', intervaloErro)
+          return
+        }
         horario = await horarioService.criarLoja(estabelecimentoId.value, {
           diaSemana: dia,
           horaInicio: horaParaApi(draft.horaInicio),
@@ -628,7 +726,12 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
         ativo,
       )
       horariosLoja.value = horariosLoja.value.map((h) => (h.id === horario!.id ? atualizado : h))
-      notifications.push('success', ativo ? 'Horário ativado.' : 'Horário desativado.')
+      notifications.push(
+        'success',
+        ativo
+          ? `Horário de ${labelDia(dia).toLowerCase()} ativado`
+          : `Horário de ${labelDia(dia).toLowerCase()} desativado`,
+      )
       cancelarEdicaoDiaLoja(dia)
     } catch (err) {
       notifications.push('error', resolveError(err))
@@ -637,8 +740,100 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
     }
   }
 
+  async function aplicarHorariosEmMassa(payload: HorarioMassaPayload) {
+    if (!estabelecimentoId.value || !podeGerenciarLoja.value) return false
+    if (!payload.dias.length) {
+      notifications.push('error', 'Selecione ao menos um dia.')
+      return false
+    }
+
+    const intervaloErro = validarIntervaloHorario(payload.horaInicio, payload.horaFim)
+    if (intervaloErro) {
+      notifications.push('error', intervaloErro)
+      return false
+    }
+
+    savingMassa.value = true
+    try {
+      const estId = estabelecimentoId.value
+      const body = {
+        horaInicio: horaParaApi(payload.horaInicio),
+        horaFim: horaParaApi(payload.horaFim),
+      }
+
+      for (const dia of payload.dias) {
+        const existente = horariosPorDiaLoja.value.get(dia)
+        let horario: HorarioFuncionamento
+        if (existente) {
+          horario = await horarioService.atualizarLoja(estId, existente.id, {
+            diaSemana: dia,
+            ...body,
+          })
+          horariosLoja.value = horariosLoja.value.map((h) => (h.id === existente.id ? horario : h))
+        } else {
+          horario = await horarioService.criarLoja(estId, { diaSemana: dia, ...body })
+          horariosLoja.value = [...horariosLoja.value, horario]
+        }
+
+        if (!horario.ativo) {
+          horario = await horarioService.alterarStatusLoja(estId, horario.id, true)
+          horariosLoja.value = horariosLoja.value.map((h) => (h.id === horario.id ? horario : h))
+        }
+
+        if (payload.aplicarProfissionais && podeGerenciarProfissionaisPorDia.value) {
+          for (const profissionalId of payload.profissionalIds) {
+            const registro =
+              horariosProfissionais.value.find(
+                (h) =>
+                  h.profissionalId === profissionalId &&
+                  normalizarDiaSemana(h.diaSemana) === dia,
+              ) ?? null
+
+            if (registro) {
+              const atualizado = await horarioService.atualizarProfissional(estId, registro.id, {
+                diaSemana: dia,
+                ...body,
+              })
+              horariosProfissionais.value = horariosProfissionais.value.map((h) =>
+                h.id === registro.id ? atualizado : h,
+              )
+              if (!atualizado.ativo) {
+                const ativado = await horarioService.alterarStatusProfissional(
+                  estId,
+                  registro.id,
+                  true,
+                )
+                horariosProfissionais.value = horariosProfissionais.value.map((h) =>
+                  h.id === registro.id ? ativado : h,
+                )
+              }
+            } else {
+              const criado = await horarioService.criarProfissional(estId, profissionalId, {
+                diaSemana: dia,
+                ...body,
+              })
+              horariosProfissionais.value = [...horariosProfissionais.value, criado]
+            }
+          }
+        }
+      }
+
+      const n = payload.dias.length
+      notifications.push(
+        'success',
+        n === 1 ? 'Horário atualizado em 1 dia' : `Horários atualizados em ${n} dias`,
+      )
+      return true
+    } catch (err) {
+      notifications.push('error', resolveError(err, 'Não foi possível aplicar os horários.'))
+      return false
+    } finally {
+      savingMassa.value = false
+    }
+  }
+
   async function salvarDiaProprio(dia: DiaSemanaValue) {
-    if (!estabelecimentoId.value || !profissionalProprioId.value || !apenasHorarioProprio.value) {
+    if (!estabelecimentoId.value || !profissionalProprioId.value || !usaHorarioAtendimentoProprio.value) {
       return
     }
 
@@ -666,7 +861,10 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
         horariosProfissionais.value = horariosProfissionais.value.map((h) =>
           h.id === existente.id ? atualizado : h,
         )
-        notifications.push('success', 'Horário atualizado.')
+        notifications.push(
+          'success',
+          `Horário de ${labelDia(dia).toLowerCase()} atualizado`,
+        )
       } else {
         const criado = await horarioService.criarProfissional(
           estabelecimentoId.value,
@@ -674,9 +872,13 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
           payload,
         )
         horariosProfissionais.value = [...horariosProfissionais.value, criado]
-        notifications.push('success', 'Horário salvo.')
+        notifications.push(
+          'success',
+          `Horário de ${labelDia(dia).toLowerCase()} atualizado`,
+        )
       }
       cancelarEdicaoDiaProprio(dia)
+      emitTutorialEvent('horario.dia.saved', { dia, scope: 'proprio' })
     } catch (err) {
       notifications.push('error', resolveError(err, 'Não foi possível salvar o horário.'))
     } finally {
@@ -685,7 +887,7 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
   }
 
   async function alterarStatusDiaProprio(dia: DiaSemanaValue, ativo: boolean) {
-    if (!estabelecimentoId.value || !profissionalProprioId.value || !apenasHorarioProprio.value) {
+    if (!estabelecimentoId.value || !profissionalProprioId.value || !usaHorarioAtendimentoProprio.value) {
       return
     }
 
@@ -737,6 +939,7 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
     loading,
     savingDia,
     savingDiaProprio,
+    savingMassa,
     horariosLoja,
     horariosProfissionais,
     horariosPorDiaLoja,
@@ -745,6 +948,8 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
     podeGerenciarLoja,
     podeGerenciarProfissional,
     apenasHorarioProprio,
+    usaHorarioAtendimentoProprio,
+    profissionalProprioId,
     exibeAbaProfissional,
     temModuloProfissionais,
     usaProfissionaisVitrine,
@@ -755,6 +960,7 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
     cancelarEdicaoDiaLoja,
     salvarDiaLoja,
     alterarStatusDiaLoja,
+    aplicarHorariosEmMassa,
     modoDiaProprio,
     draftDiaProprio,
     setDraftDiaProprio,
@@ -773,6 +979,8 @@ export function useHorarios(estabelecimentoId: Ref<number | null>, ready: Ref<bo
     modalProfissionaisErro,
     podeGerenciarProfissionaisPorDia,
     profissionaisVinculadosPorDia,
+    profissionaisListaPorDia,
+    resumoHorarioComercialAtivo,
     abrirModalProfissionaisDia,
     fecharModalProfissionaisDia,
     setModalProfissionalModo,

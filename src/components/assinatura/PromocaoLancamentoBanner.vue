@@ -8,6 +8,7 @@ const props = defineProps<{
 }>()
 
 const isLanding = computed(() => props.variant === 'landing')
+const descontoLabel = computed(() => `${props.promocao.percentualDescontoMensalidade}%`)
 </script>
 
 <template>
@@ -19,10 +20,10 @@ const isLanding = computed(() => props.variant === 'landing')
   >
     <p class="font-montserrat text-lg font-semibold leading-snug text-glow-text">
       <span class="text-glow-promo-accent">Promoção de lançamento</span>
-      <span> — {{ promocao.diasTrial }} dias grátis</span>
+      <span> — {{ promocao.diasTrial }} dias grátis + {{ descontoLabel }} off para sempre</span>
     </p>
     <p class="mt-1.5 font-poppins text-sm font-normal leading-relaxed text-glow-text/85">
-      Restam {{ promocao.vagasRestantes }} vagas. Cartão necessário; primeira cobrança após o período de teste.
+      Restam {{ promocao.vagasRestantes }} vagas. Cartão necessário; primeira cobrança com desconto após o período de teste.
     </p>
   </div>
 
@@ -33,10 +34,10 @@ const isLanding = computed(() => props.variant === 'landing')
     role="status"
   >
     <p class="font-urbanist text-base font-semibold text-glow-text">
-      Promoção de lançamento — {{ promocao.diasTrial }} dias grátis
+      Promoção de lançamento — {{ promocao.diasTrial }} dias grátis + {{ descontoLabel }} off para sempre
     </p>
     <p class="mt-1.5 text-sm text-glow-text/75">
-      Restam {{ promocao.vagasRestantes }} vagas. Cartão necessário; primeira cobrança após o período de teste.
+      Restam {{ promocao.vagasRestantes }} vagas. Cartão necessário; primeira cobrança com desconto após o período de teste.
     </p>
   </div>
 </template>

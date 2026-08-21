@@ -1,106 +1,129 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
-import PlanoCard from '@/components/assinatura/PlanoCard.vue'
-import PromocaoLancamentoBanner from '@/components/assinatura/PromocaoLancamentoBanner.vue'
+import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
+import PlanosPromoBanner from '@/components/assinatura/planos/PlanosPromoBanner.vue'
+import PlanosPricingCard from '@/components/assinatura/planos/PlanosPricingCard.vue'
+import PlanosTrustBar from '@/components/assinatura/planos/PlanosTrustBar.vue'
+import TipoOperacaoPicker from '@/components/assinatura/TipoOperacaoPicker.vue'
 import { usePlanosStore } from '@/stores/planos.store'
+import { useNegocioStore } from '@/stores/negocio.store'
 import { useApiError } from '@/composables/useApiError'
+import { ordenarPlanosPorPreco } from '@/utils/planoDisplay'
+import { FEATURE_FLAGS } from '@/config/features'
+import { TIPO_ASSINATURA_PADRAO } from '@/utils/tipoAssinatura'
+import type { TipoAssinatura } from '@/types/assinatura.types'
 
 withDefaults(
   defineProps<{
-    showComparativa?: boolean
     modoLogado?: boolean
   }>(),
   {
-    showComparativa: true,
     modoLogado: false,
   },
 )
 
 const planosStore = usePlanosStore()
+const negocioStore = useNegocioStore()
 const { planos, promocao, loading } = storeToRefs(planosStore)
 const { resolveError } = useApiError()
 const erro = ref<string | null>(null)
-const comparativaAberta = ref(false)
+const tipoAssinatura = ref<TipoAssinatura | null>(
+  FEATURE_FLAGS.lojasHabilitadas ? null : TIPO_ASSINATURA_PADRAO,
+)
 
-const planoEssencial = computed(() => planos.value.find((p) => p.nome === 'Essencial'))
+const planosOrdenados = computed(() => ordenarPlanosPorPreco(planos.value))
 
-onMounted(async () => {
+const planoDestaqueId = computed(() => {
+  const premium = planosOrdenados.value.find((p) =>
+    p.nome.toLowerCase().includes('premium'),
+  )
+  return premium?.id ?? planosOrdenados.value[1]?.id ?? null
+})
+
+const exibirPromocaoTrial = computed(() => {
+  if (!promocao.value?.disponivel) return false
+  const jaTeveAssinatura = negocioStore.estabelecimentos.some((e) => Boolean(e.assinaturaId))
+  return !jaTeveAssinatura
+})
+
+const percentualDescontoPromocao = computed(() =>
+  exibirPromocaoTrial.value ? (promocao.value?.percentualDescontoMensalidade ?? null) : null,
+)
+
+const copyTitulo = computed(() =>
+  tipoAssinatura.value === 'ProfissionalAutonomo'
+    ? 'Planos para profissionais autônomos'
+    : 'Planos para estabelecimentos',
+)
+
+const copySubtitulo = computed(() =>
+  tipoAssinatura.value === 'ProfissionalAutonomo'
+    ? 'Uma experiência feita para quem trabalha sozinho — sem equipe, sem comissões.'
+    : 'Gestão completa para o seu negócio com equipe.',
+)
+
+async function carregarPlanos(tipo: TipoAssinatura) {
+  erro.value = null
   try {
-    await planosStore.fetchPlanos()
+    await planosStore.fetchPlanos(true, tipo)
   } catch (err) {
     erro.value = resolveError(err)
+  }
+}
+
+watch(tipoAssinatura, (tipo) => {
+  if (tipo) void carregarPlanos(tipo)
+}, { immediate: true })
+
+onMounted(async () => {
+  if (!FEATURE_FLAGS.lojasHabilitadas) {
+    tipoAssinatura.value = TIPO_ASSINATURA_PADRAO
   }
 })
 </script>
 
 <template>
-  <div>
-    <PromocaoLancamentoBanner v-if="promocao?.disponivel" :promocao="promocao" />
+  <div class="space-y-8">
+    <TipoOperacaoPicker v-if="FEATURE_FLAGS.lojasHabilitadas" v-model="tipoAssinatura" />
 
-    <LoadingSpinner v-if="loading" />
-    <p v-else-if="erro" class="text-center text-sm text-red-600">{{ erro }}</p>
-    <EmptyState
-      v-else-if="planos.length === 0"
-      title="Nenhum plano disponível"
-      description="Tente novamente mais tarde."
-    />
-    <div v-else class="grid gap-6 md:grid-cols-2">
-      <PlanoCard
-        v-for="plano in planos"
-        :key="plano.id"
-        :plano="plano"
-        :destacado="plano.id === planoEssencial?.id"
-        :desabilitado="planos.length === 0"
-        :modo-logado="modoLogado"
-      />
-    </div>
-
-    <div v-if="showComparativa && planos.length > 0" class="mt-10">
-      <button
-        type="button"
-        class="text-sm font-medium text-glow-gold hover:underline"
-        @click="comparativaAberta = !comparativaAberta"
-      >
-        {{ comparativaAberta ? 'Ocultar' : 'Ver' }} comparativo de funcionalidades
-      </button>
-      <div
-        v-if="comparativaAberta"
-        class="mt-4 overflow-x-auto rounded-lg border border-glow-border-soft"
-      >
-        <table class="min-w-full text-left text-sm">
-          <thead class="bg-glow-surface">
-            <tr>
-              <th class="px-4 py-3 font-medium text-glow-text">Funcionalidade</th>
-              <th
-                v-for="plano in planos"
-                :key="plano.id"
-                class="px-4 py-3 font-medium text-glow-text"
-              >
-                {{ plano.nome }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(func, idx) in [...new Set(planos.flatMap((p) => p.funcionalidades))]"
-              :key="idx"
-              class="border-t border-glow-border-soft"
-            >
-              <td class="px-4 py-2 text-glow-text-subtle">{{ func }}</td>
-              <td
-                v-for="plano in planos"
-                :key="`${plano.id}-${idx}`"
-                class="px-4 py-2 text-center"
-              >
-                {{ plano.funcionalidades.includes(func) ? '✓' : '—' }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <template v-if="tipoAssinatura">
+      <div class="mx-auto max-w-2xl text-center">
+        <h2 class="font-satoshi text-xl font-bold text-glow-text sm:text-2xl">{{ copyTitulo }}</h2>
+        <p class="mt-2 font-urbanist text-sm text-glow-text-subtle">{{ copySubtitulo }}</p>
       </div>
-    </div>
+
+      <PlanosPromoBanner v-if="exibirPromocaoTrial && promocao" :promocao="promocao" />
+
+      <LoadingSpinner v-if="loading" />
+
+      <p v-else-if="erro" class="text-center font-urbanist text-sm text-red-600">{{ erro }}</p>
+
+      <EmptyState
+        v-else-if="planosOrdenados.length === 0"
+        title="Nenhum plano disponível"
+        description="Tente novamente mais tarde."
+      />
+
+      <template v-else>
+        <div
+          class="mx-auto grid max-w-6xl grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6 xl:pt-3"
+        >
+          <PlanosPricingCard
+            v-for="plano in planosOrdenados"
+            :key="plano.id"
+            :plano="plano"
+            :planos-ordenados="planosOrdenados"
+            :destacado="plano.id === planoDestaqueId"
+            :modo-logado="modoLogado"
+            :tipo-assinatura="tipoAssinatura"
+            :percentual-desconto="percentualDescontoPromocao"
+          />
+        </div>
+
+        <PlanosTrustBar :dias-trial="exibirPromocaoTrial ? promocao?.diasTrial : undefined" />
+      </template>
+    </template>
   </div>
 </template>

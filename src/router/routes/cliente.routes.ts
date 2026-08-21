@@ -1,4 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
+import { FEATURE_FLAGS } from '@/config/features'
 import { ROUTE_NAMES, ROUTE_PATHS } from '@/constants/routes'
 
 export const clienteRoutes: RouteRecordRaw[] = [
@@ -10,7 +11,7 @@ export const clienteRoutes: RouteRecordRaw[] = [
       layout: 'dashboard',
       requiresAuth: true,
       clienteOnly: true,
-      title: 'Explorar lojas',
+      title: FEATURE_FLAGS.lojasHabilitadas ? 'Explorar lojas' : 'Explorar profissionais',
     },
   },
   {
@@ -90,23 +91,35 @@ export const clienteRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: ROUTE_PATHS.CONVITES,
-    name: ROUTE_NAMES.CONVITES,
-    component: () => import('@/views/dashboard/cliente/ConvitesView.vue'),
-    meta: {
-      layout: 'dashboard',
-      requiresAuth: true,
-      clienteOnly: true,
-      title: 'Convites',
-    },
-  },
-  {
     path: `${ROUTE_PATHS.CONVITES}/:token`,
     name: ROUTE_NAMES.CONVITE_RESPONDER,
-    component: () => import('@/views/dashboard/cliente/ConviteResponderView.vue'),
+    redirect: (to) => {
+      const raw = to.params.token
+      const token = Array.isArray(raw) ? raw[0] : raw
+      if (!token) return { path: ROUTE_PATHS.DASHBOARD }
+      const base = (import.meta.env.VITE_LANDING_URL?.trim() || 'https://glowupconnect.com.br').replace(/\/+$/, '')
+      window.location.replace(`${base}/convite/${encodeURIComponent(String(token))}`)
+      return { path: ROUTE_PATHS.DASHBOARD }
+    },
     meta: {
       layout: 'public',
       title: 'Responder convite',
+    },
+  },
+  {
+    path: `/convite/:token`,
+    name: 'convite-landing-redirect',
+    redirect: (to) => {
+      const raw = to.params.token
+      const token = Array.isArray(raw) ? raw[0] : raw
+      if (!token) return { path: ROUTE_PATHS.DASHBOARD }
+      const base = (import.meta.env.VITE_LANDING_URL?.trim() || 'https://glowupconnect.com.br').replace(/\/+$/, '')
+      window.location.replace(`${base}/convite/${encodeURIComponent(String(token))}`)
+      return { path: ROUTE_PATHS.DASHBOARD }
+    },
+    meta: {
+      layout: 'public',
+      title: 'Convite',
     },
   },
   {

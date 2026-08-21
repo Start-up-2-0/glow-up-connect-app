@@ -95,6 +95,32 @@ export function useConfirmEmail() {
     }
   }
 
+  async function resendWhatsAppConfirmation(
+    emailOverride?: string,
+  ): Promise<{ ok: true; message: string } | { ok: false; missingEmail?: boolean }> {
+    const email = (emailOverride ?? getStoredEmail())?.trim()
+    if (!email) return { ok: false, missingEmail: true }
+
+    try {
+      const { data } = await authService.reenviarConfirmacaoWhatsApp({
+        email: email.toLowerCase(),
+      })
+      const message =
+        data && typeof data === 'object' && 'message' in data && typeof data.message === 'string'
+          ? data.message
+          : 'Se o e-mail estiver cadastrado, enviaremos novas instruções para confirmar o WhatsApp.'
+      return { ok: true, message }
+    } catch (err) {
+      if (isAxiosError(err)) {
+        const responseData = err.response?.data
+        if (isApiErrorResponse(responseData)) {
+          return { ok: false }
+        }
+      }
+      throw err
+    }
+  }
+
   return {
     RESEND_COOLDOWN_SECONDS,
     setStoredEmail,
@@ -103,5 +129,6 @@ export function useConfirmEmail() {
     confirmByCode,
     confirmByToken,
     resendConfirmation,
+    resendWhatsAppConfirmation,
   }
 }

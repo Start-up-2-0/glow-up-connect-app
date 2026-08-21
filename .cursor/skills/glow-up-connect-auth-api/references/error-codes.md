@@ -42,8 +42,7 @@ Exibir erros por campo a partir de `errors`.
 | 409 | `EMAIL_JA_CADASTRADO` | E-mail já existe no cadastro | "E-mail já cadastrado" + link login |
 | 400 | `CONFIRMACAO_EMAIL_INVALIDA` | Token/código inválido, expirado, ou enviou ambos/nenhum | Erro na tela de confirmação |
 | 400 | `AVATAR_INVALIDO` | Avatar base64 inválido ou fora do limite | Mensagem sobre formato/tamanho |
-| 400 | `RESET_SENHA_INVALIDO` | Token de reset expirado ou inválido *(futuro)* | Solicitar novo link |
-| 501 | `NOT_IMPLEMENTED` | Forgot/reset password ainda não implementado | Fallback mock ou aviso "em breve" |
+| 400 | `RESET_SENHA_INVALIDO` | Token/código de reset expirado ou inválido | Solicitar novo e-mail de recuperação |
 | 400 | — | Validação de modelo (campo ausente/regra) | Exibir `errors` por campo |
 
 ---
@@ -76,13 +75,12 @@ Exibir erros por campo a partir de `errors`.
 | Conta bloqueada | 403 `USER_BLOCKED` | Aviso temporário |
 | Conta inativa | 403 `USER_INACTIVE` | Mensagem permanente |
 
-### Esqueci senha (futuro)
+### Esqueci senha
 
 | Situação | HTTP | Tratamento |
 |----------|------|------------|
 | E-mail enviado (genérico) | 200 | Mensagem neutra (não revela existência) |
-| Token inválido/expirado | 400 `RESET_SENHA_INVALIDO` | Link para solicitar novo |
-| Não implementado | 501 `NOT_IMPLEMENTED` | Usar mock ou desabilitar submit |
+| Token/código inválido ou expirado | 400 `RESET_SENHA_INVALIDO` | Link para solicitar novo |
 
 ---
 
@@ -95,4 +93,3 @@ Exibir erros por campo a partir de `errors`.
 | 403 | Qualquer | Toast/mensagem conforme `code` |
 | 400 | Formulário | Erros de campo ou alerta |
 | 409 | Cadastro | Mensagem específica |
-| 501 | Forgot/reset | Fallback gracioso |

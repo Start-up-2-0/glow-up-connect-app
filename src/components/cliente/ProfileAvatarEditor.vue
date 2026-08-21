@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import UserAvatar from '@/components/layout/UserAvatar.vue'
-import { validateAvatarFile } from '@/utils/avatarFile'
-import { normalizeAvatarSrc } from '@/utils/avatarSrc'
+import { AVATAR_HINT, validateAvatarFile } from '@/utils/avatarFile'
 
 const props = defineProps<{
   currentSrc?: string | null
@@ -23,7 +22,7 @@ const removed = ref(false)
 const displaySrc = computed(() => {
   if (removed.value) return null
   if (previewUrl.value) return previewUrl.value
-  return normalizeAvatarSrc(props.currentSrc)
+  return props.currentSrc
 })
 
 function revokePreview() {
@@ -91,7 +90,7 @@ onBeforeUnmount(revokePreview)
       <div>
         <p class="font-urbanist text-sm font-medium text-glow-text">Foto de perfil</p>
         <p class="mt-0.5 font-urbanist text-xs text-glow-text-subtle">
-          JPEG, PNG ou WebP. Tamanho máximo de 5 MB.
+          {{ AVATAR_HINT }}
         </p>
       </div>
 

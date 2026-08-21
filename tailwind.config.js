@@ -7,16 +7,16 @@ export default {
   content: [
     './index.html',
     './src/**/*.{vue,js,ts,jsx,tsx}',
-    './node_modules/flowbite/**/*.js',
   ],
   theme: {
     extend: {
       fontFamily: {
         satoshi: ['Satoshi', 'system-ui', 'sans-serif'],
-        inter: ['Inter', 'system-ui', 'sans-serif'],
-        urbanist: ['Urbanist', 'Inter', 'system-ui', 'sans-serif'],
-        montserrat: ['Montserrat', 'system-ui', 'sans-serif'],
-        poppins: ['Poppins', 'system-ui', 'sans-serif'],
+        /* Inter/Montserrat/Poppins mapeados para stacks locais (fontes CDN reduzidas). */
+        inter: ['Urbanist', 'system-ui', 'sans-serif'],
+        urbanist: ['Urbanist', 'system-ui', 'sans-serif'],
+        montserrat: ['Satoshi', 'system-ui', 'sans-serif'],
+        poppins: ['Urbanist', 'system-ui', 'sans-serif'],
       },
       colors: {
         glow: {

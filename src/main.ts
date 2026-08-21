@@ -6,10 +6,28 @@ import { useAuthStore } from './stores/auth.store'
 import { useAppStore } from './stores/app.store'
 import { useConsentStore } from './stores/consent.store'
 import { registerSessionSyncCallback } from './utils/sessionSync'
+import { registerChunkLoadRecovery } from './utils/chunkLoadError'
 import { startSessionRefreshScheduler } from './composables/useSessionRefresh'
-import { ensureRequestProofPool } from './composables/useRequestProof'
+import { registerAppLifecycleRecovery } from './composables/useAppLifecycleRecovery'
+import { MOCK_MODE } from './mocks/config'
 import './assets/main.css'
-import 'flowbite'
+
+function scheduleIdleWork(fn: () => void, timeout = 2500): void {
+  if (typeof window === 'undefined') return
+  const ric = (
+    window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
+    }
+  ).requestIdleCallback
+  if (typeof ric === 'function') {
+    ric(fn, { timeout })
+  } else {
+    window.setTimeout(fn, 1)
+  }
+}
+
+registerChunkLoadRecovery()
+registerAppLifecycleRecovery()
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -34,7 +52,14 @@ if (authStore.isAuthenticated) {
   startSessionRefreshScheduler()
 }
 
-void ensureRequestProofPool()
+// Proof pool não deve competir com o first paint — aquece em idle.
+if (!MOCK_MODE) {
+  scheduleIdleWork(() => {
+    void import('./composables/useRequestProof').then(({ ensureRequestProofPool }) => {
+      void ensureRequestProofPool()
+    })
+  })
+}
 
 if (import.meta.env.DEV && !import.meta.env.VITE_API_BASE_URL) {
   console.warn('[glow-up-connect] VITE_API_BASE_URL não definida')

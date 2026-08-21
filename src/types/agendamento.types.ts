@@ -113,7 +113,7 @@ export interface AgendamentoContextoPublico {
 }
 
 export interface CriarAgendamentoComCadastroPayload {
-  profissionalPublicGuid: string
+  profissionalPublicGuid?: string
   servicoIds: number[]
   data: string
   horarioInicio: string
@@ -160,11 +160,15 @@ export interface ServicoPublico {
   precoMaximo: number
   duracaoMinutosBase: number
   duracaoMinutosEstimada: number
+  tipoServico: 'Individual' | 'Combo'
+  imagem?: string | null
 }
 
 export interface ProfissionalPublico {
   publicGuid: string
   nomePublico: string
+  /** Foto de apresentação do profissional. */
+  foto?: string | null
 }
 
 export interface SlotDisponivel {

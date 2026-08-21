@@ -10,8 +10,10 @@ import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useApiError } from '@/composables/useApiError'
 import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
-import type { PagamentoAssinaturaPayload } from '@/types/assinatura.types'
+import type { PagamentoAssinaturaPayload, TipoAssinatura } from '@/types/assinatura.types'
+import { TIPO_ASSINATURA_PADRAO } from '@/utils/tipoAssinatura'
 import { ROUTE_PATHS } from '@/constants/routes'
+import { lojaSetupLocation } from '@/utils/lojaSetupNavigation'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 import type { EstabelecimentoPerfilCompleto } from '@/types/estabelecimento.types'
 import type {
@@ -19,20 +21,31 @@ import type {
   AssinaturaOnboardingContexto,
   EstabelecimentoOnboardingContexto,
 } from '@/types/assinaturaOnboarding.types'
-import { ASSINATURA_LOGADA_WIZARD_STEPS } from '@/types/assinaturaOnboarding.types'
+import {
+  ASSINATURA_LOGADA_WIZARD_STEPS,
+  ASSINATURA_LOGADA_WIZARD_STEPS_AUTONOMO,
+  normalizeAutonomoStoredStep,
+  normalizeEstabelecimentoStoredStep,
+} from '@/types/assinaturaOnboarding.types'
 import { telefoneToApi } from '@/utils/formatters'
 import { draftEnderecoToApi, validateEnderecoForSubmit } from '@/utils/enderecoPayload'
+import {
+  MENSAGEM_LINK_EXPIRADO,
+  MENSAGEM_PAGAMENTO_CONCLUIDO,
+  MENSAGEM_REFRESH_FALHOU,
+  obterDeadlinePollPagamento,
+  sincronizarSessaoPosAssinatura,
+} from '@/utils/sessaoPosAssinatura'
 import { buildAtualizarPerfilPayload } from '@/utils/perfilPayload'
-
-function normalizeStoredStep(step: string): AssinaturaLogadaWizardStep {
-  if (step === 'estabelecimento') return 'informacoes-basicas'
-  return step as AssinaturaLogadaWizardStep
-}
+import { userService } from '@/services/userService'
+import type { WhatsAppConfirmacaoInstrucoes } from '@/types/whatsapp.types'
+import { MOCK_MODE } from '@/mocks/config'
 
 const STORAGE_KEY = 'guc_assinatura_logada'
 
 interface AssinaturaLogadaDraft {
   planoId: number
+  tipoAssinatura: TipoAssinatura
   step: AssinaturaLogadaWizardStep
   estabelecimento: OnboardingEstabelecimentoDraft
   estabelecimentoId: number | null
@@ -52,13 +65,15 @@ function emptyEstabelecimento(): OnboardingEstabelecimentoDraft {
     estado: '',
     complemento: '',
     logoDataUrl: null,
+    categoriaId: undefined,
   }
 }
 
-function createDraft(planoId: number): AssinaturaLogadaDraft {
+function createDraft(planoId: number, tipoAssinatura: TipoAssinatura): AssinaturaLogadaDraft {
   return {
     planoId,
-    step: 'informacoes-basicas',
+    tipoAssinatura,
+    step: tipoAssinatura === 'ProfissionalAutonomo' ? 'perfil' : 'informacoes-basicas',
     estabelecimento: emptyEstabelecimento(),
     estabelecimentoId: null,
   }
@@ -69,9 +84,15 @@ function loadDraft(): AssinaturaLogadaDraft | null {
   if (!raw) return null
   try {
     const parsed = JSON.parse(raw) as AssinaturaLogadaDraft & { step: string }
+    const tipo = parsed.tipoAssinatura ?? 'Estabelecimento'
+    const step =
+      tipo === 'ProfissionalAutonomo'
+        ? normalizeAutonomoStoredStep(parsed.step)
+        : normalizeEstabelecimentoStoredStep(parsed.step)
     return {
       ...parsed,
-      step: normalizeStoredStep(parsed.step),
+      tipoAssinatura: tipo,
+      step,
     }
   } catch {
     return null
@@ -80,6 +101,12 @@ function loadDraft(): AssinaturaLogadaDraft | null {
 
 function saveDraft(draft: AssinaturaLogadaDraft) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
+}
+
+function telefonesEquivalentes(a: string | null | undefined, b: string | null | undefined): boolean {
+  const na = telefoneToApi(a)
+  const nb = telefoneToApi(b)
+  return Boolean(na) && na === nb
 }
 
 function mapEstabelecimentoExistente(
@@ -100,6 +127,7 @@ function mapEstabelecimentoExistente(
     estado: endereco?.estado ?? '',
     complemento: endereco?.complemento ?? '',
     logoDataUrl: perfil?.logo ?? estabelecimento.logo,
+    categoriaId: perfil?.categoriaId ?? undefined,
   }
 }
 
@@ -108,7 +136,10 @@ function precisaCompletarEndereco(perfil: EstabelecimentoPerfilCompleto | null):
   return perfil.endereco.enderecoCompleto !== true
 }
 
-export function useAssinaturaLogadaWizard(planoId: number) {
+export function useAssinaturaLogadaWizard(
+  planoId: number,
+  tipoAssinatura: TipoAssinatura = TIPO_ASSINATURA_PADRAO,
+) {
   const router = useRouter()
   const authStore = useAuthStore()
   const userStore = useUserStore()
@@ -125,8 +156,12 @@ export function useAssinaturaLogadaWizard(planoId: number) {
   } = useAssinaturaPagamentoResposta()
 
   const storedDraft = loadDraft()
+  const draftCompativel =
+    storedDraft != null
+    && storedDraft.planoId === planoId
+    && (storedDraft.tipoAssinatura ?? 'Estabelecimento') === tipoAssinatura
   const draft = ref<AssinaturaLogadaDraft>(
-    storedDraft?.planoId === planoId ? storedDraft : createDraft(planoId),
+    draftCompativel ? storedDraft! : createDraft(planoId, tipoAssinatura),
   )
   const contexto = ref<AssinaturaOnboardingContexto | null>(null)
   const perfilExistente = ref<EstabelecimentoPerfilCompleto | null>(null)
@@ -134,6 +169,8 @@ export function useAssinaturaLogadaWizard(planoId: number) {
   const loading = ref(false)
   const submitting = ref(false)
   const erro = ref<string | null>(null)
+  const telefonePendenteConfirmacao = ref(false)
+  const whatsappInstrucoes = ref<WhatsAppConfirmacaoInstrucoes | null>(null)
   const step = computed({
     get: () => draft.value.step,
     set: (value: AssinaturaLogadaWizardStep) => {
@@ -149,16 +186,24 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     () => contexto.value?.temEstabelecimentoProprio === true,
   )
 
+  const ehAutonomo = computed(() => draft.value.tipoAssinatura === 'ProfissionalAutonomo')
+
+  const avatarContaDisponivel = computed(() => Boolean(userStore.profile?.avatarBase64?.trim()))
+
   const wizardSteps = computed(() => {
+    const baseSteps = ehAutonomo.value
+      ? ASSINATURA_LOGADA_WIZARD_STEPS_AUTONOMO
+      : ASSINATURA_LOGADA_WIZARD_STEPS
+
     if (usaEstabelecimentoExistente.value && !requerComplementoEndereco.value) {
-      return ASSINATURA_LOGADA_WIZARD_STEPS.filter(
+      return baseSteps.filter(
         (item) => item.id !== 'informacoes-basicas' && item.id !== 'endereco',
       )
     }
     if (usaEstabelecimentoExistente.value && requerComplementoEndereco.value) {
-      return ASSINATURA_LOGADA_WIZARD_STEPS.filter((item) => item.id !== 'informacoes-basicas')
+      return baseSteps.filter((item) => item.id !== 'informacoes-basicas')
     }
-    return ASSINATURA_LOGADA_WIZARD_STEPS
+    return baseSteps
   })
 
   const stepperIndex = computed(() => {
@@ -174,24 +219,97 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     sessionStorage.removeItem(STORAGE_KEY)
   }
 
+  function emSetupOperacionalAutonomo(): boolean {
+    return (
+      draft.value.tipoAssinatura === 'ProfissionalAutonomo'
+      && (step.value === 'servicos' || step.value === 'horarios')
+      && Boolean(draft.value.estabelecimentoId)
+    )
+  }
+
+  async function entrarSetupOperacionalAutonomo(estabelecimentoId: number | null | undefined) {
+    const estabId = estabelecimentoId ?? negocioStore.estabelecimentoIdSelecionado
+    if (!estabId) {
+      await router.push(ROUTE_PATHS.DASHBOARD)
+      return
+    }
+
+    try {
+      await negocioStore.fetchEstabelecimentos(true)
+      if (negocioStore.estabelecimentoIdSelecionado !== estabId) {
+        await negocioStore.trocarEstabelecimento(estabId)
+      }
+    } catch {
+      // Segue mesmo assim — os steps tentam carregar com o id do draft.
+    }
+
+    draft.value.estabelecimentoId = estabId
+    step.value = 'servicos'
+    persist()
+  }
+
+  async function concluirSetupOperacionalAutonomo() {
+    clearDraft()
+    notifications.push('success', 'Perfil configurado! Bem-vindo ao painel.')
+    await router.push(ROUTE_PATHS.DASHBOARD)
+  }
+
+  function avancarDeServicos() {
+    step.value = 'horarios'
+    persist()
+  }
+
+  function pularServicos() {
+    step.value = 'horarios'
+    persist()
+  }
+
+  function voltarDeHorarios() {
+    step.value = 'servicos'
+    persist()
+  }
+
+  async function avancarDeHorarios() {
+    await concluirSetupOperacionalAutonomo()
+  }
+
+  async function pularHorarios() {
+    await concluirSetupOperacionalAutonomo()
+  }
+
   function preencherDadosUsuario() {
     const profile = userStore.profile
     if (!profile) return
 
-    if (!draft.value.estabelecimento.email) {
-      draft.value.estabelecimento.email = profile.email
+    const negocio = draft.value.estabelecimento
+
+    if (!negocio.email) {
+      negocio.email = profile.email
     }
-    if (!draft.value.estabelecimento.telefone) {
-      draft.value.estabelecimento.telefone = profile.telefone ?? ''
+    if (!negocio.telefone) {
+      negocio.telefone = profile.telefone ?? ''
+    }
+
+    if (draft.value.tipoAssinatura !== 'ProfissionalAutonomo') return
+
+    if (!negocio.nome.trim()) {
+      negocio.nome = profile.nome
+    }
+    if (!negocio.logoDataUrl && profile.avatarBase64?.trim()) {
+      negocio.logoDataUrl = profile.avatarBase64
     }
   }
 
   async function aplicarContexto(data: AssinaturaOnboardingContexto) {
     contexto.value = data
 
-    if (data.proximaEtapa === 'GerenciarAssinatura') {
-      void router.replace(ROUTE_PATHS.CONFIG_ASSINATURA)
-      return false
+    if (data.proximaEtapa === 'GerenciarAssinatura' && !MOCK_MODE) {
+      // Autônomo pode ainda estar no setup pós-pagamento (serviços/horários).
+      if (!emSetupOperacionalAutonomo()) {
+        void router.replace(ROUTE_PATHS.CONFIG_ASSINATURA)
+        return false
+      }
+      return true
     }
 
     if (data.proximaEtapa === 'EscolherPlano') {
@@ -199,7 +317,11 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       return false
     }
 
-    if (data.temEstabelecimentoProprio && data.estabelecimentoIdSugerido) {
+    if (
+      draft.value.tipoAssinatura !== 'ProfissionalAutonomo'
+      && data.temEstabelecimentoProprio
+      && data.estabelecimentoIdSugerido
+    ) {
       draft.value.estabelecimentoId = data.estabelecimentoIdSugerido
       const existente = data.estabelecimentos.find(
         (item) => item.estabelecimentoId === data.estabelecimentoIdSugerido,
@@ -219,8 +341,11 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       perfilExistente.value = perfil
       requerComplementoEndereco.value = precisaCompletarEndereco(perfil)
       step.value = requerComplementoEndereco.value ? 'endereco' : 'confirmar'
-    } else if (step.value === 'confirmar' && !data.temEstabelecimentoProprio) {
-      step.value = 'informacoes-basicas'
+    } else if (
+      (step.value === 'confirmar' || step.value === 'revisao')
+      && !data.temEstabelecimentoProprio
+    ) {
+      step.value = ehAutonomo.value ? 'perfil' : 'informacoes-basicas'
     }
 
     persist()
@@ -234,7 +359,9 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       if (!authStore.isAuthenticated) {
         await router.replace({
           path: ROUTE_PATHS.LOGIN,
-          query: { redirect: `${ROUTE_PATHS.ONBOARDING_CONTRATAR}?planoId=${planoId}` },
+          query: {
+            redirect: `${ROUTE_PATHS.ONBOARDING_CONTRATAR}?planoId=${planoId}&tipoAssinatura=${tipoAssinatura}`,
+          },
         })
         return
       }
@@ -244,9 +371,9 @@ export function useAssinaturaLogadaWizard(planoId: number) {
         return
       }
 
-      if (!userStore.profile) {
-        await userStore.fetchMe()
-      }
+      // Login grava só UserSummary (sem telefone/WhatsApp). /me completo
+      // alimenta o prefill de "Usar meus dados cadastrais".
+      await userStore.fetchMe(true)
 
       if (!userStore.profile?.ativo) {
         await router.replace({
@@ -256,13 +383,14 @@ export function useAssinaturaLogadaWizard(planoId: number) {
         return
       }
 
-      await planosStore.fetchPlanos()
+      preencherDadosUsuario()
+
+      // Sempre o tipo da URL/entrada do wizard — não o draft stale.
+      await planosStore.fetchPlanos(false, tipoAssinatura)
       if (!plano.value) {
         await router.replace(ROUTE_PATHS.ONBOARDING_PLANOS)
         return
       }
-
-      preencherDadosUsuario()
 
       const data = await assinaturaService.obterContextoOnboarding()
       if (!(await aplicarContexto(data))) {
@@ -275,11 +403,17 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     }
   }
 
-  function avancarDeInformacoesBasicas(estabelecimento: OnboardingEstabelecimentoDraft) {
+  async function avancarDeInformacoesBasicas(estabelecimento: OnboardingEstabelecimentoDraft) {
     erro.value = null
+    telefonePendenteConfirmacao.value = false
+    whatsappInstrucoes.value = null
 
     if (!estabelecimento.nome.trim()) {
       erro.value = 'Informe o nome do estabelecimento.'
+      return
+    }
+    if (!estabelecimento.categoriaId) {
+      erro.value = 'Selecione a categoria do estabelecimento.'
       return
     }
     if (!estabelecimento.logoDataUrl) {
@@ -302,15 +436,134 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       telefone: telefoneToApi(estabelecimento.telefone),
       email: estabelecimento.email,
       logoDataUrl: estabelecimento.logoDataUrl,
+      categoriaId: estabelecimento.categoriaId,
     }
     draft.value.estabelecimentoId = null
+
+    const liberado = await garantirWhatsAppConfirmado(draft.value.estabelecimento.telefone)
+    if (!liberado) return
+
     step.value = 'endereco'
     persist()
   }
 
-  function voltarDeEndereco() {
-    step.value = 'informacoes-basicas'
+  /**
+   * Step Perfil (autônomo): nome, e-mail, telefone, bio, foto.
+   * Gate de WhatsApp quando o telefone muda ou ainda não está confirmado.
+   */
+  async function avancarDePerfil(perfil: OnboardingEstabelecimentoDraft) {
+    erro.value = null
+    telefonePendenteConfirmacao.value = false
+    whatsappInstrucoes.value = null
+
+    if (!perfil.nome.trim()) {
+      erro.value = 'Informe o nome profissional.'
+      return
+    }
+    if (!perfil.email.trim()) {
+      erro.value = 'Informe o e-mail.'
+      return
+    }
+    if (!perfil.telefone.trim()) {
+      erro.value = 'Informe o telefone.'
+      return
+    }
+    if (!perfil.logoDataUrl) {
+      erro.value = 'Envie a foto profissional ou use a foto da sua conta.'
+      return
+    }
+    if (!perfil.categoriaId) {
+      erro.value = 'Selecione a área em que você atua.'
+      return
+    }
+
+    const telefoneNovo = telefoneToApi(perfil.telefone)
+
+    draft.value.estabelecimento = {
+      ...draft.value.estabelecimento,
+      nome: perfil.nome.trim(),
+      descricao: perfil.descricao,
+      telefone: telefoneNovo,
+      email: perfil.email.trim(),
+      logoDataUrl: perfil.logoDataUrl,
+      categoriaId: perfil.categoriaId,
+    }
+    draft.value.estabelecimentoId = null
+
+    const liberado = await garantirWhatsAppConfirmado(telefoneNovo)
+    if (!liberado) return
+
+    step.value = 'endereco'
     persist()
+  }
+
+  async function garantirWhatsAppConfirmado(telefoneNovo: string): Promise<boolean> {
+    const telefoneConta = telefoneToApi(userStore.profile?.telefone)
+    const whatsConfirmado = Boolean(userStore.profile?.whatsAppConfirmado)
+    const telefoneIgual = telefonesEquivalentes(telefoneNovo, telefoneConta)
+
+    if (telefoneIgual && whatsConfirmado) {
+      telefonePendenteConfirmacao.value = false
+      whatsappInstrucoes.value = null
+      return true
+    }
+
+    submitting.value = true
+    try {
+      if (!telefoneIgual) {
+        await userStore.updateProfile({ telefone: telefoneNovo })
+      }
+
+      const instrucoes = await userService.solicitarConfirmacaoWhatsApp()
+      whatsappInstrucoes.value = instrucoes
+      telefonePendenteConfirmacao.value = true
+      erro.value =
+        'Confirme o telefone no WhatsApp para continuar. Assim que confirmar, clique em Continuar novamente.'
+      persist()
+      return false
+    } catch (err) {
+      await userStore.fetchMe(true)
+      if (
+        userStore.profile?.whatsAppConfirmado
+        && telefonesEquivalentes(telefoneNovo, userStore.profile.telefone)
+      ) {
+        telefonePendenteConfirmacao.value = false
+        whatsappInstrucoes.value = null
+        erro.value = null
+        return true
+      }
+      erro.value = resolveError(err)
+      return false
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  async function verificarTelefoneEAvancar(opts?: { silencioso?: boolean }) {
+    const silencioso = opts?.silencioso === true
+    if (!silencioso) erro.value = null
+    await userStore.fetchMe(true)
+    if (userStore.profile?.whatsAppConfirmado) {
+      telefonePendenteConfirmacao.value = false
+      whatsappInstrucoes.value = null
+      erro.value = null
+      step.value = 'endereco'
+      persist()
+      return
+    }
+    if (!silencioso) {
+      erro.value =
+        'Ainda não detectamos a confirmação. Envie a mensagem no WhatsApp e tente de novo.'
+    }
+  }
+
+  function voltarDeEndereco() {
+    step.value = ehAutonomo.value ? 'perfil' : 'informacoes-basicas'
+    persist()
+  }
+
+  function voltarDePerfil() {
+    void router.push(ROUTE_PATHS.ONBOARDING_PLANOS)
   }
 
   async function avancarDeEndereco(estabelecimento: OnboardingEstabelecimentoDraft) {
@@ -365,7 +618,7 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       draft.value.estabelecimentoId = null
     }
 
-    step.value = 'confirmar'
+    step.value = ehAutonomo.value ? 'revisao' : 'confirmar'
     persist()
   }
 
@@ -378,8 +631,20 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     persist()
   }
 
+  function voltarDeRevisao() {
+    step.value = 'endereco'
+    persist()
+  }
+
   function editarEstabelecimento() {
     step.value = 'informacoes-basicas'
+    persist()
+  }
+
+  function editarAutonomo(
+    destino: 'perfil' | 'endereco' = 'perfil',
+  ) {
+    step.value = destino
     persist()
   }
 
@@ -388,33 +653,54 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     persist()
   }
 
-  function voltarParaConfirmar() {
-    step.value = 'confirmar'
+  function avancarDeRevisao() {
+    erro.value = null
+    step.value = 'assinatura'
     persist()
   }
 
-  async function aguardarAtivacao() {
-    const maxTentativas = 30
-    for (let i = 0; i < maxTentativas; i++) {
+  function voltarParaConfirmar() {
+    step.value = ehAutonomo.value ? 'revisao' : 'confirmar'
+    persist()
+  }
+
+  async function aguardarAtivacao(expiraEm?: string | null) {
+    aguardandoPagamento.value = true
+    const deadline = obterDeadlinePollPagamento(expiraEm)
+    while (Date.now() < deadline) {
       await new Promise((r) => setTimeout(r, 2000))
-      await userStore.fetchMe()
-      await negocioStore.fetchEstabelecimentos(true)
+      try {
+        await negocioStore.fetchEstabelecimentos(true)
+      } catch {
+        // Continua aguardando o webhook.
+      }
       if (negocioStore.assinaturaAtiva) {
         aguardandoPagamento.value = false
+        const sessaoOk = await sincronizarSessaoPosAssinatura()
+        if (!sessaoOk) {
+          notifications.push('warning', MENSAGEM_REFRESH_FALHOU)
+        }
+        notifications.push('success', MENSAGEM_PAGAMENTO_CONCLUIDO)
+        const estabId = negocioStore.estabelecimentoIdSelecionado
+        if (ehAutonomo.value) {
+          await entrarSetupOperacionalAutonomo(estabId)
+          return
+        }
         clearDraft()
-        notifications.push('success', 'Pagamento confirmado! Bem-vindo ao seu estabelecimento.')
-        await router.push(ROUTE_PATHS.DASHBOARD)
+        await router.push(
+          lojaSetupLocation({
+            mode: 'assinatura',
+            estabelecimentoId: estabId,
+          }),
+        )
         return
       }
     }
     aguardandoPagamento.value = false
-    notifications.push(
-      'info',
-      'Pagamento em processamento. Atualize a página em alguns instantes.',
-    )
+    notifications.push('info', MENSAGEM_LINK_EXPIRADO)
   }
 
-  async function finalizarAssinatura(diaVencimento: number, pagamento?: PagamentoAssinaturaPayload) {
+  async function finalizarAssinatura(pagamento?: PagamentoAssinaturaPayload) {
     erro.value = null
 
     if (!plano.value) {
@@ -424,31 +710,49 @@ export function useAssinaturaLogadaWizard(planoId: number) {
 
     submitting.value = true
     try {
-      const payloadBase = {
-        planoId: plano.value.id,
-        tipoAssinatura: 'Estabelecimento' as const,
-        gateway: 'MercadoPago' as const,
-        diaVencimento,
-        ...(pagamento ? { pagamento } : {}),
-      }
+      const tipo = draft.value.tipoAssinatura
+      const negocio = draft.value.estabelecimento
 
       const result = await assinaturaStore.criarAssinatura(
-        draft.value.estabelecimentoId
+        tipo === 'ProfissionalAutonomo'
           ? {
-              ...payloadBase,
-              estabelecimentoId: draft.value.estabelecimentoId,
-            }
-          : {
-              ...payloadBase,
-              estabelecimento: {
-                nome: draft.value.estabelecimento.nome.trim(),
-                descricao: draft.value.estabelecimento.descricao.trim(),
-                logo: draft.value.estabelecimento.logoDataUrl!,
-                telefone: telefoneToApi(draft.value.estabelecimento.telefone),
-                email: draft.value.estabelecimento.email.trim(),
-                endereco: draftEnderecoToApi(draft.value.estabelecimento),
+              planoId: plano.value.id,
+              tipoAssinatura: 'ProfissionalAutonomo',
+              profissionalAutonomo: {
+                nomePublico: negocio.nome.trim(),
+                biografia: negocio.descricao.trim() || undefined,
+                logo: negocio.logoDataUrl!,
+                telefone: telefoneToApi(negocio.telefone),
+                email: negocio.email.trim(),
+                categoriaId: negocio.categoriaId,
+                endereco: draftEnderecoToApi(negocio),
               },
-            },
+              gateway: 'MercadoPago',
+              ...(pagamento ? { pagamento } : {}),
+            }
+          : draft.value.estabelecimentoId
+            ? {
+                planoId: plano.value.id,
+                tipoAssinatura: 'Estabelecimento',
+                estabelecimentoId: draft.value.estabelecimentoId,
+                gateway: 'MercadoPago',
+                ...(pagamento ? { pagamento } : {}),
+              }
+            : {
+                planoId: plano.value.id,
+                tipoAssinatura: 'Estabelecimento',
+                estabelecimento: {
+                  nome: negocio.nome.trim(),
+                  descricao: negocio.descricao.trim(),
+                  logo: negocio.logoDataUrl!,
+                  telefone: telefoneToApi(negocio.telefone),
+                  email: negocio.email.trim(),
+                  categoriaId: negocio.categoriaId,
+                  endereco: draftEnderecoToApi(negocio),
+                },
+                gateway: 'MercadoPago',
+                ...(pagamento ? { pagamento } : {}),
+              },
       )
 
       assinaturaStore.setAssinatura(result)
@@ -462,13 +766,35 @@ export function useAssinaturaLogadaWizard(planoId: number) {
       await processarResposta(result, {
         onTrial: async (diasTrial) => {
           notifications.push('success', `Assinatura iniciada! Você tem ${diasTrial} dias de teste.`)
+          const estabId =
+            result.estabelecimentoId ?? negocioStore.estabelecimentoIdSelecionado
+          if (ehAutonomo.value) {
+            await entrarSetupOperacionalAutonomo(estabId)
+            return
+          }
           clearDraft()
-          await router.push(ROUTE_PATHS.DASHBOARD)
+          await router.push(
+            lojaSetupLocation({
+              mode: 'assinatura',
+              estabelecimentoId: estabId,
+            }),
+          )
         },
         onDashboard: async () => {
           notifications.push('success', 'Assinatura iniciada com sucesso!')
+          const estabId =
+            result.estabelecimentoId ?? negocioStore.estabelecimentoIdSelecionado
+          if (ehAutonomo.value) {
+            await entrarSetupOperacionalAutonomo(estabId)
+            return
+          }
           clearDraft()
-          await router.push(ROUTE_PATHS.DASHBOARD)
+          await router.push(
+            lojaSetupLocation({
+              mode: 'assinatura',
+              estabelecimentoId: estabId,
+            }),
+          )
         },
         aguardarAtivacao,
       })
@@ -481,6 +807,14 @@ export function useAssinaturaLogadaWizard(planoId: number) {
         step.value = 'confirmar'
         persist()
         return
+      }
+      if (
+        code === 'TELEFONE_NAO_CONFIRMADO'
+        || code === 'TELEFONE_DIVERGENTE_NAO_CONFIRMADO'
+      ) {
+        telefonePendenteConfirmacao.value = true
+        step.value = ehAutonomo.value ? 'perfil' : 'informacoes-basicas'
+        persist()
       }
       erro.value = resolveError(err)
     } finally {
@@ -497,6 +831,10 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     promocao,
     contexto,
     usaEstabelecimentoExistente,
+    ehAutonomo,
+    avatarContaDisponivel,
+    telefonePendenteConfirmacao,
+    whatsappInstrucoes,
     loading,
     submitting,
     aguardandoPagamento,
@@ -505,12 +843,23 @@ export function useAssinaturaLogadaWizard(planoId: number) {
     erro,
     init,
     avancarDeInformacoesBasicas,
+    avancarDePerfil,
+    verificarTelefoneEAvancar,
+    voltarDePerfil,
     voltarDeEndereco,
     avancarDeEndereco,
     voltarDoConfirmar,
+    voltarDeRevisao,
     editarEstabelecimento,
+    editarAutonomo,
     avancarParaPagamento,
+    avancarDeRevisao,
     voltarParaConfirmar,
     finalizarAssinatura,
+    avancarDeServicos,
+    pularServicos,
+    voltarDeHorarios,
+    avancarDeHorarios,
+    pularHorarios,
   }
 }

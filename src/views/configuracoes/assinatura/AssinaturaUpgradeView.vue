@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import MercadoPagoCardForm from '@/components/assinatura/MercadoPagoCardForm.vue'
 import PlanoUpgradeModal from '@/components/assinatura/PlanoUpgradeModal.vue'
 import { usePlanosStore } from '@/stores/planos.store'
@@ -18,7 +17,7 @@ import { formatBRL } from '@/utils/formatters'
 const router = useRouter()
 const planosStore = usePlanosStore()
 const assinaturaStore = useAssinaturaStore()
-const { assinaturaId, planoId, planoNome } = useNegocioContext()
+const { assinaturaId, planoId, planoNome, tipoAssinatura } = useNegocioContext()
 const { planos, loading: planosLoading } = storeToRefs(planosStore)
 const { loading: submitting } = storeToRefs(assinaturaStore)
 const notifications = useNotificationsStore()
@@ -29,7 +28,7 @@ const planoSelecionadoId = ref<number | null>(null)
 const cardFormRef = ref<InstanceType<typeof MercadoPagoCardForm> | null>(null)
 const confirmarDowngrade = ref(false)
 
-onMounted(() => planosStore.fetchPlanos())
+onMounted(() => planosStore.fetchPlanos(false, tipoAssinatura.value ?? undefined))
 
 function abrirModal(planoIdAlvo: number) {
   const atual = planos.value.find((p) => p.id === planoId.value)
@@ -75,8 +74,7 @@ async function executarTroca() {
       </p>
     </BaseCard>
 
-    <LoadingSpinner v-if="planosLoading" />
-    <div v-else class="space-y-3">
+    <div v-if="!planosLoading" class="space-y-3">
       <BaseCard
         v-for="plano in planos"
         :key="plano.id"
@@ -110,9 +108,9 @@ async function executarTroca() {
     <Teleport to="body">
       <div
         v-if="confirmarDowngrade"
-        class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+        class="fixed inset-0 z-[3000] flex items-center justify-center p-4"
       >
-        <div class="absolute inset-0 bg-black/50" @click="confirmarDowngrade = false" />
+      <div class="absolute inset-0 glow-modal-scrim" @click="confirmarDowngrade = false" />
         <div class="relative z-10 w-full max-w-md rounded-lg border border-glow-border-soft bg-glow-surface p-6">
           <h2 class="mb-2 font-semibold text-glow-text">Confirmar downgrade</h2>
           <p class="mb-4 text-sm text-glow-text-subtle">

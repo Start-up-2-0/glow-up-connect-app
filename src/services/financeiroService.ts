@@ -1,6 +1,10 @@
 import api from './api'
 import { unwrapApi } from './negocioApiHelper'
 import { negocioPath } from '@/utils/negocioApi'
+import {
+  createEmptyFinanceiroDashboard,
+  isFinanceiroDashboardEmptyResponse,
+} from '@/utils/financeiroDashboard'
 import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
   CriarMovimentoPayload,
@@ -13,13 +17,20 @@ import type {
 import type { BaixarContaPayload } from '@/types/negocio/caixa.types'
 
 export const financeiroService = {
-  obterDashboard(estabelecimentoId: number, filtro?: FinanceiroPeriodoFiltro) {
-    return api
-      .get<ApiSuccessResponse<FinanceiroDashboard>>(
-        negocioPath(estabelecimentoId, '/financeiro/dashboard'),
-        { params: filtro },
-      )
-      .then(unwrapApi)
+  async obterDashboard(estabelecimentoId: number, filtro?: FinanceiroPeriodoFiltro) {
+    try {
+      return await api
+        .get<ApiSuccessResponse<FinanceiroDashboard>>(
+          negocioPath(estabelecimentoId, '/financeiro/dashboard'),
+          { params: filtro },
+        )
+        .then(unwrapApi)
+    } catch (error) {
+      if (isFinanceiroDashboardEmptyResponse(error)) {
+        return createEmptyFinanceiroDashboard(filtro)
+      }
+      throw error
+    }
   },
 
   listarEntradas(estabelecimentoId: number, filtro?: MovimentosFinanceirosFiltro) {

@@ -5,16 +5,25 @@ import { ROUTE_PATHS } from '@/constants/routes'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
+import { useLoading } from '@/composables/useLoading'
+import { lojaSetupLocation } from '@/utils/lojaSetupNavigation'
+import {
+  MENSAGEM_AGUARDANDO_PAGAMENTO,
+  MENSAGEM_LINK_EXPIRADO,
+  MENSAGEM_PAGAMENTO_CONCLUIDO,
+  MENSAGEM_REFRESH_FALHOU,
+  obterDeadlinePollPagamento,
+  sincronizarSessaoPosAssinatura,
+} from '@/utils/sessaoPosAssinatura'
 
 const route = useRoute()
 const router = useRouter()
 const negocioStore = useNegocioStore()
 const notifications = useNotificationsStore()
+const globalLoading = useLoading()
 
 const aguardando = ref(true)
 const tentativas = ref(0)
-const maxTentativas = 45
 
 const variante = computed<'sucesso' | 'pendente' | 'falha'>(() => {
   if (route.path.includes('/pendente')) return 'pendente'
@@ -35,17 +44,33 @@ const descricao = computed(() => {
   if (variante.value === 'falha') {
     return 'O pagamento não foi aprovado. Você pode tentar novamente com outro meio de pagamento.'
   }
-  return 'Estamos confirmando seu pagamento e preparando o acesso ao painel.'
+  return 'Aguardando confirmação do pagamento...'
 })
 
-async function tentarAtivar() {
+function finishWaiting() {
+  aguardando.value = false
+  globalLoading.close()
+}
+
+async function tentarAtivar(): Promise<boolean> {
   tentativas.value += 1
   await negocioStore.fetchEstabelecimentos(true)
   if (negocioStore.assinaturaAtiva) {
-    aguardando.value = false
-    notifications.push('success', 'Assinatura ativa! Bem-vindo ao Glow Up Connect.')
-    await router.replace(ROUTE_PATHS.DASHBOARD)
+    finishWaiting()
+    const sessaoOk = await sincronizarSessaoPosAssinatura()
+    if (!sessaoOk) {
+      notifications.push('warning', MENSAGEM_REFRESH_FALHOU)
+    }
+    notifications.push('success', MENSAGEM_PAGAMENTO_CONCLUIDO)
+    await router.replace(
+      lojaSetupLocation({
+        mode: 'assinatura',
+        estabelecimentoId: negocioStore.estabelecimentoIdSelecionado,
+      }),
+    )
+    return true
   }
+  return false
 }
 
 onMounted(async () => {
@@ -54,23 +79,30 @@ onMounted(async () => {
     return
   }
 
-  await tentarAtivar()
-  if (!negocioStore.assinaturaAtiva) {
+  globalLoading.open({ message: MENSAGEM_AGUARDANDO_PAGAMENTO })
+  try {
+    const ativado = await tentarAtivar()
+    if (ativado) return
+
+    const deadline = obterDeadlinePollPagamento()
     const interval = window.setInterval(async () => {
-      if (tentativas.value >= maxTentativas || negocioStore.assinaturaAtiva) {
+      if (Date.now() >= deadline) {
         window.clearInterval(interval)
-        aguardando.value = false
+        finishWaiting()
+        notifications.push('info', MENSAGEM_LINK_EXPIRADO)
         return
       }
-      await tentarAtivar()
+      const ok = await tentarAtivar()
+      if (ok) window.clearInterval(interval)
     }, 2000)
+  } catch {
+    finishWaiting()
   }
 })
 </script>
 
 <template>
   <div class="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center gap-6 px-4 text-center">
-    <LoadingSpinner v-if="aguardando && variante !== 'falha'" />
     <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ titulo }}</h1>
     <p class="text-sm text-gray-600 dark:text-gray-300">{{ descricao }}</p>
     <div v-if="!aguardando && variante !== 'sucesso'" class="flex flex-col gap-3">

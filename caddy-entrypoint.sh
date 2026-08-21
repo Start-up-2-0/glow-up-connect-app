@@ -176,7 +176,7 @@ if [ "$MTLS_MODE" = "true" ]; then
 		X-Frame-Options DENY
 		Referrer-Policy strict-origin-when-cross-origin
 		Permissions-Policy "camera=(), microphone=(), geolocation=(self)"
-		Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' https://sdk.mercadopago.com https://www.google.com https://www.gstatic.com; connect-src 'self' https://api.mercadopago.com https://*.mercadopago.com https://www.google.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; frame-src https://www.google.com; frame-ancestors 'none'"
+		Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' https://sdk.mercadopago.com https://www.google.com https://www.gstatic.com; connect-src 'self' https://api.mercadopago.com https://*.mercadopago.com https://www.google.com https://viacep.com.br https://brasilapi.com.br; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; frame-src https://www.google.com; frame-ancestors 'none'"
 	}
 
 	respond /health 200
@@ -194,9 +194,17 @@ if [ "$MTLS_MODE" = "true" ]; then
 			}
 		}
 
+		handle /assets/* {
+			root * dist
+			encode gzip
+			header Cache-Control "public, max-age=31536000, immutable"
+			file_server
+		}
+
 		handle {
 			root * dist
 			encode gzip
+			header Cache-Control "no-cache, no-store, must-revalidate"
 			try_files {path} /index.html
 			file_server
 		}
@@ -229,7 +237,7 @@ else
 		X-Frame-Options DENY
 		Referrer-Policy strict-origin-when-cross-origin
 		Permissions-Policy "camera=(), microphone=(), geolocation=(self)"
-		Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' https://sdk.mercadopago.com https://www.google.com https://www.gstatic.com; connect-src 'self' https://api.mercadopago.com https://*.mercadopago.com https://www.google.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; frame-src https://www.google.com; frame-ancestors 'none'"
+		Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' https://sdk.mercadopago.com https://www.google.com https://www.gstatic.com; connect-src 'self' https://api.mercadopago.com https://*.mercadopago.com https://www.google.com https://viacep.com.br https://brasilapi.com.br; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; frame-src https://www.google.com; frame-ancestors 'none'"
 	}
 
 	respond /health 200
@@ -241,9 +249,17 @@ else
 			}
 		}
 
+		handle /assets/* {
+			root * dist
+			encode gzip
+			header Cache-Control "public, max-age=31536000, immutable"
+			file_server
+		}
+
 		handle {
 			root * dist
 			encode gzip
+			header Cache-Control "no-cache, no-store, must-revalidate"
 			try_files {path} /index.html
 			file_server
 		}

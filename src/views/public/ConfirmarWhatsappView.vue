@@ -40,7 +40,7 @@ async function copiarLink() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-glow-canvas px-4 py-10">
+  <div class="min-h-dvh bg-glow-canvas px-4 py-10">
     <div class="mx-auto w-full max-w-lg">
       <div class="mb-8 flex justify-center">
         <AppLogo />

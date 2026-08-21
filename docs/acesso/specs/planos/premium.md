@@ -29,9 +29,9 @@
 
 - Controle de caixa
 - Fluxo financeiro
-- Comissao automatica
-- Dashboard avancado
-- Metricas do estabelecimento
+- Comissão automática
+- Dashboard avançado
+- Métricas do estabelecimento
 
 ## Criterios de aceite
 

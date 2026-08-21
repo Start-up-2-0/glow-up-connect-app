@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import DiaVencimentoSelect from '@/components/assinatura/DiaVencimentoSelect.vue'
-import { formatBRL } from '@/utils/formatters'
+import { aplicarDescontoPercentual, formatBRL } from '@/utils/formatters'
 import type { MetodoPagamentoAssinatura } from '@/types/pagamento.types'
 import type { Plano, PromocaoLancamento } from '@/types/plano.types'
 
@@ -9,8 +8,6 @@ const props = withDefaults(
   defineProps<{
     plano: Plano
     promocao: PromocaoLancamento | null
-    diasPermitidos: number[]
-    diaVencimento: number | null
     metodoPagamento: MetodoPagamentoAssinatura
     variant?: 'default' | 'contratar'
   }>(),
@@ -19,13 +16,19 @@ const props = withDefaults(
   },
 )
 
-const emit = defineEmits<{ 'update:diaVencimento': [value: number] }>()
-
 const isContratar = computed(() => props.variant === 'contratar')
 const modulosExibidos = computed(() => props.plano.modulos.slice(0, 5))
 
 const trialAtivo = computed(
   () => props.promocao?.disponivel && props.metodoPagamento === 'cartao',
+)
+
+const percentualDesconto = computed(() =>
+  trialAtivo.value ? (props.promocao?.percentualDescontoMensalidade ?? 0) : 0,
+)
+
+const precoComDesconto = computed(() =>
+  aplicarDescontoPercentual(props.plano.preco, percentualDesconto.value),
 )
 
 const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
@@ -56,7 +59,15 @@ const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
             <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">{{ plano.descricao }}</p>
           </div>
           <p class="shrink-0 font-satoshi text-base font-bold text-glow-text">
-            {{ formatBRL(plano.preco) }}
+            <template v-if="trialAtivo && percentualDesconto > 0">
+              <span class="mr-2 text-sm font-normal text-glow-text-muted line-through">
+                {{ formatBRL(plano.preco) }}
+              </span>
+              {{ formatBRL(precoComDesconto) }}
+            </template>
+            <template v-else>
+              {{ formatBRL(plano.preco) }}
+            </template>
             <span class="font-urbanist text-sm font-normal text-glow-text-muted">/mês</span>
           </p>
         </div>
@@ -94,35 +105,36 @@ const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
         <p class="mt-0.5 font-urbanist text-xs text-glow-text-subtle">
           {{ promocao.diasTrial }} dias grátis com cartão
           <span class="mx-1.5 inline-block size-1 rounded-full bg-glow-border-soft align-middle" />
+          {{ promocao.percentualDescontoMensalidade }}% off para sempre
+          <span class="mx-1.5 inline-block size-1 rounded-full bg-glow-border-soft align-middle" />
           {{ promocao.vagasRestantes }} vagas
         </p>
       </div>
     </div>
 
-    <hr v-if="isContratar" class="my-6 border-glow-border-soft" />
+    <div :class="isContratar ? 'mt-6 space-y-3' : 'mt-6 space-y-3 border-t border-glow-border-soft pt-5'">
+      <p class="font-urbanist text-sm text-glow-text-subtle">
+        A renovação será calculada automaticamente a partir da data de contratação. A fatura é gerada
+        {{ promocao?.diasAntecedenciaGeracaoCobranca ?? 7 }} dias antes do vencimento.
+      </p>
 
-    <div :class="isContratar ? '' : 'mt-6 border-t border-glow-border-soft pt-5'">
-      <DiaVencimentoSelect
-        :model-value="diaVencimento"
-        label="Dia de vencimento mensal"
-        :variant="isContratar ? 'contratar' : 'default'"
-        @update:model-value="emit('update:diaVencimento', $event)"
-      />
-    </div>
-
-    <hr v-if="isContratar" class="my-6 border-glow-border-soft" />
-
-    <div :class="isContratar ? 'space-y-3' : 'mt-6 space-y-3 border-t border-glow-border-soft pt-5'">
       <div class="flex items-center justify-between font-urbanist text-sm text-glow-text-soft">
         <span>Subtotal</span>
         <span>{{ formatBRL(plano.preco) }}/mês</span>
       </div>
       <div
-        v-if="trialAtivo"
+        v-if="trialAtivo && percentualDesconto > 0"
         class="flex items-center justify-between font-urbanist text-sm text-emerald-700 dark:text-emerald-400"
       >
-        <span>Período de teste</span>
-        <span>− {{ formatBRL(plano.preco) }}</span>
+        <span>Desconto vitalício ({{ percentualDesconto }}%)</span>
+        <span>− {{ formatBRL(plano.preco - precoComDesconto) }}</span>
+      </div>
+      <div
+        v-if="trialAtivo"
+        class="flex items-center justify-between font-urbanist text-sm text-glow-text-soft"
+      >
+        <span>Mensalidade após o teste</span>
+        <span>{{ formatBRL(precoComDesconto) }}/mês</span>
       </div>
       <div
         v-else-if="metodoPagamento === 'pix'"
@@ -138,7 +150,7 @@ const totalHoje = computed(() => (trialAtivo.value ? 0 : props.plano.preco))
         <div>
           <span class="font-urbanist text-sm text-glow-text-soft">Total hoje</span>
           <p v-if="trialAtivo" class="mt-1 font-urbanist text-xs text-glow-text-muted">
-            Primeira cobrança após {{ promocao?.diasTrial }} dias de teste.
+            Primeira cobrança de {{ formatBRL(precoComDesconto) }}/mês após {{ promocao?.diasTrial }} dias de teste.
           </p>
         </div>
         <span

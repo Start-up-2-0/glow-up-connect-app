@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import LoadingSpinner from '@/components/feedback/LoadingSpinner.vue'
 import { useEstabelecimentoView } from '@/composables/useEstabelecimentoView'
 import { useWhatsAppConfirmacao } from '@/composables/useWhatsAppConfirmacao'
 import { useApiError } from '@/composables/useApiError'
@@ -9,11 +8,15 @@ import {
   whatsappEstabelecimentoService,
   type EstabelecimentoPerfil,
 } from '@/services/whatsappEstabelecimentoService'
+import GlowGuideLauncher from '@/tutorials/components/GlowGuideLauncher.vue'
+import { usePageTutorial } from '@/tutorials/hooks/usePageTutorial'
 
 const CARD_CLASS =
   'overflow-hidden rounded-xl border border-glow-border-soft bg-glow-surface shadow-sm'
 const CARD_HEADER_CLASS = 'border-b border-glow-border-soft px-5 py-3.5'
 const CARD_BODY_CLASS = 'p-5'
+
+const { startPageTutorial } = usePageTutorial('integrations')
 
 const { estabelecimentoAtivo, estabelecimentoId, ready, error: contextError, loading } =
   useEstabelecimentoView()
@@ -105,21 +108,25 @@ async function handleOptInChange(event: Event) {
 </script>
 
 <template>
-  <div class="w-full space-y-5 lg:space-y-6">
-    <header>
-      <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
-        WhatsApp do estabelecimento
-      </h1>
-      <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
-        Configure alertas de agendamento via WhatsApp para {{ estabelecimentoAtivo?.nome ?? 'sua loja' }}.
-      </p>
+  <div class="w-full space-y-5 lg:space-y-6" data-tour="integrations-page">
+    <header class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="font-satoshi text-xl font-bold leading-tight text-glow-text lg:text-2xl">
+          WhatsApp do estabelecimento
+        </h1>
+        <p class="mt-1 font-urbanist text-sm text-glow-text-subtle">
+          Configure alertas de agendamento via WhatsApp para {{ estabelecimentoAtivo?.nome ?? 'sua loja' }}.
+        </p>
+      </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <GlowGuideLauncher class="max-sm:hidden" @click="startPageTutorial" />
+        <GlowGuideLauncher class="sm:hidden" compact @click="startPageTutorial" />
+      </div>
     </header>
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
     <p v-if="perfilError" class="font-urbanist text-sm text-red-600">{{ perfilError }}</p>
-    <LoadingSpinner v-if="(loading && !ready) || carregandoPerfil" class="mx-auto py-12" />
-
-    <section v-else-if="ready && perfil" :class="CARD_CLASS">
+    <section v-if="ready && perfil && !((loading && !ready) || carregandoPerfil)" :class="CARD_CLASS">
       <div :class="CARD_HEADER_CLASS">
         <div class="flex items-start gap-3">
           <div

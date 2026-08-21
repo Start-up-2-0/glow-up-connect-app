@@ -208,3 +208,108 @@ export interface AtualizarContaPagarPayload {
   vencimento: string
   recorrente: boolean
 }
+
+export interface Meta {
+  id: number
+  nome: string
+  tipoMeta: 'Atendimentos' | 'Faturamento' | 'Mista'
+  valorMeta: number
+  percentualComissao: number
+  ativa: boolean
+  recorrente: boolean
+  profissionalEstabelecimentoId: number | null
+  createAd: string
+  updatedAt: string | null
+}
+
+export interface CriarMetaPayload {
+  nome: string
+  tipoMeta: 'Atendimentos' | 'Faturamento' | 'Mista'
+  valorMeta: number
+  percentualComissao: number
+  recorrente: boolean
+  profissionalEstabelecimentoId?: number | null
+}
+
+export interface AtualizarMetaPayload {
+  nome: string
+  tipoMeta: 'Atendimentos' | 'Faturamento' | 'Mista'
+  valorMeta: number
+  percentualComissao: number
+  ativa: boolean
+  recorrente: boolean
+  profissionalEstabelecimentoId?: number | null
+}
+
+export interface MetaProgressoProfissional {
+  profissionalEstabelecimentoId: number
+  profissionalId: number
+  nomePublico: string
+  metaNome: string
+  tipoMeta: string
+  valorMeta: number
+  percentualComissao: number
+  quantidadeRealizada: number | null
+  valorRealizado: number | null
+  percentualProgresso: number
+  atingida: boolean
+}
+
+/* ---------- Gerenciador de metas de comissão (refatoração) ---------- */
+
+export type MetaComissaoStatus = 'EmAndamento' | 'Concluida' | 'Cancelada'
+
+/** Linha da listagem — profissional com meta ativa no mês selecionado. */
+export interface MetaComissaoProfissional {
+  profissionalEstabelecimentoId: number
+  profissionalId: number
+  nomePublico: string
+  avatarUrl?: string | null
+  metaId: number
+  nomeMeta: string
+  tipoMeta: 'Atendimentos' | 'Faturamento' | 'Mista'
+  valorMeta: number
+  percentualComissao: number
+  status: MetaComissaoStatus
+  dataInicio: string
+  dataFim: string
+  quantidadeRealizada: number | null
+  valorRealizado: number | null
+  percentualProgresso: number
+  atingida: boolean
+}
+
+/** Item do histórico de evolução da meta (não financeiro). */
+export interface MetaComissaoEvolucaoItem {
+  id: number
+  data: string
+  descricao: string
+  quantidade: number
+  valor: number | null
+}
+
+/**
+ * Notificações/automações disparadas quando a meta é concluída.
+ * Preenchido apenas para metas com status `Concluida`.
+ */
+export interface MetaComissaoNotificacoes {
+  concluidaEm: string
+  emailProfissionalEnviado: boolean
+  whatsAppProfissionalEnviado: boolean
+  lojaNotificada: boolean
+  logAuditoriaRegistrado: boolean
+}
+
+/** Detalhe completo da meta exibido na modal. */
+export interface MetaComissaoDetalhe extends MetaComissaoProfissional {
+  criadoEm: string
+  responsavelCriacao: string
+  evolucao: MetaComissaoEvolucaoItem[]
+  notificacoes?: MetaComissaoNotificacoes
+}
+
+export interface ComissaoMetasFiltro {
+  mes?: number
+  ano?: number
+  profissionalId?: number
+}

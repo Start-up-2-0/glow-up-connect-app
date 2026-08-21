@@ -1,44 +1,51 @@
 import api from './api'
 import { negocioPath } from '@/utils/negocioApi'
+import { convitePublicoUrl } from '@/utils/landingUrl'
 import type { ApiSuccessResponse } from '@/types/api.types'
 import type {
-  ConviteOuVinculo,
+  ConviteCriado,
   ConviteNegocio,
   ConvitePreview,
+  CriarConviteLinkPayload,
   StatusConviteFiltro,
 } from '@/types/convite.types'
-import type {
-  CriarConviteProfissionalPayload,
-  CriarConviteUsuarioEquipePayload,
-} from '@/types/negocio/equipe.types'
 
 function unwrap<T>(response: { data: ApiSuccessResponse<T> }): T {
   return response.data.data
 }
 
+function normalizarLinkConvite(criado: ConviteCriado): ConviteCriado {
+  return {
+    ...criado,
+    // Homolog/prod: API pode vir com LandingBaseUrl de localhost; o app usa VITE_LANDING_URL.
+    linkConvite: convitePublicoUrl(criado.linkConvite),
+  }
+}
+
 export const conviteService = {
-  criarConviteProfissional(estabelecimentoId: number, payload: CriarConviteProfissionalPayload) {
+  criarLink(estabelecimentoId: number, payload: CriarConviteLinkPayload) {
     return api
-      .post<ApiSuccessResponse<ConviteOuVinculo>>(
-        negocioPath(estabelecimentoId, '/convites/profissionais'),
+      .post<ApiSuccessResponse<ConviteCriado>>(
+        negocioPath(estabelecimentoId, '/convites'),
         payload,
       )
       .then(unwrap)
+      .then(normalizarLinkConvite)
   },
 
-  criarConviteUsuario(estabelecimentoId: number, payload: CriarConviteUsuarioEquipePayload) {
+  obterLink(estabelecimentoId: number, conviteId: number) {
     return api
-      .post<ApiSuccessResponse<ConviteOuVinculo>>(
-        negocioPath(estabelecimentoId, '/convites/usuarios'),
-        payload,
+      .get<ApiSuccessResponse<ConviteCriado>>(
+        negocioPath(estabelecimentoId, `/convites/${conviteId}/link`),
       )
       .then(unwrap)
+      .then(normalizarLinkConvite)
   },
 
   obterPreview(token: string) {
     return api
       .get<ApiSuccessResponse<ConvitePreview>>(
-        `/convites/${encodeURIComponent(token)}/preview`,
+        `/publico/convites/${encodeURIComponent(token)}/preview`,
       )
       .then(unwrap)
   },
@@ -62,13 +69,9 @@ export const conviteService = {
 
   aceitar(token: string) {
     return api
-      .post<ApiSuccessResponse<ConviteNegocio>>(`/convites/${encodeURIComponent(token)}/aceitar`)
-      .then(unwrap)
-  },
-
-  rejeitar(token: string) {
-    return api
-      .post<ApiSuccessResponse<ConviteNegocio>>(`/convites/${encodeURIComponent(token)}/rejeitar`)
+      .post<ApiSuccessResponse<ConviteNegocio>>(
+        `/publico/convites/${encodeURIComponent(token)}/aceitar`,
+      )
       .then(unwrap)
   },
 }

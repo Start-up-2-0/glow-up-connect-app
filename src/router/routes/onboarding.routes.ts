@@ -27,6 +27,19 @@ export const onboardingRoutes: RouteRecordRaw[] = [
     },
   },
   {
+    path: ROUTE_PATHS.ONBOARDING_LOJA_SETUP,
+    name: ROUTE_NAMES.ONBOARDING_LOJA_SETUP,
+    component: () => import('@/views/onboarding/LojaSetupView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      businessOnly: true,
+      requerRoleOwner: true,
+      skipNegocioGuard: true,
+      title: 'Configurar loja',
+    },
+  },
+  {
     path: ROUTE_PATHS.ONBOARDING_ASSINATURA,
     name: ROUTE_NAMES.ONBOARDING_ASSINATURA,
     component: () => import('@/views/onboarding/OnboardingAssinaturaView.vue'),
@@ -43,6 +56,17 @@ export const onboardingRoutes: RouteRecordRaw[] = [
       path: ROUTE_PATHS.ONBOARDING_ASSINATURA,
       query: to.query,
     }),
+  },
+  {
+    path: ROUTE_PATHS.ASSINATURA_DESPEDIDA,
+    name: ROUTE_NAMES.ASSINATURA_DESPEDIDA,
+    component: () => import('@/views/assinatura/AssinaturaDespedidaView.vue'),
+    meta: {
+      layout: 'dashboard',
+      requiresAuth: true,
+      skipNegocioGuard: true,
+      title: 'Até breve',
+    },
   },
   {
     path: ROUTE_PATHS.ASSINATURA_PAGAMENTO_SUCESSO,

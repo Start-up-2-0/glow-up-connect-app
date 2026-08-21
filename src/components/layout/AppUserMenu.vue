@@ -214,7 +214,7 @@ onUnmounted(() => {
           @click="openSearch"
         >
           <IconSearch :size="18" />
-          Pesquisar
+          Buscar
         </button>
 
         <button

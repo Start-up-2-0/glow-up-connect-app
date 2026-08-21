@@ -28,4 +28,12 @@ export const authService = {
   reenviarConfirmacao(payload: ReenviarConfirmacaoPayload) {
     return api.post<ApiSuccessResponseVoid>('/auth/reenviar-confirmacao', payload)
   },
+
+  reenviarConfirmacaoWhatsApp(payload: ReenviarConfirmacaoPayload) {
+    return api.post<ApiSuccessResponseVoid>('/auth/reenviar-confirmacao-whatsapp', payload)
+  },
+
+  reativarConta(payload: LoginPayload) {
+    return api.post<ApiSuccessResponse<LoginData>>('/auth/reativar-conta', payload)
+  },
 }

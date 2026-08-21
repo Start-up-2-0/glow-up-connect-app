@@ -1,8 +1,4 @@
-@import url('https://api.fontshare.com/v2/css?f[]=satoshi@1,2&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;500;600;700;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+/* Fontes carregadas de forma não-bloqueante via <link> em index.html (Satoshi + Urbanist). */
 
 @tailwind base;
 @tailwind components;
@@ -10,131 +6,188 @@
 
 @layer base {
   :root {
-    /* Marca — valores fixos */
-    --brand-gold: #ffbf00;
-    --brand-gold-dark: #c59400;
-    --brand-blue: #3c5ccf;
-    --brand-purple: #6c63ff;
-    --brand-purple-soft: #4f47d2;
-    --brand-secondary: #a38a2d;
+    /* Paleta oficial — identidade premium roxa/lilás */
+    --palette-purple-black: #0d0825;
+    --palette-lilac-white: #ebe7f7;
+    --palette-purple-dark: #2c154b;
+    --palette-gray-purple: #61526b;
+    --palette-purple-medium: #522e5f;
+    --palette-lilac-medium: #92679b;
+    --palette-gray-lilac: #9e94aa;
+    --palette-purple-light: #755e8a;
+    --palette-lilac-light: #cfb0da;
+    --palette-lavender: #b4a5ca;
+    --palette-burnt-rose: #995d5f;
+    --palette-wine-brown: #4e2c30;
 
-    /* Semânticos — elevação (light) */
-    --glow-bg-base: #e5e5e5;
-    --glow-bg-surface: #f3f3f3;
-    --glow-bg-elevated: #ffffff;
-    --glow-bg-highlight: rgba(40, 40, 40, 0.04);
+    /*
+     * Tema claro — seções lavanda da referência
+     * base (#EBE7F7) → surface → elevated → highlight
+     */
+    --glow-bg-base: var(--palette-lilac-white);
+    --glow-bg-surface: #f3f0f8;
+    --glow-bg-elevated: #faf9fd;
+    --glow-bg-highlight: #e3ddee;
 
-    /* Aliases legados */
     --glow-canvas: var(--glow-bg-base);
     --glow-surface: var(--glow-bg-surface);
-    --glow-hover-surface: var(--glow-bg-elevated);
-    --glow-surface-tint: var(--glow-bg-highlight);
+    --glow-hover-surface: var(--glow-bg-highlight);
+    --glow-surface-tint: rgba(146, 103, 155, 0.06);
 
     /* Texto */
-    --glow-text: #282828;
-    --glow-text-muted: rgba(40, 40, 40, 0.4);
-    --glow-text-soft: rgba(40, 40, 40, 0.8);
-    --glow-text-subtle: rgba(40, 40, 40, 0.5);
-    --glow-text-hover: rgba(40, 40, 40, 0.6);
-    --glow-placeholder: rgba(99, 99, 99, 0.6);
+    --glow-text: var(--palette-purple-black);
+    --glow-text-muted: var(--palette-gray-purple);
+    --glow-text-soft: #3d2a5c;
+    --glow-text-subtle: var(--palette-purple-light);
+    --glow-text-hover: var(--palette-purple-medium);
+    --glow-placeholder: var(--palette-gray-lilac);
 
     /* Bordas */
-    --glow-border-soft: rgba(40, 40, 40, 0.25);
-    --glow-border-sidebar: rgba(40, 40, 40, 0.3);
-    --glow-border-accent: rgba(230, 173, 1, 0.45);
+    --glow-border-soft: rgba(44, 21, 75, 0.1);
+    --glow-border-sidebar: rgba(44, 21, 75, 0.14);
+    --glow-border-accent: rgba(146, 103, 155, 0.45);
 
-    /* Accent / marca interativa */
-    --glow-gold: var(--brand-gold);
-    --glow-gold-dark: var(--brand-gold-dark);
-    --glow-gold-cta: #e6ad01;
-    --glow-accent: var(--brand-gold-dark);
-    --glow-accent-glow: rgba(255, 191, 0, 0.14);
+    /* Accent — lilás médio (botões, nav ativo, ícones) */
+    --glow-accent: var(--palette-lilac-medium);
+    --glow-accent-glow: rgba(207, 176, 218, 0.45);
+    --glow-gold: var(--palette-lilac-light);
+    --glow-gold-dark: var(--palette-lilac-medium);
+    --glow-gold-cta: var(--palette-lilac-medium);
     --glow-gold-soft: var(--glow-accent-glow);
-    --glow-gold-selected: rgba(255, 191, 0, 0.14);
+    --glow-gold-selected: rgba(146, 103, 155, 0.14);
+
+    /* Aliases de marca */
+    --brand-gold: var(--palette-lilac-light);
+    --brand-gold-dark: var(--palette-lilac-medium);
+    --brand-blue: #5b7fd4;
+    --brand-purple: var(--palette-purple-medium);
+    --brand-purple-soft: var(--palette-lavender);
+    --brand-secondary: var(--palette-burnt-rose);
     --glow-primary: var(--brand-blue);
-    --glow-purple: var(--brand-purple);
-    --glow-purple-soft: var(--brand-purple-soft);
-    --glow-secondary: var(--brand-secondary);
-    --glow-avatar-bg: #171717;
+    --glow-purple: var(--palette-purple-medium);
+    --glow-purple-soft: var(--palette-lavender);
+    --glow-secondary: var(--palette-burnt-rose);
+    --glow-avatar-bg: var(--palette-purple-dark);
 
-    /* Status semânticos */
-    --glow-success: #54804e;
-    --glow-success-bg: #c4f2cc;
+    /* Auxiliares */
+    --glow-neutral-warm: var(--palette-gray-purple);
+    --glow-neutral-soft: var(--palette-gray-lilac);
+    --glow-accent-muted: var(--palette-lavender);
+
+    /* Status */
+    --glow-success: #4a9e6e;
+    --glow-success-bg: rgba(74, 158, 110, 0.14);
     --glow-success-action: #4bc281;
-    --glow-success-dark: #0d5428;
-    --glow-error: #cf3f3f;
-    --glow-error-bg: rgba(207, 63, 63, 0.2);
-    --glow-neutral: #7a7b7a;
-    --glow-neutral-bg: rgba(122, 123, 122, 0.1);
-    --glow-warning: #aa682d;
-    --glow-warning-bg: rgba(170, 104, 45, 0.2);
+    --glow-success-dark: #2f6b48;
+    --glow-error: var(--palette-burnt-rose);
+    --glow-error-bg: rgba(153, 93, 95, 0.14);
+    --glow-neutral: var(--palette-gray-purple);
+    --glow-neutral-bg: rgba(97, 82, 107, 0.1);
+    --glow-warning: var(--palette-burnt-rose);
+    --glow-warning-bg: rgba(153, 93, 95, 0.12);
     --glow-info: var(--brand-blue);
-    --glow-info-bg: rgba(60, 92, 207, 0.2);
-    --glow-disabled: #a3a3a3;
-    --glow-placeholder-surface: #d9d9d9;
-    --glow-promo-border: #c3a600;
-    --glow-promo-bg: #fbed99;
-    --glow-promo-bg-soft: #fff3cc;
-    --glow-promo-bg-dashboard: #fff8e1;
-    --glow-promo-bg-dark: #3d3500;
-    --glow-promo-text: #524917;
-    --glow-promo-accent: #a67c00;
-    --glow-inverse-surface: #282828;
+    --glow-info-bg: rgba(91, 127, 212, 0.12);
+    --glow-disabled: var(--palette-gray-lilac);
+    --glow-placeholder-surface: #d5cfe0;
+    --glow-promo-border: var(--palette-lilac-medium);
+    --glow-promo-bg: rgba(207, 176, 218, 0.35);
+    --glow-promo-bg-soft: rgba(207, 176, 218, 0.25);
+    --glow-promo-bg-dashboard: rgba(146, 103, 155, 0.1);
+    --glow-promo-bg-dark: var(--palette-purple-dark);
+    --glow-promo-text: var(--palette-purple-black);
+    --glow-promo-accent: var(--palette-lilac-medium);
+    --glow-inverse-surface: var(--palette-purple-black);
 
-    /* Sombras */
-    --glow-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
-    --glow-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
-    --glow-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-    --glow-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.02), 0 0 0 1px rgba(27, 31, 35, 0.15);
+    /* Sombras com matiz roxa */
+    --glow-shadow-sm: 0 1px 2px rgba(13, 8, 37, 0.06), 0 0 0 1px rgba(44, 21, 75, 0.06);
+    --glow-shadow-md: 0 8px 24px rgba(13, 8, 37, 0.1), 0 0 0 1px rgba(44, 21, 75, 0.05);
+    --glow-shadow-lg: 0 16px 40px rgba(13, 8, 37, 0.14);
+    --glow-shadow-card: 0 2px 12px rgba(13, 8, 37, 0.08), 0 0 0 1px rgba(44, 21, 75, 0.07);
+
+    /* Glow Guide */
+    --tutorial-surface: #ffffff;
+    --tutorial-text: var(--glow-text);
+    --tutorial-muted: var(--glow-text-subtle);
+    --tutorial-overlay: rgba(20, 16, 28, 0.48);
+    --tutorial-border: #e7e3ea;
+    --tutorial-highlight: var(--glow-accent);
+    --tutorial-highlight-soft: rgba(146, 103, 155, 0.18);
   }
 
   .dark {
-    /* Semânticos — elevação (dark premium, matiz quente Glow Up) */
-    --glow-bg-base: #0c0a08;
-    --glow-bg-surface: #1a1714;
-    --glow-bg-elevated: #2a2520;
-    --glow-bg-highlight: #3d3528;
+    /*
+     * Tema escuro — cinza/preto com botões dourados (identidade original)
+     */
+    --glow-bg-base: #0a0806;
+    --glow-bg-surface: #1a1612;
+    --glow-bg-elevated: #2c2620;
+    --glow-bg-highlight: #3f382e;
 
     --glow-canvas: var(--glow-bg-base);
     --glow-surface: var(--glow-bg-surface);
-    --glow-hover-surface: var(--glow-bg-elevated);
-    --glow-surface-tint: rgba(245, 242, 235, 0.04);
+    --glow-hover-surface: var(--glow-bg-highlight);
+    --glow-surface-tint: rgba(245, 240, 232, 0.04);
 
-    /* Texto — off-white quente */
-    --glow-text: #f5f2eb;
-    --glow-text-muted: rgba(245, 242, 235, 0.45);
-    --glow-text-soft: rgba(245, 242, 235, 0.8);
-    --glow-text-subtle: rgba(245, 242, 235, 0.55);
-    --glow-text-hover: rgba(245, 242, 235, 0.7);
-    --glow-placeholder: rgba(245, 242, 235, 0.4);
+    /* Texto — off-white */
+    --glow-text: #f5f0e8;
+    --glow-text-muted: rgba(245, 240, 232, 0.45);
+    --glow-text-soft: rgba(245, 240, 232, 0.82);
+    --glow-text-subtle: rgba(245, 240, 232, 0.58);
+    --glow-text-hover: rgba(245, 240, 232, 0.72);
+    --glow-placeholder: rgba(245, 240, 232, 0.38);
 
     /* Bordas discretas */
-    --glow-border-soft: rgba(245, 242, 235, 0.08);
-    --glow-border-sidebar: rgba(245, 242, 235, 0.1);
-    --glow-border-accent: rgba(230, 173, 1, 0.35);
+    --glow-border-soft: rgba(245, 240, 232, 0.07);
+    --glow-border-sidebar: rgba(245, 240, 232, 0.09);
+    --glow-border-accent: rgba(230, 173, 1, 0.38);
 
-    /* Accent — uso escasso e premium */
-    --glow-accent-glow: rgba(255, 191, 0, 0.18);
+    /* Botões e accent dourado */
+    --glow-gold: #ffbf00;
+    --glow-gold-dark: #c59400;
+    --glow-gold-cta: #e6ad01;
+    --glow-accent: #c59400;
+    --glow-accent-glow: rgba(255, 191, 0, 0.2);
     --glow-gold-soft: var(--glow-accent-glow);
-    --glow-gold-selected: rgba(255, 191, 0, 0.12);
+    --glow-gold-selected: rgba(230, 173, 1, 0.1);
 
     --glow-avatar-bg: #141210;
+    --glow-neutral-warm: #6b6560;
+    --glow-neutral-soft: #9e9490;
+    --glow-accent-muted: #b8a078;
 
     /* Status — adaptados ao dark */
-    --glow-success-bg: rgba(16, 185, 129, 0.15);
     --glow-success: #6ee7b7;
+    --glow-success-bg: rgba(16, 185, 129, 0.14);
     --glow-success-dark: #6ee7b7;
-    --glow-error-bg: rgba(207, 63, 63, 0.2);
-    --glow-neutral-bg: rgba(122, 123, 122, 0.15);
-    --glow-info-bg: rgba(60, 92, 207, 0.25);
+    --glow-error: #f87171;
+    --glow-error-bg: rgba(207, 63, 63, 0.16);
+    --glow-neutral-bg: rgba(158, 148, 144, 0.12);
     --glow-info: #93b4ff;
-    --glow-warning-bg: rgba(170, 104, 45, 0.25);
+    --glow-info-bg: rgba(60, 92, 207, 0.2);
+    --glow-warning: #d4a574;
+    --glow-warning-bg: rgba(170, 104, 45, 0.18);
+    --glow-promo-border: #b8940a;
+    --glow-promo-bg-soft: rgba(230, 173, 1, 0.1);
+    --glow-promo-bg-dashboard: rgba(230, 173, 1, 0.08);
+    --glow-promo-bg-dark: #3d3520;
+    --glow-promo-text: #f5f0e8;
+    --glow-promo-accent: #e6ad01;
+    --glow-inverse-surface: #1a1612;
 
-    /* Sombras monocromáticas discretas */
-    --glow-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.04);
-    --glow-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06);
-    --glow-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
-    --glow-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    /* Sombras monocromáticas */
+    --glow-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    --glow-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    --glow-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.52);
+    --glow-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.05);
+
+    /* Glow Guide */
+    --tutorial-surface: var(--glow-bg-elevated);
+    --tutorial-text: var(--glow-text);
+    --tutorial-muted: var(--glow-text-subtle);
+    --tutorial-overlay: rgba(8, 6, 4, 0.62);
+    --tutorial-border: rgba(245, 240, 232, 0.12);
+    --tutorial-highlight: var(--glow-gold-cta);
+    --tutorial-highlight-soft: rgba(230, 173, 1, 0.2);
   }
 
   html {
@@ -153,39 +206,67 @@
 }
 
 @layer components {
-  /* Auth (login, cadastro, recuperação): sempre light conforme Figma, independente do tema global */
-  .auth-light-shell {
-    --glow-text: #282828;
-    --glow-text-muted: rgba(40, 40, 40, 0.4);
-    --glow-text-soft: rgba(40, 40, 40, 0.8);
-    --glow-text-subtle: rgba(40, 40, 40, 0.5);
-    --glow-text-hover: rgba(40, 40, 40, 0.6);
-    --glow-border-soft: rgba(40, 40, 40, 0.25);
-    --glow-surface: #f3f3f3;
-    --glow-canvas: #ffffff;
-    --glow-placeholder: rgba(99, 99, 99, 0.6);
-    --glow-hover-surface: #ffffff;
-    color-scheme: light;
-    @apply min-h-screen bg-white text-glow-text;
+  /*
+   * Overlay padrão de modais (referência: HorarioDiaProfissionaisModal / equipe).
+   * z-index acima do shell; scrim + blur fora de animações de opacity no próprio layer.
+   */
+  .glow-modal-overlay,
+  .equipe-modal-overlay,
+  .servicos-modal-overlay,
+  .financeiro-modal-overlay,
+  .loja-lista-modal-overlay {
+    @apply fixed inset-0 z-[3000] flex items-end justify-center p-0 sm:items-center sm:p-4;
+    background-color: rgba(0, 0, 0, 0.5);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
 
-  /* Agendamento público — Figma Fluxo Agendamento Público (node 200:345) */
-  .agendar-publico-shell {
-    --glow-text: #282828;
-    --glow-text-muted: rgba(40, 40, 40, 0.4);
-    --glow-text-soft: rgba(40, 40, 40, 0.8);
-    --glow-text-subtle: rgba(40, 40, 40, 0.6);
-    --glow-border-soft: rgba(40, 40, 40, 0.25);
-    --glow-surface: #f3f3f3;
-    --glow-canvas: #ffffff;
-    --glow-placeholder: rgba(99, 99, 99, 0.6);
-    --glow-hover-surface: #ffffff;
+  .glow-modal-scrim {
+    @apply absolute inset-0;
+    background-color: rgba(0, 0, 0, 0.5);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+
+  /* Auth — light lavanda alinhado à identidade */
+  .auth-light-shell {
+    --glow-bg-base: #ebe7f7;
+    --glow-bg-surface: #f3f0f8;
+    --glow-bg-elevated: #faf9fd;
+    --glow-canvas: #ebe7f7;
+    --glow-surface: #f3f0f8;
+    --glow-hover-surface: #faf9fd;
+    --glow-text: #0d0825;
+    --glow-text-muted: #61526b;
+    --glow-text-soft: #3d2a5c;
+    --glow-text-subtle: #755e8a;
+    --glow-text-hover: #522e5f;
+    --glow-border-soft: rgba(44, 21, 75, 0.12);
+    --glow-placeholder: #9e94aa;
     color-scheme: light;
-    @apply relative min-h-screen bg-white pb-16 text-glow-text;
+    @apply min-h-dvh bg-glow-bg-base text-glow-text;
+  }
+
+  /* Agendamento público */
+  .agendar-publico-shell {
+    --glow-bg-base: #ebe7f7;
+    --glow-bg-surface: #f3f0f8;
+    --glow-bg-elevated: #faf9fd;
+    --glow-canvas: #ebe7f7;
+    --glow-surface: #f3f0f8;
+    --glow-hover-surface: #faf9fd;
+    --glow-text: #0d0825;
+    --glow-text-muted: #61526b;
+    --glow-text-soft: #3d2a5c;
+    --glow-text-subtle: #755e8a;
+    --glow-border-soft: rgba(44, 21, 75, 0.12);
+    --glow-placeholder: #9e94aa;
+    color-scheme: light;
+    @apply relative min-h-dvh bg-glow-bg-base pb-16 text-glow-text;
   }
 
   .agendar-publico-header {
-    @apply border-b border-glow-border-soft px-[68px] pb-6 pt-[29px];
+    @apply border-b border-glow-border-soft px-4 pb-6 pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-8 lg:px-[68px] lg:pt-[29px];
   }
 
   .agendar-publico-logo {
@@ -205,7 +286,7 @@
   }
 
   .agendar-wizard-stepper__back {
-    @apply flex size-8 shrink-0 items-center justify-center rounded-full border border-glow-border-soft text-glow-text transition hover:bg-zinc-50;
+    @apply flex size-8 shrink-0 items-center justify-center rounded-full border border-glow-border-soft text-glow-text transition hover:bg-glow-hover-surface;
   }
 
   .agendar-wizard-stepper__meta {
@@ -226,7 +307,7 @@
 
   .agendar-wizard-stepper__bar {
     @apply h-1 flex-1 rounded-full;
-    background-color: rgba(40, 40, 40, 0.2);
+    background-color: color-mix(in srgb, var(--glow-text) 16%, transparent);
   }
 
   .agendar-wizard-stepper__bar--active {
@@ -255,7 +336,7 @@
   }
 
   .agendar-review-card {
-    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-white px-[22px] py-5;
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-bg-elevated px-[22px] py-5;
   }
 
   .agendar-review-card__title {
@@ -308,15 +389,38 @@
   }
 
   .agendar-slot-btn {
-    @apply flex h-[50px] min-w-0 items-center justify-center rounded-xl border-[0.5px] border-glow-text-muted font-satoshi text-base text-glow-text transition hover:bg-zinc-50;
+    @apply flex h-[50px] min-w-0 items-center justify-center rounded-xl border-[0.5px] border-glow-text-muted font-satoshi text-base text-glow-text transition hover:bg-glow-hover-surface;
   }
 
   .agendar-slot-btn--selected {
-    @apply border-glow-gold-cta bg-[rgba(40,40,40,0.08)];
+    @apply border-glow-gold-cta;
+    background-color: var(--glow-gold-selected);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--glow-gold-cta) 45%, transparent);
   }
 
   .agendar-servico-card {
-    @apply min-h-[105px];
+    @apply min-h-[105px] transition-[background-color,box-shadow,border-color];
+  }
+
+  .agendar-servico-card:hover {
+    @apply bg-glow-hover-surface;
+  }
+
+  .agendar-servico-card--selected {
+    @apply bg-glow-gold-selected ring-1 ring-glow-gold-cta;
+  }
+
+  .agendar-servico-card__radio {
+    @apply mt-1 flex size-3.5 shrink-0 items-center justify-center rounded-full border bg-glow-bg-elevated transition-colors;
+    border-color: color-mix(in srgb, var(--glow-text) 40%, transparent);
+  }
+
+  .agendar-servico-card__radio--selected {
+    @apply border-glow-gold-cta bg-glow-gold-cta;
+  }
+
+  .agendar-servico-card__radio-dot {
+    @apply size-1.5 rounded-full bg-glow-bg-base;
   }
 
   .agendar-opcao-card {
@@ -328,15 +432,31 @@
   }
 
   .agendar-resumo-footer {
-    @apply fixed inset-x-0 bottom-0 z-20 px-4 pb-4 pt-2;
+    @apply fixed inset-x-0 bottom-0 z-20 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2;
+  }
+
+  .agendar-resumo-footer--inline {
+    @apply relative inset-x-auto bottom-auto z-auto mt-6 px-0 pb-0 pt-0;
   }
 
   .agendar-resumo-footer__panel {
-    @apply mx-auto w-full max-w-[695px] rounded-xl bg-glow-inverse-surface px-5 pb-4 pt-5;
+    @apply mx-auto w-full max-w-[695px] rounded-xl bg-glow-inverse-surface px-5 pb-4 pt-5 shadow-glow-md;
+  }
+
+  .agendar-resumo-footer--wide .agendar-resumo-footer__panel {
+    @apply max-w-[926px];
+  }
+
+  .dark .agendar-resumo-footer__panel {
+    @apply border border-glow-border-soft bg-glow-bg-elevated;
   }
 
   .agendar-resumo-footer__summary {
     @apply mb-3 flex flex-wrap items-center justify-between gap-3 font-urbanist text-sm text-white;
+  }
+
+  .dark .agendar-resumo-footer__summary {
+    @apply text-glow-text;
   }
 
   .agendar-resumo-footer__meta {
@@ -347,8 +467,16 @@
     @apply size-1.5 shrink-0 rounded-full bg-white/70;
   }
 
+  .dark .agendar-resumo-footer__dot {
+    @apply bg-glow-text-subtle;
+  }
+
   .agendar-resumo-footer__total {
     @apply font-urbanist text-xl font-bold text-white;
+  }
+
+  .dark .agendar-resumo-footer__total {
+    @apply text-glow-text;
   }
 
   .agendar-calendar-day {
@@ -418,7 +546,7 @@
   }
 
   .agendar-success__card {
-    @apply mt-8 w-full rounded-xl border-[0.5px] border-glow-border-soft bg-white p-5 text-left;
+    @apply mt-8 w-full rounded-xl border-[0.5px] border-glow-border-soft bg-glow-bg-elevated p-5 text-left;
   }
 
   .agendar-success__card-header {
@@ -450,7 +578,7 @@
   }
 
   .agendar-success__btn-secondary {
-    @apply flex h-10 w-full items-center justify-center rounded border-[0.5px] border-glow-border-soft bg-white px-2.5 font-satoshi text-base font-bold text-glow-text transition hover:bg-zinc-50;
+    @apply flex h-10 w-full items-center justify-center rounded border-[0.5px] border-glow-border-soft bg-glow-bg-elevated px-2.5 font-satoshi text-base font-bold text-glow-text transition hover:bg-glow-hover-surface;
   }
 
   .checkout-shell {
@@ -514,8 +642,17 @@
     @apply flex w-full items-center justify-center gap-2 rounded-xl bg-glow-gold-cta px-5 py-3.5 text-sm font-bold text-white shadow-glow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
   }
 
+  /* Wizard Contratar plano — card e campos com contraste sobre o canvas */
+  .onboarding-contratar-card {
+    @apply rounded-xl border border-glow-border-soft bg-glow-bg-elevated shadow-glow-card;
+  }
+
+  .onboarding-contratar-input {
+    @apply bg-glow-surface;
+  }
+
   .onboarding-contratar-checkout-shell {
-    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface shadow-sm;
+    @apply rounded-xl border border-glow-border-soft bg-glow-bg-elevated shadow-glow-card;
   }
 
   .onboarding-contratar-checkout-panel {
@@ -549,7 +686,7 @@
   /* Toasts globais — canto superior, fora do fluxo do documento */
   .toast-stack {
     @apply pointer-events-none fixed z-[60] flex flex-col;
-    top: 1rem;
+    top: max(1rem, env(safe-area-inset-top));
     right: 1rem;
     left: 1rem;
     max-width: 24rem;
@@ -589,6 +726,27 @@
   /* Dashboard — uma única área de rolagem (main), sem scroll no documento */
   .dashboard-shell {
     @apply max-h-dvh;
+    background:
+      radial-gradient(ellipse 90% 50% at 50% -5%, var(--glow-accent-glow), transparent 55%),
+      var(--glow-bg-base);
+  }
+
+  .dashboard-main {
+    background: transparent;
+  }
+
+  /* Card premium — elevação consistente em toda a plataforma */
+  .glow-card {
+    @apply rounded-xl border border-glow-border-soft bg-glow-bg-elevated shadow-glow-card transition-colors;
+  }
+
+  .glow-card--interactive:hover {
+    @apply border-glow-border-accent bg-glow-hover-surface;
+  }
+
+  /* Logo sidebar */
+  .app-logo--sidebar {
+    @apply h-[80px] w-full max-w-[204px] min-w-0;
   }
 
   /* Sidebar nav — rolagem funcional sem barra visível */
@@ -601,8 +759,20 @@
     display: none;
   }
 
+  .sidebar-nav-section__label {
+    @apply px-2 pb-1 pt-4 font-urbanist text-[11px] font-semibold uppercase tracking-[0.08em] text-glow-text-subtle first:pt-1;
+  }
+
+  .sidebar-nav-section__items {
+    @apply flex flex-col gap-1.5;
+  }
+
+  .sidebar-nav-section + .sidebar-nav-section {
+    @apply mt-1;
+  }
+
   .dashboard-main {
-    @apply bg-glow-canvas;
+    @apply bg-transparent;
   }
 
   .dashboard-main__inner {
@@ -623,7 +793,7 @@
   }
 
   .panel-shell {
-    @apply overflow-hidden rounded-xl border border-glow-border-soft bg-glow-surface shadow-glow-sm;
+    @apply glow-card overflow-hidden;
   }
 
   .panel-shell__header {
@@ -651,7 +821,7 @@
   }
 
   .equipe-acao-card {
-    @apply rounded-xl border border-glow-border-soft bg-glow-surface p-5 shadow-sm transition hover:border-glow-gold-dark hover:bg-glow-hover-surface;
+    @apply glow-card glow-card--interactive p-5;
   }
 
   /* Agenda + Meus agendamentos — Figma nodes 460:657 / 487:1404 */
@@ -684,7 +854,40 @@
   }
 
   .agenda-page__filters {
-    @apply flex flex-wrap gap-2;
+    @apply grid grid-cols-2 gap-2 sm:flex sm:flex-wrap;
+  }
+
+  .agenda-page__actions {
+    @apply flex flex-wrap items-center justify-end gap-2;
+  }
+
+  .agenda-page--calendar {
+    @apply space-y-3 sm:space-y-6;
+  }
+
+  .agenda-page--calendar .agenda-page__header {
+    @apply gap-3 pb-3 sm:gap-4 sm:pb-6;
+  }
+
+  .agenda-page--calendar .agenda-page__title {
+    @apply text-xl leading-tight sm:text-2xl;
+  }
+
+  .agenda-page--calendar .agenda-page__title-date,
+  .agenda-page--calendar .agenda-page__subtitle {
+    @apply hidden sm:inline-flex;
+  }
+
+  .agenda-page--calendar .agenda-page__subtitle {
+    @apply sm:block;
+  }
+
+  .agenda-page--calendar .agenda-page__actions {
+    @apply flex-nowrap items-center justify-stretch gap-2;
+  }
+
+  .agenda-page--calendar .agenda-page__header > div:last-child {
+    @apply gap-2 sm:gap-3;
   }
 
   .agenda-filter-btn {
@@ -697,6 +900,342 @@
 
   .agenda-cards-grid {
     @apply grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 min-[1800px]:grid-cols-5;
+  }
+
+  .agenda-cal-nav {
+    @apply inline-flex shrink-0 items-center gap-0.5 rounded-xl border border-glow-border-soft bg-glow-surface p-0.5 sm:gap-1 sm:p-1;
+  }
+
+  .agenda-page--calendar .agenda-cal-nav :is(button) {
+    height: 2rem;
+    min-width: 2rem;
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+  }
+
+  @media (min-width: 640px) {
+    .agenda-page--calendar .agenda-cal-nav :is(button) {
+      height: 2.25rem;
+      min-width: 2.25rem;
+    }
+  }
+
+  .agenda-cal-views {
+    @apply min-w-0 flex-1 sm:w-[260px] sm:flex-none;
+  }
+
+  .agenda-cal-views .checkout-tabs {
+    @apply p-0.5;
+  }
+
+  .agenda-cal-views .checkout-tab {
+    @apply px-2 py-1.5 font-satoshi text-[11px] font-semibold sm:px-3 sm:text-xs;
+  }
+
+  .agenda-cal-loading {
+    @apply flex min-h-[280px] items-center justify-center rounded-2xl border border-glow-border-soft bg-glow-surface sm:min-h-[420px];
+  }
+
+  .agenda-cal-shell {
+    @apply relative overflow-hidden rounded-2xl border border-glow-border-soft bg-glow-surface;
+  }
+
+  .agenda-cal-shell--busy {
+    @apply pointer-events-none opacity-70;
+  }
+
+  .agenda-cal-empty {
+    @apply border-b border-glow-border-soft px-3 py-2 font-urbanist text-sm text-glow-text-subtle sm:px-4 sm:py-3;
+  }
+
+  .agenda-cal-count {
+    @apply border-t border-glow-border-soft px-3 py-2 font-urbanist text-sm text-glow-text-subtle sm:px-4 sm:py-3;
+  }
+
+  .agenda-cal-month {
+    @apply w-full;
+  }
+
+  .agenda-cal-month__weekdays {
+    @apply grid grid-cols-7 border-b border-glow-border-soft bg-glow-canvas;
+  }
+
+  .agenda-cal-month__weekdays span {
+    @apply px-0 py-1.5 text-center font-satoshi text-[10px] font-semibold uppercase tracking-[0.12em] text-glow-text-subtle sm:px-3 sm:py-2.5 sm:text-[11px] sm:tracking-[0.14em];
+  }
+
+  .agenda-cal-month__dow-short {
+    @apply no-underline sm:hidden;
+  }
+
+  .agenda-cal-month__dow-full {
+    @apply hidden sm:inline;
+  }
+
+  .agenda-cal-month__grid {
+    @apply grid grid-cols-7;
+  }
+
+  .agenda-cal-month__cell {
+    @apply min-h-[3.35rem] overflow-hidden border-b border-r border-glow-border-soft p-0.5 sm:min-h-[8.75rem] sm:p-2;
+  }
+
+  .agenda-cal-month__cell:nth-child(7n) {
+    @apply border-r-0;
+  }
+
+  .agenda-cal-month__cell--muted {
+    @apply bg-glow-canvas;
+  }
+
+  .agenda-cal-month__cell--muted .agenda-cal-month__day {
+    @apply text-glow-text-subtle;
+  }
+
+  .agenda-cal-month__hit {
+    @apply flex cursor-pointer flex-col items-center rounded-lg px-0.5 py-0.5 sm:items-start sm:rounded-none sm:px-0 sm:py-0;
+  }
+
+  .agenda-cal-month__hit:focus-visible {
+    @apply ring-2 ring-glow-gold ring-offset-1 ring-offset-glow-surface;
+  }
+
+  .agenda-cal-month__day {
+    @apply flex size-7 items-center justify-center rounded-full font-satoshi text-xs font-semibold text-glow-text transition sm:mb-1.5 sm:text-sm;
+  }
+
+  .agenda-cal-month__cell--today .agenda-cal-month__day {
+    @apply bg-glow-text text-glow-surface;
+  }
+
+  .agenda-cal-month__dots {
+    @apply mt-0.5 flex min-h-[6px] items-center justify-center gap-0.5 sm:hidden;
+  }
+
+  .agenda-cal-month__dot {
+    @apply size-1.5 shrink-0 rounded-full border-0;
+  }
+
+  .agenda-cal-month__dot.agenda-cal-event--confirmado {
+    @apply bg-glow-success-dark;
+  }
+
+  .agenda-cal-month__dot.agenda-cal-event--pendente {
+    @apply bg-glow-gold;
+  }
+
+  .agenda-cal-month__dot.agenda-cal-event--em-atendimento {
+    @apply bg-glow-neutral;
+  }
+
+  .agenda-cal-month__dot.agenda-cal-event--concluido {
+    @apply bg-glow-primary;
+  }
+
+  .agenda-cal-month__dot.agenda-cal-event--remarcado {
+    @apply bg-glow-warning;
+  }
+
+  .agenda-cal-month__dot.agenda-cal-event--cancelado {
+    @apply bg-glow-error;
+  }
+
+  .agenda-cal-month__dot.agenda-cal-event--default {
+    @apply bg-glow-text-subtle;
+  }
+
+  .agenda-cal-month__dot-more {
+    @apply font-satoshi text-[9px] font-bold leading-none text-glow-text-subtle;
+  }
+
+  .agenda-cal-month__events {
+    @apply hidden flex-col gap-1 sm:flex;
+  }
+
+  .agenda-cal-month__more {
+    @apply px-1 text-left font-urbanist text-[11px] font-semibold text-glow-text-subtle transition hover:text-glow-text;
+  }
+
+  .agenda-cal-event {
+    @apply flex w-full min-w-0 flex-col items-start overflow-hidden rounded-md border px-1.5 text-left transition hover:brightness-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-glow-gold;
+  }
+
+  .agenda-cal-event--pill {
+    @apply h-6 flex-row items-center gap-1 py-0;
+  }
+
+  .agenda-cal-event--block {
+    @apply h-full justify-start gap-0.5 py-1.5 shadow-sm;
+  }
+
+  .agenda-cal-event__time,
+  .agenda-cal-event__title,
+  .agenda-cal-event__meta {
+    @apply min-w-0 truncate;
+  }
+
+  .agenda-cal-event__time {
+    @apply font-satoshi text-[10px] font-bold uppercase tracking-wide;
+  }
+
+  .agenda-cal-event__title {
+    @apply font-urbanist text-[11px] font-semibold leading-tight;
+  }
+
+  .agenda-cal-event--block .agenda-cal-event__title {
+    @apply text-xs;
+  }
+
+  .agenda-cal-event__meta {
+    @apply font-urbanist text-[10px] leading-tight opacity-80;
+  }
+
+  .agenda-cal-event--cancelled {
+    @apply opacity-55;
+  }
+
+  .agenda-cal-event--cancelled .agenda-cal-event__title {
+    @apply line-through;
+  }
+
+  .agenda-cal-event--confirmado {
+    @apply border-glow-success-dark bg-glow-success-bg text-glow-success-dark;
+  }
+
+  .agenda-cal-event--pendente {
+    @apply border-glow-gold bg-glow-gold-soft text-glow-text;
+  }
+
+  .agenda-cal-event--em-atendimento {
+    @apply border-glow-neutral bg-glow-neutral-bg text-glow-neutral;
+  }
+
+  .agenda-cal-event--concluido {
+    @apply border-glow-primary bg-glow-info-bg text-glow-info;
+  }
+
+  .agenda-cal-event--remarcado {
+    @apply border-glow-warning bg-glow-warning-bg text-glow-warning;
+  }
+
+  .agenda-cal-event--cancelado {
+    @apply border-glow-error bg-glow-error-bg text-glow-error;
+  }
+
+  .agenda-cal-event--default {
+    @apply border-glow-border-soft bg-glow-canvas text-glow-text;
+  }
+
+  .agenda-cal-time {
+    --agenda-cal-gutter: 2.75rem;
+    --agenda-cal-col: 9.5rem;
+    @apply overflow-x-auto overscroll-x-contain;
+  }
+
+  .agenda-cal-time--resource {
+    --agenda-cal-col: min(100%, 22rem);
+  }
+
+  @media (min-width: 640px) {
+    .agenda-cal-time {
+      --agenda-cal-gutter: 4rem;
+      --agenda-cal-col: 9.25rem;
+    }
+
+    .agenda-cal-time--resource {
+      --agenda-cal-col: 11rem;
+    }
+  }
+
+  .agenda-cal-people {
+    @apply flex gap-2 overflow-x-auto overscroll-x-contain border-b border-glow-border-soft px-3 py-2;
+  }
+
+  .agenda-cal-people__chip {
+    @apply inline-flex shrink-0 items-center gap-1.5 rounded-full border border-glow-border-soft bg-glow-surface px-3 py-1.5 font-urbanist text-xs font-semibold text-glow-text-subtle;
+  }
+
+  .agenda-cal-people__chip--active {
+    @apply border-glow-text bg-glow-text text-glow-surface;
+  }
+
+  .agenda-cal-people__name {
+    @apply max-w-[10rem] truncate;
+  }
+
+  .agenda-cal-people__count {
+    @apply rounded-full bg-glow-gold-soft px-1.5 py-0.5 font-satoshi text-[10px] font-bold text-glow-text;
+  }
+
+  .agenda-cal-people__chip--active .agenda-cal-people__count {
+    @apply bg-glow-surface text-glow-text;
+  }
+
+  .agenda-cal-time__head,
+  .agenda-cal-time__body {
+    @apply grid;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .agenda-cal-time__head {
+    @apply sticky top-0 z-10 border-b border-glow-border-soft bg-glow-surface;
+  }
+
+  .agenda-cal-time__col-head {
+    @apply flex flex-col items-center justify-center gap-0.5 border-l border-glow-border-soft px-1 py-2 text-center sm:px-2 sm:py-3;
+  }
+
+  .agenda-cal-time__col-head--today .agenda-cal-time__col-label:not(.agenda-cal-time__col-label--resource) {
+    @apply flex size-7 items-center justify-center rounded-full bg-glow-text font-bold text-glow-surface sm:size-9;
+  }
+
+  .agenda-cal-time__dow {
+    @apply font-satoshi text-[10px] font-semibold uppercase tracking-[0.16em] text-glow-text-subtle;
+  }
+
+  .agenda-cal-time__col-label {
+    @apply font-satoshi text-lg font-bold leading-none text-glow-text;
+  }
+
+  .agenda-cal-time__col-label--resource {
+    @apply max-w-full truncate px-1 text-center text-sm font-semibold leading-snug;
+  }
+
+  .agenda-cal-time__col-caption {
+    @apply font-urbanist text-[11px] text-glow-text-subtle;
+  }
+
+  .agenda-cal-time__hours {
+    @apply relative;
+  }
+
+  .agenda-cal-time__hour {
+    @apply -mt-2 pr-2 text-right font-satoshi text-[11px] font-medium text-glow-text-subtle;
+  }
+
+  .agenda-cal-time__col {
+    @apply relative border-l border-glow-border-soft;
+  }
+
+  .agenda-cal-time__col--today {
+    @apply bg-glow-hover-surface;
+  }
+
+  .agenda-cal-time__slot {
+    @apply border-b border-glow-border-soft;
+  }
+
+  .agenda-cal-time__event {
+    @apply absolute z-[1];
+  }
+
+  .agenda-cal-now {
+    @apply pointer-events-none absolute right-0 left-0 z-[2] h-px bg-glow-gold;
+  }
+
+  .agenda-cal-now__badge {
+    @apply absolute -top-2.5 -left-1 rounded-full bg-glow-gold px-1.5 py-0.5 font-satoshi text-[10px] font-bold text-white;
   }
 
   .agendamento-card {
@@ -772,11 +1311,11 @@
   }
 
   .agendamento-card__btn-confirm {
-    @apply inline-flex h-8 min-w-[126px] items-center justify-center gap-1 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-success-action px-3 font-satoshi text-xs font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-success-action px-3 font-satoshi text-xs font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:h-8 sm:min-h-0;
   }
 
   .agendamento-card__btn-cancel {
-    @apply inline-flex h-8 min-w-[126px] items-center justify-center gap-1 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3 font-satoshi text-xs font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3 font-satoshi text-xs font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60 sm:h-8 sm:min-h-0;
   }
 
   .agendamento-badge {
@@ -812,7 +1351,11 @@
   }
 
   .agenda-figma-filter {
-    @apply relative inline-block w-[171px];
+    @apply relative w-full min-w-0 sm:inline-block sm:w-[171px];
+  }
+
+  .agenda-figma-filter--wide {
+    @apply sm:w-[220px];
   }
 
   .agenda-figma-filter__trigger {
@@ -929,13 +1472,17 @@
     @apply inline-flex h-[38px] min-w-[108px] items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-4 font-urbanist text-sm font-semibold text-glow-text-subtle transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-50;
   }
 
-  /* Detalhe do agendamento — Figma nodes 409:885 / 470:1460 */
+  /* Detalhe do agendamento */
   .agendamento-detail-page {
-    @apply space-y-6;
+    @apply space-y-5;
   }
 
   .agendamento-detail-header {
-    @apply flex items-start gap-3 border-b border-glow-border-soft pb-6;
+    @apply flex flex-col gap-4 border-b border-glow-border-soft pb-5 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .agendamento-detail-header__lead {
+    @apply flex min-w-0 items-start gap-3;
   }
 
   .agendamento-detail-back {
@@ -947,15 +1494,27 @@
   }
 
   .agendamento-detail-title {
-    @apply font-satoshi text-2xl font-bold text-glow-text;
+    @apply font-satoshi text-xl font-bold text-glow-text sm:text-2xl;
   }
 
   .agendamento-detail-subtitle {
-    @apply mt-1 font-satoshi text-base font-medium text-glow-text-muted;
+    @apply mt-1 font-satoshi text-sm font-medium text-glow-text-muted sm:text-base;
+  }
+
+  .agendamento-detail-header__meta {
+    @apply mt-2;
+  }
+
+  .agendamento-detail-header__actions {
+    @apply flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end;
+  }
+
+  .agendamento-detail-action-hint {
+    @apply font-urbanist text-xs text-glow-text-subtle sm:max-w-xs sm:text-right;
   }
 
   .agendamento-detail-grid {
-    @apply grid gap-6 xl:grid-cols-2;
+    @apply grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.85fr)];
   }
 
   .agendamento-detail-column {
@@ -964,6 +1523,23 @@
 
   .agendamento-detail-section-title {
     @apply mb-3 font-satoshi text-sm font-medium uppercase tracking-wide text-glow-text-soft;
+  }
+
+  .agendamento-detail-embedded-services {
+    @apply space-y-5 border-t border-glow-border-soft pt-5;
+  }
+
+  .agendamento-detail-subsection-title {
+    @apply font-satoshi text-sm font-medium uppercase tracking-wide text-glow-text-soft;
+  }
+
+  .agendamento-detail-fields-grid,
+  .agendamento-detail-service-fields {
+    @apply grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .agendamento-detail-service-fields--divided {
+    @apply border-t border-glow-border-soft pt-5;
   }
 
   .agendamento-detail-panel {
@@ -979,15 +1555,19 @@
   }
 
   .agendamento-detail-pending-alert {
-    @apply inline-flex items-center gap-1 rounded-xl border border-glow-promo-border bg-glow-promo-bg px-5 py-1 font-urbanist text-sm font-medium text-glow-promo-text;
+    @apply inline-flex items-center gap-1 rounded-xl border border-glow-promo-border bg-glow-promo-bg px-4 py-1 font-urbanist text-sm font-medium text-glow-promo-text;
   }
 
   .agendamento-detail-field {
-    @apply flex gap-3;
+    @apply flex min-w-0 items-start gap-3;
   }
 
   .agendamento-detail-field__icon {
     @apply flex size-[30px] shrink-0 items-center justify-center rounded border border-glow-border-soft bg-glow-canvas text-glow-text-subtle;
+  }
+
+  .agendamento-detail-field__content {
+    @apply min-w-0;
   }
 
   .agendamento-detail-field__label {
@@ -995,7 +1575,27 @@
   }
 
   .agendamento-detail-field__value {
-    @apply font-urbanist text-sm font-medium text-glow-text;
+    @apply break-words font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .agendamento-detail-field--inline {
+    @apply items-center;
+  }
+
+  .agendamento-detail-field--inline .agendamento-detail-field__content {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .agendamento-detail-field--inline .agendamento-detail-field__label {
+    @apply leading-none;
+  }
+
+  .agendamento-detail-field--inline .agendamento-detail-field__value {
+    @apply leading-none;
+  }
+
+  .agendamento-detail-field--inline .agendamento-badge {
+    @apply px-2.5 py-0.5;
   }
 
   .agendamento-detail-divider {
@@ -1020,38 +1620,6 @@
 
   .agendamento-detail-obs-box {
     @apply min-h-[82px] rounded-xl border border-glow-text-subtle px-5 py-3 font-urbanist text-sm text-glow-text;
-  }
-
-  .agendamento-detail-service-row {
-    @apply flex items-start gap-3 border-b border-glow-border-soft pb-4 last:border-b-0 last:pb-0;
-  }
-
-  .agendamento-detail-service-avatar {
-    @apply flex size-9 shrink-0 items-center justify-center rounded-full bg-glow-text-subtle font-urbanist text-sm font-semibold text-white;
-  }
-
-  .agendamento-detail-service-main {
-    @apply min-w-0 flex-1;
-  }
-
-  .agendamento-detail-service-name {
-    @apply font-urbanist text-sm font-medium text-glow-text;
-  }
-
-  .agendamento-detail-service-professional {
-    @apply mt-0.5 font-urbanist text-sm font-medium text-glow-text-subtle;
-  }
-
-  .agendamento-detail-service-side {
-    @apply shrink-0 text-right;
-  }
-
-  .agendamento-detail-service-time {
-    @apply font-urbanist text-sm font-medium text-glow-text;
-  }
-
-  .agendamento-detail-service-price {
-    @apply mt-0.5 font-urbanist text-sm font-medium text-glow-text-subtle;
   }
 
   .agendamento-detail-historico {
@@ -1084,8 +1652,25 @@
     @apply flex flex-wrap gap-2;
   }
 
+  .agendamento-detail-actions--toolbar {
+    @apply w-full flex-col-reverse gap-3 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .agendamento-detail-actions__secondary,
+  .agendamento-detail-actions__primary {
+    @apply flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center;
+  }
+
+  .agendamento-detail-actions__primary {
+    @apply sm:justify-end;
+  }
+
+  .agendamento-detail-actions__primary .agendamento-detail-btn--confirm {
+    @apply min-w-[200px];
+  }
+
   .agendamento-detail-btn {
-    @apply inline-flex h-8 items-center justify-center gap-1 rounded-xl border-[0.5px] px-3 font-satoshi text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-11 items-center justify-center gap-1 rounded-xl border-[0.5px] px-3 font-satoshi text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 sm:h-8 sm:min-h-0;
   }
 
   .agendamento-detail-btn--confirm {
@@ -1101,7 +1686,15 @@
   }
 
   .agendamento-detail-avaliado-badge {
-    @apply inline-flex items-center rounded-xl border border-glow-border-soft bg-glow-hover-surface px-3 py-2 font-urbanist text-sm text-glow-text-subtle;
+    @apply inline-flex min-h-11 items-center rounded-xl border border-glow-border-soft bg-glow-hover-surface px-3 py-2 font-urbanist text-sm text-glow-text-subtle sm:min-h-0;
+  }
+
+  @media (max-width: 639px) {
+    .agendamento-detail-header__actions .agendamento-detail-btn,
+    .agendamento-detail-actions .agendamento-detail-btn,
+    .agendamento-detail-actions .agendamento-detail-avaliado-badge {
+      @apply w-full;
+    }
   }
 
   .remarcar-agendamento {
@@ -1188,6 +1781,18 @@
     gap: 6px;
   }
 
+  .cliente-explorar-intro__top {
+    @apply flex items-start justify-between gap-4;
+  }
+
+  .cliente-explorar-intro__text {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 6px;
+  }
+
   .cliente-explorar-intro__title {
     @apply font-satoshi text-2xl font-bold leading-8 text-glow-text;
   }
@@ -1212,6 +1817,511 @@
     @apply space-y-6;
   }
 
+  .loja-detalhe-page {
+    @apply space-y-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:space-y-6 lg:pb-0;
+  }
+
+  .loja-detalhe-loading {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface px-6 py-16 text-center font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .loja-detalhe-layout {
+    @apply grid items-start gap-3 lg:grid-cols-[minmax(0,1.55fr)_minmax(260px,0.85fr)] lg:gap-5;
+  }
+
+  .loja-detalhe-layout__main {
+    @apply flex min-w-0 flex-col gap-3 lg:gap-4;
+  }
+
+  .loja-detalhe-layout__aside {
+    @apply hidden min-w-0 flex-col gap-4 lg:flex;
+  }
+
+  .loja-detalhe-layout__hours-mobile {
+    @apply block lg:hidden;
+  }
+
+  .loja-detalhe-atalhos {
+    @apply grid grid-cols-1 gap-2 sm:grid-cols-2;
+  }
+
+  .loja-detalhe-atalho {
+    @apply flex min-h-[3.25rem] w-full items-center gap-3 rounded-2xl border border-glow-border-soft bg-glow-surface px-3 py-2.5 text-left shadow-glow-sm transition active:scale-[0.99] hover:bg-glow-hover-surface;
+  }
+
+  .loja-detalhe-atalho:hover {
+    border-color: color-mix(in srgb, var(--glow-gold-cta) 40%, transparent);
+  }
+
+  .loja-detalhe-atalho__icon {
+    @apply inline-flex size-9 shrink-0 items-center justify-center rounded-xl sm:size-10;
+  }
+
+  .loja-detalhe-atalho__icon--users {
+    @apply bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300;
+  }
+
+  .loja-detalhe-atalho__icon--scissors {
+    @apply bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-950/50 dark:text-fuchsia-300;
+  }
+
+  .loja-detalhe-atalho__text {
+    @apply min-w-0 flex-1;
+  }
+
+  .loja-detalhe-atalho__text strong {
+    @apply block font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .loja-detalhe-atalho__text small {
+    @apply mt-0.5 block font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .loja-detalhe-atalho__chevron {
+    @apply size-4 shrink-0 text-glow-text-subtle;
+  }
+
+  .loja-detalhe-sticky-cta {
+    @apply fixed inset-x-0 bottom-0 z-[40] border-t border-glow-border-soft px-4 pt-3 backdrop-blur-md lg:hidden;
+    background: color-mix(in srgb, var(--glow-surface) 95%, transparent);
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  .loja-detalhe-sticky-cta__btn {
+    @apply inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-glow-gold-cta font-satoshi text-sm font-bold text-white shadow-md transition active:scale-[0.99] hover:brightness-95;
+  }
+
+  .loja-lista-modal {
+    @apply flex max-h-[88dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl border border-glow-border-soft bg-glow-surface shadow-xl sm:rounded-2xl;
+  }
+
+  .loja-lista-modal__header {
+    @apply flex items-start justify-between gap-3 border-b border-glow-border-soft px-4 py-3.5 sm:px-5 sm:py-4;
+  }
+
+  .loja-lista-modal__title {
+    @apply font-satoshi text-base font-bold text-glow-text sm:text-lg;
+  }
+
+  .loja-lista-modal__subtitle {
+    @apply mt-0.5 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .loja-lista-modal__close {
+    @apply inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-glow-text-subtle transition hover:bg-glow-hover-surface hover:text-glow-text;
+  }
+
+  .loja-lista-modal__body {
+    @apply min-h-0 flex-1 overflow-y-auto px-4 py-3 sm:px-5 sm:py-4;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .loja-lista-modal__empty {
+    @apply py-10 text-center font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .loja-lista-modal__table-wrap {
+    @apply overflow-x-auto;
+  }
+
+  .loja-lista-modal__table {
+    @apply w-full border-collapse text-left;
+  }
+
+  .loja-lista-modal__table th {
+    @apply border-b border-glow-border-soft pb-2 font-urbanist text-[11px] font-semibold uppercase tracking-wide text-glow-text-soft;
+  }
+
+  .loja-lista-modal__table td {
+    @apply border-b border-glow-border-soft py-3 align-middle font-urbanist text-sm text-glow-text;
+  }
+
+  .loja-lista-modal__table tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .loja-lista-modal__th-right,
+  .loja-lista-modal__td-right {
+    @apply text-right;
+  }
+
+  .loja-lista-modal__person {
+    @apply flex items-center gap-3;
+  }
+
+  .loja-lista-modal__avatar {
+    @apply flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-violet-100 font-satoshi text-xs font-bold text-violet-700 dark:bg-violet-950/50 dark:text-violet-300;
+  }
+
+  .loja-lista-modal__name {
+    @apply font-satoshi text-sm font-semibold text-glow-text;
+  }
+
+  .loja-lista-modal__hint {
+    @apply mt-0.5 max-w-md font-urbanist text-xs text-glow-text-subtle line-clamp-2;
+  }
+
+  .loja-lista-modal__price {
+    @apply font-satoshi font-bold whitespace-nowrap;
+  }
+
+  .loja-lista-modal__pill {
+    @apply inline-flex rounded-full bg-emerald-50 px-2 py-0.5 font-urbanist text-[11px] font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300;
+  }
+
+  @media (max-width: 639px) {
+    .loja-lista-modal__table thead {
+      @apply sr-only;
+    }
+
+    .loja-lista-modal__table,
+    .loja-lista-modal__table tbody,
+    .loja-lista-modal__table tr,
+    .loja-lista-modal__table td {
+      @apply block w-full;
+    }
+
+    .loja-lista-modal__table tr {
+      @apply mb-2 rounded-xl border border-glow-border-soft bg-glow-hover-surface px-3 py-3;
+    }
+
+    .loja-lista-modal__table td {
+      @apply border-0 py-1;
+    }
+
+    .loja-lista-modal__td-right {
+      @apply mt-1 text-left;
+    }
+  }
+
+  .loja-detalhe-aside__label {
+    @apply font-satoshi text-[11px] font-semibold uppercase tracking-[0.14em] text-glow-text-soft;
+  }
+
+  .loja-detalhe-aside__empty {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface px-4 py-8 text-center font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .loja-detalhe-aside__servicos {
+    @apply flex flex-col gap-2.5;
+  }
+
+  .loja-detalhe-aside__servico-link {
+    @apply block rounded-2xl outline-none transition;
+  }
+
+  .loja-detalhe-aside__servico-link:focus-visible {
+    @apply ring-2 ring-glow-gold-cta ring-offset-2 ring-offset-glow-canvas;
+  }
+
+  .loja-detalhe-aside__servico-link:hover .loja-servico-card {
+    border-color: color-mix(in srgb, var(--glow-gold-cta) 45%, transparent);
+  }
+
+  .loja-hero-card {
+    @apply overflow-hidden rounded-2xl border border-glow-border-soft bg-glow-surface shadow-glow-sm;
+  }
+
+  .loja-hero-card__top {
+    @apply contents;
+  }
+
+  .loja-hero-card__media {
+    @apply relative h-44 w-full overflow-hidden bg-glow-placeholder-surface sm:h-52 lg:absolute lg:right-5 lg:top-5 lg:h-[7.5rem] lg:w-36 lg:rounded-xl;
+  }
+
+  .loja-hero-card__body {
+    @apply relative p-4 sm:p-5 lg:pr-44;
+  }
+
+  .loja-hero-card__identity {
+    @apply min-w-0;
+  }
+
+  .loja-hero-card__badge-desktop {
+    @apply mb-2 hidden lg:block;
+  }
+
+  .loja-hero-card__badge {
+    @apply inline-flex h-6 items-center gap-2 rounded-full bg-emerald-50 px-3 font-urbanist text-[11px] font-bold tracking-wide text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300;
+  }
+
+  .loja-hero-card__badge--on-media {
+    @apply absolute bottom-3 left-3 z-[1] shadow-sm backdrop-blur-sm lg:hidden;
+  }
+
+  .loja-hero-card__badge--closed {
+    @apply bg-glow-surface-tint text-glow-text-subtle;
+  }
+
+  .loja-hero-card__badge-dot {
+    @apply size-1.5 rounded-full bg-emerald-500;
+  }
+
+  .loja-hero-card__title-row {
+    @apply flex items-center gap-2;
+  }
+
+  .loja-hero-card__nome {
+    @apply font-satoshi text-xl font-bold tracking-tight text-glow-text sm:text-2xl lg:text-[1.75rem];
+  }
+
+  .loja-hero-card__verified {
+    @apply size-5 shrink-0 text-glow-gold-cta;
+  }
+
+  .loja-hero-card__rating {
+    @apply mt-1.5;
+  }
+
+  .loja-hero-card__categoria {
+    @apply mt-2 flex flex-wrap items-center gap-1.5 font-urbanist text-xs font-semibold text-glow-gold-cta;
+  }
+
+  .loja-hero-card__formato {
+    @apply inline-flex rounded-md bg-glow-surface-tint px-2.5 py-0.5 font-semibold text-glow-text;
+  }
+
+  .loja-hero-card__categoria > span:last-child:not(.loja-hero-card__formato) {
+    @apply inline-flex rounded-full px-2.5 py-0.5 text-glow-gold-cta;
+    background: color-mix(in srgb, var(--glow-gold-cta) 12%, transparent);
+  }
+
+  .loja-hero-card__img {
+    @apply size-full object-cover;
+  }
+
+  .loja-hero-card__img-fallback {
+    @apply flex size-full items-center justify-center font-satoshi text-4xl font-bold text-glow-gold-cta lg:text-3xl;
+  }
+
+  .loja-hero-card__fav {
+    @apply absolute right-3 top-3 z-[1] inline-flex size-9 items-center justify-center rounded-full text-glow-gold-cta shadow-sm backdrop-blur transition hover:scale-105;
+    background: color-mix(in srgb, var(--glow-surface) 90%, transparent);
+  }
+
+  .loja-hero-card__fav--on {
+    @apply text-glow-gold-cta;
+  }
+
+  .loja-hero-card__stats {
+    @apply mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4;
+  }
+
+  .loja-hero-stat {
+    @apply flex items-center gap-2 rounded-xl border border-glow-border-soft bg-glow-hover-surface px-2.5 py-2.5;
+  }
+
+  .loja-hero-stat__icon {
+    @apply inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-glow-border-soft bg-glow-surface text-glow-gold-cta;
+  }
+
+  .loja-hero-stat__label {
+    @apply font-urbanist text-[10px] text-glow-text-subtle sm:text-[11px];
+  }
+
+  .loja-hero-stat__value {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .loja-hero-card__address {
+    @apply mt-3 flex flex-col gap-2 rounded-xl border border-glow-border-soft bg-glow-hover-surface px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .loja-hero-card__address-main {
+    @apply flex min-w-0 items-start gap-2 font-urbanist text-sm text-glow-text;
+  }
+
+  .loja-hero-card__map-link {
+    @apply inline-flex shrink-0 items-center gap-1 self-start font-urbanist text-sm font-semibold text-glow-gold-cta transition hover:brightness-95 sm:self-auto;
+  }
+
+  .loja-hero-card__desc {
+    @apply mt-3 font-urbanist text-sm leading-relaxed text-glow-text-subtle;
+  }
+
+  .loja-hero-card__cta {
+    @apply mt-4 block;
+  }
+
+  .loja-hero-card__cta--desktop {
+    @apply hidden lg:block;
+  }
+
+  @media (min-width: 1024px) {
+    .loja-hero-card {
+      @apply relative p-5;
+    }
+
+    .loja-hero-card__media {
+      @apply absolute;
+    }
+
+    .loja-hero-card__body {
+      @apply p-0;
+    }
+  }
+
+  .loja-servico-card {
+    @apply relative flex min-h-[4.75rem] items-center gap-3 rounded-2xl border border-glow-border-soft bg-glow-surface px-3.5 py-3 shadow-glow-sm;
+  }
+
+  .loja-servico-card__icon {
+    @apply flex size-11 shrink-0 items-center justify-center rounded-xl;
+  }
+
+  .loja-servico-card__icon--violet {
+    @apply bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300;
+  }
+
+  .loja-servico-card__icon--rose {
+    @apply bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300;
+  }
+
+  .loja-servico-card__icon--emerald {
+    @apply bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300;
+  }
+
+  .loja-servico-card__icon--amber {
+    @apply bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300;
+  }
+
+  .loja-servico-card__icon--sky {
+    @apply bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300;
+  }
+
+  .loja-servico-card__body {
+    @apply min-w-0 flex-1 pr-2;
+  }
+
+  .loja-servico-card__nome {
+    @apply font-satoshi text-sm font-semibold text-glow-text;
+  }
+
+  .loja-servico-card__meta {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .loja-servico-card__preco {
+    @apply shrink-0 font-satoshi text-xs font-bold text-glow-text sm:text-sm;
+  }
+
+  .loja-servico-card__chevron {
+    @apply size-4 shrink-0 text-glow-text-subtle;
+  }
+
+  .loja-profissionais-card {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+  }
+
+  .loja-profissionais-card__head {
+    @apply mb-4 flex items-center justify-between gap-3;
+  }
+
+  .loja-profissionais-card__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .loja-profissionais-card__count {
+    @apply rounded-full bg-glow-surface-tint px-2.5 py-0.5 font-urbanist text-xs font-semibold text-glow-gold-cta;
+  }
+
+  .loja-profissionais-card__list {
+    @apply flex gap-4 overflow-x-auto pb-1;
+  }
+
+  .loja-profissionais-card__item {
+    @apply flex w-[4.75rem] shrink-0 flex-col items-center gap-2;
+  }
+
+  .loja-profissionais-card__avatar {
+    @apply flex size-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-violet-100 font-satoshi text-sm font-bold text-violet-700 shadow-sm dark:border-glow-surface dark:bg-violet-950/50 dark:text-violet-300;
+  }
+
+  .loja-profissionais-card__nome {
+    @apply line-clamp-2 text-center font-urbanist text-[11px] font-medium leading-tight text-glow-text;
+  }
+
+  .loja-horarios-card {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-4 shadow-glow-sm sm:p-5;
+  }
+
+  .loja-horarios-card__head {
+    @apply mb-2 flex flex-wrap items-center justify-between gap-2;
+  }
+
+  .loja-horarios-card__title-wrap {
+    @apply flex items-center gap-2;
+  }
+
+  .loja-horarios-card__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .loja-horarios-card__status {
+    @apply rounded-full px-2.5 py-0.5 font-urbanist text-[11px] font-bold;
+  }
+
+  .loja-horarios-card__status--open {
+    @apply bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300;
+  }
+
+  .loja-horarios-card__status--closed {
+    @apply bg-glow-surface-tint text-glow-text-subtle;
+  }
+
+  .loja-horarios-card__hoje {
+    @apply mb-2 rounded-xl bg-glow-hover-surface px-3 py-2 font-urbanist text-sm text-glow-text;
+  }
+
+  .loja-horarios-card__hoje--muted {
+    @apply text-glow-text-subtle;
+  }
+
+  .loja-horarios-card__toggle {
+    @apply mb-1 inline-flex items-center gap-1 font-urbanist text-xs font-semibold text-glow-gold-cta lg:hidden;
+  }
+
+  .loja-horarios-card__list {
+    @apply hidden space-y-1 lg:block;
+  }
+
+  .loja-horarios-card__list--open {
+    @apply block;
+  }
+
+  .loja-horarios-card__row {
+    @apply flex items-center justify-between rounded-lg px-2 py-1.5 font-urbanist text-sm text-glow-text;
+  }
+
+  .loja-horarios-card__row--today {
+    @apply bg-glow-surface-tint font-semibold;
+  }
+
+  .loja-detalhe-avaliacoes {
+    @apply space-y-4 rounded-2xl border border-glow-border-soft bg-glow-surface p-4 shadow-glow-sm sm:p-5;
+  }
+
+  .loja-detalhe-avaliacoes__head {
+    @apply flex items-center justify-between gap-3;
+  }
+
+  .loja-detalhe-avaliacoes__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .loja-detalhe-contato {
+    @apply mt-2 rounded-2xl border border-glow-border-soft bg-glow-surface-tint p-4;
+  }
+
+  .loja-detalhe-contato__text {
+    @apply mb-3 font-urbanist text-sm leading-relaxed text-glow-text;
+  }
+
+  .loja-detalhe-contato__btn {
+    @apply inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-glow-gold-cta bg-glow-surface font-urbanist text-sm font-semibold text-glow-gold-cta transition hover:bg-glow-hover-surface;
+  }
+
   .cliente-page-header-block {
     @apply space-y-6;
   }
@@ -1230,12 +2340,6 @@
 
   .cliente-page-divider {
     @apply border-t border-glow-border-soft;
-  }
-
-  .cliente-explorar-toolbar {
-    @apply flex justify-end;
-    padding-top: 38px;
-    padding-bottom: 38px;
   }
 
   .cliente-explorar-btn-localizacao {
@@ -1261,8 +2365,9 @@
   .cliente-explorar-grid {
     display: grid;
     gap: 10px;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 388px), 388px));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 388px), 1fr));
     justify-content: start;
+    margin-top: 38px;
   }
 
   .cliente-explorar-load-more {
@@ -1270,6 +2375,14 @@
   }
 
   @media (max-width: 427px) {
+    .cliente-explorar-intro__top {
+      @apply flex-wrap;
+    }
+
+    .cliente-explorar-btn-localizacao {
+      @apply w-full;
+    }
+
     .cliente-explorar-grid {
       grid-template-columns: minmax(0, 1fr);
     }
@@ -1288,7 +2401,7 @@
   }
 
   .cliente-card {
-    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface transition-colors hover:border-glow-gold-dark;
+    @apply glow-card;
   }
 
   .cliente-estab-card {
@@ -1347,7 +2460,7 @@
   }
 
   .cliente-loja-panel {
-    @apply cliente-card flex min-h-[382px] w-full max-w-[723px] flex-col p-10;
+    @apply cliente-card flex min-h-[382px] w-full max-w-[723px] flex-col p-5 sm:p-8 lg:p-10;
   }
 
   .cliente-loja-panel__header {
@@ -1454,7 +2567,7 @@
   }
 
   .cliente-loja-servicos {
-    @apply w-full max-w-[278px] space-y-4;
+    @apply w-full space-y-4 lg:max-w-[278px];
   }
 
   .cliente-loja-servicos-grid {
@@ -1512,6 +2625,10 @@
   /* Serviços — Figma node 696:3155 */
   .servicos-page {
     @apply space-y-6;
+  }
+
+  .servicos-page--form {
+    @apply space-y-3;
   }
 
   .servicos-page__header {
@@ -1585,67 +2702,132 @@
   }
 
   .servicos-btn-form-primary {
-    @apply flex h-10 flex-1 items-center justify-center rounded-xl bg-glow-gold-cta px-2.5 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply flex h-11 flex-1 touch-manipulation items-center justify-center rounded-xl bg-glow-gold-cta px-2.5 font-satoshi text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:h-10;
   }
 
   .servicos-btn-form-secondary {
-    @apply flex h-[37px] flex-1 items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+    @apply flex h-11 flex-1 touch-manipulation items-center justify-center rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:h-[37px];
   }
 
   .servicos-cards-grid {
-    @apply grid gap-2.5 lg:grid-cols-2;
+    @apply grid w-full gap-3;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  }
+
+  .servicos-cards-grid > * {
+    @apply min-w-0 w-full;
   }
 
   .servico-card {
-    @apply relative min-h-[141px] rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-[22px] shadow-glow-sm;
+    @apply relative isolate flex h-auto flex-col items-stretch gap-2.5 overflow-hidden rounded-2xl p-3.5 text-left shadow-glow-card transition duration-200;
+    background:
+      linear-gradient(
+        165deg,
+        color-mix(in srgb, var(--glow-gold-cta) 12%, var(--glow-bg-elevated)) 0%,
+        var(--glow-bg-elevated) 38%
+      );
+    border: 1px solid color-mix(in srgb, var(--glow-gold-cta) 18%, var(--glow-border-soft));
   }
 
-  .servico-card__body {
-    @apply flex h-full flex-col gap-4 lg:flex-row lg:items-center lg:justify-between;
+  .servico-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      var(--glow-gold-cta),
+      color-mix(in srgb, var(--glow-gold-cta) 15%, transparent)
+    );
+  }
+
+  .servico-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glow-shadow-md);
+    border-color: color-mix(in srgb, var(--glow-gold-cta) 42%, var(--glow-border-soft));
+  }
+
+  .servico-card--combo {
+    border-color: color-mix(in srgb, var(--glow-gold-cta) 40%, var(--glow-border-soft));
+  }
+
+  .servico-card--inativo {
+    opacity: 0.78;
+  }
+
+  .servico-card__header {
+    @apply flex min-w-0 items-start gap-2.5;
+  }
+
+  .servico-card__thumb {
+    @apply shrink-0;
+  }
+
+  .servico-card .servico-imagem {
+    background: color-mix(in srgb, var(--glow-gold-cta) 14%, var(--glow-hover-surface));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--glow-gold-cta) 22%, transparent);
+  }
+
+  .servico-card .servico-imagem__fallback {
+    color: var(--glow-gold-cta);
   }
 
   .servico-card__info {
     @apply min-w-0 flex-1;
   }
 
-  .servico-card__title-row {
-    @apply flex flex-wrap items-center gap-2;
+  .servico-card__title {
+    @apply line-clamp-2 font-satoshi text-sm font-bold leading-snug tracking-tight text-glow-text;
   }
 
-  .servico-card__title {
-    @apply font-urbanist text-base font-bold text-glow-text;
+  .servico-card__badges {
+    @apply mt-1.5 flex flex-wrap items-center justify-start gap-1;
   }
 
   .servico-card__description {
-    @apply mt-1 line-clamp-2 font-urbanist text-xs text-glow-text-subtle;
+    @apply line-clamp-2 font-urbanist text-xs leading-relaxed text-glow-text-subtle;
   }
 
   .servico-card__meta {
-    @apply mt-3 flex flex-col gap-1;
+    @apply flex w-full flex-row flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5;
   }
 
   .servico-card__meta-item {
-    @apply inline-flex items-center gap-2 font-urbanist text-xs text-[rgba(40,40,40,0.6)];
+    @apply inline-flex items-center gap-1.5 font-urbanist text-xs text-glow-text-subtle;
   }
 
   .servico-card__meta-item--price {
-    @apply font-bold;
+    @apply font-satoshi text-sm font-bold tracking-tight text-glow-gold-cta;
   }
 
   .servico-card__meta-icon {
-    @apply size-4 shrink-0 text-glow-text-subtle;
+    @apply size-3.5 shrink-0 text-glow-gold-dark;
   }
 
   .servico-card__actions {
-    @apply flex shrink-0 flex-wrap items-center gap-2.5 lg:justify-end;
+    @apply mt-0.5 flex w-full items-center justify-start gap-1.5 border-t pt-2.5;
+    border-color: color-mix(in srgb, var(--glow-gold-cta) 16%, var(--glow-border-soft));
+  }
+
+  .servico-card__action {
+    @apply inline-flex size-8 flex-none items-center justify-center rounded-full text-glow-gold-cta transition hover:text-white disabled:cursor-not-allowed disabled:opacity-60;
+    background: color-mix(in srgb, var(--glow-gold-cta) 12%, transparent);
+  }
+
+  .servico-card__action:hover:not(:disabled) {
+    background: var(--glow-gold-cta);
   }
 
   .servico-status-badge {
-    @apply inline-flex h-[14px] items-center justify-center rounded-full px-4 font-urbanist text-xs font-normal leading-none;
+    @apply inline-flex h-5 items-center justify-center rounded-full px-2 font-urbanist text-[10px] font-medium leading-none;
   }
 
   .servico-status-badge--ativo {
     @apply bg-glow-success-bg text-glow-success-dark;
+  }
+
+  .servico-status-badge--combo {
+    @apply bg-glow-gold-soft text-glow-gold-dark;
   }
 
   .servico-status-badge--inativo {
@@ -1669,11 +2851,11 @@
   }
 
   .servicos-empty__title {
-    @apply font-satoshi text-[32px] font-black leading-tight text-glow-text;
+    @apply font-satoshi text-2xl font-black leading-tight text-glow-text sm:text-[32px];
   }
 
   .servicos-empty__description {
-    @apply mt-3 font-satoshi text-xl text-glow-text-muted;
+    @apply mt-3 font-satoshi text-base text-glow-text-muted sm:text-xl;
   }
 
   .servicos-empty__action {
@@ -1705,15 +2887,19 @@
   }
 
   .servicos-form-panel {
-    @apply mx-auto w-full max-w-[721px] rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-4 shadow-sm sm:px-[50px] sm:py-10;
+    @apply mx-auto w-full max-w-[721px] rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-3 shadow-sm sm:p-4 sm:px-[50px] sm:py-10;
   }
 
   .servicos-form-panel__fields {
-    @apply space-y-6;
+    @apply space-y-4 sm:space-y-6;
   }
 
   .servicos-form-panel__row {
-    @apply grid gap-6 sm:grid-cols-2;
+    @apply grid grid-cols-2 gap-3 sm:gap-6;
+  }
+
+  .servicos-form-panel__row > * {
+    @apply min-w-0;
   }
 
   .servicos-form-label {
@@ -1721,7 +2907,39 @@
   }
 
   .servicos-form-input {
-    @apply h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-canvas px-[18px] font-inter text-sm text-glow-text outline-none transition placeholder:font-inter placeholder:text-sm placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:opacity-60;
+    @apply h-12 w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-canvas px-3.5 font-inter text-base text-glow-text outline-none transition placeholder:font-inter placeholder:text-base placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:opacity-60 sm:h-[49px] sm:px-[18px] sm:text-sm sm:placeholder:text-sm;
+  }
+
+  .servicos-form-textarea {
+    @apply min-h-[88px] w-full resize-y rounded-lg border-[0.3px] border-glow-border-soft bg-glow-canvas px-3.5 py-3 font-inter text-base text-glow-text outline-none transition placeholder:font-inter placeholder:text-base placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:opacity-60 sm:px-[18px] sm:text-sm sm:placeholder:text-sm;
+  }
+
+  .servicos-form-tipo-grid {
+    @apply grid grid-cols-2 gap-2 sm:gap-3;
+  }
+
+  .servicos-form-tipo-card {
+    @apply flex h-full flex-col rounded-xl border px-3 py-2.5 text-left transition sm:p-3;
+  }
+
+  .servicos-form-tipo-card--active {
+    @apply border-glow-gold bg-glow-gold-selected ring-2 ring-glow-gold;
+  }
+
+  .servicos-form-tipo-card--idle {
+    @apply border-glow-border-soft;
+  }
+
+  .servicos-form-tipo-card--idle:hover {
+    border-color: color-mix(in srgb, var(--glow-gold) 40%, transparent);
+  }
+
+  .servicos-form-tipo-card__title {
+    @apply block font-satoshi text-[13px] font-semibold leading-snug text-glow-text sm:text-sm;
+  }
+
+  .servicos-form-tipo-card__desc {
+    @apply mt-1 line-clamp-3 block font-urbanist text-[11px] leading-snug text-glow-text-subtle sm:text-xs;
   }
 
   .servicos-form-input--error {
@@ -1737,7 +2955,11 @@
   }
 
   .servicos-form-profissionais-header {
-    @apply flex flex-wrap items-center justify-between gap-3;
+    @apply flex flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3;
+  }
+
+  .servicos-form-profissionais-header .servicos-btn-outline {
+    @apply h-11 w-full sm:h-9 sm:w-auto;
   }
 
   .servicos-form-profissionais-box {
@@ -1753,7 +2975,37 @@
   }
 
   .servicos-form-actions {
-    @apply mt-8 flex flex-col gap-3 sm:flex-row;
+    @apply mt-6 flex flex-row gap-3 sm:mt-8;
+  }
+
+  .servicos-form-panel--page {
+    @apply pb-[5.5rem] sm:pb-10;
+  }
+
+  @media (max-width: 639px) {
+    .servicos-page--form {
+      margin-left: -1rem;
+      margin-right: -1rem;
+      margin-bottom: -1rem;
+    }
+
+    .servicos-form-panel--page {
+      @apply max-w-none rounded-none border-x-0 px-4 pt-4 shadow-none;
+      padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
+    }
+
+    .servicos-form-panel--page .servicos-form-actions {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 30;
+      margin-top: 0;
+      border-top: 1px solid var(--glow-border-soft);
+      background: var(--glow-surface);
+      padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+      box-shadow: 0 -8px 24px color-mix(in srgb, var(--glow-text) 8%, transparent);
+    }
   }
 
   .servico-prof-chip {
@@ -1826,10 +3078,6 @@
 
   .servico-prof-add-btn {
     @apply flex size-[76px] items-center justify-center rounded-full border border-dashed border-glow-border-soft bg-glow-hover-surface text-glow-text-subtle transition hover:border-glow-gold hover:text-glow-gold;
-  }
-
-  .servicos-modal-overlay {
-    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4;
   }
 
   .servicos-modal {
@@ -1928,15 +3176,15 @@
   }
 
   .servico-form-currency .flex > span {
-    @apply h-[49px] rounded-l-lg border-[0.3px] border-r-0 border-glow-border-soft;
+    @apply h-12 rounded-l-lg border-[0.3px] border-r-0 border-glow-border-soft sm:h-[49px];
   }
 
   .servico-form-currency .flex > input {
-    @apply servicos-form-input h-[49px] rounded-r-lg;
+    @apply servicos-form-input rounded-r-lg;
   }
 
   .servico-prof-rating {
-    @apply inline-flex h-[22px] items-center gap-1.5 rounded-full bg-[rgba(255,191,0,0.15)] px-3.5 font-urbanist text-sm font-bold text-glow-text;
+    @apply inline-flex h-[22px] items-center gap-1.5 rounded-full bg-glow-gold-selected px-3.5 font-urbanist text-sm font-bold text-glow-text;
   }
 
   .servico-prof-rating--compact {
@@ -2065,19 +3313,15 @@
   }
 
   .equipe-empty-state__title {
-    @apply font-satoshi text-[32px] font-black leading-tight text-glow-text;
+    @apply font-satoshi text-2xl font-black leading-tight text-glow-text sm:text-[32px];
   }
 
   .equipe-empty-state__description {
-    @apply max-w-md font-satoshi text-xl text-glow-text-muted;
-  }
-
-  .equipe-modal-overlay {
-    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4;
+    @apply max-w-md font-satoshi text-base text-glow-text-muted sm:text-xl;
   }
 
   .equipe-modal {
-    @apply flex max-h-[92dvh] w-full max-w-[490px] flex-col overflow-hidden rounded-t-2xl border-[0.5px] border-glow-border-soft bg-glow-surface shadow-xl sm:max-h-[90dvh] sm:rounded-xl;
+    @apply flex max-h-[92dvh] w-full max-w-[490px] flex-col overflow-hidden rounded-t-2xl border border-glow-border-soft bg-glow-surface shadow-[0_24px_48px_-12px_rgba(0,0,0,0.28)] ring-1 ring-black/5 sm:max-h-[90dvh] sm:rounded-2xl;
   }
 
   .equipe-modal--tall {
@@ -2105,7 +3349,7 @@
   }
 
   .equipe-modal__header {
-    @apply space-y-2 border-b border-glow-border-soft px-6 pb-4 pt-6;
+    @apply shrink-0 space-y-2 border-b border-glow-border-soft bg-glow-surface px-6 pb-4 pt-6;
   }
 
   .equipe-modal__header-top {
@@ -2117,7 +3361,7 @@
   }
 
   .equipe-modal__title {
-    @apply font-urbanist text-base font-semibold text-black;
+    @apply font-urbanist text-base font-semibold text-glow-text;
   }
 
   .equipe-modal__subtitle {
@@ -2125,11 +3369,11 @@
   }
 
   .equipe-modal__body {
-    @apply flex-1 overflow-y-auto px-6 py-6;
+    @apply min-h-0 flex-1 overflow-y-auto bg-glow-surface px-6 py-6;
   }
 
   .equipe-modal__footer {
-    @apply flex items-center justify-center gap-2.5 border-t border-glow-border-soft px-6 py-6;
+    @apply flex shrink-0 items-center justify-end gap-2.5 border-t border-glow-border-soft bg-glow-hover-surface px-6 py-5;
   }
 
   .equipe-modal__dismiss {
@@ -2273,7 +3517,7 @@
   }
 
   .equipe-convites-table {
-    @apply w-full min-w-[640px] text-left font-urbanist text-sm;
+    @apply w-full min-w-[760px] text-left font-urbanist text-sm;
   }
 
   .equipe-convites-table__head-row {
@@ -2294,6 +3538,30 @@
 
   .equipe-convites-table__td--muted {
     @apply text-glow-text-subtle;
+  }
+
+  .equipe-convites-table__actions {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .equipe-convite-status-badge {
+    @apply inline-flex h-[14px] items-center justify-center rounded-full px-3 font-urbanist text-[10px] font-medium leading-none;
+  }
+
+  .equipe-convite-status-badge--ativo {
+    @apply bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200;
+  }
+
+  .equipe-convite-status-badge--cancelado {
+    @apply bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-200;
+  }
+
+  .equipe-convite-status-badge--indisponivel {
+    @apply bg-glow-hover-surface text-glow-text-subtle;
+  }
+
+  .equipe-convites__row-card {
+    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-4 shadow-sm md:hidden;
   }
 
   .equipe-membro-detalhe__danger {
@@ -2381,9 +3649,9 @@
     @apply w-full rounded-xl border-[0.5px] border-glow-border-soft bg-glow-canvas px-3 py-2 font-urbanist text-sm text-glow-text outline-none transition focus:border-glow-gold disabled:cursor-not-allowed disabled:opacity-60;
   }
 
-  /* Horários — Figma node 800:4293 */
+  /* Horários de atendimento — fiel à referência visual */
   .horarios-page {
-    @apply space-y-6;
+    @apply space-y-5 pb-8;
   }
 
   .horarios-page__header {
@@ -2391,15 +3659,15 @@
   }
 
   .horarios-page__header-main {
-    @apply min-w-0 max-w-xl;
+    @apply min-w-0 max-w-2xl;
   }
 
   .horarios-page__title {
-    @apply font-satoshi text-2xl font-bold text-glow-text;
+    @apply font-satoshi text-2xl font-bold tracking-tight text-glow-text;
   }
 
   .horarios-page__subtitle {
-    @apply mt-1 font-satoshi text-base leading-snug text-glow-text-subtle;
+    @apply mt-1.5 max-w-xl font-urbanist text-[13px] leading-relaxed text-glow-text-subtle;
   }
 
   .horarios-page__actions {
@@ -2410,28 +3678,8 @@
     @apply font-urbanist text-sm text-red-600;
   }
 
-  .horarios-tabs {
-    @apply relative flex gap-8 border-b border-glow-border-soft pb-0;
-  }
-
-  .horarios-tabs__item {
-    @apply relative z-[1] border-b-2 border-transparent px-2 pb-3 font-urbanist text-sm font-medium text-glow-text-subtle transition hover:text-glow-text;
-  }
-
-  .horarios-tabs__item--active {
-    @apply text-glow-text;
-  }
-
-  .horarios-tabs__indicator {
-    @apply pointer-events-none absolute bottom-0 h-1 rounded-full bg-glow-gold transition-all duration-200;
-  }
-
-  .horarios-tabs__indicator--loja {
-    @apply left-2 w-[54px];
-  }
-
-  .horarios-tabs__indicator--profissionais {
-    @apply left-[84px] w-[113px];
+  .horarios-massa-btn {
+    @apply inline-flex h-10 items-center gap-2 rounded-xl border border-transparent bg-glow-gold-soft px-4 font-urbanist text-sm font-semibold text-glow-gold-cta shadow-sm transition hover:bg-glow-gold-selected focus:outline-none focus:ring-2 focus:ring-glow-gold;
   }
 
   .horarios-section-title {
@@ -2439,55 +3687,364 @@
   }
 
   .horarios-loja {
-    @apply space-y-5;
+    @apply space-y-4;
   }
 
   .horarios-loja-grid {
-    @apply grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6;
+    display: grid;
+    gap: 16px;
+    /* Evita cards estreitos demais que cortam 08:00 */
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+
+  @media (min-width: 1536px) {
+    .horarios-loja-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+
+  .horarios-loja-list {
+    @apply divide-y divide-glow-border-soft overflow-hidden rounded-xl border border-glow-border-soft bg-glow-surface;
+  }
+
+  .horarios-comercial {
+    @apply flex flex-col gap-4 rounded-xl border border-glow-border-soft bg-glow-surface p-4 shadow-sm sm:flex-row sm:items-center sm:gap-4 sm:px-5 sm:py-4;
+  }
+
+  .horarios-comercial__icon {
+    @apply flex size-11 shrink-0 items-center justify-center rounded-xl bg-glow-gold-soft text-glow-gold-cta;
+  }
+
+  .horarios-comercial__content {
+    @apply min-w-0 flex-1;
+  }
+
+  .horarios-comercial__title {
+    @apply font-urbanist text-[15px] font-semibold text-glow-text;
+  }
+
+  .horarios-comercial__desc {
+    @apply mt-0.5 max-w-2xl font-urbanist text-[13px] leading-relaxed text-glow-text-subtle;
+  }
+
+  .horarios-comercial__status {
+    @apply flex shrink-0 items-center gap-3;
+  }
+
+  .horarios-comercial--skeleton {
+    @apply items-center;
+  }
+
+  .horarios-skeleton {
+    @apply animate-pulse rounded-md bg-glow-hover-surface;
+  }
+
+  .horarios-skeleton--icon {
+    @apply size-11 shrink-0 rounded-xl;
   }
 
   .horario-dia-card {
-    @apply flex min-h-[360px] flex-col rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm transition-colors;
+    @apply flex min-h-[248px] flex-col gap-3.5 rounded-xl border border-glow-border-soft bg-glow-surface p-[18px] shadow-sm transition-colors;
   }
 
-  .horario-dia-card--editavel {
-    @apply border-glow-gold-dark bg-glow-gold-soft;
+  .horario-dia-card--fechado {
+    background: #fcfcfd;
   }
 
-  .horario-dia-card--bloqueado {
-    @apply border-glow-border-soft;
+  .dark .horario-dia-card--fechado {
+    @apply bg-glow-surface;
   }
 
-  .horario-dia-card__hint {
-    @apply mb-4 flex items-start gap-2 rounded-lg border border-glow-border-soft bg-glow-hover-surface px-3 py-2 font-urbanist text-xs leading-snug text-glow-text-subtle;
+  .horario-dia-card--editando {
+    @apply shadow-glow-sm;
+    border-color: color-mix(in srgb, var(--glow-gold-cta) 40%, transparent);
   }
 
-  .horario-dia-card__hint--editavel {
-    @apply border-glow-gold-dark bg-glow-gold-soft text-glow-text;
+  .horario-dia-card--skeleton {
+    @apply min-h-[220px];
   }
 
-  .horario-dia-card__hint-icon {
-    @apply mt-0.5 size-3.5 shrink-0 text-glow-text-subtle;
+  .horario-dia-card--compact {
+    @apply min-h-0 rounded-none border-0 bg-transparent p-4 shadow-none;
   }
 
-  .horario-dia-card__hint--editavel .horario-dia-card__hint-icon {
-    @apply text-glow-gold;
+  .horario-dia-card__compact-row {
+    @apply flex items-center gap-3;
   }
 
   .horario-dia-card__header {
-    @apply mb-5 flex items-start justify-between gap-2;
+    @apply flex items-start justify-between gap-2;
   }
 
   .horario-dia-card__title {
-    @apply font-urbanist text-base font-semibold text-glow-text;
+    @apply font-urbanist text-sm font-semibold leading-snug text-glow-text;
   }
 
-  .horario-dia-card__fields {
-    @apply flex flex-1 flex-col gap-5;
+  .horario-dia-card__label {
+    @apply block font-urbanist text-xs font-medium text-glow-text-subtle;
+  }
+
+  .horario-dia-card__times-read,
+  .horario-dia-card__times-edit {
+    @apply grid grid-cols-2 gap-2.5;
+  }
+
+  .horario-dia-card__times-edit.is-disabled,
+  .horario-dia-card__profs.is-disabled {
+    @apply pointer-events-none opacity-50;
+  }
+
+  .horario-dia-card__time-block {
+    @apply min-w-0 space-y-1.5;
+  }
+
+  .horario-dia-card__time-box {
+    @apply flex h-11 w-full min-w-0 items-center justify-between gap-2 rounded-lg border border-glow-border-soft bg-glow-canvas px-3 font-urbanist text-glow-text;
+  }
+
+  .horario-dia-card__time-text {
+    @apply font-urbanist text-[15px] font-semibold tabular-nums tracking-wide text-glow-text;
+  }
+
+  .horario-dia-card__time-box-icon {
+    @apply size-4 shrink-0 text-glow-text-subtle;
+  }
+
+  .horario-dia-card__range {
+    @apply mt-1 font-urbanist text-[15px] font-semibold tabular-nums text-glow-text;
+  }
+
+  .horario-dia-card__input {
+    @apply h-11 w-full min-w-0 rounded-lg border border-glow-border-soft bg-glow-canvas px-3 font-urbanist text-[15px] font-semibold tabular-nums text-glow-text outline-none transition focus:border-glow-gold-cta focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .horario-dia-card__input:focus {
+    --tw-ring-color: color-mix(in srgb, var(--glow-gold) 30%, transparent);
+  }
+
+  .horario-dia-card__input::-webkit-calendar-picker-indicator {
+    opacity: 0.55;
+    cursor: pointer;
+  }
+
+  .horario-dia-card__closed {
+    @apply flex flex-1 flex-col items-center justify-center gap-2 py-3 text-center;
+  }
+
+  .horario-dia-card__closed-label {
+    @apply font-urbanist text-sm font-medium text-glow-text-subtle;
+  }
+
+  .horario-dia-card__closed-range {
+    @apply font-urbanist text-sm tracking-wide text-glow-text-subtle opacity-70;
+  }
+
+  .horario-dia-card__closed-hint {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .horario-dia-card__error {
+    @apply font-urbanist text-xs text-red-600;
+  }
+
+  .horario-dia-card__profs {
+    @apply space-y-2;
+  }
+
+  .horario-dia-card__profs-empty {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .horario-dia-card__profs-count {
+    @apply font-urbanist text-xs font-medium text-glow-text-subtle;
+  }
+
+  .horario-dia-card__profs-count-btn {
+    @apply inline-flex h-9 w-full items-center gap-2 rounded-lg border border-glow-border-soft bg-glow-canvas px-3 font-urbanist text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .horario-dia-card__add-prof,
+  .horario-dia-card__edit-link {
+    @apply inline-flex items-center gap-1 font-urbanist text-xs font-medium text-glow-gold-cta transition hover:brightness-95;
+  }
+
+  .horario-dia-card__select-hint {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .horario-dia-card__edit-btn,
+  .horario-dia-card__define-btn,
+  .horario-dia-card__profs-btn,
+  .horario-dia-card__select-profs {
+    @apply inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-glow-border-soft bg-glow-surface px-3 font-urbanist text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .horario-dia-card__edit-btn {
+    @apply mt-auto border-glow-border-soft bg-glow-surface text-glow-text hover:bg-glow-hover-surface;
+  }
+
+  .horario-dia-card__edit-btn svg {
+    @apply text-glow-gold-cta;
+  }
+
+  .horario-dia-card__define-btn {
+    @apply border-glow-border-soft bg-glow-surface text-glow-text;
+  }
+
+  .horario-dia-card__profs-btn {
+    @apply border-transparent bg-transparent text-glow-text-subtle shadow-none hover:bg-glow-hover-surface hover:text-glow-text;
+  }
+
+  .horario-dia-card__switch-row {
+    @apply flex items-center justify-between gap-3;
+  }
+
+  .horario-dia-card__switch-label {
+    @apply font-urbanist text-sm font-medium text-glow-text;
   }
 
   .horario-dia-card__actions {
-    @apply mt-auto flex flex-col gap-2 pt-5;
+    @apply mt-auto flex items-center justify-end gap-2 pt-1;
+  }
+
+  .horario-toggle {
+    @apply relative h-5 w-9 shrink-0 cursor-default appearance-none rounded-full bg-glow-border-soft transition
+      before:absolute before:left-0.5 before:top-0.5 before:size-4 before:rounded-full before:bg-white before:shadow-sm before:transition
+      checked:bg-glow-gold-cta checked:before:translate-x-4;
+  }
+
+  .horario-dia-card .horario-toggle {
+    @apply cursor-pointer;
+  }
+
+  .horario-status-badge {
+    @apply inline-flex h-5 items-center justify-center rounded-full px-2.5 font-urbanist text-[11px] font-medium leading-none;
+  }
+
+  .horario-status-badge--ativo {
+    background: #eaf8ef;
+    color: #218a4a;
+  }
+
+  .dark .horario-status-badge--ativo {
+    @apply bg-glow-success-bg text-glow-success-dark;
+  }
+
+  .horario-status-badge--inativo {
+    @apply bg-glow-hover-surface text-glow-text-subtle;
+  }
+
+  .horarios-dica {
+    @apply flex flex-col gap-3 rounded-xl border border-glow-border-soft bg-glow-gold-soft px-5 py-4 sm:flex-row sm:items-center;
+  }
+
+  .horarios-dica__icon {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-full bg-glow-surface text-glow-gold-cta shadow-sm;
+  }
+
+  .horarios-dica__text {
+    @apply min-w-0 flex-1 font-urbanist text-sm leading-relaxed text-glow-text-subtle;
+  }
+
+  .horarios-dica__action,
+  .horarios-dica__link {
+    @apply inline-flex h-9 shrink-0 items-center justify-center rounded-lg border border-glow-border-soft bg-glow-surface px-3.5 font-urbanist text-sm font-medium text-glow-gold-cta transition hover:bg-glow-hover-surface;
+  }
+
+  .horarios-excecoes {
+    @apply space-y-5;
+  }
+
+  .horarios-excecoes__empty {
+    @apply flex flex-col items-center rounded-xl border border-dashed border-glow-border-soft bg-glow-surface px-6 py-10 text-center;
+  }
+
+  .horarios-excecoes__icon {
+    @apply mb-3 flex size-12 items-center justify-center rounded-xl bg-glow-gold-soft text-glow-gold-cta;
+  }
+
+  .horarios-excecoes__title {
+    @apply font-urbanist text-base font-semibold text-glow-text;
+  }
+
+  .horarios-excecoes__desc {
+    @apply mt-2 max-w-md font-urbanist text-sm leading-relaxed text-glow-text-subtle;
+  }
+
+  .horarios-excecoes__badge {
+    @apply mt-4 inline-flex rounded-full bg-glow-hover-surface px-3 py-1 font-urbanist text-xs font-medium text-glow-text-subtle;
+  }
+
+  .horarios-excecoes__preview {
+    @apply grid gap-3 sm:grid-cols-2;
+  }
+
+  .horarios-excecoes__card {
+    @apply flex items-center justify-between gap-3 rounded-xl border border-glow-border-soft bg-glow-surface px-4 py-3 opacity-60;
+  }
+
+  .horarios-excecoes__date {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .horarios-excecoes__name {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .horarios-excecoes__hours {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .horarios-massa-modal {
+    @apply max-w-[520px];
+  }
+
+  .horarios-massa-modal__body {
+    @apply space-y-5;
+  }
+
+  .horarios-massa-modal__warning {
+    @apply rounded-lg border border-amber-200/80 bg-amber-50 px-3 py-2.5 font-urbanist text-xs leading-relaxed text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100;
+  }
+
+  .horarios-massa-modal__section {
+    @apply space-y-3;
+  }
+
+  .horarios-massa-modal__section-title {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .horarios-massa-modal__times {
+    @apply grid grid-cols-2 gap-3;
+  }
+
+  .horarios-massa-modal__dias {
+    @apply grid gap-2 sm:grid-cols-2;
+  }
+
+  .horarios-massa-modal__dia {
+    @apply flex cursor-pointer items-center gap-2 rounded-lg border border-glow-border-soft bg-glow-canvas px-3 py-2.5 font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .horarios-massa-modal__seletor {
+    @apply overflow-hidden rounded-xl border border-glow-border-soft;
+  }
+
+  .horarios-massa-modal__search {
+    @apply flex items-center gap-2 border-b border-glow-border-soft px-3 py-2.5;
+  }
+
+  .horarios-massa-modal__search-input {
+    @apply w-full bg-transparent font-urbanist text-sm text-glow-text outline-none placeholder:text-glow-placeholder;
+  }
+
+  .horarios-massa-modal__prof-list {
+    @apply max-h-48 overflow-y-auto;
+  }
+
+  .horarios-massa-modal__prof-item {
+    @apply flex cursor-pointer items-center gap-2.5 px-3 py-2.5 font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface;
   }
 
   .horario-field {
@@ -2499,15 +4056,19 @@
   }
 
   .horario-field__input {
-    @apply h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-canvas px-[18px] font-inter text-sm text-glow-text outline-none transition placeholder:text-glow-placeholder focus:border-glow-gold focus:ring-1 focus:ring-glow-gold disabled:cursor-not-allowed disabled:bg-glow-hover-surface disabled:text-glow-text-subtle;
+    @apply h-10 w-full rounded-lg border border-glow-border-soft bg-glow-canvas px-3 font-urbanist text-sm text-glow-text outline-none transition focus:border-glow-gold-cta focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .horario-field__input:focus {
+    --tw-ring-color: color-mix(in srgb, var(--glow-gold) 30%, transparent);
   }
 
   .horario-field__input--editable {
-    @apply cursor-pointer border-glow-gold-dark bg-white focus:border-glow-gold focus:ring-2 focus:ring-glow-gold-soft dark:bg-glow-canvas;
+    @apply cursor-pointer;
   }
 
   .horario-field__value {
-    @apply flex h-[49px] items-center rounded-lg border border-dashed border-glow-border-soft bg-glow-hover-surface px-[18px] font-inter text-sm text-glow-text-subtle;
+    @apply flex h-10 items-center rounded-lg border border-dashed border-glow-border-soft bg-glow-hover-surface px-3 font-urbanist text-sm text-glow-text-subtle;
   }
 
   .horario-field__select-wrap {
@@ -2520,23 +4081,11 @@
 
   .horario-field__select-wrap::after {
     content: '';
-    @apply pointer-events-none absolute right-[18px] top-1/2 size-0 -translate-y-1/2 border-x-[5px] border-t-[6px] border-x-transparent border-t-glow-text-subtle;
-  }
-
-  .horario-status-badge {
-    @apply inline-flex h-[14px] items-center justify-center rounded-full px-4 font-urbanist text-xs font-normal leading-none;
-  }
-
-  .horario-status-badge--ativo {
-    @apply bg-glow-success-bg text-glow-success-dark;
-  }
-
-  .horario-status-badge--inativo {
-    @apply bg-glow-error-bg text-glow-error;
+    @apply pointer-events-none absolute right-3 top-1/2 size-0 -translate-y-1/2 border-x-[5px] border-t-[6px] border-x-transparent border-t-glow-text-subtle;
   }
 
   .horarios-btn-primary {
-    @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl bg-glow-gold-cta px-3.5 font-urbanist text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-glow-gold-cta px-3.5 font-urbanist text-sm font-medium text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .horarios-btn-primary--block {
@@ -2544,11 +4093,11 @@
   }
 
   .horarios-btn-primary--sm {
-    @apply h-[30px] min-w-[100px] px-3.5 text-sm;
+    @apply h-8 min-w-[100px] px-3 text-sm;
   }
 
   .horarios-btn-outline {
-    @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-glow-border-soft bg-glow-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:bg-glow-hover-surface disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .horarios-btn-outline--block {
@@ -2556,11 +4105,11 @@
   }
 
   .horarios-btn-outline--sm {
-    @apply h-[30px] min-w-[120px] px-3.5 text-sm;
+    @apply h-8 min-w-[120px] px-3 text-sm;
   }
 
   .horarios-btn-ativar {
-    @apply inline-flex h-[37px] items-center justify-center gap-2.5 rounded-xl bg-glow-success-bg px-3.5 font-urbanist text-sm font-medium text-glow-success-dark transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-glow-success-bg px-3.5 font-urbanist text-sm font-medium text-glow-success-dark transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .horarios-btn-ativar--block {
@@ -2568,7 +4117,7 @@
   }
 
   .horarios-btn-ativar--sm {
-    @apply h-[30px] min-w-[120px] px-3.5 text-sm;
+    @apply h-8 min-w-[120px] px-3 text-sm;
   }
 
   .horarios-profissionais,
@@ -2613,7 +4162,7 @@
   }
 
   .horarios-prof-chip--selected {
-    @apply border-glow-gold bg-[rgba(255,191,0,0.12)];
+    @apply border-glow-gold bg-glow-gold-selected;
   }
 
   .horarios-panel__fields {
@@ -2814,7 +4363,7 @@
 
   /* Financeiro */
   .financeiro-page {
-    @apply space-y-6;
+    @apply space-y-4;
   }
 
   .financeiro-page__header {
@@ -2854,7 +4403,7 @@
   }
 
   .financeiro-btn-outline {
-    @apply inline-flex h-[37px] items-center justify-center gap-2 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-hover-surface px-3.5 font-urbanist text-sm font-medium text-glow-text transition hover:brightness-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex h-[37px] items-center justify-center gap-2 rounded-xl border border-glow-gold-cta bg-glow-surface px-3.5 font-urbanist text-sm font-medium text-glow-gold-cta transition hover:bg-glow-gold-soft disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .financeiro-quick-filters {
@@ -2866,7 +4415,99 @@
   }
 
   .financeiro-quick-filters__btn--active {
-    @apply border-glow-gold bg-glow-gold-soft font-semibold text-glow-text;
+    @apply border-glow-border-soft bg-glow-hover-surface font-medium text-glow-text;
+  }
+
+  .financeiro-segmented {
+    @apply inline-flex flex-wrap items-center rounded-xl border border-glow-border-soft bg-glow-hover-surface p-1;
+  }
+
+  .financeiro-segmented__btn {
+    @apply inline-flex h-8 items-center justify-center rounded-lg px-3 font-urbanist text-sm text-glow-text-subtle transition hover:text-glow-text;
+  }
+
+  .financeiro-segmented__btn--active {
+    @apply bg-glow-surface font-semibold text-glow-text shadow-glow-sm;
+  }
+
+  .financeiro-dashboard-header {
+    @apply space-y-4 border-b border-glow-border-soft pb-5;
+  }
+
+  .financeiro-dashboard-header__top {
+    @apply flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .financeiro-dashboard-header__actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .financeiro-dashboard-header__toolbar {
+    @apply flex flex-wrap items-end justify-between gap-3;
+  }
+
+  .financeiro-summary-bar {
+    @apply grid grid-cols-1 gap-3 rounded-xl border border-glow-border-soft bg-glow-surface px-4 py-3 shadow-glow-sm sm:grid-cols-[1fr_auto_1fr_auto_1fr];
+  }
+
+  .financeiro-summary-bar__item {
+    @apply flex items-center gap-3;
+  }
+
+  .financeiro-summary-bar__icon {
+    @apply size-4 shrink-0;
+  }
+
+  .financeiro-summary-bar__icon--entrada {
+    @apply text-green-600;
+  }
+
+  .financeiro-summary-bar__icon--saida {
+    @apply text-glow-error;
+  }
+
+  .financeiro-summary-bar__icon--lucro {
+    @apply text-glow-gold-cta;
+  }
+
+  .financeiro-summary-bar__label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-summary-bar__value {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .financeiro-summary-bar__value--positive {
+    @apply text-green-700;
+  }
+
+  .financeiro-summary-bar__value--negative {
+    @apply text-glow-error;
+  }
+
+  .financeiro-summary-bar__divider {
+    @apply hidden h-8 w-px bg-glow-border-soft sm:block;
+  }
+
+  .financeiro-icon {
+    @apply size-4 shrink-0;
+  }
+
+  .financeiro-trend {
+    @apply mt-1 flex flex-wrap items-center gap-1 font-urbanist text-xs;
+  }
+
+  .financeiro-trend--up {
+    @apply text-green-700;
+  }
+
+  .financeiro-trend--down {
+    @apply text-glow-error;
+  }
+
+  .financeiro-trend__label {
+    @apply text-glow-text-subtle;
   }
 
   .financeiro-kpi-grid {
@@ -2874,7 +4515,312 @@
   }
 
   .financeiro-kpi-card {
-    @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+    @apply rounded-xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.02);
+  }
+
+  .financeiro-kpi-card__header {
+    @apply flex items-center gap-2;
+  }
+
+  .financeiro-kpi-card__accent {
+    @apply size-2.5 shrink-0 rounded-full;
+  }
+
+  .financeiro-kpi-card__accent--green {
+    @apply bg-green-600;
+  }
+
+  .financeiro-kpi-card__accent--red {
+    @apply bg-glow-error;
+  }
+
+  .financeiro-kpi-card__accent--blue {
+    @apply bg-blue-600;
+  }
+
+  .financeiro-kpi-card__accent--gold {
+    @apply bg-glow-gold-cta;
+  }
+
+  .financeiro-kpi-card__accent--neutral {
+    @apply bg-glow-text-subtle;
+  }
+
+  .financeiro-dashboard-hero {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm sm:p-6;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      0 0 0 1px rgba(212, 175, 55, 0.06);
+  }
+
+  .financeiro-dashboard-hero__main {
+    @apply grid grid-cols-1 gap-5 lg:grid-cols-[1.4fr_1fr];
+  }
+
+  .financeiro-dashboard-hero__label-row {
+    @apply flex items-center gap-2;
+  }
+
+  .financeiro-dashboard-hero__icon {
+    @apply size-4 text-glow-gold-cta;
+  }
+
+  .financeiro-dashboard-hero__label {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .financeiro-dashboard-hero__value {
+    @apply mt-2 font-satoshi text-4xl font-bold tracking-tight text-glow-gold-cta sm:text-5xl;
+  }
+
+  .financeiro-dashboard-hero__lucro-hint {
+    @apply mt-2 font-urbanist text-sm;
+  }
+
+  .financeiro-dashboard-hero__lucro-hint--positive {
+    @apply text-green-700;
+  }
+
+  .financeiro-dashboard-hero__lucro-hint--negative {
+    @apply text-glow-error;
+  }
+
+  .financeiro-dashboard-hero__side {
+    @apply grid grid-cols-2 gap-3;
+  }
+
+  .financeiro-dashboard-hero__mini {
+    @apply rounded-xl border border-glow-border-soft bg-glow-hover-surface p-4;
+  }
+
+  .financeiro-dashboard-hero__mini-head {
+    @apply flex items-center gap-2 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-dashboard-hero__mini-icon {
+    @apply size-3.5;
+  }
+
+  .financeiro-dashboard-hero__mini-icon--entrada {
+    @apply text-green-600;
+  }
+
+  .financeiro-dashboard-hero__mini-icon--saida {
+    @apply text-glow-error;
+  }
+
+  .financeiro-dashboard-hero__mini-value {
+    @apply mt-2 font-satoshi text-xl font-bold;
+  }
+
+  .financeiro-dashboard-hero__mini-value--entrada {
+    @apply text-green-700;
+  }
+
+  .financeiro-dashboard-hero__mini-value--saida {
+    @apply text-glow-error;
+  }
+
+  .financeiro-metric-strip {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-3;
+  }
+
+  .financeiro-metric-strip__item {
+    @apply rounded-xl border border-glow-border-soft bg-glow-surface p-4 text-left shadow-glow-sm transition;
+  }
+
+  .financeiro-metric-strip__item--clickable {
+    @apply cursor-pointer hover:border-glow-border-soft hover:bg-glow-hover-surface;
+  }
+
+  .financeiro-metric-strip__head {
+    @apply flex items-center gap-2;
+  }
+
+  .financeiro-metric-strip__icon {
+    @apply size-3.5 text-glow-text-subtle;
+  }
+
+  .financeiro-metric-strip__label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-metric-strip__value {
+    @apply mt-1 font-satoshi text-lg font-bold text-glow-text;
+  }
+
+  .financeiro-metric-strip__value--positive {
+    @apply text-green-700;
+  }
+
+  .financeiro-metric-strip__value--negative {
+    @apply text-glow-error;
+  }
+
+  .financeiro-metric-strip__hint {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-dashboard-empty {
+    @apply flex gap-4 rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-4 sm:items-start;
+  }
+
+  .financeiro-dashboard-empty__icon-wrap {
+    @apply flex size-10 shrink-0 items-center justify-center rounded-xl bg-glow-surface;
+  }
+
+  .financeiro-dashboard-empty__icon {
+    @apply size-5 text-glow-gold-cta;
+  }
+
+  .financeiro-dashboard-empty__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .financeiro-dashboard-empty__desc {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .financeiro-dashboard-empty__tips {
+    @apply mt-2 list-inside list-disc space-y-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-dashboard-empty__actions {
+    @apply mt-3 flex flex-wrap gap-2;
+  }
+
+  .financeiro-quick-actions {
+    @apply space-y-3;
+  }
+
+  .financeiro-quick-actions__title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .financeiro-quick-actions__grid {
+    @apply grid grid-cols-2 gap-2 sm:grid-cols-4;
+  }
+
+  .financeiro-quick-actions__btn {
+    @apply flex items-center gap-2 rounded-xl border border-glow-border-soft bg-glow-surface px-3 py-3 font-urbanist text-sm text-glow-text transition hover:bg-glow-hover-surface;
+  }
+
+  .financeiro-quick-actions__icon {
+    @apply size-4 shrink-0 text-glow-text-subtle;
+  }
+
+  .financeiro-recent {
+    @apply rounded-xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+  }
+
+  .financeiro-recent__header {
+    @apply mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .financeiro-recent__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .financeiro-recent__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-recent__link {
+    @apply font-urbanist text-sm font-medium text-glow-gold-cta transition hover:brightness-110;
+  }
+
+  .financeiro-recent__list {
+    @apply divide-y divide-glow-border-soft;
+  }
+
+  .financeiro-recent__row {
+    @apply flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0;
+  }
+
+  .financeiro-recent__meta {
+    @apply min-w-0;
+  }
+
+  .financeiro-recent__date {
+    @apply block font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-recent__desc {
+    @apply block truncate font-urbanist text-sm text-glow-text;
+  }
+
+  .financeiro-recent__valor {
+    @apply shrink-0 font-satoshi text-sm font-bold;
+  }
+
+  .financeiro-recent__valor--entrada {
+    @apply text-green-700;
+  }
+
+  .financeiro-recent__valor--saida {
+    @apply text-glow-error;
+  }
+
+  .financeiro-chart-card {
+    @apply rounded-xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+  }
+
+  .financeiro-chart-card--empty {
+    @apply pb-4;
+  }
+
+  .financeiro-chart-card__header {
+    @apply mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .financeiro-chart-card__title-row {
+    @apply flex items-start gap-2;
+  }
+
+  .financeiro-chart-card__title-icon {
+    @apply mt-0.5 size-4 text-glow-text-subtle;
+  }
+
+  .financeiro-chart-card__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-chart-card__legend {
+    @apply flex flex-wrap items-center gap-4 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-chart-card__legend-item {
+    @apply inline-flex items-center gap-1.5;
+  }
+
+  .financeiro-chart-card__dot {
+    @apply size-2 rounded-full;
+  }
+
+  .financeiro-chart-card__dot--entrada {
+    @apply bg-green-600;
+  }
+
+  .financeiro-chart-card__dot--saida {
+    @apply bg-glow-error;
+  }
+
+  .financeiro-chart-card__body {
+    @apply h-56;
+  }
+
+  .financeiro-chart-card__empty-compact {
+    @apply rounded-lg border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-6 text-center;
+  }
+
+  .financeiro-chart-card__empty-title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .financeiro-chart-card__empty-desc {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
   }
 
   .financeiro-kpi-card__label {
@@ -2917,6 +4863,26 @@
     @apply rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface p-4 md:hidden;
   }
 
+  .financeiro-table__row-meta {
+    @apply mt-3 space-y-2;
+  }
+
+  .financeiro-table__row-meta-item {
+    @apply flex items-center justify-between gap-2;
+  }
+
+  .financeiro-table__row-meta-label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-table__row-meta-value {
+    @apply font-urbanist text-sm text-glow-text;
+  }
+
+  .financeiro-table__row-actions {
+    @apply mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end;
+  }
+
   .financeiro-badge {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 font-urbanist text-xs font-medium;
   }
@@ -2934,7 +4900,227 @@
   }
 
   .financeiro-badge--estornada {
-    @apply bg-amber-50 text-amber-800;
+    @apply bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-200;
+  }
+
+  .financeiro-badge--recebida {
+    @apply bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-300;
+  }
+
+  .financeiro-badge--pendente {
+    @apply bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-200;
+  }
+
+  .financeiro-badge--cancelada {
+    @apply bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-300;
+  }
+
+  .financeiro-badge__dot {
+    @apply mr-1.5 size-1.5 shrink-0 rounded-full bg-current opacity-80;
+  }
+
+  .financeiro-movimentos-kpis {
+    @apply grid gap-3 sm:grid-cols-2 xl:grid-cols-4;
+  }
+
+  .financeiro-movimentos-panel {
+    @apply mt-8 rounded-2xl border border-glow-border-soft bg-glow-bg-elevated p-4 shadow-glow-sm sm:p-5;
+  }
+
+  .financeiro-movimentos-panel__header {
+    @apply mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between;
+  }
+
+  .financeiro-movimentos-panel__title {
+    @apply font-urbanist text-lg font-semibold text-glow-text;
+  }
+
+  .financeiro-movimentos-panel__subtitle {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .financeiro-movimentos-panel__tabs {
+    @apply inline-flex rounded-xl border border-glow-border-soft bg-glow-bg-surface p-1;
+  }
+
+  .financeiro-movimentos-panel__tab {
+    @apply rounded-lg px-4 py-2 font-urbanist text-sm font-medium text-glow-text-subtle transition-colors hover:text-glow-text;
+  }
+
+  .financeiro-movimentos-panel__tab--active {
+    @apply bg-glow-bg-elevated text-glow-text shadow-glow-sm;
+  }
+
+  .financeiro-movimentos-embedded .financeiro-movimentos-toolbar {
+    @apply mt-4 border-0 bg-transparent p-0 shadow-none;
+  }
+
+  .financeiro-movimentos-kpis__item {
+    @apply flex flex-col;
+  }
+
+  .financeiro-movimentos-toolbar {
+    @apply mt-6 space-y-3 rounded-xl border border-glow-border-soft bg-glow-bg-elevated p-4 shadow-glow-sm;
+  }
+
+  .financeiro-movimentos-toolbar__search {
+    @apply w-full;
+  }
+
+  .financeiro-movimentos-toolbar__row {
+    @apply flex flex-wrap items-center gap-3;
+  }
+
+  .financeiro-movimentos-toolbar__filters {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .financeiro-movimentos-select {
+    @apply h-10 min-w-[9rem] rounded-lg border border-glow-border-soft bg-glow-surface px-3 font-urbanist text-sm text-glow-text outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold;
+  }
+
+  .financeiro-movimentos-layout {
+    @apply grid gap-6 xl:grid-cols-[minmax(0,1fr)_260px];
+  }
+
+  .financeiro-movimentos-layout__main {
+    @apply min-w-0;
+  }
+
+  .financeiro-movimento-cell {
+    @apply flex items-start gap-3;
+  }
+
+  .financeiro-movimento-cell__icon {
+    @apply mt-1 size-2.5 shrink-0 rounded-full;
+  }
+
+  .financeiro-movimento-cell__icon--entrada {
+    @apply bg-green-500;
+  }
+
+  .financeiro-movimento-cell__icon--saida {
+    @apply bg-glow-error;
+  }
+
+  .financeiro-movimento-cell__title {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .financeiro-movimento-cell__meta {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-pagamento-pill {
+    @apply inline-flex rounded-full border border-glow-border-soft bg-glow-hover-surface px-2.5 py-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-valor-assinado {
+    @apply font-satoshi text-sm font-bold tabular-nums;
+  }
+
+  .financeiro-valor-assinado--entrada {
+    @apply text-green-700 dark:text-green-400;
+  }
+
+  .financeiro-valor-assinado--saida {
+    @apply text-glow-error;
+  }
+
+  .financeiro-table--rich tbody tr.financeiro-table__row--interactive {
+    @apply transition hover:bg-glow-hover-surface;
+  }
+
+  .financeiro-movimento-card {
+    @apply rounded-xl border border-glow-border-soft bg-glow-bg-elevated p-4 shadow-glow-sm;
+  }
+
+  .financeiro-movimento-card__head {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  .financeiro-movimento-card__foot {
+    @apply mt-3 flex items-center justify-between gap-2;
+  }
+
+  .financeiro-movimentos-summary {
+    @apply h-fit rounded-xl border border-glow-border-soft bg-glow-bg-elevated p-5 shadow-glow-sm;
+  }
+
+  .financeiro-movimentos-summary__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .financeiro-movimentos-summary__block {
+    @apply mt-4 border-t border-glow-border-soft pt-4 first:mt-3 first:border-t-0 first:pt-0;
+  }
+
+  .financeiro-movimentos-summary__label {
+    @apply font-urbanist text-xs uppercase tracking-wide text-glow-text-subtle;
+  }
+
+  .financeiro-movimentos-summary__value {
+    @apply mt-1 font-satoshi text-xl font-bold text-glow-text;
+  }
+
+  .financeiro-movimentos-summary__value--positive {
+    @apply text-green-700 dark:text-green-400;
+  }
+
+  .financeiro-movimentos-summary__list {
+    @apply mt-2 space-y-2;
+  }
+
+  .financeiro-movimentos-summary__list-item {
+    @apply flex items-center justify-between gap-2 font-urbanist text-sm text-glow-text;
+  }
+
+  .financeiro-movimentos-summary__pct {
+    @apply font-semibold text-glow-text-subtle;
+  }
+
+  .financeiro-movimentos-summary__updated {
+    @apply mt-4 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-movimentos-chart {
+    @apply rounded-xl border border-glow-border-soft bg-glow-bg-elevated p-5 shadow-glow-sm;
+  }
+
+  .financeiro-movimentos-chart__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .financeiro-movimentos-chart__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .financeiro-movimentos-chart__body {
+    @apply mt-3 h-44;
+  }
+
+  .financeiro-pagination {
+    @apply flex flex-wrap items-center justify-between gap-3 rounded-xl border border-glow-border-soft bg-glow-bg-elevated px-4 py-3;
+  }
+
+  .financeiro-pagination__info {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .financeiro-pagination__controls {
+    @apply flex items-center gap-1;
+  }
+
+  .financeiro-pagination__nav {
+    @apply min-w-[2.25rem] px-2;
+  }
+
+  .financeiro-pagination__page {
+    @apply flex size-9 items-center justify-center rounded-lg font-urbanist text-sm text-glow-text-subtle transition hover:bg-glow-hover-surface;
+  }
+
+  .financeiro-pagination__page--active {
+    @apply bg-glow-gold-selected font-semibold text-glow-text;
   }
 
   .financeiro-empty {
@@ -2977,10 +5163,6 @@
     @apply border-green-200 bg-green-50 text-green-800;
   }
 
-  .financeiro-modal-overlay {
-    @apply fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4;
-  }
-
   .financeiro-modal {
     @apply flex max-h-[92dvh] w-full max-w-[490px] flex-col overflow-hidden rounded-t-2xl border-[0.5px] border-glow-border-soft bg-glow-surface shadow-xl sm:max-h-[90dvh] sm:rounded-xl;
   }
@@ -3002,7 +5184,10 @@
   }
 
   .financeiro-drawer-overlay {
-    @apply fixed inset-0 z-[90] bg-black/30;
+    @apply fixed inset-0 z-[90];
+    background-color: rgba(0, 0, 0, 0.4);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
 
   .financeiro-drawer {
@@ -3010,11 +5195,42 @@
   }
 
   .financeiro-search {
-    @apply flex h-10 w-full max-w-md items-center gap-2 rounded-xl border-[0.5px] border-glow-border-soft bg-glow-surface px-3;
+    @apply relative flex h-11 w-full max-w-xl items-center gap-2.5 rounded-2xl border border-glow-border-soft bg-glow-hover-surface px-3.5 transition;
+  }
+
+  .financeiro-search:focus-within {
+    @apply border-glow-gold bg-glow-surface;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--glow-gold-cta) 18%, transparent);
+  }
+
+  .financeiro-search__icon {
+    @apply size-4 shrink-0 text-glow-text-subtle transition;
+  }
+
+  .financeiro-search:focus-within .financeiro-search__icon {
+    @apply text-glow-gold-cta;
   }
 
   .financeiro-search__input {
-    @apply min-w-0 flex-1 bg-transparent font-urbanist text-sm text-glow-text outline-none placeholder:text-glow-placeholder;
+    @apply min-w-0 flex-1 appearance-none border-0 bg-transparent p-0 font-urbanist text-sm text-glow-text shadow-none outline-none ring-0 placeholder:text-glow-placeholder;
+  }
+
+  .financeiro-search__input:focus,
+  .financeiro-search__input:focus-visible {
+    @apply border-0 outline-none ring-0;
+  }
+
+  .financeiro-search__input::-webkit-search-decoration,
+  .financeiro-search__input::-webkit-search-cancel-button,
+  .financeiro-search__input::-webkit-search-results-button,
+  .financeiro-search__input::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+  }
+
+  .financeiro-search__clear {
+    @apply inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-glow-text-subtle transition hover:bg-glow-surface hover:text-glow-text;
   }
 
   @media print {
@@ -3026,4 +5242,2081 @@
       @apply space-y-4;
     }
   }
+
+  /* Dashboard */
+  .dashboard-page {
+    @apply space-y-4;
+  }
+
+  .dashboard-page-header {
+    @apply flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .dashboard-page-header__greeting {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-page-header__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .dashboard-page-header__subtitle {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-page-header__meta {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-page-header__actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .dashboard-page-header--compact {
+    @apply gap-3 pb-1;
+  }
+
+  .dashboard-page-header--compact .dashboard-page-header__title {
+    @apply text-xl sm:text-2xl;
+  }
+
+  .dashboard-header-btn-icon {
+    @apply mr-2 size-4;
+  }
+
+  .dashboard-page--negocio {
+    @apply space-y-5;
+  }
+
+  .dashboard-trial-strip {
+    @apply flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-glow-border-accent bg-glow-accent-glow px-4 py-2.5 font-urbanist text-sm;
+  }
+
+  .dashboard-trial-strip__badge {
+    @apply rounded-md bg-glow-hover-surface px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-glow-gold-cta;
+  }
+
+  .dashboard-trial-strip__text {
+    @apply font-medium text-glow-text;
+  }
+
+  .dashboard-trial-strip__divider {
+    @apply hidden h-3 w-px bg-glow-border-soft sm:block;
+  }
+
+  .dashboard-trial-strip__billing {
+    @apply text-glow-text-subtle;
+  }
+
+  .dashboard-trial-strip__link {
+    @apply ml-auto font-medium text-glow-gold-cta transition hover:brightness-110;
+  }
+
+  .dashboard-operacional {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-operacional__head {
+    @apply mb-4;
+  }
+
+  .dashboard-operacional__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-operacional__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-operacional__grid {
+    @apply grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5;
+  }
+
+  .dashboard-operacional__label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-operacional__value {
+    @apply mt-1 font-satoshi text-xl font-bold text-glow-text;
+  }
+
+  .dashboard-operacional__value--green {
+    @apply text-emerald-400;
+  }
+
+  .dashboard-exec-grid {
+    @apply grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4;
+  }
+
+  .dashboard-exec-grid__revenue {
+    @apply md:col-span-2 md:row-span-2;
+  }
+
+  .dashboard-exec-grid__rating {
+    @apply md:col-span-2 xl:col-span-1;
+  }
+
+  .dashboard-revenue-hero {
+    @apply flex h-full flex-col justify-between rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      0 0 0 1px rgba(84, 128, 78, 0.1);
+  }
+
+  .dashboard-revenue-hero__label-row {
+    @apply flex items-center gap-3;
+  }
+
+  .dashboard-revenue-hero__icon-wrap {
+    @apply flex size-10 items-center justify-center rounded-xl;
+  }
+
+  .dashboard-revenue-hero__icon-wrap--green {
+    @apply bg-emerald-500/15 text-emerald-400;
+  }
+
+  .dashboard-revenue-hero__icon {
+    @apply size-5;
+  }
+
+  .dashboard-revenue-hero__label {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-revenue-hero__value {
+    @apply mt-4 font-satoshi text-4xl font-bold text-emerald-400 sm:text-5xl;
+  }
+
+  .dashboard-revenue-hero__value--loading {
+    @apply text-glow-text-subtle;
+  }
+
+  .dashboard-revenue-hero__sparkline {
+    @apply mt-6 border-t border-glow-border-soft pt-4;
+  }
+
+  .dashboard-revenue-hero__sparkline-label {
+    @apply mb-3 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-revenue-hero__bars {
+    @apply flex h-16 items-end gap-1.5;
+  }
+
+  .dashboard-revenue-hero__bar {
+    @apply min-h-[4px] flex-1 rounded-sm bg-emerald-500/50 transition-all;
+  }
+
+  .dashboard-trend {
+    @apply mt-2 inline-flex items-center gap-2 font-urbanist text-sm;
+  }
+
+  .dashboard-trend--up {
+    @apply text-emerald-400;
+  }
+
+  .dashboard-trend--down {
+    @apply text-red-400;
+  }
+
+  .dashboard-trend__label {
+    @apply text-glow-text-subtle;
+  }
+
+  .dashboard-kpi {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-kpi--gold {
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      0 0 0 1px rgba(212, 175, 55, 0.08);
+  }
+
+  .dashboard-kpi--green .dashboard-kpi__icon-wrap {
+    @apply bg-emerald-500/15 text-emerald-400;
+  }
+
+  .dashboard-kpi--blue .dashboard-kpi__icon-wrap {
+    @apply bg-sky-500/15 text-sky-400;
+  }
+
+  .dashboard-kpi--purple .dashboard-kpi__icon-wrap {
+    @apply bg-violet-500/15 text-violet-400;
+  }
+
+  .dashboard-kpi--orange .dashboard-kpi__icon-wrap {
+    @apply bg-orange-500/15 text-orange-400;
+  }
+
+  .dashboard-kpi--yellow .dashboard-kpi__icon-wrap {
+    @apply bg-amber-500/15 text-amber-400;
+  }
+
+  .dashboard-kpi--gold .dashboard-kpi__icon-wrap {
+    @apply bg-glow-hover-surface text-glow-gold-cta;
+  }
+
+  .dashboard-kpi--gold .dashboard-kpi__value {
+    @apply text-glow-gold-cta;
+  }
+
+  .dashboard-kpi__head {
+    @apply flex items-center gap-2;
+  }
+
+  .dashboard-kpi__icon-wrap {
+    @apply flex size-8 items-center justify-center rounded-lg bg-glow-hover-surface;
+  }
+
+  .dashboard-kpi__icon {
+    @apply size-4 text-glow-text-subtle;
+  }
+
+  .dashboard-kpi--gold .dashboard-kpi__icon {
+    @apply text-glow-gold-cta;
+  }
+
+  .dashboard-kpi__label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-kpi__value {
+    @apply mt-2 font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .dashboard-kpi__value--loading {
+    @apply text-glow-text-subtle;
+  }
+
+  .dashboard-kpi__hint {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-kpi__substats {
+    @apply mt-4 space-y-1.5 border-t border-glow-border-soft pt-3;
+  }
+
+  .dashboard-kpi__substat {
+    @apply flex items-center justify-between font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-kpi__substat strong {
+    @apply font-semibold text-glow-text;
+  }
+
+  .dashboard-star-rating {
+    @apply mt-3;
+  }
+
+  .dashboard-star-rating__stars {
+    @apply flex gap-0.5 text-base leading-none;
+  }
+
+  .dashboard-star-rating__star {
+    @apply text-glow-border-soft;
+  }
+
+  .dashboard-star-rating__star--filled {
+    @apply text-glow-gold-cta;
+  }
+
+  .dashboard-star-rating__meta {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-insights {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-insights__title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-insights__list {
+    @apply mt-3 grid gap-2 sm:grid-cols-2;
+  }
+
+  .dashboard-insights__item {
+    @apply flex items-start gap-3 rounded-xl border border-glow-border-soft bg-glow-hover-surface px-4 py-3;
+  }
+
+  .dashboard-insights__icon-wrap {
+    @apply flex size-8 shrink-0 items-center justify-center rounded-lg bg-glow-surface;
+  }
+
+  .dashboard-insights__item--positive .dashboard-insights__icon-wrap {
+    @apply text-emerald-400;
+  }
+
+  .dashboard-insights__item--warning .dashboard-insights__icon-wrap {
+    @apply text-amber-400;
+  }
+
+  .dashboard-insights__item--info .dashboard-insights__icon-wrap {
+    @apply text-sky-400;
+  }
+
+  .dashboard-insights__message {
+    @apply font-urbanist text-sm text-glow-text;
+  }
+
+  .dashboard-charts-grid {
+    @apply grid grid-cols-1 gap-4 xl:grid-cols-2;
+  }
+
+  .dashboard-chart-card {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-chart-card__header {
+    @apply mb-4;
+  }
+
+  .dashboard-chart-card__title-row {
+    @apply flex items-start gap-3;
+  }
+
+  .dashboard-chart-card__icon-wrap {
+    @apply flex size-10 shrink-0 items-center justify-center rounded-xl;
+  }
+
+  .dashboard-chart-card__icon-wrap--green {
+    @apply bg-emerald-500/15 text-emerald-400;
+  }
+
+  .dashboard-chart-card__icon-wrap--yellow {
+    @apply bg-amber-500/15 text-amber-400;
+  }
+
+  .dashboard-chart-card__icon {
+    @apply size-5;
+  }
+
+  .dashboard-chart-card__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-chart-card__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-chart-card__body {
+    @apply h-56;
+  }
+
+  .dashboard-chart-card__empty {
+    @apply rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-8 text-center;
+  }
+
+  .dashboard-chart-card__empty-title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-chart-card__empty-desc {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-distribution {
+    @apply space-y-4;
+  }
+
+  .dashboard-distribution__head {
+    @apply mb-1.5 flex items-center justify-between gap-2;
+  }
+
+  .dashboard-distribution__name {
+    @apply truncate font-urbanist text-sm text-glow-text;
+  }
+
+  .dashboard-distribution__count {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-distribution__track {
+    @apply h-2 overflow-hidden rounded-full bg-glow-hover-surface;
+  }
+
+  .dashboard-distribution__bar {
+    @apply block h-full rounded-full bg-amber-500/70;
+  }
+
+  .dashboard-quick-actions--shortcuts .dashboard-quick-actions__grid {
+    @apply grid-cols-2 xl:grid-cols-4;
+  }
+
+  .dashboard-quick-actions--shortcuts .dashboard-quick-actions__item {
+    @apply flex-col items-start gap-4 p-6;
+  }
+
+  .dashboard-quick-actions--shortcuts .dashboard-quick-actions__icon-wrap {
+    @apply size-12 rounded-xl;
+  }
+
+  .dashboard-quick-actions--shortcuts .dashboard-quick-actions__icon {
+    @apply size-6;
+  }
+
+  .dashboard-agenda-preview {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-agenda-preview__header {
+    @apply mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .dashboard-agenda-preview__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-agenda-preview__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-agenda-preview__list {
+    @apply divide-y divide-glow-border-soft;
+  }
+
+  .dashboard-agenda-preview__row {
+    @apply flex items-center gap-4 py-3 first:pt-0 last:pb-0;
+  }
+
+  .dashboard-agenda-preview__row--livre .dashboard-agenda-preview__label {
+    @apply italic text-glow-text-subtle;
+  }
+
+  .dashboard-agenda-preview__time {
+    @apply w-14 shrink-0 font-satoshi text-sm font-bold text-sky-400;
+  }
+
+  .dashboard-agenda-preview__content {
+    @apply flex min-w-0 flex-1 items-center justify-between gap-2;
+  }
+
+  .dashboard-agenda-preview__label {
+    @apply truncate font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .dashboard-panel__empty--action {
+    @apply py-10;
+  }
+
+  .dashboard-panel__empty-icon-wrap {
+    @apply mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-glow-surface;
+  }
+
+  .dashboard-panel__empty-icon {
+    @apply size-6 text-glow-text-subtle;
+  }
+
+  .dashboard-panel__empty-action {
+    @apply mt-4 inline-flex rounded-lg bg-glow-gold-cta px-4 py-2 font-urbanist text-sm font-medium text-white transition hover:brightness-95;
+  }
+
+  .dashboard-team-list--rich .dashboard-team-list__row--rich {
+    @apply items-center rounded-xl border border-glow-border-soft bg-glow-hover-surface p-4;
+  }
+
+  .dashboard-team-list__status {
+    @apply size-2.5 shrink-0 rounded-full;
+  }
+
+  .dashboard-team-list__status--online {
+    @apply bg-emerald-400;
+  }
+
+  .dashboard-team-list__status--offline {
+    @apply bg-glow-border-soft;
+  }
+
+  .dashboard-team-list__body {
+    @apply min-w-0 flex-1;
+  }
+
+  .dashboard-team-list__stats {
+    @apply text-right;
+  }
+
+  .dashboard-team-list__stat {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-team-list__stat strong {
+    @apply block text-sm font-semibold text-glow-text;
+  }
+
+  .dashboard-team-list__rating {
+    @apply mt-1 font-urbanist text-xs text-glow-gold-cta;
+  }
+
+  .dashboard-kpi-grid {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4;
+  }
+
+  .dashboard-kpi-grid--hero .dashboard-kpi-grid__main {
+    @apply sm:col-span-2;
+  }
+
+  .dashboard-quick-actions__title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-quick-actions__grid {
+    @apply grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4;
+  }
+
+  .dashboard-quick-actions__item {
+    @apply flex items-start gap-3 rounded-xl border border-glow-border-soft bg-glow-surface p-3 text-left transition hover:bg-glow-hover-surface;
+  }
+
+  .dashboard-quick-actions__icon-wrap {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-lg bg-glow-hover-surface;
+  }
+
+  .dashboard-quick-actions__icon {
+    @apply size-4 text-glow-text-subtle;
+  }
+
+  .dashboard-quick-actions__content {
+    @apply min-w-0;
+  }
+
+  .dashboard-quick-actions__label {
+    @apply block font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .dashboard-quick-actions__desc {
+    @apply mt-0.5 block font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-panel {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-4 shadow-glow-sm sm:p-5;
+  }
+
+  .dashboard-panel__header {
+    @apply mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .dashboard-panel__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-panel__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-panel__link {
+    @apply inline-flex items-center gap-1 font-urbanist text-sm font-medium text-glow-gold-cta transition hover:brightness-110;
+  }
+
+  .dashboard-panel__link-icon {
+    @apply size-3.5;
+  }
+
+  .dashboard-panel__empty {
+    @apply rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-8 text-center;
+  }
+
+  .dashboard-panel__empty-title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-panel__empty-desc {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-two-col {
+    @apply grid grid-cols-1 gap-4 xl:grid-cols-2;
+  }
+
+  .dashboard-activity-list {
+    @apply divide-y divide-glow-border-soft;
+  }
+
+  .dashboard-activity-list__row {
+    @apply flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0;
+  }
+
+  .dashboard-activity-list__row--stacked {
+    @apply items-start;
+  }
+
+  .dashboard-activity-list__main {
+    @apply min-w-0;
+  }
+
+  .dashboard-activity-list__title {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .dashboard-activity-list__meta {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-favorite-grid {
+    @apply grid grid-cols-1 gap-2 sm:grid-cols-2;
+  }
+
+  .dashboard-favorite-card {
+    @apply flex flex-col items-start rounded-xl border border-glow-border-soft bg-glow-hover-surface p-3 text-left transition hover:border-glow-gold hover:bg-glow-surface;
+  }
+
+  .dashboard-favorite-card--static {
+    @apply cursor-default hover:border-glow-border-soft hover:bg-glow-hover-surface;
+  }
+
+  .dashboard-favorite-card__avatar {
+    @apply flex size-9 items-center justify-center rounded-full bg-glow-surface font-satoshi text-sm font-bold text-glow-gold-cta;
+  }
+
+  .dashboard-favorite-card__name {
+    @apply mt-2 font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .dashboard-favorite-card__meta {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-team-list {
+    @apply space-y-3;
+  }
+
+  .dashboard-team-list__row {
+    @apply flex items-center gap-3;
+  }
+
+  .dashboard-team-list__avatar {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-full bg-glow-hover-surface font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-team-list__name {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .dashboard-team-list__meta {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-inline-stats {
+    @apply flex flex-wrap items-center gap-3 rounded-xl border border-glow-border-soft bg-glow-hover-surface px-4 py-3 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-inline-stats__item strong {
+    @apply text-glow-text;
+  }
+
+  .dashboard-inline-stats__divider {
+    @apply hidden h-4 w-px bg-glow-border-soft sm:block;
+  }
+
+  .dashboard-alert {
+    @apply rounded-xl border border-glow-border-soft bg-glow-hover-surface p-4;
+  }
+
+  .dashboard-alert__title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-alert__desc {
+    @apply mt-1 mb-3 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-link-card {
+    @apply rounded-xl border border-glow-border-soft bg-glow-surface p-4;
+  }
+
+  .dashboard-link-card__label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-link-card__url {
+    @apply my-2 break-all rounded-lg bg-glow-hover-surface px-3 py-2 font-urbanist text-xs text-glow-text;
+  }
+
+  .dashboard-icon {
+    @apply size-4 shrink-0;
+  }
+
+  /* Dashboard Cliente */
+  .dashboard-page--cliente {
+    @apply space-y-5;
+  }
+
+  .dashboard-cliente-fade-in {
+    animation: dashboardClienteFadeIn 0.45s ease-out;
+  }
+
+  @keyframes dashboardClienteFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .dashboard-cliente-hero {
+    @apply relative overflow-hidden rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-cliente-hero__glow {
+    @apply pointer-events-none absolute -right-8 -top-8 size-32 rounded-full opacity-60;
+    background: radial-gradient(circle, var(--palette-lilac-light) 0%, transparent 70%);
+    animation: dashboardClienteGlow 6s ease-in-out infinite alternate;
+  }
+
+  @keyframes dashboardClienteGlow {
+    from { transform: scale(1); opacity: 0.45; }
+    to { transform: scale(1.15); opacity: 0.7; }
+  }
+
+  .dashboard-cliente-hero__content {
+    @apply relative;
+  }
+
+  .dashboard-cliente-hero__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text sm:text-3xl;
+  }
+
+  .dashboard-cliente-hero__title--loading {
+    @apply text-glow-text-subtle;
+  }
+
+  .dashboard-cliente-hero__subtitle {
+    @apply mt-2 max-w-2xl font-urbanist text-sm text-glow-text-subtle sm:text-base;
+  }
+
+  .dashboard-proximo-agendamento {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm transition hover:shadow-md;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 0 0 1px rgba(146, 103, 155, 0.12);
+  }
+
+  .dashboard-proximo-agendamento__header {
+    @apply mb-5 flex items-start gap-3;
+  }
+
+  .dashboard-proximo-agendamento__icon-wrap {
+    @apply flex size-11 items-center justify-center rounded-xl bg-glow-hover-surface text-glow-gold-cta;
+  }
+
+  .dashboard-proximo-agendamento__icon {
+    @apply size-5;
+  }
+
+  .dashboard-proximo-agendamento__eyebrow {
+    @apply font-urbanist text-xs font-semibold uppercase tracking-wide text-glow-gold-cta;
+  }
+
+  .dashboard-proximo-agendamento__title {
+    @apply font-satoshi text-lg font-bold text-glow-text;
+  }
+
+  .dashboard-proximo-agendamento__empty {
+    @apply rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-5 py-6 text-center;
+  }
+
+  .dashboard-proximo-agendamento__empty-icon {
+    @apply text-3xl;
+  }
+
+  .dashboard-proximo-agendamento__empty-title {
+    @apply mt-2 font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-proximo-agendamento__empty-desc {
+    @apply mx-auto mt-2 max-w-md font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-proximo-agendamento__cta {
+    @apply mt-4 inline-flex rounded-xl bg-glow-gold-cta px-5 py-2.5 font-urbanist text-sm font-semibold text-white transition hover:brightness-95;
+  }
+
+  .dashboard-proximo-agendamento__card {
+    @apply flex w-full flex-col gap-4 rounded-xl border border-glow-border-soft bg-glow-hover-surface p-5 text-left transition hover:-translate-y-0.5 hover:border-glow-gold-cta hover:shadow-glow-sm sm:flex-row sm:items-center;
+  }
+
+  .dashboard-proximo-agendamento__when {
+    @apply shrink-0;
+  }
+
+  .dashboard-proximo-agendamento__day {
+    @apply block font-urbanist text-xs font-semibold uppercase tracking-wide text-glow-gold-cta;
+  }
+
+  .dashboard-proximo-agendamento__time {
+    @apply mt-1 block font-satoshi text-3xl font-bold text-glow-text;
+  }
+
+  .dashboard-proximo-agendamento__info {
+    @apply min-w-0 flex-1;
+  }
+
+  .dashboard-proximo-agendamento__loja {
+    @apply font-satoshi text-lg font-bold text-glow-text;
+  }
+
+  .dashboard-proximo-agendamento__meta {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-cliente-stats {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-3;
+  }
+
+  .dashboard-cliente-stats__item {
+    @apply flex items-start gap-3 rounded-2xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm transition hover:-translate-y-0.5 hover:shadow-md;
+  }
+
+  .dashboard-cliente-stats__icon-wrap {
+    @apply flex size-10 shrink-0 items-center justify-center rounded-xl;
+  }
+
+  .dashboard-cliente-stats__icon-wrap--money {
+    @apply bg-violet-500/15 text-violet-500;
+  }
+
+  .dashboard-cliente-stats__icon-wrap--calendar {
+    @apply bg-sky-500/15 text-sky-500;
+  }
+
+  .dashboard-cliente-stats__icon-wrap--heart {
+    @apply bg-fuchsia-500/15 text-fuchsia-500;
+  }
+
+  .dashboard-cliente-stats__icon {
+    @apply size-5;
+  }
+
+  .dashboard-cliente-stats__label {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-cliente-stats__value {
+    @apply mt-1 font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .dashboard-cliente-stats__hint {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-cliente-progress {
+    @apply grid gap-3 sm:grid-cols-2;
+  }
+
+  .dashboard-cliente-progress__block {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+  }
+
+  .dashboard-cliente-progress__head {
+    @apply mb-3 flex items-center justify-between gap-2;
+  }
+
+  .dashboard-cliente-progress__label {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-cliente-progress__link {
+    @apply font-urbanist text-xs font-medium text-glow-gold-cta transition hover:brightness-110;
+  }
+
+  .dashboard-cliente-progress__track {
+    @apply h-2 overflow-hidden rounded-full bg-glow-hover-surface;
+  }
+
+  .dashboard-cliente-progress__track--dotted {
+    @apply relative h-3 bg-transparent;
+  }
+
+  .dashboard-cliente-progress__bar {
+    @apply block h-full rounded-full bg-glow-gold-cta transition-all duration-500;
+  }
+
+  .dashboard-cliente-progress__dot {
+    @apply block size-3 rounded-full bg-glow-gold-cta;
+  }
+
+  .dashboard-cliente-progress__hint {
+    @apply mt-2 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-page--cliente .dashboard-quick-actions--shortcuts .dashboard-quick-actions__item {
+    @apply border-glow-border-soft transition hover:-translate-y-0.5 hover:border-glow-gold-cta hover:shadow-glow-sm;
+  }
+
+  .dashboard-page--cliente .dashboard-quick-actions--shortcuts .dashboard-quick-actions__icon-wrap {
+    @apply bg-glow-hover-surface text-glow-gold-cta;
+  }
+
+  .dashboard-recomendados {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-recomendados__header {
+    @apply mb-4 flex items-center justify-between gap-2;
+  }
+
+  .dashboard-recomendados__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-recomendados__grid {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-3;
+  }
+
+  .dashboard-recomendados__card {
+    @apply flex flex-col justify-between rounded-xl border border-glow-border-soft bg-glow-hover-surface p-4 transition hover:-translate-y-0.5 hover:border-glow-gold-cta;
+  }
+
+  .dashboard-recomendados__card-top {
+    @apply flex items-start gap-3;
+  }
+
+  .dashboard-recomendados__avatar {
+    @apply flex size-10 shrink-0 items-center justify-center rounded-full bg-glow-surface font-satoshi text-sm font-bold text-glow-gold-cta;
+  }
+
+  .dashboard-recomendados__name {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .dashboard-recomendados__meta {
+    @apply mt-1 flex flex-wrap gap-2 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-recomendados__action {
+    @apply mt-4 w-full rounded-lg bg-glow-gold-cta py-2 font-urbanist text-sm font-medium text-white transition hover:brightness-95;
+  }
+
+  .dashboard-recomendados__empty {
+    @apply rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-5 text-center;
+  }
+
+  .dashboard-recomendados__empty-text {
+    @apply font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .dashboard-recomendados__cta {
+    @apply mt-3 font-urbanist text-sm font-medium text-glow-gold-cta;
+  }
+
+  .dashboard-novidades {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-novidades__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-novidades__list {
+    @apply mt-3 space-y-2;
+  }
+
+  .dashboard-novidades__item {
+    @apply flex items-start gap-3 rounded-xl bg-glow-hover-surface px-4 py-3;
+  }
+
+  .dashboard-novidades__icon {
+    @apply text-base;
+  }
+
+  .dashboard-novidades__message {
+    @apply font-urbanist text-sm text-glow-text;
+  }
+
+  .dashboard-timeline {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-6 shadow-glow-sm;
+  }
+
+  .dashboard-timeline__header {
+    @apply mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .dashboard-timeline__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-timeline__subtitle {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-timeline__empty--compact {
+    @apply rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-5 text-center;
+  }
+
+  .dashboard-timeline__empty-title {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-timeline__empty-desc {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-timeline__cta {
+    @apply mt-3 font-urbanist text-sm font-medium text-glow-gold-cta;
+  }
+
+  .dashboard-timeline__groups {
+    @apply space-y-4;
+  }
+
+  .dashboard-timeline__group-label {
+    @apply mb-2 font-urbanist text-xs font-semibold uppercase tracking-wide text-glow-gold-cta;
+  }
+
+  .dashboard-timeline__list {
+    @apply divide-y divide-glow-border-soft rounded-xl border border-glow-border-soft bg-glow-hover-surface;
+  }
+
+  .dashboard-timeline__row {
+    @apply flex items-center gap-3 px-4 py-3;
+  }
+
+  .dashboard-timeline__check {
+    @apply text-sm text-emerald-500;
+  }
+
+  .dashboard-timeline__main {
+    @apply min-w-0 flex-1;
+  }
+
+  .dashboard-timeline__service {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .dashboard-timeline__meta {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-favoritos {
+    @apply space-y-4;
+  }
+
+  .dashboard-favoritos__title {
+    @apply font-satoshi text-base font-bold text-glow-text;
+  }
+
+  .dashboard-favoritos__grid {
+    @apply grid grid-cols-1 gap-4 xl:grid-cols-2;
+  }
+
+  .dashboard-favoritos__panel {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-5 shadow-glow-sm;
+  }
+
+  .dashboard-favoritos__panel-title {
+    @apply mb-3 font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .dashboard-favoritos__empty--compact {
+    @apply rounded-xl border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-5 text-center;
+  }
+
+  .dashboard-favoritos__empty-icon {
+    @apply text-2xl;
+  }
+
+  .dashboard-favoritos__empty-title {
+    @apply mt-2 font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .dashboard-favoritos__empty-desc {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .dashboard-favoritos__cta {
+    @apply mt-3 font-urbanist text-sm font-medium text-glow-gold-cta;
+  }
+
+  .dashboard-skeleton {
+    @apply block animate-pulse rounded-lg bg-glow-hover-surface;
+  }
+
+  .dashboard-skeleton--line {
+    @apply h-4 w-full;
+  }
+
+  .dashboard-skeleton--line.dashboard-skeleton--lg {
+    @apply h-8 w-2/3;
+  }
+
+  .dashboard-skeleton--line.dashboard-skeleton--sm {
+    @apply h-3 w-1/2;
+  }
+
+  .dashboard-skeleton--bar {
+    @apply h-2 w-full;
+  }
+
+  .dashboard-skeleton--avatar {
+    @apply size-10 rounded-full;
+  }
+
+  /* Perfil */
+  .perfil-page {
+    @apply w-full space-y-6 pb-16;
+  }
+
+  .perfil-page__title {
+    @apply font-satoshi text-2xl font-bold text-glow-text;
+  }
+
+  .perfil-page__meta {
+    @apply mt-2 flex flex-wrap items-center gap-2 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .perfil-page__meta-dot {
+    @apply size-1 rounded-full bg-glow-border-soft;
+  }
+
+  .perfil-sheet,
+  .perfil-hero {
+    background: #ffffff;
+    border: 1px solid #e7e3ea;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+
+  .dark .perfil-sheet,
+  .dark .perfil-hero {
+    background: var(--glow-bg-elevated);
+    border-color: var(--glow-border-soft);
+    box-shadow: none;
+  }
+
+  .perfil-hero__body {
+    @apply flex flex-col gap-6 p-6 lg:flex-row lg:items-start lg:justify-between;
+  }
+
+  .perfil-hero__identity {
+    @apply flex min-w-0 flex-col gap-5 sm:flex-row sm:items-start;
+  }
+
+  .perfil-hero__avatar-wrap {
+    @apply relative w-fit shrink-0;
+  }
+
+  .perfil-hero__camera {
+    @apply absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-full bg-glow-gold-cta text-white transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-glow-gold-soft disabled:opacity-60;
+  }
+
+  .perfil-hero__details {
+    @apply min-w-0;
+  }
+
+  .perfil-hero__name-row {
+    @apply flex flex-wrap items-center gap-2.5;
+  }
+
+  .perfil-hero__name {
+    @apply font-satoshi text-xl font-bold text-glow-text;
+  }
+
+  .perfil-hero__role {
+    @apply mt-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .perfil-hero__contact {
+    @apply mt-2 font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .perfil-hero__contact + .perfil-hero__contact {
+    @apply mt-1;
+  }
+
+  .perfil-hero__meta {
+    @apply mt-3 font-urbanist text-[13px] text-glow-text-subtle;
+  }
+
+  .perfil-hero__aside {
+    @apply w-full shrink-0 lg:max-w-[220px];
+  }
+
+  .perfil-hero__progress-head {
+    @apply mb-1.5 flex items-center justify-between font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-hero__progress-track {
+    @apply h-1.5 overflow-hidden rounded-full bg-glow-hover-surface;
+  }
+
+  .perfil-hero__progress-bar {
+    @apply block h-full rounded-full bg-glow-gold-cta transition-all duration-500;
+  }
+
+  .perfil-hero__photo-btn {
+    @apply mt-4 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-glow-border-soft bg-transparent px-3.5 font-urbanist text-xs font-medium text-glow-text transition hover:bg-glow-hover-surface focus:outline-none focus:ring-2 focus:ring-glow-gold-soft disabled:opacity-60;
+  }
+
+  .perfil-tabs {
+    @apply flex gap-1 overflow-x-auto border-t border-glow-border-soft px-2 sm:px-4;
+  }
+
+  .perfil-tabs--standalone {
+    @apply -mx-1 border-t-0 border-b border-glow-border-soft px-1;
+  }
+
+  .perfil-tabs__item {
+    @apply inline-flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent px-3 py-3.5 font-urbanist text-sm font-medium text-glow-text-subtle transition hover:text-glow-text;
+  }
+
+  .perfil-tabs__item--active {
+    @apply border-glow-gold-cta text-glow-gold-cta;
+  }
+
+  .perfil-tabs__icon {
+    @apply size-4;
+  }
+
+  .perfil-content-panel {
+    @apply min-h-[320px];
+  }
+
+  .perfil-tab-panel-enter-active,
+  .perfil-tab-panel-leave-active {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .perfil-tab-panel-enter-from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  .perfil-tab-panel-leave-to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  .perfil-profile-grid {
+    @apply grid grid-cols-1 gap-5 lg:grid-cols-[1.3fr_1fr];
+  }
+
+  .perfil-sheet__header {
+    @apply flex items-start justify-between gap-3 border-b border-glow-border-soft px-6 py-5;
+  }
+
+  .perfil-sheet__title {
+    @apply font-satoshi text-base font-semibold text-glow-text;
+  }
+
+  .perfil-sheet__desc {
+    @apply mt-1 font-urbanist text-[13px] text-glow-text-subtle;
+  }
+
+  .perfil-sheet__edit {
+    @apply -mr-1 -mt-1 inline-flex size-8 items-center justify-center rounded-lg text-glow-text-subtle transition hover:bg-glow-hover-surface hover:text-glow-gold-cta focus:outline-none focus:ring-2 focus:ring-glow-gold-soft;
+  }
+
+  .perfil-sheet__body {
+    @apply px-6 py-6;
+  }
+
+  .perfil-sheet__footer {
+    @apply border-t border-glow-border-soft px-6 py-4;
+  }
+
+  .perfil-fields {
+    @apply grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2;
+  }
+
+  .perfil-field--span {
+    @apply sm:col-span-2;
+  }
+
+  .perfil-field__label {
+    @apply block font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-field__value {
+    @apply mt-1 font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .perfil-field__value--warn {
+    @apply inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400;
+  }
+
+  .perfil-field__status {
+    @apply mt-1 inline-flex items-center gap-1 font-urbanist text-xs font-medium;
+  }
+
+  .perfil-field__status--ok {
+    @apply text-glow-success-dark;
+  }
+
+  .perfil-field__hint {
+    @apply mt-1 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-field__hint--warn {
+    @apply text-amber-700 dark:text-amber-400;
+  }
+
+  .perfil-field__action {
+    @apply mt-1 inline-flex font-urbanist text-sm font-medium text-glow-gold-cta transition hover:brightness-110 disabled:opacity-60;
+  }
+
+  .perfil-readonly-field {
+    @apply sm:col-span-2;
+  }
+
+  .perfil-edit-form {
+    @apply grid grid-cols-1 gap-5;
+  }
+
+  .perfil-edit-form__actions {
+    @apply flex flex-col-reverse gap-2 sm:flex-row sm:justify-end;
+  }
+
+  .perfil-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 font-urbanist text-xs font-medium;
+  }
+
+  .perfil-badge--success {
+    @apply bg-glow-success-bg text-glow-success-dark;
+  }
+
+  .perfil-badge--danger {
+    @apply bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300;
+  }
+
+  .perfil-badge--plan {
+    @apply bg-glow-gold-selected text-glow-gold-cta;
+  }
+
+  .perfil-summary {
+    @apply flex flex-col gap-3;
+  }
+
+  .perfil-summary__item {
+    @apply flex items-center gap-3 rounded-[10px] border border-[#e7e3ea] px-3.5 py-3;
+  }
+
+  .dark .perfil-summary__item {
+    @apply border-glow-border-soft;
+  }
+
+  .perfil-summary__icon {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-lg;
+  }
+
+  .perfil-summary__icon--ok {
+    @apply bg-glow-success-bg text-glow-success-dark;
+  }
+
+  .perfil-summary__icon--warn {
+    @apply bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400;
+  }
+
+  .perfil-summary__icon--primary {
+    @apply bg-glow-gold-selected text-glow-gold-cta;
+  }
+
+  .perfil-summary__title {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .perfil-summary__desc {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-summary__status {
+    @apply shrink-0 font-urbanist text-xs font-medium;
+  }
+
+  .perfil-summary__status--ok {
+    @apply text-glow-success-dark;
+  }
+
+  .perfil-summary__status--warn {
+    @apply text-amber-600 dark:text-amber-400;
+  }
+
+  .perfil-summary__status--primary {
+    @apply text-glow-gold-cta;
+  }
+
+  .perfil-security {
+    @apply divide-y divide-glow-border-soft;
+  }
+
+  .perfil-security__row {
+    @apply flex flex-col items-stretch gap-3 py-5 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4;
+  }
+
+  .perfil-security__row--muted {
+    @apply opacity-80;
+  }
+
+  .perfil-security__label {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .perfil-security__meta {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-password-form {
+    @apply space-y-4 pb-5;
+  }
+
+  .perfil-password-form__grid {
+    @apply grid gap-4 md:grid-cols-2;
+  }
+
+  .perfil-password-form__actions {
+    @apply flex flex-col gap-2 sm:flex-row sm:justify-end;
+  }
+
+  .perfil-password-rules__title {
+    @apply font-urbanist text-xs font-semibold text-glow-text-subtle;
+  }
+
+  .perfil-password-rules__list {
+    @apply mt-2 space-y-1;
+  }
+
+  .perfil-password-rules__item {
+    @apply flex items-center gap-2 font-urbanist text-sm text-glow-text-subtle transition;
+  }
+
+  .perfil-password-rules__item--met {
+    @apply text-emerald-600;
+  }
+
+  .perfil-sessions {
+    @apply py-5;
+  }
+
+  .perfil-sessions__title {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .perfil-sessions__list {
+    @apply mt-3 space-y-2;
+  }
+
+  .perfil-sessions__item {
+    @apply rounded-lg border border-glow-border-soft px-3 py-2;
+  }
+
+  .perfil-sessions__device {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .perfil-sessions__meta {
+    @apply font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-sessions__hint {
+    @apply mt-2 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-prefs {
+    @apply divide-y divide-glow-border-soft;
+  }
+
+  .perfil-prefs__item {
+    @apply flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0;
+  }
+
+  .perfil-prefs__label {
+    @apply font-urbanist text-sm font-semibold text-glow-text;
+  }
+
+  .perfil-prefs__desc {
+    @apply mt-0.5 font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .perfil-toggle {
+    @apply size-6 shrink-0 accent-glow-gold-cta sm:size-5;
+  }
+
+  .perfil-inline-alert {
+    @apply rounded-lg px-4 py-3 font-urbanist text-sm;
+  }
+
+  .perfil-inline-alert--success {
+    @apply border border-green-200 bg-green-50 text-green-800;
+  }
+
+  .perfil-inline-alert--warning {
+    @apply border border-amber-200 bg-amber-50 text-amber-800;
+  }
+
+  /* Perfil do estabelecimento (Minha Loja) */
+  .loja-perfil-stack {
+    @apply flex flex-col gap-5;
+  }
+
+  .loja-perfil-top-grid {
+    @apply grid grid-cols-1 gap-5 lg:grid-cols-2;
+  }
+
+  .loja-perfil-logo {
+    @apply size-[88px] rounded-[14px] bg-glow-hover-surface object-cover;
+  }
+
+  .loja-perfil-logo--empty {
+    @apply border border-dashed border-glow-border-soft;
+  }
+
+  .loja-perfil-store__main {
+    @apply flex flex-col gap-4 sm:flex-row sm:items-start;
+  }
+
+  .loja-perfil-icon {
+    @apply flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-glow-gold-selected text-glow-gold-cta;
+  }
+
+  .loja-perfil-address {
+    @apply flex items-start gap-3;
+  }
+
+  .loja-perfil-info-grid {
+    @apply grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .loja-perfil-info {
+    @apply flex items-start gap-3;
+  }
+
+  .loja-perfil-modules {
+    @apply mt-6 border-t border-glow-border-soft pt-5;
+  }
+
+  .loja-perfil-module-list {
+    @apply mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .loja-perfil-module-list li {
+    @apply font-urbanist text-sm font-medium text-glow-text;
+  }
+
+  .loja-perfil-empty {
+    @apply rounded-[10px] border border-dashed border-glow-border-soft bg-glow-hover-surface px-4 py-5;
+  }
+
+  .loja-perfil-share {
+    @apply flex flex-col gap-3 rounded-[10px] border border-glow-border-soft bg-glow-gold-selected p-3 sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .dark .loja-perfil-share {
+    @apply bg-glow-hover-surface;
+  }
+
+  .loja-perfil-share__url {
+    @apply flex min-w-0 items-center gap-2.5 px-1;
+  }
+
+  .loja-perfil-share__actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .loja-perfil-status-dot {
+    @apply mr-1 inline-block size-1.5 rounded-full;
+  }
+
+  .loja-perfil-status-dot--ok {
+    @apply bg-glow-success-dark;
+  }
+
+  .loja-perfil-status-dot--off {
+    @apply bg-red-500;
+  }
+
+  .loja-perfil-skeleton {
+    @apply space-y-5;
+  }
+
+  .loja-perfil-skeleton__tabs {
+    @apply h-12 animate-pulse rounded-lg bg-glow-hover-surface;
+  }
+
+  .loja-perfil-skeleton__grid {
+    @apply grid grid-cols-1 gap-5 lg:grid-cols-2;
+  }
+
+  .loja-perfil-skeleton__card {
+    @apply space-y-4 rounded-xl border border-glow-border-soft bg-glow-surface p-6;
+  }
+
+  .loja-perfil-skeleton__logo-row {
+    @apply flex items-start gap-4 pt-2;
+  }
+
+  .loja-perfil-skeleton__logo {
+    @apply size-[88px] shrink-0 animate-pulse rounded-[14px] bg-glow-hover-surface;
+  }
+
+  .loja-perfil-skeleton__info-grid {
+    @apply grid grid-cols-1 gap-5 pt-2 sm:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .loja-perfil-skeleton__info {
+    @apply flex items-start gap-3;
+  }
+
+  .loja-perfil-skeleton__icon {
+    @apply size-10 shrink-0 animate-pulse rounded-[10px] bg-glow-hover-surface;
+  }
+
+  .loja-perfil-skeleton__line {
+    @apply h-3 animate-pulse rounded bg-glow-hover-surface;
+  }
+
+  .loja-perfil-skeleton__line--sm {
+    @apply w-24;
+  }
+
+  .loja-perfil-skeleton__line--md {
+    @apply w-40;
+  }
+
+  .loja-perfil-skeleton__line--lg {
+    @apply w-48;
+  }
+
+  .loja-perfil-skeleton__line--full {
+    @apply w-full;
+  }
+}
+
+/*
+ * iOS Safari / Leaflet: panes com transform viram layers de GPU e furam o z-index do drawer.
+ * Com o menu mobile aberto, escondemos o mapa (e o shell) para o menu ficar sempre por cima.
+ */
+@media (max-width: 767px) {
+  body.guc-mobile-drawer-open .explorar-page__map-shell,
+  body.guc-mobile-drawer-open .explorar-mapa,
+  body.guc-mobile-drawer-open .leaflet-container,
+  body.guc-mobile-drawer-open .leaflet-pane,
+  .guc-main--drawer-open .explorar-page__map-shell,
+  .guc-main--drawer-open .explorar-mapa,
+  .guc-main--drawer-open .leaflet-container {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
+/* ========== Glow Guide ========== */
+.gg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  pointer-events: none;
+}
+
+.gg-overlay__panel {
+  position: fixed;
+  background: var(--tutorial-overlay);
+  pointer-events: auto;
+}
+
+.gg-overlay__veil {
+  position: fixed;
+  inset: 0;
+  background: var(--tutorial-overlay);
+  pointer-events: none;
+}
+
+.gg-spotlight {
+  position: fixed;
+  z-index: 10051;
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 4px var(--tutorial-highlight-soft),
+    0 8px 30px rgba(0, 0, 0, 0.16);
+  pointer-events: none;
+  transition: opacity 200ms ease, transform 200ms ease;
+  transform: scale(1);
+  opacity: 1;
+}
+
+.gg-spotlight--pulse {
+  animation: gg-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes gg-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px var(--tutorial-highlight-soft), 0 8px 30px rgba(0, 0, 0, 0.16); }
+  50% { box-shadow: 0 0 0 7px var(--tutorial-highlight-soft), 0 8px 30px rgba(0, 0, 0, 0.18); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gg-spotlight {
+    transition: none;
+  }
+  .gg-spotlight--pulse {
+    animation: none;
+  }
+}
+
+.gg-popover {
+  z-index: 10060;
+  max-width: min(380px, calc(100vw - 16px));
+  min-width: min(300px, calc(100vw - 16px));
+  pointer-events: auto;
+  animation: gg-card-in 200ms ease;
+}
+
+.gg-popover--centered {
+  width: min(380px, calc(100vw - 24px));
+}
+
+.gg-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10060;
+  max-height: 50vh;
+  overflow: auto;
+  padding: 8px 12px 0;
+  background: var(--tutorial-surface);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  border-top: 1px solid var(--tutorial-border);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.18);
+  pointer-events: auto;
+  transition: transform 180ms ease;
+}
+
+.gg-sheet .gg-card {
+  border: none;
+  box-shadow: none;
+  max-width: none;
+  min-width: 0;
+  width: 100%;
+  background: transparent;
+  padding: 8px 8px 4px;
+}
+
+.gg-sheet__handle {
+  width: 40px;
+  height: 4px;
+  margin: 4px auto 8px;
+  border-radius: 999px;
+  background: var(--tutorial-border);
+}
+
+@keyframes gg-card-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gg-popover,
+  .gg-sheet {
+    animation: none;
+    transition: none;
+  }
+}
+
+.gg-card {
+  background: var(--tutorial-surface);
+  color: var(--tutorial-text);
+  border: 1px solid var(--tutorial-border);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.14);
+  padding: 20px;
+  min-width: 300px;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gg-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gg-card__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.gg-card__brand-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--tutorial-highlight);
+  flex-shrink: 0;
+}
+
+.gg-card__brand-text {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tutorial-highlight);
+}
+
+.gg-card__header-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.gg-card__counter {
+  font-size: 12px;
+  color: var(--tutorial-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.gg-card__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: -6px -6px -6px 0;
+  border-radius: 8px;
+  color: var(--tutorial-muted);
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.gg-card__close:hover {
+  background: var(--glow-hover-surface);
+  color: var(--tutorial-text);
+}
+
+.gg-card__close:focus-visible {
+  outline: 2px solid var(--tutorial-highlight);
+  outline-offset: 2px;
+}
+
+.gg-progress__bar {
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tutorial-border) 80%, transparent);
+  overflow: hidden;
+}
+
+.gg-progress__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--tutorial-highlight);
+  transition: width 200ms ease;
+}
+
+.gg-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gg-card__success-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--glow-success-bg);
+  color: var(--glow-success);
+  margin-bottom: 4px;
+}
+
+.gg-card__title {
+  font-family: Satoshi, system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--tutorial-text);
+}
+
+.gg-card__desc {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--tutorial-muted);
+}
+
+.gg-card__tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--glow-surface-tint);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--tutorial-text);
+}
+
+.gg-card__waiting {
+  margin-top: 4px;
+  font-size: 0.8125rem;
+  color: var(--tutorial-highlight);
+  font-weight: 500;
+}
+
+.gg-card__done-meta {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--tutorial-border);
+  font-size: 0.8125rem;
+  color: var(--tutorial-muted);
+}
+
+.gg-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.gg-card__spacer {
+  flex: 1;
+}
+
+.gg-card__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 150ms ease, color 150ms ease, filter 150ms ease;
+}
+
+.gg-card__btn:focus-visible {
+  outline: 2px solid var(--tutorial-highlight);
+  outline-offset: 2px;
+}
+
+.gg-card__btn--ghost {
+  color: var(--tutorial-muted);
+  background: transparent;
+}
+
+.gg-card__btn--ghost:hover {
+  color: var(--tutorial-text);
+  background: var(--glow-hover-surface);
+}
+
+.gg-card__btn--primary {
+  color: #fff;
+  background: var(--glow-gold-cta);
+}
+
+.gg-card__btn--primary:hover {
+  filter: brightness(0.96);
+}
+
+.gg-card__btn--block {
+  width: 100%;
+}
+
+.gg-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10070;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  background: rgba(20, 16, 28, 0.45);
+}
+
+@media (min-width: 640px) {
+  .gg-dialog-backdrop {
+    align-items: center;
+  }
+}
+
+.gg-dialog {
+  width: min(400px, 100%);
+  background: var(--tutorial-surface);
+  color: var(--tutorial-text);
+  border: 1px solid var(--tutorial-border);
+  border-radius: 14px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  padding: 22px;
+}
+
+.gg-dialog__title {
+  font-family: Satoshi, system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.gg-dialog__text {
+  margin-top: 8px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--tutorial-muted);
+}
+
+.gg-dialog__meta {
+  margin-top: 6px;
+  font-size: 0.8125rem;
+  color: var(--tutorial-muted);
+}
+
+.gg-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.gg-launcher {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--glow-border-soft);
+  background: var(--glow-surface);
+  color: var(--glow-text-subtle);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.gg-launcher:hover {
+  color: var(--glow-text);
+  background: var(--glow-hover-surface);
+  border-color: var(--glow-border-accent);
+}
+
+.gg-launcher:focus-visible {
+  outline: 2px solid var(--glow-accent);
+  outline-offset: 2px;
+}
+
+.gg-launcher__icon {
+  width: 16px;
+  height: 16px;
+  color: var(--glow-accent);
+}
+
+.gg-launcher--compact {
+  padding: 0;
+  width: 44px;
+}
+
+.gg-launcher--compact .gg-launcher__icon {
+  width: 18px;
+  height: 18px;
 }

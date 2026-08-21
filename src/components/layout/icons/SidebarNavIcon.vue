@@ -160,5 +160,13 @@ withDefaults(
       <path d="M4 11H20" stroke="currentColor" stroke-width="1.5" />
       <path d="M8 15.5H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
     </template>
+
+    <!-- metas / target -->
+    <template v-else-if="name === 'target'">
+      <circle cx="12" cy="12" r="7.5" stroke="currentColor" stroke-width="1.5" />
+      <circle cx="12" cy="12" r="3.5" stroke="currentColor" stroke-width="1.5" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+      <path d="M12 4.5V7M12 17V19.5M19.5 12H17M7 12H4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+    </template>
   </svg>
 </template>

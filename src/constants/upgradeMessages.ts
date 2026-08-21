@@ -10,7 +10,7 @@ export const UPGRADE_BY_MODULO: Record<string, UpgradeInfo> = {
   },
   WhatsApp: {
     planoMinimo: 'Essencial',
-    mensagem: 'Alertas automáticos no WhatsApp',
+    mensagem: 'Alertas automáticos no WhatsApp no plano Essencial',
   },
   Clientes: {
     planoMinimo: 'Premium',
@@ -30,7 +30,39 @@ export const UPGRADE_BY_MODULO: Record<string, UpgradeInfo> = {
   },
 }
 
-export function getUpgradeInfo(modulo: string): UpgradeInfo {
+/** Mensagens de upgrade para profissional autônomo (sem equipe/comissões). */
+export const UPGRADE_BY_MODULO_AUTONOMO: Record<string, UpgradeInfo> = {
+  WhatsApp: {
+    planoMinimo: 'Premium',
+    mensagem: 'Confirmações e lembretes automáticos no WhatsApp com o Premium',
+  },
+  Caixa: {
+    planoMinimo: 'Premium',
+    mensagem: 'Controle financeiro pessoal no Premium',
+  },
+  Financeiro: {
+    planoMinimo: 'Premium',
+    mensagem: 'Relatórios e indicadores financeiros no Premium',
+  },
+  Clientes: {
+    planoMinimo: 'Essencial',
+    mensagem: 'Gestão de clientes já inclusa no Essencial para autônomos',
+  },
+}
+
+export function getUpgradeInfo(
+  modulo: string,
+  ehProfissionalAutonomo = false,
+): UpgradeInfo {
+  if (ehProfissionalAutonomo) {
+    return (
+      UPGRADE_BY_MODULO_AUTONOMO[modulo] ?? {
+        planoMinimo: 'Premium',
+        mensagem: 'Desbloqueie recursos avançados feitos para quem trabalha sozinho com o Premium.',
+      }
+    )
+  }
+
   return (
     UPGRADE_BY_MODULO[modulo] ?? {
       planoMinimo: 'Essencial',

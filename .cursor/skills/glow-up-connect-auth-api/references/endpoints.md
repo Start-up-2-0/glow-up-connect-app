@@ -157,17 +157,15 @@ Sempre retorna sucesso genérico (não revela se o e-mail existe).
 
 ---
 
-## Esqueci a senha (501 — não implementado)
+## Esqueci a senha
 
-> Endpoints existem mas retornam **501 Not Implemented**. Não integrar em produção até o backend liberar.
-
-### `POST /api/auth/forgot-password` (previsto)
+### `POST /api/auth/forgot-password`
 
 ```json
 { "email": "maria@email.com" }
 ```
 
-Resposta esperada (200) — mensagem genérica:
+Resposta (200) — mensagem genérica:
 
 ```json
 {
@@ -176,17 +174,17 @@ Resposta esperada (200) — mensagem genérica:
 }
 ```
 
-E-mail conterá link:
+E-mail contém link e código de 6 dígitos:
 
 ```text
 {Auth:FrontendBaseUrl}/resetar-senha?token=<token-opaco>
 ```
 
-Validade prevista: **30 minutos**.
+Validade: **30 minutos**.
 
-### `POST /api/auth/reset-password` (previsto)
+### `POST /api/auth/reset-password`
 
-Tela `/resetar-senha` lê `token` da query string.
+Tela `/resetar-senha` lê `token` da query string, ou a etapa de código envia `codigo`. Informe exatamente um dos dois.
 
 ```json
 {
@@ -196,7 +194,17 @@ Tela `/resetar-senha` lê `token` da query string.
 }
 ```
 
-Resposta esperada (200):
+ou
+
+```json
+{
+  "codigo": "482913",
+  "senha": "NovaSenha123!",
+  "confirmarSenha": "NovaSenha123!"
+}
+```
+
+Resposta (200):
 
 ```json
 {
@@ -205,13 +213,13 @@ Resposta esperada (200):
 }
 ```
 
-Resposta atual (501):
+Erro (400):
 
 ```json
 {
   "success": false,
-  "message": "Recuperação de senha ainda não implementada.",
-  "code": "NOT_IMPLEMENTED"
+  "message": "Link ou codigo de recuperacao invalido ou expirado.",
+  "code": "RESET_SENHA_INVALIDO"
 }
 ```
 

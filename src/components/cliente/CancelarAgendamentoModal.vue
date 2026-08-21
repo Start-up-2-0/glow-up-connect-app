@@ -30,15 +30,10 @@ async function handleConfirm() {
 
 <template>
   <Teleport to="body">
-    <Transition
-      enter-active-class="transition-opacity duration-200"
-      leave-active-class="transition-opacity duration-200"
-      enter-from-class="opacity-0"
-      leave-to-class="opacity-0"
-    >
+    <Transition name="equipe-modal">
       <div
         v-if="open"
-        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+        class="glow-modal-overlay !items-center"
         @click.self="close"
       >
         <div

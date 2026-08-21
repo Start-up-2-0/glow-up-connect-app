@@ -4,8 +4,8 @@ import { useUserStore } from '@/stores/user.store'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { ROUTE_PATHS } from '@/constants/routes'
-import { redirectToLandingPlanos } from '@/utils/landingUrl'
 import { isClienteRole } from '@/types/user.types'
+import { mapBackendStepToWizardStep } from '@/types/onboardingPublicacao.types'
 
 function rotaRequerNegocio(to: Parameters<NavigationGuard>[0]): boolean {
   return to.matched.some((record) => {
@@ -78,8 +78,8 @@ export const negocioGuard: NavigationGuard = async (to) => {
     negocioStore.estabelecimentos.length === 0 &&
     !isOnboarding
   ) {
-    redirectToLandingPlanos()
-    return false
+    // Domínios separados: fluxo de produto fica no app, não na landing.
+    return { path: ROUTE_PATHS.ONBOARDING_CONTRATAR }
   }
 
   if (
@@ -89,6 +89,13 @@ export const negocioGuard: NavigationGuard = async (to) => {
     !ignoraAssinaturaAtiva &&
     negocioStore.estabelecimentos.length > 0
   ) {
+    const status = negocioStore.assinaturaStatus
+    const encerrada = status === 'Cancelada' || status === 'Expirada' || status === 'Suspensa'
+
+    if (encerrada && to.path !== ROUTE_PATHS.ASSINATURA_DESPEDIDA) {
+      return { path: ROUTE_PATHS.ASSINATURA_DESPEDIDA }
+    }
+
     if (roleLoja === 'Profissional') {
       useNotificationsStore().push(
         'warning',
@@ -97,6 +104,34 @@ export const negocioGuard: NavigationGuard = async (to) => {
       return { path: ROUTE_PATHS.DASHBOARD }
     }
     return { path: ROUTE_PATHS.CONFIG_ASSINATURA }
+  }
+
+  const isLojaSetup = to.path === ROUTE_PATHS.ONBOARDING_LOJA_SETUP
+
+  if (
+    negocioStore.assinaturaAtiva
+    && negocioStore.role === 'Owner'
+    && negocioStore.ehProfissionalAutonomo
+    && negocioStore.onboardingObrigatorioPendente
+    && !isLojaSetup
+    && !isOnboarding
+    && requerAssinatura
+  ) {
+    const proximaEtapa = mapBackendStepToWizardStep(
+      negocioStore.proximaEtapaOnboarding,
+      negocioStore.ehProfissionalAutonomo,
+    )
+    return {
+      path: ROUTE_PATHS.ONBOARDING_LOJA_SETUP,
+      query: {
+        mode: 'assinatura',
+        ...(negocioStore.estabelecimentoIdSelecionado
+          ? { estabelecimentoId: String(negocioStore.estabelecimentoIdSelecionado) }
+          : {}),
+        ...(negocioStore.assinaturaId ? { assinaturaId: String(negocioStore.assinaturaId) } : {}),
+        step: proximaEtapa,
+      },
+    }
   }
 
   const requerModulo = to.matched
@@ -142,6 +177,27 @@ export const negocioGuard: NavigationGuard = async (to) => {
   if (permissaoBloqueada) {
     useNotificationsStore().push('warning', 'Você não tem permissão para acessar esta área.')
     return { path: ROUTE_PATHS.DASHBOARD }
+  }
+
+  const requerRoleOwner = to.matched.some((record) => record.meta.requerRoleOwner === true)
+  if (requerRoleOwner && negocioStore.role !== 'Owner') {
+    useNotificationsStore().push(
+      'warning',
+      'Apenas o proprietário da conta pode gerenciar as lojas.',
+    )
+    return { path: ROUTE_PATHS.DASHBOARD }
+  }
+
+  const requerMultiLoja = to.matched.some((record) => record.meta.requerMultiLoja === true)
+  if (requerMultiLoja) {
+    const limite = negocioStore.limites.estabelecimentos ?? 1
+    if (limite <= 1) {
+      useNotificationsStore().push(
+        'info',
+        'Gestão de múltiplas lojas está disponível no plano Premium.',
+      )
+      return { path: ROUTE_PATHS.CONFIG_ASSINATURA }
+    }
   }
 
   return true

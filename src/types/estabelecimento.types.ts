@@ -1,8 +1,18 @@
+import type { TipoAssinatura } from '@/types/assinatura.types'
+
 export interface EnderecoResumo {
   logradouro: string
   bairro: string
   cidade: string
   estado: string
+}
+
+/** Catálogo de categorias do marketplace, separado por tipo de operação. */
+export interface EstabelecimentoCategoria {
+  id: number
+  nome: string
+  slug?: string
+  tipoAssinatura?: TipoAssinatura
 }
 
 export interface EstabelecimentoProximo {
@@ -15,6 +25,13 @@ export interface EstabelecimentoProximo {
   destaqueMarketplace?: boolean
   notaMedia?: number
   totalAvaliacoes?: number
+  categoriaId?: number
+  categoria?: string
+  /** Coordenadas do estabelecimento para o mapa (quando geocodificado). */
+  latitude?: number | null
+  longitude?: number | null
+  /** Formato comercial: loja vs profissional autônomo. */
+  tipoAssinatura?: 'Estabelecimento' | 'ProfissionalAutonomo' | null
 }
 
 export interface EstabelecimentosProximosResponse {
@@ -37,6 +54,9 @@ export interface EstabelecimentoPublico {
   abertoAgora?: boolean
   horarioAbertura?: string
   horarioFechamento?: string
+  categoriaId?: number
+  categoria?: string
+  tipoAssinatura?: 'Estabelecimento' | 'ProfissionalAutonomo' | null
 }
 
 export interface ListarProximosParams {
@@ -45,6 +65,8 @@ export interface ListarProximosParams {
   raioKm?: number
   pagina?: number
   tamanhoPagina?: number
+  /** Filtro por categoria de estabelecimento. */
+  categoriaId?: number
 }
 
 export interface EnderecoPerfil {
@@ -69,6 +91,8 @@ export interface EstabelecimentoPerfilCompleto {
   whatsAppConfirmado?: boolean
   whatsAppOptIn?: boolean
   whatsAppPendenteConfirmacao?: boolean
+  categoriaId?: number
+  categoria?: string
   endereco: EnderecoPerfil | null
 }
 
@@ -78,6 +102,7 @@ export interface AtualizarEstabelecimentoPerfilPayload {
   descricao?: string
   telefone?: string
   email?: string
+  categoriaId?: number
   endereco?: {
     cep: string
     logradouro: string

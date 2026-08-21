@@ -4,46 +4,56 @@ import {
   ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS,
   ONBOARDING_CONTRATAR_CARD_CLASS,
 } from '@/constants/designTokens'
-import { formatBRL, formatEnderecoOnboarding, telefoneLocalFromApi } from '@/utils/formatters'
-import type { Plano } from '@/types/plano.types'
+import OnboardingPlanoResumoCard from '@/components/onboarding/OnboardingPlanoResumoCard.vue'
+import { formatEnderecoOnboarding, telefoneLocalFromApi } from '@/utils/formatters'
+import type { Plano, PromocaoLancamento } from '@/types/plano.types'
 import type { OnboardingEstabelecimentoDraft } from '@/types/onboardingAssinatura.types'
 
-defineProps<{
-  plano: Plano
-  estabelecimento: OnboardingEstabelecimentoDraft
-  estabelecimentoExistente?: boolean
-  loading?: boolean
-  errorMessage?: string | null
-}>()
+withDefaults(
+  defineProps<{
+    plano: Plano
+    promocao?: PromocaoLancamento | null
+    estabelecimento: OnboardingEstabelecimentoDraft
+    estabelecimentoExistente?: boolean
+    loading?: boolean
+    errorMessage?: string | null
+    modoAutonomo?: boolean
+    /** Quando true, o plano já aparece na sidebar do shell. */
+    ocultarResumoPlano?: boolean
+  }>(),
+  {
+    promocao: null,
+    modoAutonomo: false,
+    ocultarResumoPlano: false,
+  },
+)
 
 const emit = defineEmits<{
   back: []
   submit: []
   edit: []
 }>()
-
 </script>
 
 <template>
   <div class="mx-auto w-full space-y-4">
-    <article :class="ONBOARDING_CONTRATAR_CARD_CLASS">
-      <p class="font-urbanist text-sm font-bold text-glow-text">Plano escolhido</p>
-      <p class="mt-2 font-urbanist text-base font-black text-glow-gold-cta">{{ plano.nome }}</p>
-      <p class="mt-2 font-urbanist text-sm text-glow-text-muted">{{ plano.descricao }}</p>
-      <p class="mt-3 font-urbanist text-base font-black text-glow-text">
-        {{ formatBRL(plano.preco) }}
-        <span class="text-sm font-normal text-glow-text-muted">/mês</span>
-      </p>
-    </article>
+    <OnboardingPlanoResumoCard
+      v-if="!ocultarResumoPlano"
+      :plano="plano"
+      :promocao="promocao"
+      variant="inline"
+    />
 
     <article :class="[ONBOARDING_CONTRATAR_CARD_CLASS, 'relative']">
       <div class="flex items-start justify-between gap-3">
-        <p class="font-urbanist text-sm font-bold text-glow-text">Estabelecimento</p>
+        <p class="font-urbanist text-sm font-bold text-glow-text">
+          {{ modoAutonomo ? 'Perfil profissional' : 'Estabelecimento' }}
+        </p>
         <button
           v-if="!estabelecimentoExistente"
           type="button"
           class="flex size-[30px] shrink-0 items-center justify-center rounded border-[0.5px] border-glow-border-soft bg-glow-surface-tint text-glow-text-subtle transition hover:bg-glow-hover-surface hover:text-glow-text"
-          aria-label="Editar estabelecimento"
+          :aria-label="modoAutonomo ? 'Editar perfil profissional' : 'Editar estabelecimento'"
           @click="emit('edit')"
         >
           <svg class="size-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -58,16 +68,18 @@ const emit = defineEmits<{
         <div
           v-if="estabelecimento.logoDataUrl"
           class="size-14 shrink-0 overflow-hidden rounded sm:size-[56px]"
+          :class="{ 'rounded-full': modoAutonomo }"
         >
           <img
             :src="estabelecimento.logoDataUrl"
-            alt="Logo do estabelecimento"
+            :alt="modoAutonomo ? 'Foto profissional' : 'Logo do estabelecimento'"
             class="size-full object-cover"
           />
         </div>
         <div
           v-else
           class="flex size-14 shrink-0 items-center justify-center rounded bg-glow-canvas font-urbanist text-xl font-bold text-glow-text-muted sm:size-[56px]"
+          :class="{ 'rounded-full': modoAutonomo }"
           aria-hidden="true"
         >
           {{ estabelecimento.nome.charAt(0) }}
@@ -121,11 +133,20 @@ const emit = defineEmits<{
 
     <p v-if="errorMessage" class="text-sm text-red-600 dark:text-red-400" role="alert">{{ errorMessage }}</p>
 
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+    <div
+      class="flex flex-col-reverse gap-3 border-t border-glow-border-soft pt-6 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <button
+        type="button"
+        :class="[ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS, 'sm:w-auto sm:min-w-[160px]']"
+        @click="emit('back')"
+      >
+        Anterior
+      </button>
       <button
         type="button"
         :disabled="loading"
-        :class="ONBOARDING_CONTRATAR_BTN_PRIMARY_CLASS"
+        :class="[ONBOARDING_CONTRATAR_BTN_PRIMARY_CLASS, 'sm:w-auto sm:min-w-[200px]']"
         @click="emit('submit')"
       >
         <span
@@ -133,14 +154,7 @@ const emit = defineEmits<{
           class="mr-2 inline-block size-4 animate-spin rounded-full border-2 border-white border-t-transparent"
           aria-hidden="true"
         />
-        Continuar para o pagamento
-      </button>
-      <button
-        type="button"
-        :class="ONBOARDING_CONTRATAR_BTN_SECONDARY_CLASS"
-        @click="emit('back')"
-      >
-        Voltar
+        Próximo: Pagamento
       </button>
     </div>
   </div>

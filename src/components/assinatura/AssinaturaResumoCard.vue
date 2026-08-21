@@ -22,8 +22,8 @@ defineProps<{
 
       <dl class="grid gap-3 text-sm sm:grid-cols-2">
         <div>
-          <dt class="text-glow-text-subtle">Dia de vencimento</dt>
-          <dd class="font-medium text-glow-text">Todo dia {{ assinatura.diaVencimento }}</dd>
+          <dt class="text-glow-text-subtle">Data de referência</dt>
+          <dd class="font-medium text-glow-text">{{ formatDate(assinatura.dataReferenciaCiclo) }}</dd>
         </div>
         <div>
           <dt class="text-glow-text-subtle">Próximo vencimento</dt>

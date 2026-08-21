@@ -1,15 +1,17 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import {
-  businessNavItems,
-  clienteNavItems,
+  businessNavSections,
+  clienteNavSections,
   NAV_SEARCH_PLACEHOLDER_BUSINESS,
   NAV_SEARCH_PLACEHOLDER_CLIENTE,
   NAV_SEARCH_PLACEHOLDER_PROFISSIONAL,
-  profissionalNavItems,
+  profissionalNavSections,
   type NavItem,
+  type NavSection,
 } from '@/constants/navigation'
-import { filterNavItems } from '@/utils/filterNavItems'
+import { FEATURE_FLAGS } from '@/config/features'
+import { filterNavSections } from '@/utils/filterNavItems'
 import { useUserStore } from '@/stores/user.store'
 import { useNegocioStore } from '@/stores/negocio.store'
 import { useAcessoUsuario } from '@/composables/useAcessoUsuario'
@@ -24,8 +26,26 @@ function dedupeNavById(items: NavItem[]): NavItem[] {
   })
 }
 
+function mergeNavSections(...groups: NavSection[][]): NavSection[] {
+  const map = new Map<string, NavSection>()
+
+  for (const sections of groups) {
+    for (const section of sections) {
+      const existing = map.get(section.id)
+      if (existing) {
+        existing.items = dedupeNavById([...existing.items, ...section.items])
+      } else {
+        map.set(section.id, { ...section, items: [...section.items] })
+      }
+    }
+  }
+
+  return Array.from(map.values())
+}
+
 function clienteNavSemAbrirLoja(items: NavItem[]): NavItem[] {
   return items
+    .filter((item) => item.id !== 'abrir-loja')
     .map((item) => {
       if (item.id !== 'cliente-conta' || !item.children?.length) return item
       const children = item.children.filter((child) => child.id !== 'abrir-loja')
@@ -35,20 +55,32 @@ function clienteNavSemAbrirLoja(items: NavItem[]): NavItem[] {
     .filter((item): item is NavItem => item !== null)
 }
 
+function clienteNavSemAbrirLojaSections(sections: NavSection[]): NavSection[] {
+  return sections
+    .map((section) => ({
+      ...section,
+      items: clienteNavSemAbrirLoja(section.items),
+    }))
+    .filter((section) => section.items.length > 0)
+}
+
 export function useDashboardNav() {
   const userStore = useUserStore()
   const negocioStore = useNegocioStore()
   const { profile } = storeToRefs(userStore)
-  const { assinaturaAtiva } = storeToRefs(negocioStore)
+  const { assinaturaAtiva, ehProfissionalAutonomo, role, limites } = storeToRefs(negocioStore)
   const {
     temVinculoNegocio,
     ehProfissionalOperacional,
     possuiEstabelecimentoProprio,
   } = useAcessoUsuario()
 
-  const navItems = computed(() => {
+  const navSections = computed(() => {
     const filterCtx = {
       assinaturaAtiva: assinaturaAtiva.value,
+      ehProfissionalAutonomo: ehProfissionalAutonomo.value,
+      ehOwner: role.value === 'Owner',
+      permiteMultiLoja: (limites.value.estabelecimentos ?? 1) > 1,
       possuiModulo: negocioStore.possuiModulo,
       possuiPermissao: negocioStore.possuiPermissao,
       possuiAlgumModulo: negocioStore.possuiAlgumModulo,
@@ -56,28 +88,64 @@ export function useDashboardNav() {
     }
 
     const ocultarAbrirLoja =
-      ehProfissionalOperacional.value || possuiEstabelecimentoProprio.value
-    const clienteNav = ocultarAbrirLoja ? clienteNavSemAbrirLoja(clienteNavItems) : clienteNavItems
+      !FEATURE_FLAGS.lojasHabilitadas
+      || ehProfissionalOperacional.value
+      || possuiEstabelecimentoProprio.value
+    const clienteSections = ocultarAbrirLoja
+      ? clienteNavSemAbrirLojaSections(clienteNavSections)
+      : clienteNavSections
 
     if (ehProfissionalOperacional.value) {
-      const operacao = filterNavItems(profissionalNavItems, filterCtx)
-      return dedupeNavById([...clienteNav, ...operacao])
+      const operacao = filterNavSections(profissionalNavSections, filterCtx)
+      return adaptLabelsCliente(
+        mergeNavSections(
+          filterNavSections(clienteSections, filterCtx),
+          operacao,
+        ),
+      )
     }
 
     if (temVinculoNegocio.value) {
-      const business = filterNavItems(
-        businessNavItems.filter((item) => item.id !== 'dashboard'),
-        filterCtx,
-      )
-      return dedupeNavById([...clienteNav, ...business])
+      return adaptLabels(filterNavSections(businessNavSections, filterCtx))
     }
 
     if (!isClienteRole(profile.value?.role)) {
-      return filterNavItems(businessNavItems, filterCtx)
+      return adaptLabels(filterNavSections(businessNavSections, filterCtx))
     }
 
-    return clienteNavItems
+    return adaptLabelsCliente(filterNavSections(clienteSections, filterCtx))
   })
+
+  function adaptLabelsAutonomo(sections: NavSection[]): NavSection[] {
+    if (!ehProfissionalAutonomo.value) return sections
+    return sections.map((section) => ({
+      ...section,
+      items: section.items.map((item) =>
+        item.id === 'perfil-estabelecimento'
+          ? { ...item, label: 'Meu perfil' }
+          : item,
+      ),
+    }))
+  }
+
+  function adaptLabelsExplorar(sections: NavSection[]): NavSection[] {
+    if (FEATURE_FLAGS.lojasHabilitadas) return sections
+    return sections.map((section) => ({
+      ...section,
+      items: section.items.map((item) =>
+        item.id === 'explorar' ? { ...item, label: 'Explorar profissionais' } : item,
+      ),
+    }))
+  }
+
+  function adaptLabels(sections: NavSection[]): NavSection[] {
+    return adaptLabelsExplorar(adaptLabelsAutonomo(sections))
+  }
+
+  function adaptLabelsCliente(sections: NavSection[]): NavSection[] {
+    return adaptLabelsExplorar(sections)
+  }
+  const navItems = computed(() => navSections.value.flatMap((section) => section.items))
 
   const searchPlaceholder = computed(() => {
     if (ehProfissionalOperacional.value) {
@@ -87,9 +155,11 @@ export function useDashboardNav() {
       return NAV_SEARCH_PLACEHOLDER_BUSINESS
     }
     return isClienteRole(profile.value?.role)
-      ? NAV_SEARCH_PLACEHOLDER_CLIENTE
+      ? FEATURE_FLAGS.lojasHabilitadas
+        ? NAV_SEARCH_PLACEHOLDER_CLIENTE
+        : 'Buscar profissionais, agendamentos, perfil…'
       : NAV_SEARCH_PLACEHOLDER_BUSINESS
   })
 
-  return { navItems, searchPlaceholder }
+  return { navSections, navItems, searchPlaceholder }
 }
