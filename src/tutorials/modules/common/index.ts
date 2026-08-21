@@ -32,7 +32,7 @@ export const dashboardTutorial: TutorialDefinition = {
     {
       id: 'completion',
       type: 'completion',
-      title: 'Tutorial concluído',
+      title: 'Tour concluído',
       description: 'Explore o painel e use os tutoriais de cada módulo quando precisar.',
       interaction: 'blocked',
       allowBack: false,
@@ -71,7 +71,7 @@ export const storesTutorial: TutorialDefinition = {
     {
       id: 'completion',
       type: 'completion',
-      title: 'Tutorial concluído',
+      title: 'Tour concluído',
       description: 'Você já sabe onde gerenciar suas unidades.',
       interaction: 'blocked',
       allowBack: false,
@@ -111,7 +111,7 @@ export const clientsTutorial: TutorialDefinition = {
     {
       id: 'completion',
       type: 'completion',
-      title: 'Tutorial concluído',
+      title: 'Tour concluído',
       description: 'Pronto para explorar sua base de clientes.',
       interaction: 'blocked',
       allowBack: false,
@@ -150,7 +150,7 @@ export const financeTutorial: TutorialDefinition = {
     {
       id: 'completion',
       type: 'completion',
-      title: 'Tutorial concluído',
+      title: 'Tour concluído',
       description: 'Explore as abas financeiras conforme a necessidade do dia.',
       interaction: 'blocked',
       allowBack: false,
@@ -190,7 +190,7 @@ export const subscriptionTutorial: TutorialDefinition = {
     {
       id: 'completion',
       type: 'completion',
-      title: 'Tutorial concluído',
+      title: 'Tour concluído',
       description: 'Você já sabe onde gerenciar a assinatura.',
       interaction: 'blocked',
       allowBack: false,
@@ -229,7 +229,7 @@ export const storeProfileTutorial: TutorialDefinition = {
     {
       id: 'completion',
       type: 'completion',
-      title: 'Tutorial concluído',
+      title: 'Tour concluído',
       description: 'Seu perfil de loja é o cartão de visita para os clientes.',
       interaction: 'blocked',
       allowBack: false,
@@ -269,7 +269,7 @@ export const teamTutorial: TutorialDefinition = {
     {
       id: 'completion',
       type: 'completion',
-      title: 'Tutorial concluído',
+      title: 'Tour concluído',
       description: 'Use esta área sempre que precisar ajustar a equipe.',
       interaction: 'blocked',
       allowBack: false,
@@ -309,7 +309,7 @@ export const integrationsTutorial: TutorialDefinition = {
     {
       id: 'completion',
       type: 'completion',
-      title: 'Tutorial concluído',
+      title: 'Tour concluído',
       description: 'Volte aqui sempre que precisar revisar a integração.',
       interaction: 'blocked',
       allowBack: false,
@@ -348,7 +348,7 @@ export const auditTutorial: TutorialDefinition = {
     {
       id: 'completion',
       type: 'completion',
-      title: 'Tutorial concluído',
+      title: 'Tour concluído',
       description: 'Use a auditoria para acompanhar mudanças críticas.',
       interaction: 'blocked',
       allowBack: false,
@@ -387,7 +387,7 @@ export const preferencesTutorial: TutorialDefinition = {
     {
       id: 'completion',
       type: 'completion',
-      title: 'Tutorial concluído',
+      title: 'Tour concluído',
       description: 'Suas preferências estão sob controle.',
       interaction: 'blocked',
       allowBack: false,
@@ -426,7 +426,7 @@ export const profileTutorial: TutorialDefinition = {
     {
       id: 'completion',
       type: 'completion',
-      title: 'Tutorial concluído',
+      title: 'Tour concluído',
       description: 'Seu perfil está pronto para uso.',
       interaction: 'blocked',
       allowBack: false,

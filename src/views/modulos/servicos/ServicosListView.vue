@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import ServicoCard from '@/components/servicos/ServicoCard.vue'
@@ -31,7 +31,7 @@ const negocioStore = useNegocioStore()
 const { limites, estabelecimentoAtivo } = storeToRefs(negocioStore)
 const notifications = useNotificationsStore()
 const { resolveError } = useApiError()
-const { start: startTutorial, maybeShowSuggestion } = useGlowGuide()
+const { start: startTutorial } = useGlowGuide()
 
 const servicos = ref<Servico[]>([])
 const loading = ref(false)
@@ -40,10 +40,6 @@ const pagina = ref(1)
 
 const podeGerenciar = computed(() => possuiPermissao('ServicoGerenciar'))
 const pageTutorialId = computed(() => (podeGerenciar.value ? 'first-service' : 'services'))
-
-onMounted(() => {
-  maybeShowSuggestion(pageTutorialId.value)
-})
 
 function onStartTutorial() {
   void startTutorial(pageTutorialId.value)

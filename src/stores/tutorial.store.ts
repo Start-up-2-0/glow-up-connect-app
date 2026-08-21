@@ -17,6 +17,7 @@ import {
   estimateSheetHeight,
   resolveLayoutMode,
 } from '@/tutorials/engine/positioning'
+import { GLOW_GUIDE_FLAGS } from '@/tutorials/config'
 import type {
   TargetRect,
   TutorialContext,
@@ -455,6 +456,9 @@ export const useTutorialStore = defineStore('tutorial', () => {
   }
 
   function maybeShowSuggestion(id: string) {
+    // Flag desligada: mantém API, mas não abre dialog automático.
+    if (!GLOW_GUIDE_FLAGS.autoSuggestOnFirstVisit) return
+
     const progress = tutorialStorage.getProgress(userId(), id)
     if (progress && (progress.status === 'completed' || progress.status === 'in_progress')) {
       return

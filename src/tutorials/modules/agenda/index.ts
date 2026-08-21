@@ -58,7 +58,7 @@ export const agendaTutorial: TutorialDefinition = {
     {
       id: 'completion',
       type: 'completion',
-      title: 'Tutorial concluído',
+      title: 'Tour concluído',
       description: 'Você já sabe navegar pela agenda do Glow Up.',
       interaction: 'blocked',
       allowBack: false,

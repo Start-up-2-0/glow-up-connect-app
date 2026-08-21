@@ -119,7 +119,7 @@ const waitingLabel = computed(() => {
 
       <template v-else-if="isCompletion">
         <button type="button" class="gg-card__btn gg-card__btn--primary gg-card__btn--block" @click="emit('finish')">
-          Finalizar
+          Concluir Tour
         </button>
       </template>
 

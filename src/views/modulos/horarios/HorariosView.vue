@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Lightbulb, Settings2 } from 'lucide-vue-next'
 import HorarioDiaLojaCard from '@/components/horarios/HorarioDiaLojaCard.vue'
@@ -17,7 +17,7 @@ import type { DiaSemanaValue } from '@/constants/diasSemana'
 const { estabelecimentoId, ready, error: contextError, loading: contextLoading } =
   useEstabelecimentoView()
 const { ehProfissionalAutonomo } = storeToRefs(useNegocioStore())
-const { start: startTutorial, maybeShowSuggestion } = useGlowGuide()
+const { start: startTutorial } = useGlowGuide()
 
 const {
   DIAS_SEMANA,
@@ -131,10 +131,6 @@ async function onAplicarMassa(payload: HorarioMassaPayload) {
 function onStartTutorial() {
   void startTutorial('business-hours')
 }
-
-onMounted(() => {
-  maybeShowSuggestion('business-hours')
-})
 </script>
 
 <template>

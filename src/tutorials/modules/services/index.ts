@@ -1,14 +1,14 @@
 import type { TutorialDefinition } from '@/tutorials/types'
 import { ROUTE_NAMES, ROUTE_PATHS } from '@/constants/routes'
 
-/** Missão: cadastrar o primeiro serviço (lista → form → API). */
+/** Tour educativo: explica o cadastro sem exigir abrir o form, preencher ou salvar. */
 export const firstServiceMission: TutorialDefinition = {
   id: 'first-service',
-  version: 1,
-  kind: 'mission',
-  title: 'Cadastre seu primeiro serviço',
-  description: 'Crie um serviço completo para seus clientes agendarem.',
-  estimatedMinutes: 3,
+  version: 2,
+  kind: 'tutorial',
+  title: 'Cadastre um serviço',
+  description: 'Entenda os campos do formulário de serviço — sem precisar cadastrar agora.',
+  estimatedMinutes: 2,
   routeName: ROUTE_NAMES.SERVICOS,
   routePath: ROUTE_PATHS.SERVICOS,
   module: 'Servicos',
@@ -19,9 +19,9 @@ export const firstServiceMission: TutorialDefinition = {
     {
       id: 'intro',
       type: 'intro',
-      title: 'Seu primeiro serviço',
+      title: 'Serviços da loja',
       description:
-        'Vou te guiar para cadastrar um serviço com nome, preço e duração. Leva cerca de 3 minutos.',
+        'Vou explicar como cadastrar um serviço. Este tour é só demonstrativo: nada precisa ser preenchido ou salvo.',
       interaction: 'blocked',
       allowBack: false,
     },
@@ -35,80 +35,67 @@ export const firstServiceMission: TutorialDefinition = {
     },
     {
       id: 'create',
-      type: 'action',
+      type: 'info',
       target: '[data-tour="servicos-novo"]',
-      action: 'click',
-      title: 'Sua vez',
-      description: 'Clique em Novo serviço para começar o cadastro.',
-      interaction: 'target-only',
+      title: 'Novo serviço',
+      description:
+        'Use Novo serviço para abrir o formulário. Quando for criar de verdade, comece por aqui.',
+      interaction: 'blocked',
     },
     {
       id: 'name',
-      type: 'input',
-      target: '[data-tour="servico-nome"]',
-      action: 'input',
+      type: 'info',
       title: 'Nome do serviço',
-      description: 'Informe o nome que seus clientes verão ao agendar.',
-      interaction: 'target-only',
+      description:
+        'No formulário, o nome é obrigatório. É o texto que o cliente vê ao agendar. Ex.: “Corte masculino com barba”.',
+      interaction: 'blocked',
     },
     {
       id: 'price-duration',
       type: 'info',
-      target: '[data-tour="servico-preco-duracao"]',
       title: 'Preço e duração',
-      description: 'Defina o valor base e quanto tempo o atendimento leva.',
-      interaction: 'free',
+      description:
+        'Informe o valor base (obrigatório) e a duração em minutos (ex.: 30). Isso orienta o agendamento e o financeiro.',
+      interaction: 'blocked',
     },
     {
       id: 'type',
       type: 'info',
-      target: '[data-tour="servico-tipo"]',
       title: 'Tipo do serviço',
-      description: 'Escolha se é um atendimento individual ou um pacote.',
-      interaction: 'free',
+      description: 'Escolha se é um atendimento individual ou um pacote com várias sessões.',
+      interaction: 'blocked',
     },
     {
       id: 'professionals',
       type: 'info',
-      target: '[data-tour="servico-profissionais"]',
       title: 'Profissionais',
-      description: 'Opcional: vincule quem pode realizar este serviço.',
-      interaction: 'free',
+      description:
+        'Opcional: vincule quem pode realizar o serviço. Útil quando a equipe é grande.',
+      interaction: 'blocked',
       skipIf: (ctx) => !ctx.possuiModulo('Profissionais'),
     },
     {
       id: 'save',
-      type: 'action',
-      target: '[data-tour="servico-save"]',
-      action: 'click',
-      waitForEvent: 'servico.created',
-      title: 'Salve o serviço',
-      description: 'Clique em salvar. Vamos aguardar a confirmação do sistema.',
-      interaction: 'target-only',
-    },
-    {
-      id: 'success',
-      type: 'success',
-      title: 'Serviço cadastrado',
-      description: 'Agora seus clientes poderão selecioná-lo durante um agendamento.',
+      type: 'info',
+      title: 'Salvar o serviço',
+      description:
+        'Com os dados prontos, use Salvar para gravar. Neste tour você não precisa salvar.',
       interaction: 'blocked',
-      allowBack: false,
     },
     {
       id: 'completion',
       type: 'completion',
-      title: 'Missão concluída',
-      description: 'Você já sabe como cadastrar serviços no Glow Up.',
+      title: 'Tour concluído',
+      description: 'Você já conhece os campos principais para cadastrar um serviço quando quiser.',
       interaction: 'blocked',
       allowBack: false,
     },
   ],
 }
 
-/** Tutorial curto da listagem (quando já existem serviços). */
 export const servicesTutorial: TutorialDefinition = {
   id: 'services',
-  version: 1,
+  version: 2,
   kind: 'tutorial',
   title: 'Conheça seus serviços',
   description: 'Entenda a lista, o status e como editar um serviço.',
@@ -147,8 +134,8 @@ export const servicesTutorial: TutorialDefinition = {
     {
       id: 'completion',
       type: 'completion',
-      title: 'Tutorial concluído',
-      description: 'Pronto. Explore a lista ou inicie a missão de cadastrar um serviço.',
+      title: 'Tour concluído',
+      description: 'Explore a lista ou abra o tour de cadastro quando for criar um serviço.',
       interaction: 'blocked',
       allowBack: false,
     },
