@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import registerCrest from '@/assets/logo/logo_original.png'
+import registerCrest from '@/assets/logo/logo_original.webp'
 import loginBackground from '@/assets/auth/login-background.webp'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import TelefoneInput from '@/components/ui/TelefoneInput.vue'

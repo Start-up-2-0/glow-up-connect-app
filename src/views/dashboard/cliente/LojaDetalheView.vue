@@ -14,6 +14,7 @@ import { avaliacaoService } from '@/services/avaliacaoService'
 import { useGeolocation } from '@/composables/useGeolocation'
 import { useApiError } from '@/composables/useApiError'
 import { useLoading } from '@/composables/useLoading'
+import { forceUnlockBodyScroll } from '@/utils/bodyScrollLock'
 import { lojaAgendarPath } from '@/constants/routes'
 import type { EstabelecimentoPublico } from '@/types/estabelecimento.types'
 import type { ProfissionalPublico, ServicoPublico } from '@/types/agendamento.types'
@@ -67,7 +68,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  document.body.style.overflow = ''
+  forceUnlockBodyScroll()
   globalLoading.hide()
 })
 </script>

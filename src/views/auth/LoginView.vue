@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import loginCrest from '@/assets/logo/logo_original.png'
+import loginCrest from '@/assets/logo/logo_original.webp'
 import loginBackground from '@/assets/auth/login-background.webp'
 import { useAuth } from '@/composables/useAuth'
 import { useApiError } from '@/composables/useApiError'

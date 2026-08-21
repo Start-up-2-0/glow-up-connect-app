@@ -120,29 +120,39 @@ const api: AxiosInstance = axios.create({
   timeout: 30_000,
 })
 
+type GlowRequestConfig = InternalAxiosRequestConfig & { _glowLoading?: boolean }
+
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-  // Loading global de requisição (ignora infraestrutura silenciosa).
-  if (!isExcludedLoadingPath(config.url)) {
-    useLoadingStore().start()
-  }
+  const glowConfig = config as GlowRequestConfig
+  const trackLoading = !isExcludedLoadingPath(config.url)
 
-  // Modo mockado: intercepta a chamada no adapter, sem tocar na rede real.
-  if (MOCK_MODE) {
-    const { getMockAdapter } = await import('@/mocks')
-    config.adapter = getMockAdapter() as unknown as InternalAxiosRequestConfig['adapter']
-    return config
-  }
-
-  // Auth via cookie HttpOnly (guc_access); não injeta token no header.
-
-  if (!isExemptRequestProofPath(config.url)) {
-    const proof = await acquireRequestProof(config.method, config.url)
-    if (proof && config.headers) {
-      config.headers[REQUEST_PROOF_HEADER] = proof
+  try {
+    // Modo mockado: intercepta a chamada no adapter, sem tocar na rede real.
+    if (MOCK_MODE) {
+      const { getMockAdapter } = await import('@/mocks')
+      config.adapter = getMockAdapter() as unknown as InternalAxiosRequestConfig['adapter']
+    } else if (!isExemptRequestProofPath(config.url)) {
+      // Auth via cookie HttpOnly (guc_access); não injeta token no header.
+      const proof = await acquireRequestProof(config.method, config.url)
+      if (proof && config.headers) {
+        config.headers[REQUEST_PROOF_HEADER] = proof
+      }
     }
-  }
 
-  return config
+    // Só marca loading depois da preparação — evita overlay preso se o proof falhar.
+    if (trackLoading) {
+      useLoadingStore().start()
+      glowConfig._glowLoading = true
+    }
+
+    return config
+  } catch (error) {
+    if (glowConfig._glowLoading) {
+      useLoadingStore().finish()
+      glowConfig._glowLoading = false
+    }
+    return Promise.reject(error)
+  }
 })
 
 function handleSubscriptionError(error: AxiosError<ApiErrorResponse>) {
@@ -183,18 +193,21 @@ function handleSubscriptionError(error: AxiosError<ApiErrorResponse>) {
 
 api.interceptors.response.use(
   (response) => {
-    if (!isExcludedLoadingPath(response.config.url)) {
+    const cfg = response.config as GlowRequestConfig
+    if (cfg._glowLoading) {
       useLoadingStore().finish()
+      cfg._glowLoading = false
     }
     return response
   },
   async (error: AxiosError<ApiErrorResponse>) => {
-    if (!isExcludedLoadingPath(error.config?.url)) {
-      useLoadingStore().finish()
-    }
-    const originalRequest = error.config as InternalAxiosRequestConfig & {
+    const originalRequest = error.config as GlowRequestConfig & {
       _retry?: boolean
       _proofRetry?: boolean
+    }
+    if (originalRequest?._glowLoading) {
+      useLoadingStore().finish()
+      originalRequest._glowLoading = false
     }
     const requestUrl = originalRequest?.url
 

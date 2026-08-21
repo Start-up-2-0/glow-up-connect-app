@@ -49,7 +49,7 @@ const highlights = [
 <style scoped>
 .goodbye-page {
   position: relative;
-  min-height: calc(100vh - 8rem);
+  min-height: calc(100dvh - 8rem);
   display: grid;
   place-items: center;
   padding: 2rem 1rem 3rem;

@@ -93,7 +93,7 @@ const emit = defineEmits<{
   <!-- Flowbite-style split: plano | formulário -->
   <div
     v-else-if="planoResumo"
-    class="-mx-4 -mt-4 flex min-h-[calc(100vh-5rem)] flex-col overflow-hidden bg-glow-canvas lg:-mx-6 lg:-mt-6 lg:flex-row"
+    class="-mx-4 -mt-4 flex min-h-[calc(100dvh-5rem)] flex-col overflow-hidden bg-glow-canvas lg:-mx-6 lg:-mt-6 lg:flex-row"
   >
     <!-- Plano: mobile no topo -->
     <div class="lg:hidden">
@@ -106,7 +106,7 @@ const emit = defineEmits<{
 
     <!-- Plano: desktop sidebar -->
     <div class="hidden w-[min(100%,380px)] shrink-0 self-stretch lg:block">
-      <div class="sticky top-0 h-[calc(100vh-4rem)] min-h-full overflow-y-auto">
+      <div class="sticky top-0 h-[calc(100dvh-4rem)] min-h-full overflow-y-auto">
         <OnboardingPlanoResumoCard
           :plano="planoResumo"
           :promocao="promocaoResumo"

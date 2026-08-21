@@ -1,21 +1,22 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, defineAsyncComponent } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 import { useNegocioStore } from '@/stores/negocio.store'
-import AuthLayout from '@/layouts/AuthLayout.vue'
-import DevPreviewLayout from '@/layouts/DevPreviewLayout.vue'
-import DashboardLayout from '@/layouts/DashboardLayout.vue'
-import PublicLayout from '@/layouts/PublicLayout.vue'
-import AgendarPublicoLayout from '@/layouts/AgendarPublicoLayout.vue'
 import ToastContainer from '@/components/feedback/ToastContainer.vue'
 import GlobalLoader from '@/components/loading/GlobalLoader.vue'
 import CookieConsentBanner from '@/components/legal/CookieConsentBanner.vue'
 import CookiePreferencesModal from '@/components/legal/CookiePreferencesModal.vue'
-import GlowGuideHost from '@/tutorials/components/GlowGuideHost.vue'
 import { useConsent } from '@/composables/useConsent'
 import { ROUTE_NAMES } from '@/constants/routes'
+
+const AuthLayout = defineAsyncComponent(() => import('@/layouts/AuthLayout.vue'))
+const DevPreviewLayout = defineAsyncComponent(() => import('@/layouts/DevPreviewLayout.vue'))
+const DashboardLayout = defineAsyncComponent(() => import('@/layouts/DashboardLayout.vue'))
+const PublicLayout = defineAsyncComponent(() => import('@/layouts/PublicLayout.vue'))
+const AgendarPublicoLayout = defineAsyncComponent(() => import('@/layouts/AgendarPublicoLayout.vue'))
+const GlowGuideHost = defineAsyncComponent(() => import('@/tutorials/components/GlowGuideHost.vue'))
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -35,6 +36,13 @@ const layout = computed(() => {
   if (route.meta.layout === 'agendar-publico') return AgendarPublicoLayout
   if (route.meta.layout === 'public') return PublicLayout
   return AuthLayout
+})
+
+const showGlowGuide = computed(() => {
+  return (
+    route.meta.layout === 'dashboard'
+    || (route.name === ROUTE_NAMES.LOJA_AGENDAR && authStore.isAuthenticated)
+  )
 })
 
 const routerViewKey = computed(() => {
@@ -57,7 +65,7 @@ const routerViewKey = computed(() => {
   </component>
   <ToastContainer />
   <GlobalLoader />
-  <GlowGuideHost />
+  <GlowGuideHost v-if="showGlowGuide" />
   <CookieConsentBanner v-if="showBanner" />
   <CookiePreferencesModal />
 </template>

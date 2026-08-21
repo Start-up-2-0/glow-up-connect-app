@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import logoLight from '@/assets/logo/logo_original.png'
-import logoDark from '@/assets/logo/logo_orignal_dark.png'
+import logoLight from '@/assets/logo/logo_original.webp'
+import logoDark from '@/assets/logo/logo_orignal_dark.webp'
 import { useAppStore } from '@/stores/app.store'
 
 const props = withDefaults(
@@ -38,6 +38,10 @@ const sizeClass = computed(() => {
   <img
     :src="logoUrl"
     alt="Glow Up Connect"
+    width="168"
+    height="128"
+    decoding="async"
+    :fetchpriority="compact || sidebar ? 'low' : 'high'"
     :class="['object-contain object-left', sizeClass, logoClass]"
   />
 </template>

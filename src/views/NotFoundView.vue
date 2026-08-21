@@ -16,7 +16,7 @@ const { isAuthenticated } = storeToRefs(authStore)
 </script>
 
 <template>
-  <div class="relative flex min-h-screen bg-white">
+  <div class="relative flex min-h-dvh bg-white">
     <AuthSplashPanel />
 
     <main :class="GLOW_AUTH_PANEL_CLASS">

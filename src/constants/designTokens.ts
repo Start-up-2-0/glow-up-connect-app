@@ -57,7 +57,7 @@ export const GLOW_SPLASH_IMAGE_CLASS =
 
 /** Largura do painel esquerdo no layout 1920px (955px) */
 export const GLOW_SPLASH_PANEL_CLASS =
-  'relative hidden min-h-screen shrink-0 overflow-hidden lg:block lg:w-[955px] lg:max-w-[50%]'
+  'relative hidden min-h-dvh shrink-0 overflow-hidden lg:block lg:w-[955px] lg:max-w-[50%]'
 
 export const GLOW_INPUT_CLASS =
   'h-[49px] w-full rounded-lg border-[0.3px] border-glow-border-soft bg-glow-bg-elevated px-4 font-satoshi text-glow-text placeholder:font-inter placeholder:text-sm placeholder:font-normal placeholder:text-glow-placeholder outline-none transition focus:border-glow-gold focus:ring-1 focus:ring-glow-gold'
@@ -90,10 +90,10 @@ export const GLOW_AUTH_SUBTITLE_CLASS =
 export const GLOW_AUTH_FORM_GRID_CLASS = 'grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-x-2'
 
 export const GLOW_AUTH_PANEL_CLASS =
-  'relative z-10 flex min-h-screen w-full flex-1 items-center justify-center bg-glow-bg-elevated px-6 py-10 lg:-ml-[54px] lg:rounded-l-panel lg:px-16'
+  'relative z-10 flex min-h-dvh w-full flex-1 items-center justify-center bg-glow-bg-elevated px-6 py-10 lg:-ml-[54px] lg:rounded-l-panel lg:px-16'
 
 export const GLOW_AUTH_PANEL_BORDERED_CLASS =
-  'relative z-10 flex min-h-screen w-full flex-1 items-center justify-center border-glow-border-soft bg-glow-bg-elevated px-6 py-10 lg:-ml-[54px] lg:rounded-l-panel lg:border lg:px-16'
+  'relative z-10 flex min-h-dvh w-full flex-1 items-center justify-center border-glow-border-soft bg-glow-bg-elevated px-6 py-10 lg:-ml-[54px] lg:rounded-l-panel lg:border lg:px-16'
 
 export const GLOW_AVATAR_DROPZONE_CLASS =
   'flex h-[49px] w-full cursor-pointer items-center rounded-lg border border-dashed border-glow-border-soft transition hover:border-glow-gold'

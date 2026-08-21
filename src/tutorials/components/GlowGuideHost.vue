@@ -103,6 +103,24 @@ watch(isActive, (active) => {
   else unbindScrollListeners()
 })
 
+/** Failsafe: overlay sem target por tempo demais = tela "morta" para cliques. */
+let stuckTimer: ReturnType<typeof setTimeout> | null = null
+watch(
+  [isActive, targetRect, () => store.isResolvingTarget],
+  ([active, rect, resolving]) => {
+    if (stuckTimer) {
+      clearTimeout(stuckTimer)
+      stuckTimer = null
+    }
+    if (!active || rect || resolving) return
+    stuckTimer = setTimeout(() => {
+      if (store.isActive && !store.targetRect && !store.isResolvingTarget) {
+        store.abandon()
+      }
+    }, 6_000)
+  },
+)
+
 onMounted(() => {
   window.addEventListener('keydown', onKeydown)
   if (isActive.value) bindScrollListeners()
@@ -111,6 +129,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown)
   unbindScrollListeners()
+  if (stuckTimer) clearTimeout(stuckTimer)
 })
 </script>
 

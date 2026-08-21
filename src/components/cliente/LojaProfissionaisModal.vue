@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { onUnmounted, watch } from 'vue'
 import { X } from 'lucide-vue-next'
 import type { ProfissionalPublico } from '@/types/agendamento.types'
+import { lockBodyScroll, unlockBodyScroll } from '@/utils/bodyScrollLock'
 
 const open = defineModel<boolean>({ default: false })
 
@@ -22,11 +23,16 @@ watch(open, (isOpen) => {
   if (typeof document === 'undefined') return
   if (isOpen) {
     document.addEventListener('keydown', onKeydown)
-    document.body.style.overflow = 'hidden'
+    lockBodyScroll()
   } else {
     document.removeEventListener('keydown', onKeydown)
-    document.body.style.overflow = ''
+    unlockBodyScroll()
   }
+})
+
+onUnmounted(() => {
+  if (open.value) unlockBodyScroll()
+  document.removeEventListener('keydown', onKeydown)
 })
 
 function iniciais(nome: string) {

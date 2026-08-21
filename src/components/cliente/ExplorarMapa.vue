@@ -231,6 +231,12 @@ function onDragStart() {
   userDragging = true
 }
 
+function onAppResumed() {
+  requestAnimationFrame(() => {
+    map?.invalidateSize({ animate: false })
+  })
+}
+
 onMounted(() => {
   if (!mapEl.value) return
 
@@ -278,9 +284,14 @@ onMounted(() => {
   requestAnimationFrame(() => {
     map?.invalidateSize()
   })
+
+  window.addEventListener('guc:app-resumed', onAppResumed)
+  window.visualViewport?.addEventListener('resize', onAppResumed)
 })
 
 onUnmounted(() => {
+  window.removeEventListener('guc:app-resumed', onAppResumed)
+  window.visualViewport?.removeEventListener('resize', onAppResumed)
   if (moveTimer) clearTimeout(moveTimer)
   if (suppressTimer) clearTimeout(suppressTimer)
   map?.off('dragstart', onDragStart)
