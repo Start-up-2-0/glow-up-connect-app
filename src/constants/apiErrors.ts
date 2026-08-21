@@ -1,6 +1,6 @@
 export const API_ERROR_MESSAGES: Record<string, string> = {
   UNAUTHORIZED: 'Sessão expirada. Faça login novamente.',
-  INVALID_CREDENTIALS: 'Email ou senha inválidos.',
+  INVALID_CREDENTIALS: 'E-mail ou senha inválidos.',
   INVALID_TOKEN: 'Sessão inválida. Faça login novamente.',
   TOKEN_EXPIRED: 'Sessão expirada. Faça login novamente.',
   EMAIL_NAO_CONFIRMADO: 'Confirme seu e-mail antes de entrar.',

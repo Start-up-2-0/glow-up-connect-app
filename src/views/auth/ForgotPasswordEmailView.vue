@@ -58,7 +58,7 @@ async function handleSubmit() {
           type="email"
           autocomplete="email"
           required
-          placeholder="ex: usuario01@exemplo.com"
+          placeholder="ex: usuário01@exemplo.com"
           :class="GLOW_RECOVERY_INPUT_CLASS"
         />
       </div>

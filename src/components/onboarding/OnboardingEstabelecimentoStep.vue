@@ -303,7 +303,7 @@ function handleSubmit() {
             v-model="email"
             type="email"
             required
-            placeholder="ex: usuario01@gmail.com"
+            placeholder="ex: usuário01@gmail.com"
             :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
           />
         </div>
@@ -405,7 +405,7 @@ function handleSubmit() {
               v-model="email"
               type="email"
               required
-              :placeholder="modoAutonomo ? 'ex: usuario01@gmail.com' : 'contato@seunegocio.com'"
+              :placeholder="modoAutonomo ? 'ex: usuário01@gmail.com' : 'contato@seunegocio.com'"
               :class="GLOW_INPUT_CLASS"
             />
           </div>

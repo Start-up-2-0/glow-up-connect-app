@@ -365,7 +365,7 @@ async function handleConfirmar() {
                 v-model="clienteEmail"
                 type="email"
                 autocomplete="email"
-                placeholder="ex: usuario01@exemplo.com"
+                placeholder="ex: usuário01@exemplo.com"
                 :class="[GLOW_INPUT_CLASS, 'mt-2']"
               />
             </div>
@@ -438,7 +438,7 @@ async function handleConfirmar() {
               <div class="min-w-0 text-left">
                 <p class="font-urbanist text-sm font-semibold text-glow-text">Sem preferência</p>
                 <p class="mt-1 font-urbanist text-xs text-glow-text-subtle">
-                  A loja quem escolhe o profissional disponível.
+                  A loja é quem escolhe o profissional disponível.
                 </p>
               </div>
             </button>

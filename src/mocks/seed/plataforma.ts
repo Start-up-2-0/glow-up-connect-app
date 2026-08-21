@@ -93,8 +93,8 @@ function buildMockPlanos(tipoAssinatura: 'Estabelecimento' | 'ProfissionalAutono
       id: 2,
       nome: 'Essencial',
       descricao: ehAutonomo
-        ? 'Operação completa para profissional autônomo.'
-        : 'Operação completa para uma unidade.',
+        ? 'Agenda, clientes e perfil público para quem atende sozinho'
+        : 'Operação completa com equipe, WhatsApp e gestão para uma unidade',
       preco: ehAutonomo ? PRECO_AUTONOMO_ESSENCIAL : PRECO_LOJA_ESSENCIAL,
       periodo: 'mensal',
       limiteProfissionais: ehAutonomo ? 1 : 10,
@@ -115,8 +115,8 @@ function buildMockPlanos(tipoAssinatura: 'Estabelecimento' | 'ProfissionalAutono
       id: 3,
       nome: 'Premium',
       descricao: ehAutonomo
-        ? 'Recursos avançados para o profissional autônomo.'
-        : 'Para redes com múltiplas unidades.',
+        ? 'WhatsApp, caixa pessoal, financeiro e prioridade no marketplace'
+        : 'Caixa, financeiro, comissões, até 5 unidades e prioridade no marketplace',
       preco: ehAutonomo ? PRECO_AUTONOMO_PREMIUM : PRECO_LOJA_PREMIUM,
       periodo: 'mensal',
       limiteProfissionais: ehAutonomo ? 1 : null,

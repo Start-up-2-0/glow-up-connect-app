@@ -185,7 +185,7 @@ async function handleSubmit() {
             type="email"
             autocomplete="email"
             required
-            placeholder="ex: usuario01@exemplo.com"
+            placeholder="ex: usuário01@exemplo.com"
             :class="GLOW_INPUT_CLASS"
           />
           <p v-if="getFieldError(...FIELD_KEYS.email)" class="text-sm text-red-600">
@@ -201,7 +201,7 @@ async function handleSubmit() {
             type="email"
             autocomplete="email"
             required
-            placeholder="ex: usuario01@exemplo.com"
+            placeholder="ex: usuário01@exemplo.com"
             :class="GLOW_INPUT_CLASS"
           />
         </div>

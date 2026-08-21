@@ -94,10 +94,10 @@ export function registerCoreRoutes(router: MockRouter) {
 
   /* ---------- Recovery ---------- */
   router.on('post', '/auth/forgot-password', () =>
-    voidOk('Se o e-mail estiver cadastrado, enviaremos instrucoes para redefinir a senha.'),
+    voidOk('Se o e-mail estiver cadastrado, enviaremos instruções para redefinir a senha.'),
   )
   router.on('post', '/auth/reset-password', () =>
-    voidOk('Senha redefinida com sucesso. Voce ja pode fazer login.'),
+    voidOk('Senha redefinida com sucesso. Você já pode fazer login.'),
   )
 
   /* ---------- Usuário ---------- */

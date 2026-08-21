@@ -113,7 +113,7 @@ defineExpose({ resetForm })
               type="email"
               class="equipe-form-input"
               :class="{ 'border-red-500': !!emailError }"
-              placeholder="Ex: usuario@exemplo.com"
+              placeholder="Ex: usuário@exemplo.com"
               required
             />
             <p v-if="emailError" class="equipe-form-field__error">{{ emailError }}</p>
@@ -181,7 +181,7 @@ defineExpose({ resetForm })
                   type="email"
                   class="equipe-form-input"
                   :class="{ 'border-red-500': !!emailError }"
-                  placeholder="Ex: usuario@exemplo.com"
+                  placeholder="Ex: usuário@exemplo.com"
                   required
                 />
                 <p v-if="emailError" class="equipe-form-field__error">{{ emailError }}</p>

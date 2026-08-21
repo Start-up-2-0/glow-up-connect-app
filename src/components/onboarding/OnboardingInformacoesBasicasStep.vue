@@ -354,7 +354,7 @@ function handleSubmit() {
             v-model="email"
             type="email"
             required
-            placeholder="ex: usuario01@gmail.com"
+            placeholder="ex: usuário01@gmail.com"
             :class="ONBOARDING_CONTRATAR_INPUT_CLASS"
           />
         </div>
