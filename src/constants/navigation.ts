@@ -122,7 +122,7 @@ export const businessNavSections: NavSection[] = [
       },
       {
         id: 'minhas-lojas',
-        label: 'Minhas Lojas',
+        label: 'Minhas lojas',
         to: ROUTE_PATHS.MINHAS_LOJAS,
         icon: 'building',
         requerRoleOwner: true,

@@ -168,7 +168,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
               @click="open = false"
             >
               <Store :size="14" />
-              Minhas Lojas
+              Minhas lojas
             </RouterLink>
           </div>
         </div>

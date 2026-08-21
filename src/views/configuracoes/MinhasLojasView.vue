@@ -203,7 +203,7 @@ function irAdicionarLoja() {
     <header class="flex flex-wrap items-start justify-between gap-4">
       <div class="min-w-0">
         <h1 class="font-urbanist text-2xl font-bold tracking-tight text-glow-text sm:text-[28px]">
-          Minhas Lojas
+          Minhas lojas
         </h1>
         <p class="mt-1.5 max-w-xl font-urbanist text-sm leading-relaxed text-glow-text-subtle">
           Visualize e gerencie as lojas vinculadas à sua conta Premium.

@@ -14,7 +14,7 @@ export const configuracoesRoutes: RouteRecordRaw[] = [
       requerRoleOwner: true,
       requerMultiLoja: true,
       requerAssinaturaAtiva: true,
-      title: 'Minhas Lojas',
+      title: 'Minhas lojas',
     },
   },
   {

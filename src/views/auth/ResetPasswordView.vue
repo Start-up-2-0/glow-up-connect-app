@@ -101,7 +101,7 @@ async function handleSubmit() {
 
       <div class="relative flex flex-col gap-2">
         <label for="confirmar-nova-senha" :class="GLOW_RECOVERY_LABEL_CLASS">
-          Confirmar Senha
+          Confirmar senha
         </label>
         <input
           id="confirmar-nova-senha"
@@ -119,7 +119,7 @@ async function handleSubmit() {
       </div>
 
       <AuthRecoveryAlert v-if="mismatchError">
-        As senhas não coincidem. Por favor verifique-as novamente.
+        As senhas não coincidem. Por favor, verifique-as novamente.
       </AuthRecoveryAlert>
 
       <AuthRecoveryAlert v-if="errorMessage">

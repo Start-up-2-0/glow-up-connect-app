@@ -115,7 +115,7 @@ function handleConfirm() {
             />
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="font-urbanist text-sm font-medium text-glow-text">Início vigência</label>
+                <label class="font-urbanist text-sm font-medium text-glow-text">Início da vigência</label>
                 <input
                   v-model="inicioVigencia"
                   type="date"

@@ -201,7 +201,7 @@ function abrirPolitica() {
           {{ contextoOnboarding.limiteLojas ?? '—' }}
           lojas utilizadas.
         </template>
-        A gestão operacional das unidades fica em Minhas Lojas.
+        A gestão operacional das unidades fica em Minhas lojas.
       </p>
       <RouterLink :to="ROUTE_PATHS.MINHAS_LOJAS">
         <BaseButton variant="secondary">Gerenciar lojas</BaseButton>

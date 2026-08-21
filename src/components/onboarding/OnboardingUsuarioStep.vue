@@ -194,7 +194,7 @@ async function handleSubmit() {
         </div>
 
         <div class="flex flex-col gap-2">
-          <label for="onb-confirmar-email" :class="GLOW_LABEL_CLASS">Confirmar E-mail</label>
+          <label for="onb-confirmar-email" :class="GLOW_LABEL_CLASS">Confirmar e-mail</label>
           <input
             id="onb-confirmar-email"
             v-model="confirmarEmail"
@@ -224,7 +224,7 @@ async function handleSubmit() {
         </div>
 
         <div class="relative flex flex-col gap-2">
-          <label for="onb-confirmar-senha" :class="GLOW_LABEL_CLASS">Confirmar Senha</label>
+          <label for="onb-confirmar-senha" :class="GLOW_LABEL_CLASS">Confirmar senha</label>
           <input
             id="onb-confirmar-senha"
             v-model="confirmarSenha"

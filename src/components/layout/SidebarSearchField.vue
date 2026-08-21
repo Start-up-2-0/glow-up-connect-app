@@ -9,7 +9,7 @@ const { searchPlaceholder } = useDashboardNav()
 
 <template>
   <div class="relative w-full">
-    <label for="sidebar-search" class="sr-only">Pesquisar</label>
+    <label for="sidebar-search" class="sr-only">Buscar</label>
     <IconSearch
       class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-glow-text-subtle"
       :size="18"

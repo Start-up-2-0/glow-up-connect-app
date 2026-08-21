@@ -109,7 +109,7 @@ const subtitulo = computed(() =>
 const statusOptions = computed(() =>
   isEntrada.value
     ? [
-        { value: '', label: 'Todos status' },
+        { value: '', label: 'Todos os status' },
         { value: 'recebido', label: 'Recebido' },
         { value: 'pendente', label: 'Pendente' },
         { value: 'vencido', label: 'Vencido' },
@@ -117,7 +117,7 @@ const statusOptions = computed(() =>
         { value: 'cancelado', label: 'Cancelado' },
       ]
     : [
-        { value: '', label: 'Todos status' },
+        { value: '', label: 'Todos os status' },
         { value: 'pago', label: 'Pago' },
         { value: 'pendente', label: 'Pendente' },
         { value: 'vencido', label: 'Vencido' },

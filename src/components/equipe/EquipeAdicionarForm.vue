@@ -78,11 +78,11 @@ defineExpose({ resetForm })
       <div class="equipe-link-success">
         <p class="equipe-link-success__title">Link pronto!</p>
         <p class="equipe-link-success__text">
-          Envie o link abaixo para o usuário para que ele possa aceitar. Lembre-se de colar o link
+          Envie o link abaixo para o usuário para que ele possa aceitar. Lembre-se de abrir o link
           em outra aba do navegador.
         </p>
         <p class="equipe-link-success__text">
-          Também há a possibilidade do usuário aceitar o convite pelo e-mail; o destino é o mesmo.
+          Também é possível que o usuário aceite o convite pelo e-mail; o destino é o mesmo.
         </p>
         <div class="equipe-link-success__url-box">
           <p class="equipe-link-success__url">{{ linkConvite }}</p>

@@ -18,12 +18,12 @@ const emit = defineEmits<{
 const forma = ref<FormaRecebimentoPresencial>('Dinheiro')
 const valor = ref('')
 
-const formas: FormaRecebimentoPresencial[] = [
-  'Dinheiro',
-  'Pix',
-  'CartaoDebito',
-  'CartaoCredito',
-  'Outro',
+const formas: { value: FormaRecebimentoPresencial; label: string }[] = [
+  { value: 'Dinheiro', label: 'Dinheiro' },
+  { value: 'Pix', label: 'Pix' },
+  { value: 'CartaoDebito', label: 'Cartão de débito' },
+  { value: 'CartaoCredito', label: 'Cartão de crédito' },
+  { value: 'Outro', label: 'Outro' },
 ]
 
 watch(open, (isOpen) => {
@@ -70,7 +70,7 @@ function handleConfirm() {
               v-model="forma"
               class="mt-1 w-full rounded border border-glow-border-soft bg-glow-canvas px-3 py-2 text-glow-text"
             >
-              <option v-for="f in formas" :key="f" :value="f">{{ f }}</option>
+              <option v-for="f in formas" :key="f.value" :value="f.value">{{ f.label }}</option>
             </select>
           </label>
 

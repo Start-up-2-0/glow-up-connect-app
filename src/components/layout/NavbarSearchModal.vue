@@ -8,7 +8,7 @@ const props = withDefaults(
   defineProps<{
     placeholder?: string
   }>(),
-  { placeholder: 'Pesquisar...' },
+  { placeholder: 'Buscar...' },
 )
 
 const query = ref('')
@@ -50,7 +50,7 @@ function onKeydown(event: KeyboardEvent) {
         class="glow-modal-overlay items-start pt-[max(1rem,env(safe-area-inset-top))] sm:items-center"
         role="dialog"
         aria-modal="true"
-        aria-label="Pesquisar"
+        aria-label="Buscar"
         @click="onOverlayClick"
         @keydown="onKeydown"
       >

@@ -92,7 +92,7 @@ const emit = defineEmits<{
     </section>
 
     <section class="agendar-review-card">
-      <h2 class="agendar-review-card__title">Data e Horário</h2>
+      <h2 class="agendar-review-card__title">Data e horário</h2>
       <div class="agendar-review-fields-grid--2">
         <div class="agendar-review-field">
           <p class="agendar-review-field__label">Data</p>
@@ -108,11 +108,11 @@ const emit = defineEmits<{
     <section class="agendar-review-card">
       <div class="agendar-review-fields-grid--2">
         <div class="agendar-review-field">
-          <p class="agendar-review-card__title !mb-1">Tempo Total</p>
+          <p class="agendar-review-card__title !mb-1">Tempo total</p>
           <p class="agendar-review-field__value !mt-0">{{ duracaoTotal }} minutos</p>
         </div>
         <div class="agendar-review-field">
-          <p class="agendar-review-card__title !mb-1">Valor Total</p>
+          <p class="agendar-review-card__title !mb-1">Valor total</p>
           <p class="agendar-review-summary-value !mt-0">{{ valorTotalLabel }}</p>
         </div>
       </div>
@@ -150,7 +150,7 @@ const emit = defineEmits<{
       :disabled="submitting"
       @click="emit('confirm')"
     >
-      {{ submitting ? 'Confirmando…' : 'Confirmar Agendamento' }}
+      {{ submitting ? 'Confirmando…' : 'Confirmar agendamento' }}
     </button>
   </div>
 </template>

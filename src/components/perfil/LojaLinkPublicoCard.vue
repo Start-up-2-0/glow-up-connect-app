@@ -18,7 +18,7 @@ defineEmits<{
 
 <template>
   <PerfilSectionCard
-    title="Link Público de Agendamento"
+    title="Link público de agendamento"
     description="Compartilhe este link para que seus clientes agendem serviços com você."
   >
     <template v-if="linkUrl" #header-aside>
