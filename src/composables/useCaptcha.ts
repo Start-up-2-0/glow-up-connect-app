@@ -72,8 +72,10 @@ function loadRecaptchaScript(): Promise<void> {
 }
 
 export function useCaptcha() {
+  /** Temporário: captcha desligado. Para reativar, defina como `false`. */
+  const CAPTCHA_TEMPORARILY_DISABLED = true
   const siteKey = getSiteKey()
-  const enabled = siteKey.length > 0
+  const enabled = !CAPTCHA_TEMPORARILY_DISABLED && siteKey.length > 0
   let widgetId: number | null = null
 
   async function mountWidget(container: HTMLElement): Promise<void> {

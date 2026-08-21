@@ -10,6 +10,7 @@ import { useNotificationsStore } from '@/stores/notifications.store'
 import { useConfirmEmail } from '@/composables/useConfirmEmail'
 import { useApiError } from '@/composables/useApiError'
 import { useAssinaturaPagamentoResposta } from '@/composables/useAssinaturaPagamentoResposta'
+import { useCaptcha } from '@/composables/useCaptcha'
 import type { PagamentoAssinaturaPayload, TipoAssinatura } from '@/types/assinatura.types'
 import { TIPO_ASSINATURA_PADRAO } from '@/utils/tipoAssinatura'
 import { ROUTE_PATHS } from '@/constants/routes'
@@ -104,6 +105,7 @@ export function useOnboardingAssinaturaWizard(
     aguardandoPagamento,
     processarResposta,
   } = useAssinaturaPagamentoResposta()
+  const { enabled: captchaEnabled } = useCaptcha()
 
   const storedDraft = loadDraft()
   const draftCompativel =
@@ -214,7 +216,7 @@ export function useOnboardingAssinaturaWizard(
     fieldErrors.value = {}
 
     if (pendingAutoLogin.value) {
-      if (!payload.captchaToken) {
+      if (captchaEnabled && !payload.captchaToken) {
         erro.value = 'Marque o reCAPTCHA novamente para entrar na sua conta.'
         return
       }
@@ -271,13 +273,21 @@ export function useOnboardingAssinaturaWizard(
       setStoredEmail(payload.email.trim())
       notifications.push('success', data.mensagem)
 
-      pendingAutoLogin.value = {
-        email: payload.email.trim(),
-        senha: payload.senha,
+      if (captchaEnabled) {
+        pendingAutoLogin.value = {
+          email: payload.email.trim(),
+          senha: payload.senha,
+        }
+        captchaResetNonce.value += 1
+        erro.value =
+          'Conta criada! Marque o reCAPTCHA novamente e clique em Continuar para prosseguir.'
+      } else {
+        const loginData = await authStore.login({
+          email: payload.email.trim(),
+          senha: payload.senha,
+        })
+        await finalizarPosCadastro(loginData.requerConfirmacaoEmail ?? false)
       }
-      captchaResetNonce.value += 1
-      erro.value =
-        'Conta criada! Marque o reCAPTCHA novamente e clique em Continuar para prosseguir.'
     } catch (err) {
       captchaResetNonce.value += 1
       fieldErrors.value = resolveFieldErrors(err)
