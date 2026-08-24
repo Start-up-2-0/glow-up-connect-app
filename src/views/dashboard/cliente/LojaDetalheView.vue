@@ -11,6 +11,8 @@ import AvaliacaoResumoCard from '@/components/avaliacao/AvaliacaoResumoCard.vue'
 import AvaliacaoComentariosLista from '@/components/avaliacao/AvaliacaoComentariosLista.vue'
 import { publicoService } from '@/services/publicoService'
 import { avaliacaoService } from '@/services/avaliacaoService'
+import { favoritoService } from '@/services/favoritoService'
+import { useNotificationsStore } from '@/stores/notifications.store'
 import { useGeolocation } from '@/composables/useGeolocation'
 import { useApiError } from '@/composables/useApiError'
 import { useLoading } from '@/composables/useLoading'
@@ -20,18 +22,21 @@ import { formatPrecoFigma } from '@/utils/formatters'
 import type { EstabelecimentoPublico } from '@/types/estabelecimento.types'
 import type { ProfissionalPublico, ServicoPublico } from '@/types/agendamento.types'
 import type { AvaliacoesPaginadas } from '@/types/avaliacao.types'
+import type { FavoritoCliente } from '@/types/favorito.types'
 
 const route = useRoute()
 const publicGuid = computed(() => String(route.params.publicGuid))
 const { request } = useGeolocation()
 const { resolveError } = useApiError()
 const globalLoading = useLoading()
+const notifications = useNotificationsStore()
 
 const loja = ref<EstabelecimentoPublico | null>(null)
 const servicos = ref<ServicoPublico[]>([])
 const profissionais = ref<ProfissionalPublico[]>([])
 const avaliacoes = ref<AvaliacoesPaginadas | null>(null)
 const favorito = ref(false)
+const favoritos = ref<FavoritoCliente[]>([])
 const error = ref<string | null>(null)
 const modalProfissionais = ref(false)
 const modalServicos = ref(false)
@@ -43,6 +48,52 @@ const tempoMedioMinutos = computed(() => {
 })
 
 const servicosDestaque = computed(() => servicos.value.slice(0, 3))
+const favoritoLoja = computed(() =>
+  favoritos.value.find((item) =>
+    item.estabelecimentoPublicGuid === publicGuid.value && !item.profissionalPublicGuid),
+)
+const profissionaisFavoritos = computed(() =>
+  favoritos.value.flatMap((item) => item.profissionalPublicGuid ? [item.profissionalPublicGuid] : []),
+)
+
+async function toggleFavoritoLoja() {
+  try {
+    if (favoritoLoja.value) {
+      await favoritoService.remover(favoritoLoja.value.id)
+      favoritos.value = favoritos.value.filter((item) => item.id !== favoritoLoja.value?.id)
+      favorito.value = false
+      notifications.push('success', 'Loja removida dos favoritos.')
+    } else {
+      const criado = await favoritoService.adicionar({ estabelecimentoPublicGuid: publicGuid.value })
+      favoritos.value.unshift(criado)
+      favorito.value = true
+      notifications.push('success', 'Loja adicionada aos favoritos.')
+    }
+  } catch (err) {
+    favorito.value = Boolean(favoritoLoja.value)
+    notifications.push('error', resolveError(err, 'Não foi possível atualizar o favorito.'))
+  }
+}
+
+async function toggleFavoritoProfissional(profissional: ProfissionalPublico) {
+  const existente = favoritos.value.find((item) =>
+    item.estabelecimentoPublicGuid === publicGuid.value
+      && item.profissionalPublicGuid === profissional.publicGuid)
+  try {
+    if (existente) {
+      await favoritoService.remover(existente.id)
+      favoritos.value = favoritos.value.filter((item) => item.id !== existente.id)
+    } else {
+      favoritos.value.unshift(await favoritoService.adicionar({
+        estabelecimentoPublicGuid: publicGuid.value,
+        profissionalPublicGuid: profissional.publicGuid,
+      }))
+    }
+    notifications.push('success', existente ? 'Profissional removido dos favoritos.' : 'Profissional adicionado aos favoritos.')
+  } catch (err) {
+    notifications.push('error', resolveError(err, 'Não foi possível atualizar o favorito.'))
+  }
+}
 
 function precoServico(servico: ServicoPublico) {
   if (servico.precoMinimo === servico.precoMaximo) return formatPrecoFigma(servico.precoMinimo)
@@ -53,16 +104,19 @@ onMounted(async () => {
   error.value = null
   globalLoading.show({ message: 'Carregando loja...' })
   try {
-    const [detalhe, listaServicos, listaProfissionais, listaAvaliacoes] = await Promise.all([
+    const [detalhe, listaServicos, listaProfissionais, listaAvaliacoes, listaFavoritos] = await Promise.all([
       publicoService.obterEstabelecimento(publicGuid.value),
       publicoService.listarServicosLoja(publicGuid.value).catch(() => []),
       publicoService.listarProfissionaisLoja(publicGuid.value).catch(() => []),
       avaliacaoService.listarEstabelecimento(publicGuid.value).catch(() => null),
+      favoritoService.listar().catch(() => []),
     ])
     loja.value = detalhe
     servicos.value = listaServicos
     profissionais.value = listaProfissionais
     avaliacoes.value = listaAvaliacoes
+    favoritos.value = listaFavoritos
+    favorito.value = Boolean(favoritoLoja.value)
   } catch (err) {
     error.value = resolveError(err, 'Não foi possível carregar a loja.')
   } finally {
@@ -98,6 +152,7 @@ onUnmounted(() => {
             v-model:favorito="favorito"
             :loja="loja"
             :tempo-medio-minutos="tempoMedioMinutos"
+            @toggle-favorito="toggleFavoritoLoja"
           />
 
           <section class="loja-detalhe-escolha" aria-labelledby="loja-escolha-title">
@@ -221,6 +276,9 @@ onUnmounted(() => {
         v-model="modalProfissionais"
         :profissionais="profissionais"
         :loja-nome="loja.nome"
+        :loja-public-guid="loja.publicGuid"
+        :favoritos="profissionaisFavoritos"
+        @toggle-favorito="toggleFavoritoProfissional"
       />
       <LojaServicosModal
         v-model="modalServicos"
