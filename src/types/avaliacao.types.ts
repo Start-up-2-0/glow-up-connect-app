@@ -4,6 +4,8 @@ export interface AvaliacaoResumoCliente {
   notaEstabelecimento: number
   notaProfissional: number
   avaliadoEm: string
+  comentarioEstabelecimento?: string | null
+  comentarioProfissional?: string | null
 }
 
 export interface AvaliacaoContexto {

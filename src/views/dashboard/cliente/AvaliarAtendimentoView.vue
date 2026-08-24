@@ -55,6 +55,8 @@ async function load() {
     if (contexto.value.avaliacao) {
       notaEstabelecimento.value = contexto.value.avaliacao.notaEstabelecimento
       notaProfissional.value = contexto.value.avaliacao.notaProfissional
+      comentarioEstabelecimento.value = contexto.value.avaliacao.comentarioEstabelecimento ?? ''
+      comentarioProfissional.value = contexto.value.avaliacao.comentarioProfissional ?? ''
     }
   } catch (err) {
     error.value = resolveError(err, 'Não foi possível carregar a avaliação.')
