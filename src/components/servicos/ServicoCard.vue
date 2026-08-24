@@ -79,7 +79,7 @@ const emit = defineEmits<{
         @click="emit('editar')"
       >
         <ServicoIcons name="edit" />
-        <span class="sr-only">Editar</span>
+        <span>Editar</span>
       </button>
       <button
         v-if="temModuloProfissionais"
@@ -89,7 +89,7 @@ const emit = defineEmits<{
         @click="emit('profissionais')"
       >
         <ServicoIcons name="profissionais" />
-        <span class="sr-only">Profissionais</span>
+        <span>Profissionais</span>
       </button>
       <button
         type="button"
@@ -99,7 +99,7 @@ const emit = defineEmits<{
         @click="emit('toggleStatus')"
       >
         <ServicoIcons :name="servico.ativo ? 'desativar' : 'ativar'" />
-        <span class="sr-only">{{ servico.ativo ? 'Desativar' : 'Ativar' }}</span>
+        <span>{{ servico.ativo ? 'Desativar' : 'Ativar' }}</span>
       </button>
     </div>
   </article>

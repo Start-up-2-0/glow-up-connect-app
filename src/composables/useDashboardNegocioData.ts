@@ -17,6 +17,7 @@ export interface ProfissionalDashboard extends DashboardNegocioProfissional {}
 
 export function useDashboardNegocioData() {
   const loading = ref(false)
+  const error = ref<string | null>(null)
   const totalGanhoMes = ref(0)
   const totalGanhoMesAnterior = ref(0)
   const totalGanhoHoje = ref(0)
@@ -71,8 +72,10 @@ export function useDashboardNegocioData() {
 
   async function load(estabelecimentoId: number) {
     loading.value = true
+    error.value = null
     try {
       const data = await dashboardNegocioService.obter(estabelecimentoId)
+      if (!data) throw new Error('Resposta vazia ao carregar o painel.')
       totalGanhoMes.value = data.totalGanhoMes
       totalGanhoMesAnterior.value = data.totalGanhoMesAnterior
       totalGanhoHoje.value = data.totalGanhoHoje
@@ -94,6 +97,8 @@ export function useDashboardNegocioData() {
         nome: d.nome,
         count: d.quantidade,
       }))
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Não foi possível carregar o painel.'
     } finally {
       loading.value = false
     }
@@ -101,6 +106,7 @@ export function useDashboardNegocioData() {
 
   return {
     loading,
+    error,
     totalGanhoMes,
     totalGanhoHoje,
     totalGanhoSemana,

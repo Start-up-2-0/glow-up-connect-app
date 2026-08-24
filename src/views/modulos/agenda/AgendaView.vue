@@ -28,7 +28,7 @@ import type {
   AgendaPaginada,
 } from '@/types/negocio/agenda.types'
 import { agendaDetalhePath } from '@/constants/routes'
-import { AGENDA_STATUS_FILTER_OPTIONS } from '@/utils/agendamentoStatusTheme'
+import { AGENDA_STATUS_FILTER_OPTIONS, resolveAgendamentoStatusTheme } from '@/utils/agendamentoStatusTheme'
 import { AGENDA_CALENDAR_VIEW_OPTIONS, toCalendarEventsFromGeral, toCalendarEventsFromPropria } from '@/utils/agendaCalendar'
 
 const router = useRouter()
@@ -67,6 +67,22 @@ const viewOptions = AGENDA_CALENDAR_VIEW_OPTIONS.map((option) => ({
   value: option.value,
   label: option.label,
 }))
+
+const statusSummary = computed(() => {
+  const groups = new Map<string, number>()
+  for (const event of events.value) {
+    const key = event.status === 'Agendado' ? 'Confirmado' : event.status
+    groups.set(key, (groups.get(key) ?? 0) + 1)
+  }
+  return AGENDA_STATUS_FILTER_OPTIONS
+    .filter((option) => option.value && groups.has(option.value))
+    .map((option) => ({
+      value: option.value,
+      label: option.label,
+      count: groups.get(option.value) ?? 0,
+      className: resolveAgendamentoStatusTheme(option.value).pillClass,
+    }))
+})
 
 const apiFiltro = computed<AgendaFiltro>(() => ({
   inicio: apiDateRange.value.inicio,
@@ -209,6 +225,22 @@ watch([statusFilter, apiDateRange], () => {
     </div>
 
     <div v-else class="agenda-cal-shell" data-tour="agenda-calendar" :class="{ 'agenda-cal-shell--busy': loading }">
+      <div class="agenda-cal-summary">
+        <div>
+          <p class="agenda-cal-summary__title">
+            {{ total }} {{ total === 1 ? 'agendamento no período' : 'agendamentos no período' }}
+          </p>
+          <p class="agenda-cal-summary__hint">Selecione um horário para ver os detalhes ou clique no dia para abrir a agenda.</p>
+        </div>
+        <div v-if="statusSummary.length" class="agenda-cal-legend" aria-label="Legenda dos status">
+          <span v-for="item in statusSummary" :key="item.value" class="agenda-cal-legend__item">
+            <span class="agenda-cal-legend__dot" :class="item.className" aria-hidden="true" />
+            {{ item.label }}
+            <strong>{{ item.count }}</strong>
+          </span>
+        </div>
+      </div>
+
       <p v-if="!loading && events.length === 0" class="agenda-cal-empty">
         Nenhum agendamento neste período.
       </p>
@@ -235,9 +267,7 @@ watch([statusFilter, apiDateRange], () => {
         @select="onSelectEvent"
       />
 
-      <p class="agenda-cal-count">
-        {{ total }} {{ total === 1 ? 'agendamento' : 'agendamentos' }}
-      </p>
+      <p class="agenda-cal-count">Horários exibidos no fuso local do estabelecimento.</p>
     </div>
   </div>
 </template>

@@ -24,10 +24,10 @@
      * Tema claro — seções lavanda da referência
      * base (#EBE7F7) → surface → elevated → highlight
      */
-    --glow-bg-base: var(--palette-lilac-white);
-    --glow-bg-surface: #f3f0f8;
-    --glow-bg-elevated: #faf9fd;
-    --glow-bg-highlight: #e3ddee;
+    --glow-bg-base: #f6f4f8;
+    --glow-bg-surface: #fbfafc;
+    --glow-bg-elevated: #ffffff;
+    --glow-bg-highlight: #eeeaf2;
 
     --glow-canvas: var(--glow-bg-base);
     --glow-surface: var(--glow-bg-surface);
@@ -937,7 +937,7 @@
   }
 
   .agenda-cal-shell {
-    @apply relative overflow-hidden rounded-2xl border border-glow-border-soft bg-glow-surface;
+    @apply relative overflow-hidden rounded-2xl border border-glow-border-soft bg-glow-bg-elevated shadow-sm;
   }
 
   .agenda-cal-shell--busy {
@@ -948,6 +948,23 @@
     @apply border-b border-glow-border-soft px-3 py-2 font-urbanist text-sm text-glow-text-subtle sm:px-4 sm:py-3;
   }
 
+  .agenda-cal-summary {
+    @apply flex flex-col gap-3 border-b border-glow-border-soft bg-glow-bg-elevated px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4;
+  }
+
+  .agenda-cal-summary__title { @apply font-satoshi text-sm font-bold text-glow-text; }
+  .agenda-cal-summary__hint { @apply mt-0.5 hidden font-urbanist text-xs text-glow-text-subtle lg:block; }
+  .agenda-cal-legend { @apply flex flex-wrap items-center gap-x-3 gap-y-1.5; }
+  .agenda-cal-legend__item { @apply inline-flex items-center gap-1.5 font-urbanist text-[11px] font-medium text-glow-text-subtle; }
+  .agenda-cal-legend__item strong { @apply rounded-full bg-glow-neutral-bg px-1.5 py-0.5 text-[10px] text-glow-text; }
+  .agenda-cal-legend__dot { @apply size-2.5 rounded-full border-2; }
+  .agenda-cal-legend__dot.agenda-cal-event--confirmado { @apply border-glow-success-dark bg-glow-success-bg; }
+  .agenda-cal-legend__dot.agenda-cal-event--pendente { @apply border-glow-gold bg-glow-gold-soft; }
+  .agenda-cal-legend__dot.agenda-cal-event--em-atendimento { @apply border-glow-neutral bg-glow-neutral-bg; }
+  .agenda-cal-legend__dot.agenda-cal-event--concluido { @apply border-glow-primary bg-glow-info-bg; }
+  .agenda-cal-legend__dot.agenda-cal-event--remarcado { @apply border-glow-warning bg-glow-warning-bg; }
+  .agenda-cal-legend__dot.agenda-cal-event--cancelado { @apply border-glow-error bg-glow-error-bg; }
+
   .agenda-cal-count {
     @apply border-t border-glow-border-soft px-3 py-2 font-urbanist text-sm text-glow-text-subtle sm:px-4 sm:py-3;
   }
@@ -957,7 +974,7 @@
   }
 
   .agenda-cal-month__weekdays {
-    @apply grid grid-cols-7 border-b border-glow-border-soft bg-glow-canvas;
+    @apply grid grid-cols-7 border-b border-glow-border-soft bg-glow-surface;
   }
 
   .agenda-cal-month__weekdays span {
@@ -977,7 +994,7 @@
   }
 
   .agenda-cal-month__cell {
-    @apply min-h-[3.35rem] overflow-hidden border-b border-r border-glow-border-soft p-0.5 sm:min-h-[8.75rem] sm:p-2;
+    @apply relative min-h-[3.8rem] overflow-hidden border-b border-r border-glow-border-soft bg-glow-bg-elevated p-0.5 transition-colors hover:bg-glow-hover-surface sm:min-h-[8.75rem] sm:p-2;
   }
 
   .agenda-cal-month__cell:nth-child(7n) {
@@ -986,6 +1003,16 @@
 
   .agenda-cal-month__cell--muted {
     @apply bg-glow-canvas;
+    opacity: 0.58;
+  }
+
+  .agenda-cal-month__cell--weekend:not(.agenda-cal-month__cell--muted) {
+    background: color-mix(in srgb, var(--glow-gold-cta) 3%, var(--glow-bg-elevated));
+  }
+
+  .agenda-cal-month__cell--today {
+    background: color-mix(in srgb, var(--glow-gold-cta) 7%, var(--glow-bg-elevated));
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--glow-gold-cta) 45%, transparent);
   }
 
   .agenda-cal-month__cell--muted .agenda-cal-month__day {
@@ -993,7 +1020,7 @@
   }
 
   .agenda-cal-month__hit {
-    @apply flex cursor-pointer flex-col items-center rounded-lg px-0.5 py-0.5 sm:items-start sm:rounded-none sm:px-0 sm:py-0;
+    @apply flex cursor-pointer flex-col items-stretch rounded-lg px-0.5 py-0.5 sm:rounded-none sm:px-0 sm:py-0;
   }
 
   .agenda-cal-month__hit:focus-visible {
@@ -1001,8 +1028,12 @@
   }
 
   .agenda-cal-month__day {
-    @apply flex size-7 items-center justify-center rounded-full font-satoshi text-xs font-semibold text-glow-text transition sm:mb-1.5 sm:text-sm;
+    @apply flex size-7 items-center justify-center rounded-full font-satoshi text-xs font-bold text-glow-text transition sm:text-sm;
   }
+
+  .agenda-cal-month__day-row { @apply flex w-full items-center justify-center gap-0.5 sm:mb-2 sm:justify-between; }
+  .agenda-cal-month__event-count { @apply inline-flex min-w-4 items-center justify-center rounded-full bg-glow-gold-selected px-1 py-0.5 font-satoshi text-[9px] font-bold leading-none text-glow-gold-dark sm:px-2 sm:text-[10px]; }
+  .agenda-cal-month__event-count-label { @apply ml-1 hidden lg:inline; }
 
   .agenda-cal-month__cell--today .agenda-cal-month__day {
     @apply bg-glow-text text-glow-surface;
@@ -1057,12 +1088,14 @@
   }
 
   .agenda-cal-event {
-    @apply flex w-full min-w-0 flex-col items-start overflow-hidden rounded-md border px-1.5 text-left transition hover:brightness-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-glow-gold;
+    @apply relative flex w-full min-w-0 flex-col items-start overflow-hidden rounded-lg border px-2 text-left shadow-sm transition hover:-translate-y-px hover:brightness-[0.97] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-glow-gold;
   }
 
   .agenda-cal-event--pill {
-    @apply h-6 flex-row items-center gap-1 py-0;
+    @apply h-8 flex-row items-center gap-1.5 py-0;
   }
+
+  .agenda-cal-event--pill::before { content: ''; @apply absolute inset-y-0 left-0 w-1 bg-current opacity-70; }
 
   .agenda-cal-event--block {
     @apply h-full justify-start gap-0.5 py-1.5 shadow-sm;
@@ -1075,11 +1108,11 @@
   }
 
   .agenda-cal-event__time {
-    @apply font-satoshi text-[10px] font-bold uppercase tracking-wide;
+    @apply font-satoshi text-[10px] font-bold tabular-nums tracking-wide;
   }
 
   .agenda-cal-event__title {
-    @apply font-urbanist text-[11px] font-semibold leading-tight;
+    @apply font-urbanist text-[11px] font-bold leading-tight;
   }
 
   .agenda-cal-event--block .agenda-cal-event__title {
@@ -1834,7 +1867,7 @@
   }
 
   .loja-detalhe-layout__aside {
-    @apply hidden min-w-0 flex-col gap-4 lg:flex;
+    @apply hidden min-w-0 flex-col gap-4 lg:sticky lg:top-4 lg:flex;
   }
 
   .loja-detalhe-layout__hours-mobile {
@@ -1845,8 +1878,94 @@
     @apply grid grid-cols-1 gap-2 sm:grid-cols-2;
   }
 
+  .loja-detalhe-escolha {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-3 shadow-glow-sm sm:p-4;
+  }
+
+  .loja-detalhe-escolha__head {
+    @apply mb-3 flex items-end justify-between gap-4;
+  }
+
+  .loja-detalhe-escolha__eyebrow {
+    @apply mb-0.5 font-urbanist text-[10px] font-bold uppercase tracking-[0.14em] text-glow-gold-cta;
+  }
+
+  .loja-detalhe-escolha__title {
+    @apply font-satoshi text-base font-bold text-glow-text sm:text-lg;
+  }
+
+  .loja-detalhe-escolha__hint {
+    @apply hidden max-w-[16rem] text-right font-urbanist text-xs text-glow-text-subtle sm:block;
+  }
+
+  .loja-detalhe-servicos-destaque {
+    @apply rounded-2xl border border-glow-border-soft bg-glow-surface p-3 shadow-glow-sm sm:p-4;
+  }
+
+  .loja-detalhe-section-head {
+    @apply mb-3 flex items-end justify-between gap-3;
+  }
+
+  .loja-detalhe-section-link {
+    @apply inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-1.5 font-urbanist text-xs font-bold text-glow-gold-cta transition hover:bg-glow-hover-surface;
+  }
+
+  .loja-detalhe-servicos-destaque__list {
+    @apply grid gap-2;
+  }
+
+  .loja-detalhe-servico-preview {
+    @apply grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-glow-border-soft bg-glow-canvas p-3 transition hover:bg-glow-hover-surface;
+  }
+
+  .loja-detalhe-servico-preview:hover {
+    border-color: color-mix(in srgb, var(--glow-gold-cta) 40%, transparent);
+  }
+
+  .loja-detalhe-servico-preview__icon {
+    @apply inline-flex size-10 items-center justify-center rounded-xl bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-950/50 dark:text-fuchsia-300;
+  }
+
+  .loja-detalhe-servico-preview__body {
+    @apply min-w-0;
+  }
+
+  .loja-detalhe-servico-preview__body h3 {
+    @apply truncate font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .loja-detalhe-servico-preview__body p {
+    @apply mt-0.5 truncate font-urbanist text-xs text-glow-text-subtle;
+  }
+
+  .loja-detalhe-servico-preview__duration {
+    @apply mt-1 inline-flex items-center gap-1 font-urbanist text-[11px] font-medium text-glow-text-soft;
+  }
+
+  .loja-detalhe-servico-preview__action {
+    @apply flex min-w-[6.5rem] flex-col items-end gap-1;
+  }
+
+  .loja-detalhe-servico-preview__action strong {
+    @apply font-satoshi text-sm font-bold text-glow-text;
+  }
+
+  .loja-detalhe-servico-preview__action a {
+    @apply inline-flex h-7 items-center justify-center rounded-lg bg-glow-gold-cta px-3 font-satoshi text-xs font-bold text-white shadow-sm transition hover:brightness-95;
+  }
+
+  @media (max-width: 479px) {
+    .loja-detalhe-servico-preview {
+      @apply grid-cols-[auto_minmax(0,1fr)];
+    }
+
+    .loja-detalhe-servico-preview__action {
+      @apply col-span-2 mt-1 w-full flex-row items-center justify-between border-t border-glow-border-soft pt-2;
+    }
+  }
+
   .loja-detalhe-atalho {
-    @apply flex min-h-[3.25rem] w-full items-center gap-3 rounded-2xl border border-glow-border-soft bg-glow-surface px-3 py-2.5 text-left shadow-glow-sm transition active:scale-[0.99] hover:bg-glow-hover-surface;
+    @apply flex min-h-[4rem] w-full items-center gap-3 rounded-xl border border-glow-border-soft bg-glow-canvas px-3 py-2.5 text-left transition active:scale-[0.99] hover:bg-glow-hover-surface;
   }
 
   .loja-detalhe-atalho:hover {
@@ -1878,7 +1997,11 @@
   }
 
   .loja-detalhe-atalho__chevron {
-    @apply size-4 shrink-0 text-glow-text-subtle;
+    @apply size-4 shrink-0 text-glow-gold-cta transition-transform;
+  }
+
+  .loja-detalhe-atalho:hover .loja-detalhe-atalho__chevron {
+    @apply translate-x-0.5;
   }
 
   .loja-detalhe-sticky-cta {
@@ -2146,6 +2269,10 @@
 
   .loja-hero-card__cta--desktop {
     @apply hidden lg:block;
+  }
+
+  .loja-hero-card__cta-hint {
+    @apply mt-2 hidden text-center font-urbanist text-xs text-glow-text-subtle lg:block;
   }
 
   @media (min-width: 1024px) {
@@ -2667,6 +2794,84 @@
     @apply flex w-full shrink-0 flex-wrap items-center gap-[15px] sm:w-auto sm:justify-end;
   }
 
+  .servicos-toolbar {
+    @apply flex flex-col gap-3 rounded-2xl border border-glow-border-soft bg-glow-bg-elevated p-3 shadow-sm md:flex-row md:items-center;
+  }
+
+  .servicos-toolbar__search {
+    @apply flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-glow-border-soft bg-glow-surface px-3 text-glow-text-subtle transition focus-within:border-glow-gold-cta;
+  }
+
+  .servicos-toolbar__search:focus-within {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--glow-gold-cta) 16%, transparent);
+  }
+
+  .servicos-toolbar__search > svg,
+  .servicos-toolbar__search button svg {
+    @apply size-4 shrink-0;
+  }
+
+  .servicos-toolbar__search input {
+    @apply h-10 min-w-0 flex-1 border-0 bg-transparent p-0 font-urbanist text-sm text-glow-text placeholder:text-glow-placeholder focus:ring-0;
+  }
+
+  .servicos-toolbar__search button {
+    @apply rounded-md p-1 transition hover:bg-glow-hover-surface hover:text-glow-text;
+  }
+
+  .servicos-toolbar__filters {
+    @apply flex items-center gap-2 text-glow-text-subtle;
+  }
+
+  .servicos-toolbar__filters > svg {
+    @apply hidden size-4 shrink-0 lg:block;
+  }
+
+  .servicos-toolbar__filters label {
+    @apply min-w-0 flex-1;
+  }
+
+  .servicos-toolbar__filters select {
+    @apply h-10 w-full rounded-xl border-glow-border-soft bg-glow-surface py-1.5 pl-3 pr-8 font-urbanist text-sm text-glow-text focus:border-glow-gold-cta focus:ring-glow-gold-cta;
+  }
+
+  .servicos-toolbar__count {
+    @apply whitespace-nowrap font-urbanist text-xs font-medium text-glow-text-subtle;
+  }
+
+  .servicos-feedback {
+    @apply flex flex-col items-start justify-between gap-3 rounded-2xl border border-dashed border-glow-border-soft bg-glow-bg-elevated p-5 sm:flex-row sm:items-center;
+  }
+
+  .servicos-feedback > div {
+    @apply flex flex-col gap-1 font-urbanist text-sm text-glow-text-subtle;
+  }
+
+  .servicos-feedback strong {
+    @apply font-satoshi text-base font-semibold text-glow-text;
+  }
+
+  .servicos-feedback button {
+    @apply shrink-0 rounded-lg border border-glow-border-soft px-3 py-2 font-urbanist text-sm font-semibold text-glow-gold-dark transition hover:bg-glow-hover-surface;
+  }
+
+  .servicos-feedback--error {
+    @apply border-solid border-red-200 bg-red-50/70;
+  }
+
+  .servico-card-skeleton {
+    @apply flex min-h-44 animate-pulse flex-col gap-3 rounded-2xl border border-glow-border-soft bg-glow-bg-elevated p-4;
+  }
+
+  .servico-card-skeleton span {
+    @apply block h-3 rounded-full bg-glow-hover-surface;
+  }
+
+  .servico-card-skeleton span:first-child { @apply h-10 w-3/5; }
+  .servico-card-skeleton span:nth-child(2) { @apply w-full; }
+  .servico-card-skeleton span:nth-child(3) { @apply w-4/5; }
+  .servico-card-skeleton span:last-child { @apply mt-auto h-8 w-full; }
+
   .servicos-btn-primary {
     @apply inline-flex h-[34px] w-full items-center justify-center gap-2.5 rounded-xl bg-glow-gold-cta px-4 font-urbanist text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto;
   }
@@ -2752,7 +2957,9 @@
   }
 
   .servico-card--inativo {
-    opacity: 0.78;
+    border-style: dashed;
+    border-color: color-mix(in srgb, var(--glow-error) 34%, var(--glow-border-soft));
+    background: color-mix(in srgb, var(--glow-neutral-bg) 55%, var(--glow-bg-elevated));
   }
 
   .servico-card__header {
@@ -2805,17 +3012,36 @@
   }
 
   .servico-card__actions {
-    @apply mt-0.5 flex w-full items-center justify-start gap-1.5 border-t pt-2.5;
+    @apply mt-0.5 flex w-full flex-wrap items-center justify-start gap-1.5 border-t pt-2.5;
     border-color: color-mix(in srgb, var(--glow-gold-cta) 16%, var(--glow-border-soft));
   }
 
   .servico-card__action {
-    @apply inline-flex size-8 flex-none items-center justify-center rounded-full text-glow-gold-cta transition hover:text-white disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex h-8 flex-none items-center justify-center gap-1.5 rounded-full px-2.5 font-urbanist text-[11px] font-semibold text-glow-gold-cta transition hover:text-white disabled:cursor-not-allowed disabled:opacity-60;
     background: color-mix(in srgb, var(--glow-gold-cta) 12%, transparent);
   }
 
   .servico-card__action:hover:not(:disabled) {
     background: var(--glow-gold-cta);
+  }
+
+  .servico-card__action .servico-icon,
+  .servico-card__action svg {
+    @apply size-3.5;
+  }
+
+  @media (max-width: 639px) {
+    .servicos-page { padding-bottom: 72px; }
+    .servicos-btn-primary--header {
+      position: fixed;
+      z-index: 45;
+      right: 16px;
+      bottom: max(16px, env(safe-area-inset-bottom));
+      left: 16px;
+      width: auto;
+      height: 46px;
+      box-shadow: 0 12px 30px rgba(82, 46, 95, 0.28);
+    }
   }
 
   .servico-status-badge {

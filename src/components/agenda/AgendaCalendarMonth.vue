@@ -27,6 +27,10 @@ function eventsFor(iso: string): AgendaCalendarEvent[] {
   return grouped.value.get(iso) ?? []
 }
 
+function eventCount(iso: string): number {
+  return eventsFor(iso).length
+}
+
 function visibleEvents(iso: string): AgendaCalendarEvent[] {
   return eventsFor(iso).slice(0, AGENDA_CALENDAR_MONTH_VISIBLE_EVENTS)
 }
@@ -60,12 +64,14 @@ function onCellKeydown(event: KeyboardEvent, iso: string) {
     </div>
     <div class="agenda-cal-month__grid">
       <div
-        v-for="cell in cells"
+        v-for="(cell, index) in cells"
         :key="cell.iso"
         class="agenda-cal-month__cell"
         :class="{
           'agenda-cal-month__cell--muted': !cell.inMonth,
           'agenda-cal-month__cell--today': cell.isToday,
+          'agenda-cal-month__cell--weekend': index % 7 >= 5,
+          'agenda-cal-month__cell--has-events': eventCount(cell.iso) > 0,
         }"
         role="gridcell"
       >
@@ -73,12 +79,18 @@ function onCellKeydown(event: KeyboardEvent, iso: string) {
           class="agenda-cal-month__hit"
           role="button"
           tabindex="0"
-          :aria-label="`Ver agenda de ${cell.iso}`"
+          :aria-label="`Ver agenda de ${cell.iso}${eventCount(cell.iso) ? `, ${eventCount(cell.iso)} ${eventCount(cell.iso) === 1 ? 'agendamento' : 'agendamentos'}` : ', sem agendamentos'}`"
           :aria-current="cell.isToday ? 'date' : undefined"
           @click="emit('selectDay', cell.iso)"
           @keydown="onCellKeydown($event, cell.iso)"
         >
-          <span class="agenda-cal-month__day">{{ cell.day }}</span>
+          <div class="agenda-cal-month__day-row">
+            <span class="agenda-cal-month__day">{{ cell.day }}</span>
+            <span v-if="eventCount(cell.iso)" class="agenda-cal-month__event-count">
+              {{ eventCount(cell.iso) }}
+              <span class="agenda-cal-month__event-count-label">{{ eventCount(cell.iso) === 1 ? 'horário' : 'horários' }}</span>
+            </span>
+          </div>
           <div class="agenda-cal-month__dots" aria-hidden="true">
             <span
               v-for="event in dotsFor(cell.iso)"

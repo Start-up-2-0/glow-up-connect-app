@@ -33,10 +33,10 @@ const badgeClass = computed(() => {
     :is="item.to ? 'router-link' : 'button'"
     :to="item.to || undefined"
     :type="item.to ? undefined : 'button'"
-    class="group flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] font-normal leading-snug text-glow-text-subtle transition-colors duration-150 hover:bg-glow-hover-surface hover:text-glow-text"
+    class="group relative flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-normal leading-snug text-glow-text-subtle transition-all duration-150 hover:bg-glow-hover-surface hover:text-glow-text"
     :class="[
       active
-        ? 'bg-glow-gold-selected font-medium text-glow-text'
+        ? 'bg-glow-gold-selected pl-3.5 font-semibold text-glow-text shadow-[inset_3px_0_0_var(--glow-gold-cta)]'
         : '',
       isDisabled ? 'cursor-not-allowed opacity-45' : '',
     ]"

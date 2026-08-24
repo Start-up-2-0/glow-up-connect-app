@@ -180,9 +180,12 @@ const inicial = computed(() => (props.loja.nome?.charAt(0) || '?').toUpperCase()
       >
         <span :class="CLIENTE_BTN_CTA_CLASS">
           <CalendarDays class="size-4" aria-hidden="true" />
-          Continuar agendamento
+          Agendar um horário
         </span>
       </RouterLink>
+      <p v-if="!hideCta" class="loja-hero-card__cta-hint">
+        Escolha o serviço, o profissional e o melhor horário na próxima etapa.
+      </p>
     </div>
   </section>
 </template>

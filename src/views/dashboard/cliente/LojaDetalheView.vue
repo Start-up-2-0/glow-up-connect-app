@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { ChevronRight, CalendarDays, Scissors, Users } from 'lucide-vue-next'
+import { ArrowRight, ChevronRight, CalendarDays, Clock3, Scissors, Users } from 'lucide-vue-next'
 import { RouterLink, useRoute } from 'vue-router'
 import BaseAlert from '@/components/feedback/BaseAlert.vue'
 import LojaResumoPanel from '@/components/cliente/LojaResumoPanel.vue'
@@ -16,13 +16,14 @@ import { useApiError } from '@/composables/useApiError'
 import { useLoading } from '@/composables/useLoading'
 import { forceUnlockBodyScroll } from '@/utils/bodyScrollLock'
 import { lojaAgendarPath } from '@/constants/routes'
+import { formatPrecoFigma } from '@/utils/formatters'
 import type { EstabelecimentoPublico } from '@/types/estabelecimento.types'
 import type { ProfissionalPublico, ServicoPublico } from '@/types/agendamento.types'
 import type { AvaliacoesPaginadas } from '@/types/avaliacao.types'
 
 const route = useRoute()
 const publicGuid = computed(() => String(route.params.publicGuid))
-const { coords, request } = useGeolocation()
+const { request } = useGeolocation()
 const { resolveError } = useApiError()
 const globalLoading = useLoading()
 
@@ -41,16 +42,19 @@ const tempoMedioMinutos = computed(() => {
   return Math.round(total / servicos.value.length)
 })
 
+const servicosDestaque = computed(() => servicos.value.slice(0, 3))
+
+function precoServico(servico: ServicoPublico) {
+  if (servico.precoMinimo === servico.precoMaximo) return formatPrecoFigma(servico.precoMinimo)
+  return `A partir de ${formatPrecoFigma(servico.precoMinimo)}`
+}
+
 onMounted(async () => {
   error.value = null
   globalLoading.show({ message: 'Carregando loja...' })
   try {
-    await request()
     const [detalhe, listaServicos, listaProfissionais, listaAvaliacoes] = await Promise.all([
-      publicoService.obterEstabelecimento(publicGuid.value, {
-        latitude: coords.value?.latitude,
-        longitude: coords.value?.longitude,
-      }),
+      publicoService.obterEstabelecimento(publicGuid.value),
       publicoService.listarServicosLoja(publicGuid.value).catch(() => []),
       publicoService.listarProfissionaisLoja(publicGuid.value).catch(() => []),
       avaliacaoService.listarEstabelecimento(publicGuid.value).catch(() => null),
@@ -62,9 +66,21 @@ onMounted(async () => {
   } catch (err) {
     error.value = resolveError(err, 'Não foi possível carregar a loja.')
   } finally {
-    // Só some depois dos dados (ou erro) estarem prontos para a tela.
     globalLoading.hide()
   }
+
+  // Localização enriquece a distância, mas nunca deve bloquear a vitrine.
+  void request({ waitMs: 6_000, minSamples: 1 }).then(async (position) => {
+    if (!position || !loja.value) return
+    try {
+      loja.value = await publicoService.obterEstabelecimento(publicGuid.value, {
+        latitude: position.latitude,
+        longitude: position.longitude,
+      })
+    } catch {
+      // Mantém os dados já exibidos caso a atualização de distância falhe.
+    }
+  })
 })
 
 onUnmounted(() => {
@@ -84,7 +100,18 @@ onUnmounted(() => {
             :tempo-medio-minutos="tempoMedioMinutos"
           />
 
-          <div class="loja-detalhe-atalhos">
+          <section class="loja-detalhe-escolha" aria-labelledby="loja-escolha-title">
+            <header class="loja-detalhe-escolha__head">
+              <div>
+                <p class="loja-detalhe-escolha__eyebrow">Explore antes de agendar</p>
+                <h2 id="loja-escolha-title" class="loja-detalhe-escolha__title">
+                  O que você deseja conhecer?
+                </h2>
+              </div>
+              <p class="loja-detalhe-escolha__hint">Consulte opções, valores e especialistas.</p>
+            </header>
+
+            <div class="loja-detalhe-atalhos">
             <button
               type="button"
               class="loja-detalhe-atalho"
@@ -114,7 +141,45 @@ onUnmounted(() => {
               </span>
               <ChevronRight class="loja-detalhe-atalho__chevron" aria-hidden="true" />
             </button>
-          </div>
+            </div>
+          </section>
+
+          <section v-if="servicosDestaque.length" class="loja-detalhe-servicos-destaque">
+            <header class="loja-detalhe-section-head">
+              <div>
+                <p class="loja-detalhe-escolha__eyebrow">Valores transparentes</p>
+                <h2 class="loja-detalhe-escolha__title">Serviços mais procurados</h2>
+              </div>
+              <button type="button" class="loja-detalhe-section-link" @click="modalServicos = true">
+                Ver todos
+                <ArrowRight class="size-3.5" aria-hidden="true" />
+              </button>
+            </header>
+
+            <div class="loja-detalhe-servicos-destaque__list">
+              <article
+                v-for="servico in servicosDestaque"
+                :key="servico.id"
+                class="loja-detalhe-servico-preview"
+              >
+                <span class="loja-detalhe-servico-preview__icon">
+                  <Scissors class="size-4" aria-hidden="true" />
+                </span>
+                <div class="loja-detalhe-servico-preview__body">
+                  <h3>{{ servico.nome }}</h3>
+                  <p v-if="servico.descricao">{{ servico.descricao }}</p>
+                  <span class="loja-detalhe-servico-preview__duration">
+                    <Clock3 class="size-3.5" aria-hidden="true" />
+                    {{ servico.duracaoMinutosEstimada }} min
+                  </span>
+                </div>
+                <div class="loja-detalhe-servico-preview__action">
+                  <strong>{{ precoServico(servico) }}</strong>
+                  <RouterLink :to="lojaAgendarPath(loja.publicGuid)">Agendar</RouterLink>
+                </div>
+              </article>
+            </div>
+          </section>
 
           <div class="loja-detalhe-layout__hours-mobile">
             <LojaHorariosCard
@@ -148,7 +213,7 @@ onUnmounted(() => {
       <div class="loja-detalhe-sticky-cta">
         <RouterLink :to="lojaAgendarPath(loja.publicGuid)" class="loja-detalhe-sticky-cta__btn">
           <CalendarDays class="size-4" aria-hidden="true" />
-          Continuar agendamento
+          Agendar um horário
         </RouterLink>
       </div>
 

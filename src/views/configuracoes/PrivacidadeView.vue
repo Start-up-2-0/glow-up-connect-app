@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Cookie, Download, Mail, ShieldAlert, ExternalLink, CheckCircle2 } from 'lucide-vue-next'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
@@ -30,6 +31,7 @@ const dialogoExclusaoAberto = ref(false)
 const senhaExclusao = ref('')
 const exclusaoLoading = ref(false)
 const exclusaoErro = ref('')
+const comunicacoesAtivas = ref(true)
 
 const isOwner = () => negocioStore.role === 'Owner'
 
@@ -89,6 +91,7 @@ async function confirmarExclusao() {
 async function revogarConsentimento() {
   try {
     await privacidadeService.revogarConsentimento()
+    comunicacoesAtivas.value = false
     notifications.push('success', 'Consentimento revogado.')
   } catch (err) {
     notifications.push('error', resolveError(err))
@@ -102,98 +105,116 @@ function revogarCookiesTerceiros() {
 </script>
 
 <template>
-  <div class="space-y-4 lg:space-y-6" data-tour="preferences-page">
-    <div class="flex flex-wrap items-start justify-between gap-3">
+  <div class="privacy-page" data-tour="preferences-page">
+    <header class="privacy-page__header">
       <div class="min-w-0">
-        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Privacidade</h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Exercite seus direitos previstos na LGPD e gerencie cookies.
+        <h1 class="privacy-page__title">Privacidade e preferências</h1>
+        <p class="privacy-page__subtitle">
+          Controle como seus dados são usados e exerça seus direitos previstos na LGPD.
         </p>
       </div>
       <div class="flex shrink-0 items-center gap-2">
         <GlowGuideLauncher class="max-sm:hidden" @click="startPageTutorial" />
-        <GlowGuideLauncher class="sm:hidden" compact @click="startPageTutorial" />
+        <GlowGuideLauncher class="sm:hidden" label="Ver tutorial" @click="startPageTutorial" />
       </div>
-    </div>
+    </header>
 
-    <BaseCard class="space-y-4">
-      <div>
-        <h2 class="font-medium text-gray-900 dark:text-white">Cookies e terceiros</h2>
-        <p class="text-sm text-gray-500">
-          Status:
-          <strong>{{ hasThirdPartyConsent ? 'serviços de terceiros autorizados' : 'apenas cookies essenciais' }}</strong>
-        </p>
-        <p v-if="hasTermsAccepted" class="mt-1 text-xs text-gray-400">
-          Termos de uso aceitos no cadastro.
-        </p>
-        <div class="mt-3 flex flex-wrap gap-2">
-          <button
-            type="button"
-            class="rounded-lg bg-primary-600 px-4 py-2 text-sm text-white"
-            @click="openPreferences"
-          >
-            Gerenciar cookies
-          </button>
-          <button
-            v-if="hasThirdPartyConsent"
-            type="button"
-            class="rounded-lg border border-gray-300 px-4 py-2 text-sm dark:border-gray-600"
-            @click="revogarCookiesTerceiros"
-          >
-            Revogar cookies de terceiros
-          </button>
+    <div class="privacy-page__grid">
+      <BaseCard class="privacy-card" :padding="false">
+        <div class="privacy-card__body">
+          <span class="privacy-card__icon privacy-card__icon--accent"><Cookie /></span>
+          <div class="privacy-card__content">
+            <div class="privacy-card__heading">
+              <div>
+                <h2>Cookies e serviços externos</h2>
+                <p>Defina quais integrações podem processar dados durante o uso da plataforma.</p>
+              </div>
+              <span class="privacy-status" :class="{ 'privacy-status--active': hasThirdPartyConsent }">
+                <CheckCircle2 />
+                {{ hasThirdPartyConsent ? 'Terceiros autorizados' : 'Somente essenciais' }}
+              </span>
+            </div>
+            <p v-if="hasTermsAccepted" class="privacy-card__note">Termos de uso aceitos no cadastro.</p>
+            <div class="privacy-card__actions">
+              <BaseButton size="sm" @click="openPreferences">Gerenciar cookies</BaseButton>
+              <BaseButton v-if="hasThirdPartyConsent" variant="secondary" size="sm" @click="revogarCookiesTerceiros">
+                Revogar terceiros
+              </BaseButton>
+            </div>
+            <div class="privacy-card__links">
+              <a :href="legalUrl('termos-de-uso')" target="_blank" rel="noopener">Termos de uso <ExternalLink /></a>
+              <a :href="legalUrl('politica-de-cookies')" target="_blank" rel="noopener">Política de cookies <ExternalLink /></a>
+            </div>
+          </div>
         </div>
-        <p class="mt-3 text-xs text-gray-400">
-          <a :href="legalUrl('termos-de-uso')" class="text-primary-600 hover:underline" target="_blank" rel="noopener">
-            Termos de uso
-          </a>
-          ·
-          <a :href="legalUrl('politica-de-cookies')" class="text-primary-600 hover:underline" target="_blank" rel="noopener">
-            Política de cookies
-          </a>
-        </p>
-      </div>
+      </BaseCard>
 
-      <div>
-        <h2 class="font-medium text-gray-900 dark:text-white">Portabilidade</h2>
-        <p class="text-sm text-gray-500">Baixe uma cópia dos seus dados cadastrais.</p>
-        <button
-          type="button"
-          class="mt-2 rounded-lg bg-primary-600 px-4 py-2 text-sm text-white"
-          :disabled="exportando"
-          @click="exportarDados"
-        >
-          {{ exportando ? 'Exportando…' : 'Exportar meus dados' }}
-        </button>
-      </div>
+      <BaseCard class="privacy-card" :padding="false">
+        <div class="privacy-card__body">
+          <span class="privacy-card__icon privacy-card__icon--info"><Mail /></span>
+          <div class="privacy-card__content">
+            <div class="privacy-card__heading">
+              <div>
+                <h2>Comunicações</h2>
+                <p>Controle mensagens promocionais e outras comunicações não essenciais.</p>
+              </div>
+              <span class="privacy-status" :class="{ 'privacy-status--active': comunicacoesAtivas }">
+                {{ comunicacoesAtivas ? 'Ativas' : 'Revogadas' }}
+              </span>
+            </div>
+            <div class="privacy-card__actions">
+              <BaseButton variant="secondary" size="sm" :disabled="!comunicacoesAtivas" @click="revogarConsentimento">
+                {{ comunicacoesAtivas ? 'Revogar consentimento' : 'Consentimento revogado' }}
+              </BaseButton>
+            </div>
+          </div>
+        </div>
+      </BaseCard>
 
-      <div>
-        <h2 class="font-medium text-gray-900 dark:text-white">Exclusão</h2>
-        <p class="text-sm text-gray-500">
-          A conta entra em um prazo de 30 dias. Nesse período você pode reativar pelo login.
-          Depois disso, os dados pessoais são anonimizados, sujeito a retenção legal.
-        </p>
-        <button
-          type="button"
-          class="mt-2 rounded-lg border border-red-300 px-4 py-2 text-sm text-red-700 dark:border-red-800 dark:text-red-400"
-          @click="abrirDialogoExclusao"
-        >
-          Solicitar exclusão
-        </button>
-      </div>
+      <BaseCard class="privacy-card" :padding="false">
+        <div class="privacy-card__body">
+          <span class="privacy-card__icon privacy-card__icon--success"><Download /></span>
+          <div class="privacy-card__content">
+            <div class="privacy-card__heading">
+              <div>
+                <h2>Seus dados e portabilidade</h2>
+                <p>Baixe uma cópia dos dados cadastrais associados à sua conta.</p>
+              </div>
+              <span class="privacy-status">Arquivo JSON</span>
+            </div>
+            <p class="privacy-card__note">O arquivo é gerado no momento e baixado diretamente neste dispositivo.</p>
+            <div class="privacy-card__actions">
+              <BaseButton size="sm" :loading="exportando" @click="exportarDados">
+                <Download class="privacy-button-icon" />
+                {{ exportando ? 'Preparando arquivo…' : 'Exportar meus dados' }}
+              </BaseButton>
+            </div>
+          </div>
+        </div>
+      </BaseCard>
 
-      <div>
-        <h2 class="font-medium text-gray-900 dark:text-white">Comunicações opcionais</h2>
-        <p class="text-sm text-gray-500">Revogue consentimento para mensagens não essenciais.</p>
-        <button
-          type="button"
-          class="mt-2 rounded-lg border border-gray-300 px-4 py-2 text-sm dark:border-gray-600"
-          @click="revogarConsentimento"
-        >
-          Revogar consentimento
-        </button>
-      </div>
-    </BaseCard>
+      <BaseCard class="privacy-card privacy-card--danger" :padding="false">
+        <div class="privacy-card__body">
+          <span class="privacy-card__icon privacy-card__icon--danger"><ShieldAlert /></span>
+          <div class="privacy-card__content">
+            <div class="privacy-card__heading">
+              <div>
+                <h2>Zona de risco</h2>
+                <p>Solicite a exclusão permanente da sua conta e dos dados pessoais vinculados.</p>
+              </div>
+              <span class="privacy-status privacy-status--danger">Ação irreversível</span>
+            </div>
+            <p class="privacy-card__note">
+              Você terá 30 dias para reativar a conta pelo login. Depois desse prazo, os dados são
+              anonimizados, respeitando obrigações legais de retenção.
+            </p>
+            <div class="privacy-card__actions">
+              <BaseButton variant="danger" size="sm" @click="abrirDialogoExclusao">Solicitar exclusão</BaseButton>
+            </div>
+          </div>
+        </div>
+      </BaseCard>
+    </div>
 
     <Teleport to="body">
       <div
@@ -239,3 +260,44 @@ function revogarCookiesTerceiros() {
     </Teleport>
   </div>
 </template>
+
+<style scoped>
+.privacy-page { display: flex; flex-direction: column; gap: 24px; padding-bottom: 28px; }
+.privacy-page__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--glow-border-soft); padding-bottom: 20px; }
+.privacy-page__title { font-family: Satoshi, sans-serif; font-size: 24px; font-weight: 700; color: var(--glow-text); }
+.privacy-page__subtitle { margin-top: 4px; max-width: 680px; font-family: Urbanist, sans-serif; font-size: 14px; color: var(--glow-text-subtle); }
+.privacy-page__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.privacy-card { min-width: 0; overflow: hidden; }
+.privacy-card--danger { border-color: color-mix(in srgb, var(--glow-error) 34%, var(--glow-border-soft)); background: color-mix(in srgb, var(--glow-error-bg) 35%, var(--glow-bg-elevated)); }
+.privacy-card__body { display: flex; align-items: flex-start; gap: 14px; padding: 20px; }
+.privacy-card__icon { display: inline-flex; width: 42px; height: 42px; flex: 0 0 auto; align-items: center; justify-content: center; border-radius: 12px; }
+.privacy-card__icon svg { width: 20px; height: 20px; }
+.privacy-card__icon--accent { background: var(--glow-gold-selected); color: var(--glow-gold-dark); }
+.privacy-card__icon--info { background: var(--glow-info-bg); color: var(--glow-info); }
+.privacy-card__icon--success { background: var(--glow-success-bg); color: var(--glow-success-dark); }
+.privacy-card__icon--danger { background: var(--glow-error-bg); color: var(--glow-error); }
+.privacy-card__content { min-width: 0; flex: 1; }
+.privacy-card__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.privacy-card__heading h2 { font-family: Satoshi, sans-serif; font-size: 16px; font-weight: 700; color: var(--glow-text); }
+.privacy-card__heading p { margin-top: 4px; font-family: Urbanist, sans-serif; font-size: 13px; line-height: 1.5; color: var(--glow-text-subtle); }
+.privacy-status { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 5px; border-radius: 999px; background: var(--glow-neutral-bg); padding: 5px 9px; font-family: Urbanist, sans-serif; font-size: 11px; font-weight: 600; color: var(--glow-text-subtle); }
+.privacy-status svg { width: 12px; height: 12px; }
+.privacy-status--active { background: var(--glow-success-bg); color: var(--glow-success-dark); }
+.privacy-status--danger { background: var(--glow-error-bg); color: var(--glow-error); }
+.privacy-card__note { margin-top: 12px; font-family: Urbanist, sans-serif; font-size: 12px; line-height: 1.5; color: var(--glow-text-subtle); }
+.privacy-card__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.privacy-card__links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--glow-border-soft); }
+.privacy-card__links a { display: inline-flex; align-items: center; gap: 4px; font-family: Urbanist, sans-serif; font-size: 12px; font-weight: 600; color: var(--glow-gold-dark); }
+.privacy-card__links a:hover { text-decoration: underline; }
+.privacy-card__links svg, .privacy-button-icon { width: 14px; height: 14px; margin-right: 6px; }
+@media (max-width: 900px) { .privacy-page__grid { grid-template-columns: 1fr; } }
+@media (max-width: 639px) {
+  .privacy-page { gap: 18px; }
+  .privacy-page__header { flex-direction: column; padding-bottom: 18px; }
+  .privacy-page__title { font-size: 22px; }
+  .privacy-card__body { padding: 16px; }
+  .privacy-card__heading { flex-direction: column; gap: 10px; }
+  .privacy-status { align-self: flex-start; }
+  .privacy-card__actions :deep(button) { width: 100%; }
+}
+</style>

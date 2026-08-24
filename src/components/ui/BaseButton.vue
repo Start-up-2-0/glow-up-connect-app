@@ -29,7 +29,7 @@ const sizeClasses: Record<Size, string> = {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    'border-transparent bg-glow-gold font-medium text-white shadow-sm hover:brightness-95 focus:ring-2 focus:ring-glow-gold/40',
+    'border-transparent bg-glow-gold-cta font-semibold text-white shadow-[0_6px_16px_rgba(82,46,95,0.18)] hover:brightness-90 focus:ring-2 focus:ring-glow-gold-cta/40',
   secondary:
     'border border-glow-border-soft bg-glow-surface font-medium text-glow-text hover:bg-glow-hover-surface focus:ring-2 focus:ring-glow-border-soft',
   danger:
