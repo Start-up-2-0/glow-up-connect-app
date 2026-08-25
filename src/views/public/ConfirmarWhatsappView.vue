@@ -13,7 +13,10 @@ const route = useRoute()
 const token = computed(() => String(route.params.token ?? '').trim())
 
 const numeroPlataforma = computed(() =>
-  resolveNumeroPlataforma(undefined, import.meta.env.VITE_WHATSAPP_NUMBER),
+  resolveNumeroPlataforma(
+    typeof route.query.numero === 'string' ? route.query.numero : undefined,
+    import.meta.env.VITE_WHATSAPP_NUMBER,
+  ),
 )
 
 const linkConfirmacao = computed(() => buildLinkConfirmacao(token.value))
