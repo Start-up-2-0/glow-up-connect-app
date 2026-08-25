@@ -20,6 +20,23 @@ function isoFromNow(hours: number): string {
   return d.toISOString()
 }
 
+function gerarTokenConfirmacaoMock(id: number, type: 'account' | 'store' | 'autonomous_professional', phone: string) {
+  const json = JSON.stringify({ id, type, phone: phone.replace(/\D/g, '') })
+  return btoa(json).replace(/=+$/g, '').replace(/\+/g, '-').replace(/\//g, '_')
+}
+
+function instrucoesConfirmacaoMock(id: number, type: 'account' | 'store' | 'autonomous_professional', phone: string) {
+  const token = gerarTokenConfirmacaoMock(id, type, phone)
+  return {
+    numeroPlataforma: '5511999999999',
+    tokenConfirmacao: token,
+    linkConfirmacao: `${window.location.origin}/c/${token}?numero=5511999999999`,
+    linkWhatsApp: `https://wa.me/5511999999999?text=${encodeURIComponent(token)}`,
+    whatsAppEnviado: true,
+    emailEnviado: true,
+  }
+}
+
 /** Identidade atual do mock (e-mail de login) — persiste na sessão. */
 const SESSION_EMAIL_KEY = 'guc_mock_email'
 
@@ -186,16 +203,7 @@ export function registerCoreRoutes(router: MockRouter) {
       sessionStorage.setItem(`guc_mock_user_patch_${email}`, JSON.stringify(latest))
     }, 2000)
 
-    const telefone = (user.telefone ?? '5511999999999').replace(/\D/g, '')
-    const token = btoa(telefone)
-    return ok({
-      numeroPlataforma: '5511999999999',
-      tokenConfirmacao: token,
-      linkConfirmacao: `http://localhost:3000/c/${token}`,
-      linkWhatsApp: `https://wa.me/5511999999999?text=${encodeURIComponent(token)}`,
-      whatsAppEnviado: true,
-      emailEnviado: true,
-    })
+    return ok(instrucoesConfirmacaoMock(user.id, 'account', user.telefone ?? '5511999999999'))
   })
 
   /* ---------- Planos ---------- */
@@ -436,8 +444,9 @@ export function registerCoreRoutes(router: MockRouter) {
   router.on('post', '/privacidade/revogar-consentimento', () => voidOk('Consentimento revogado.'))
 
   /* ---------- WhatsApp estabelecimento ---------- */
-  router.on('post', '/estabelecimentos/:estabelecimentoId/whatsapp/solicitar-confirmacao', () => {
-    return ok({ solicitado: true, numero: '(79) 3200-0000' })
+  router.on('post', '/estabelecimentos/:estabelecimentoId/whatsapp/solicitar-confirmacao', (req) => {
+    const id = Number(req.params.estabelecimentoId)
+    return ok(instrucoesConfirmacaoMock(id, 'store', MOCK_PERFIL_ESTABELECIMENTO.telefone))
   })
   router.on('post', '/estabelecimentos/:estabelecimentoId/whatsapp/opt-in', () => voidOk('Preferência atualizada.'))
 }
