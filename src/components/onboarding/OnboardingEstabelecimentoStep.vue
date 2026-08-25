@@ -13,6 +13,7 @@ import {
   sugerirCategoriaId,
 } from '@/utils/categoriasEstabelecimento'
 import OnboardingContratarFormActions from '@/components/onboarding/OnboardingContratarFormActions.vue'
+import OnboardingComodidadesField from '@/components/onboarding/OnboardingComodidadesField.vue'
 import {
   AGENDAR_BTN_CONTINUE_CLASS,
   GLOW_AUTH_FORM_GRID_CLASS,
@@ -106,6 +107,7 @@ const enderecoError = ref<string | null>(null)
 const categorias = ref<EstabelecimentoCategoria[]>([])
 const categoriaId = ref<string>(props.initial.categoriaId ? String(props.initial.categoriaId) : '')
 const categoriaError = ref<string | null>(null)
+const comodidadeIds = ref<number[]>([...(props.initial.comodidadeIds ?? [])])
 
 const tipoCategoria = computed(() =>
   props.modoAutonomo ? 'ProfissionalAutonomo' as const : 'Estabelecimento' as const,
@@ -184,6 +186,7 @@ function handleSubmit() {
     complemento: complemento.value,
     logoDataUrl: logoDataUrl.value,
     categoriaId: Number(categoriaId.value),
+    comodidadeIds: comodidadeIds.value,
   })
 }
 </script>
@@ -323,6 +326,8 @@ function handleSubmit() {
           :id-prefix="`${fieldIdPrefix}-end`"
         />
 
+        <OnboardingComodidadesField v-model="comodidadeIds" />
+
         <OnboardingContratarFormActions
           :loading="loading"
           :submit-label="submitLabel"
@@ -416,6 +421,8 @@ function handleSubmit() {
             :id-prefix="`${fieldIdPrefix}-end`"
             grid-class="contents"
           />
+
+          <OnboardingComodidadesField v-model="comodidadeIds" />
         </div>
 
         <button

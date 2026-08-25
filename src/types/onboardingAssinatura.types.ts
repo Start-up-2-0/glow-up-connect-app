@@ -31,6 +31,7 @@ export interface OnboardingEstabelecimentoDraft {
   logoDataUrl: string | null
   /** Categoria do estabelecimento (id do catálogo). Obrigatória antes de avançar. */
   categoriaId?: number
+  comodidadeIds: number[]
 }
 
 export interface OnboardingAssinaturaDraft {

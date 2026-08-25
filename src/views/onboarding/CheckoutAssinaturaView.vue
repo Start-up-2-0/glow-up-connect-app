@@ -8,6 +8,7 @@ import BaseInput from '@/components/ui/BaseInput.vue'
 import MercadoPagoCardForm from '@/components/assinatura/MercadoPagoCardForm.vue'
 import PromocaoLancamentoBanner from '@/components/assinatura/PromocaoLancamentoBanner.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
+import OnboardingComodidadesField from '@/components/onboarding/OnboardingComodidadesField.vue'
 import { readFileAsDataUrl } from '@/utils/avatarFile'
 import { usePlanosStore } from '@/stores/planos.store'
 import { useAssinaturaStore } from '@/stores/assinatura.store'
@@ -61,6 +62,7 @@ const cidade = ref('')
 const estado = ref('')
 const complemento = ref('')
 const logoFile = ref<File | null>(null)
+const comodidadeIds = ref<number[]>([])
 
 const isAutonomo = computed(
   () =>
@@ -170,6 +172,7 @@ async function finalizarCheckout() {
           telefone: telefoneToApi(telefone.value),
           email: email.value,
           endereco,
+          comodidadeIds: comodidadeIds.value,
         },
         gateway: 'MercadoPago' as const,
         pagamento,
@@ -183,6 +186,7 @@ async function finalizarCheckout() {
           telefone: telefoneToApi(telefone.value),
           email: email.value,
           endereco,
+          comodidadeIds: comodidadeIds.value,
         },
         gateway: 'MercadoPago' as const,
         pagamento,
@@ -265,6 +269,7 @@ function onLogoError(message: string) {
             <BaseInput v-model="estado" label="Estado" maxlength="2" />
           </div>
           <BaseInput v-model="complemento" label="Complemento" hint="Opcional" />
+          <OnboardingComodidadesField v-model="comodidadeIds" />
         </div>
       </BaseCard>
 

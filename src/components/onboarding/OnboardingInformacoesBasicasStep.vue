@@ -4,6 +4,7 @@ import TelefoneInput from '@/components/ui/TelefoneInput.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
 import AuthAvatarUpload from '@/components/auth/AuthAvatarUpload.vue'
 import OnboardingContratarFormActions from '@/components/onboarding/OnboardingContratarFormActions.vue'
+import OnboardingComodidadesField from '@/components/onboarding/OnboardingComodidadesField.vue'
 import { publicoService } from '@/services/publicoService'
 import type { EstabelecimentoCategoria } from '@/types/estabelecimento.types'
 import {
@@ -77,6 +78,7 @@ const fotoAlteradaManual = ref(false)
 const categorias = ref<EstabelecimentoCategoria[]>([])
 const categoriaId = ref(props.initial.categoriaId ? String(props.initial.categoriaId) : '')
 const categoriaError = ref<string | null>(null)
+const comodidadeIds = ref<number[]>([...(props.initial.comodidadeIds ?? [])])
 
 const tipoCategoria = computed(() =>
   props.modoAutonomo ? 'ProfissionalAutonomo' as const : 'Estabelecimento' as const,
@@ -179,6 +181,7 @@ function handleSubmit() {
       : categoriaId.value
         ? Number(categoriaId.value)
         : undefined,
+    comodidadeIds: comodidadeIds.value,
   })
 }
 </script>
@@ -367,6 +370,8 @@ function handleSubmit() {
           required
           placeholder="(00) 0 0000-0000"
         />
+
+        <OnboardingComodidadesField v-model="comodidadeIds" />
       </div>
 
       <OnboardingContratarFormActions
