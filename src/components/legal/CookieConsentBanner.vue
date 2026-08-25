@@ -7,44 +7,43 @@ const { acceptAll, rejectNonEssential, openPreferences } = useConsent()
 
 <template>
   <div
-    class="fixed inset-x-0 bottom-0 z-50 border-t border-glow-border-soft bg-glow-surface p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lg sm:p-5"
+    class="cookie-consent"
     role="dialog"
     aria-labelledby="cookie-banner-title"
     aria-describedby="cookie-banner-desc"
   >
-    <div class="mx-auto flex max-w-6xl flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex flex-col gap-3">
       <div class="min-w-0 flex-1">
         <p id="cookie-banner-title" class="font-satoshi text-sm font-semibold text-glow-text">
           Cookies e serviços de terceiros
         </p>
-        <p id="cookie-banner-desc" class="mt-1 text-sm text-glow-text-subtle">
-          Usamos cookies essenciais para login e preferências. Com sua autorização, também
-          compartilhamos dados com parceiros como Mercado Pago e APIs de CEP para pagamentos e
-          cadastro de endereço.
+        <p id="cookie-banner-desc" class="mt-1 text-xs leading-relaxed text-glow-text-subtle sm:text-sm">
+          Usamos cookies essenciais para login e preferências. Com sua autorização, parceiros de
+          pagamento e endereço também podem processar dados.
           <a :href="legalUrl('politica-de-cookies')" class="font-medium text-glow-gold-dark hover:underline" target="_blank" rel="noopener">
             Saiba mais
           </a>
         </p>
       </div>
 
-      <div class="flex flex-wrap gap-2 lg:shrink-0">
+      <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
         <button
           type="button"
-          class="rounded-lg border border-glow-border-soft px-4 py-2 text-sm font-medium text-glow-text-subtle hover:bg-glow-canvas"
+          class="rounded-lg border border-glow-border-soft px-3 py-2 text-xs font-medium text-glow-text-subtle hover:bg-glow-canvas sm:text-sm"
           @click="rejectNonEssential"
         >
           Apenas essenciais
         </button>
         <button
           type="button"
-          class="rounded-lg border border-glow-border-soft px-4 py-2 text-sm font-medium text-glow-text hover:bg-glow-canvas"
+          class="rounded-lg border border-glow-border-soft px-3 py-2 text-xs font-medium text-glow-text hover:bg-glow-canvas sm:text-sm"
           @click="openPreferences"
         >
           Personalizar
         </button>
         <button
           type="button"
-          class="rounded-lg bg-glow-gold px-4 py-2 text-sm font-medium text-white hover:brightness-95"
+          class="col-span-2 rounded-lg bg-glow-gold-cta px-3 py-2 text-xs font-semibold text-white hover:brightness-95 sm:col-span-1 sm:text-sm"
           @click="acceptAll"
         >
           Aceitar todos
@@ -53,3 +52,23 @@ const { acceptAll, rejectNonEssential, openPreferences } = useConsent()
     </div>
   </div>
 </template>
+
+<style scoped>
+.cookie-consent {
+  position: fixed;
+  z-index: 2050;
+  right: 16px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 16px;
+  max-width: 560px;
+  border: 1px solid var(--glow-border-soft);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--glow-surface) 96%, transparent);
+  padding: 16px;
+  box-shadow: 0 18px 48px rgba(20, 10, 35, 0.22);
+  backdrop-filter: blur(14px);
+}
+@media (min-width: 640px) {
+  .cookie-consent { left: auto; width: min(560px, calc(100vw - 32px)); }
+}
+</style>

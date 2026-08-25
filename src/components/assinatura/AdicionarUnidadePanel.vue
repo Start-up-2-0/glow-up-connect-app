@@ -27,6 +27,7 @@ const draftInicial: OnboardingEstabelecimentoDraft = {
   estado: '',
   complemento: '',
   logoDataUrl: null,
+  comodidadeIds: [],
 }
 
 function handleSubmit(draft: OnboardingEstabelecimentoDraft) {
@@ -37,7 +38,8 @@ function handleSubmit(draft: OnboardingEstabelecimentoDraft) {
     logo: draft.logoDataUrl,
     telefone: draft.telefone,
     email: draft.email,
-    endereco: draftEnderecoToApi(draft),
+      endereco: draftEnderecoToApi(draft),
+      comodidadeIds: draft.comodidadeIds,
   })
 }
 </script>

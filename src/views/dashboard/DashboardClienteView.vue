@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { CalendarCheck, Repeat2, Store, Wallet } from 'lucide-vue-next'
+import { CalendarCheck, CalendarDays, Heart, Repeat2, Store, Wallet } from 'lucide-vue-next'
 import { useDashboardClienteData } from '@/composables/useDashboardClienteData'
 import { useUserStore } from '@/stores/user.store'
-import { ROUTE_PATHS, agendamentoDetalhePath } from '@/constants/routes'
+import { ROUTE_PATHS, agendamentoDetalhePath, lojaAgendarPath } from '@/constants/routes'
+import { favoritoService } from '@/services/favoritoService'
+import type { FavoritoCliente } from '@/types/favorito.types'
 import { formatCurrency } from '@/utils/formatters'
 import { mensagemBoasVindas } from '@/utils/dashboardClienteUtils'
 import ClienteDashHeader from '@/components/dashboard/cliente/ClienteDashHeader.vue'
@@ -33,6 +35,8 @@ const {
 const primeiroNome = computed(() => profile.value?.nome?.split(' ')[0] ?? 'Cliente')
 const welcome = computed(() => mensagemBoasVindas(primeiroNome.value, proximoAgendamento.value))
 const headerChip = computed(() => (proximoAgendamento.value ? '1 próximo' : null))
+const favoritos = ref<FavoritoCliente[]>([])
+const favoritosLoading = ref(false)
 
 const stats = computed<ClienteStat[]>(() => {
   const trend = variacaoGastoMes.value
@@ -87,7 +91,21 @@ function verAgendamento(id: number) {
   router.push(agendamentoDetalhePath(id))
 }
 
-onMounted(() => void load())
+async function loadFavoritos() {
+  favoritosLoading.value = true
+  try {
+    favoritos.value = await favoritoService.listar()
+  } catch {
+    favoritos.value = []
+  } finally {
+    favoritosLoading.value = false
+  }
+}
+
+onMounted(() => {
+  void load()
+  void loadFavoritos()
+})
 </script>
 
 <template>
@@ -104,6 +122,42 @@ onMounted(() => void load())
       description="Resumo do seu relacionamento neste mês e no acumulado"
     >
       <StatsGrid :items="stats" :loading="loading" />
+    </ClienteDashSection>
+
+    <ClienteDashSection
+      title="Favoritos"
+      description="Agende novamente com suas lojas e profissionais preferidos"
+    >
+      <div v-if="favoritosLoading" class="dashboard-favorite-grid">
+        <div v-for="n in 3" :key="n" class="dashboard-favorite-card dashboard-favorite-card--static animate-pulse" />
+      </div>
+      <div v-else-if="favoritos.length" class="dashboard-favorite-grid">
+        <article v-for="favorito in favoritos" :key="favorito.id" class="dashboard-favorite-card dashboard-favorite-card--static">
+          <img
+            v-if="favorito.profissionalLogo || favorito.estabelecimentoLogo"
+            :src="favorito.profissionalLogo || favorito.estabelecimentoLogo"
+            :alt="favorito.profissionalNome || favorito.estabelecimentoNome"
+            class="dashboard-favorite-card__avatar"
+          />
+          <div class="min-w-0 flex-1">
+            <p class="dashboard-favorite-card__name">{{ favorito.profissionalNome || favorito.estabelecimentoNome }}</p>
+            <p class="dashboard-favorite-card__meta">
+              {{ favorito.profissionalNome ? favorito.estabelecimentoNome : favorito.tipo === 'ProfissionalAutonomo' ? 'Profissional autônomo' : 'Loja' }}
+            </p>
+          </div>
+          <button
+            type="button"
+            class="dashboard-favoritos__cta"
+            @click="router.push(lojaAgendarPath(favorito.estabelecimentoPublicGuid, favorito.profissionalPublicGuid || undefined))"
+          >
+            <CalendarDays class="size-4" /> Agendar
+          </button>
+        </article>
+      </div>
+      <button v-else type="button" class="dashboard-favorite-card dashboard-favorite-card--static w-full" @click="router.push(ROUTE_PATHS.EXPLORAR)">
+        <Heart class="size-5 text-glow-gold-cta" />
+        <span>Explore e marque lojas ou profissionais como favoritos.</span>
+      </button>
     </ClienteDashSection>
 
     <div class="grid gap-5 lg:grid-cols-2 lg:items-stretch">

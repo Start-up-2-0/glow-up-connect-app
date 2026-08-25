@@ -21,7 +21,7 @@ function barWidth(quantidade: number): string {
     <div class="avaliacao-resumo-card__score">
       <span class="avaliacao-resumo-card__media">{{ formatNotaMediaDisplay(resumo.notaMedia) }}</span>
       <span class="avaliacao-resumo-card__meta">
-        {{ resumo.totalAvaliacoes }} avaliação{{ resumo.totalAvaliacoes === 1 ? '' : 'ões' }}
+        {{ resumo.totalAvaliacoes }} {{ resumo.totalAvaliacoes === 1 ? 'avaliação' : 'avaliações' }}
         · últimos {{ resumo.janelaDias }} dias
       </span>
     </div>

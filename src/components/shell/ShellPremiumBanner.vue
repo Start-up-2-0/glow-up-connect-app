@@ -85,10 +85,10 @@ function goAssinatura() {
 
 <style scoped>
 .premium-status {
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid var(--glow-border-soft);
   background: var(--glow-canvas);
-  padding: 12px;
+  padding: 10px;
 }
 .premium-status__icon {
   display: inline-flex;
@@ -101,11 +101,11 @@ function goAssinatura() {
   color: var(--glow-gold-cta);
 }
 .premium-status__btn {
-  margin-top: 10px;
+  margin-top: 7px;
   width: 100%;
   border-radius: 10px;
   background: color-mix(in srgb, var(--glow-gold-cta) 12%, transparent);
-  padding: 8px 10px;
+  padding: 6px 9px;
   font-family: Urbanist, ui-sans-serif, system-ui, sans-serif;
   font-size: 12px;
   font-weight: 600;

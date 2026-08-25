@@ -47,6 +47,7 @@ function emptyEstabelecimento(): OnboardingEstabelecimentoDraft {
     complemento: '',
     logoDataUrl: null,
     categoriaId: undefined,
+    comodidadeIds: [],
   }
 }
 
@@ -353,7 +354,8 @@ export function useLojaSetupWizard() {
           telefone: telefoneToApi(dados.telefone) || undefined,
           email: dados.email || undefined,
           categoriaId: dados.categoriaId,
-          endereco: draftEnderecoToApi(dados),
+        endereco: draftEnderecoToApi(dados),
+        comodidadeIds: dados.comodidadeIds,
         },
       })
       draft.value.estabelecimentoId = resultado.estabelecimentoId

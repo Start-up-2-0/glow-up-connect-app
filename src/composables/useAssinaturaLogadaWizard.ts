@@ -66,6 +66,7 @@ function emptyEstabelecimento(): OnboardingEstabelecimentoDraft {
     complemento: '',
     logoDataUrl: null,
     categoriaId: undefined,
+    comodidadeIds: [],
   }
 }
 
@@ -128,6 +129,7 @@ function mapEstabelecimentoExistente(
     complemento: endereco?.complemento ?? '',
     logoDataUrl: perfil?.logo ?? estabelecimento.logo,
     categoriaId: perfil?.categoriaId ?? undefined,
+    comodidadeIds: [],
   }
 }
 
@@ -725,6 +727,7 @@ export function useAssinaturaLogadaWizard(
                 telefone: telefoneToApi(negocio.telefone),
                 email: negocio.email.trim(),
                 categoriaId: negocio.categoriaId,
+                comodidadeIds: negocio.comodidadeIds,
                 endereco: draftEnderecoToApi(negocio),
               },
               gateway: 'MercadoPago',
@@ -748,6 +751,7 @@ export function useAssinaturaLogadaWizard(
                   telefone: telefoneToApi(negocio.telefone),
                   email: negocio.email.trim(),
                   categoriaId: negocio.categoriaId,
+                  comodidadeIds: negocio.comodidadeIds,
                   endereco: draftEnderecoToApi(negocio),
                 },
                 gateway: 'MercadoPago',

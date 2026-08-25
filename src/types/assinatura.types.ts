@@ -37,6 +37,7 @@ export interface EstabelecimentoOnboarding {
   email?: string
   /** Categoria do estabelecimento (id do catálogo de categorias). */
   categoriaId?: number
+  comodidadeIds: number[]
   endereco: EnderecoOnboarding
 }
 
@@ -48,6 +49,7 @@ export interface ProfissionalAutonomoOnboarding {
   email?: string
   /** Área de atuação (mesmo catálogo do marketplace). */
   categoriaId?: number
+  comodidadeIds: number[]
   endereco: EnderecoOnboarding
 }
 

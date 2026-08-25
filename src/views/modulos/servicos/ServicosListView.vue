@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { Search, SlidersHorizontal, X } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import ServicoCard from '@/components/servicos/ServicoCard.vue'
@@ -35,8 +36,12 @@ const { start: startTutorial } = useGlowGuide()
 
 const servicos = ref<Servico[]>([])
 const loading = ref(false)
+const loadError = ref<string | null>(null)
 const togglingId = ref<number | null>(null)
 const pagina = ref(1)
+const busca = ref('')
+const status = ref<'todos' | 'ativos' | 'inativos'>('todos')
+const ordenacao = ref<'nome' | 'preco-asc' | 'preco-desc'>('nome')
 
 const podeGerenciar = computed(() => possuiPermissao('ServicoGerenciar'))
 const pageTutorialId = computed(() => (podeGerenciar.value ? 'first-service' : 'services'))
@@ -58,14 +63,41 @@ const limiteTooltip = computed(() =>
     : undefined,
 )
 
+const servicosFiltrados = computed(() => {
+  const termo = busca.value.trim().toLocaleLowerCase('pt-BR')
+  const filtrados = servicos.value.filter((servico) => {
+    const correspondeBusca = !termo || `${servico.nome} ${servico.descricao ?? ''}`
+      .toLocaleLowerCase('pt-BR')
+      .includes(termo)
+    const correspondeStatus = status.value === 'todos'
+      || (status.value === 'ativos' && servico.ativo)
+      || (status.value === 'inativos' && !servico.ativo)
+    return correspondeBusca && correspondeStatus
+  })
+
+  return [...filtrados].sort((a, b) => {
+    if (ordenacao.value === 'preco-asc') return precoExibicao(a) - precoExibicao(b)
+    if (ordenacao.value === 'preco-desc') return precoExibicao(b) - precoExibicao(a)
+    return a.nome.localeCompare(b.nome, 'pt-BR')
+  })
+})
+
 const totalPaginas = computed(() =>
-  Math.max(1, Math.ceil(servicos.value.length / SERVICOS_PAGE_SIZE)),
+  Math.max(1, Math.ceil(servicosFiltrados.value.length / SERVICOS_PAGE_SIZE)),
 )
 
 const servicosPaginados = computed(() => {
   const start = (pagina.value - 1) * SERVICOS_PAGE_SIZE
-  return servicos.value.slice(start, start + SERVICOS_PAGE_SIZE)
+  return servicosFiltrados.value.slice(start, start + SERVICOS_PAGE_SIZE)
 })
+
+const filtrosAtivos = computed(() => Boolean(busca.value.trim()) || status.value !== 'todos')
+
+function limparFiltros() {
+  busca.value = ''
+  status.value = 'todos'
+  ordenacao.value = 'nome'
+}
 
 const pageTitle = computed(() => (ehVisaoProfissional.value ? 'Meus serviços' : 'Serviços'))
 
@@ -113,13 +145,15 @@ function duracaoExibicao(servico: Servico): number {
 async function load() {
   if (!estabelecimentoId.value) return
   loading.value = true
+  loadError.value = null
   try {
     servicos.value = await servicoService.listar(estabelecimentoId.value)
     if (pagina.value > totalPaginas.value) {
       pagina.value = totalPaginas.value
     }
   } catch (err) {
-    notifications.push('error', resolveError(err, 'Não foi possível carregar os serviços.'))
+    loadError.value = resolveError(err, 'Não foi possível carregar os serviços.')
+    notifications.push('error', loadError.value)
   } finally {
     loading.value = false
   }
@@ -163,6 +197,10 @@ watch(
   },
   { immediate: true },
 )
+
+watch([busca, status, ordenacao], () => {
+  pagina.value = 1
+})
 </script>
 
 <template>
@@ -170,7 +208,7 @@ watch(
     <ServicoPageHeader :title="pageTitle" :subtitle="pageSubtitle">
       <template #actions>
         <GlowGuideLauncher class="max-sm:hidden" @click="onStartTutorial" />
-        <GlowGuideLauncher class="sm:hidden" compact @click="onStartTutorial" />
+        <GlowGuideLauncher class="sm:hidden" label="Ver tutorial" @click="onStartTutorial" />
         <template v-if="podeGerenciar">
           <span
             v-if="limiteServicos !== null"
@@ -195,6 +233,52 @@ watch(
 
     <p v-if="contextError" class="font-urbanist text-sm text-red-600">{{ contextError }}</p>
 
+    <div v-if="loadError" class="servicos-feedback servicos-feedback--error" role="alert">
+      <div>
+        <strong>Não foi possível carregar os serviços.</strong>
+        <span>{{ loadError }}</span>
+      </div>
+      <button type="button" @click="load">Tentar novamente</button>
+    </div>
+
+    <div v-if="servicos.length > 0" class="servicos-toolbar" aria-label="Filtros de serviços">
+      <div class="servicos-toolbar__search">
+        <Search aria-hidden="true" />
+        <input v-model="busca" type="search" aria-label="Buscar serviços" placeholder="Buscar por nome ou descrição" />
+        <button v-if="busca" type="button" aria-label="Limpar busca" @click="busca = ''">
+          <X aria-hidden="true" />
+        </button>
+      </div>
+      <div class="servicos-toolbar__filters">
+        <SlidersHorizontal aria-hidden="true" />
+        <label>
+          <span class="sr-only">Filtrar por status</span>
+          <select v-model="status">
+            <option value="todos">Todos os status</option>
+            <option value="ativos">Ativos</option>
+            <option value="inativos">Inativos</option>
+          </select>
+        </label>
+        <label>
+          <span class="sr-only">Ordenar serviços</span>
+          <select v-model="ordenacao">
+            <option value="nome">Nome (A–Z)</option>
+            <option value="preco-asc">Menor preço</option>
+            <option value="preco-desc">Maior preço</option>
+          </select>
+        </label>
+      </div>
+      <span class="servicos-toolbar__count">
+        {{ servicosFiltrados.length }} {{ servicosFiltrados.length === 1 ? 'serviço' : 'serviços' }}
+      </span>
+    </div>
+
+    <div v-if="loading && servicos.length === 0" class="servicos-cards-grid" aria-label="Carregando serviços">
+      <div v-for="item in 6" :key="item" class="servico-card-skeleton" aria-hidden="true">
+        <span /><span /><span /><span />
+      </div>
+    </div>
+
     <ServicoEmptyState
       v-if="!contextLoading && !loading && servicos.length === 0"
       :title="emptyTitle"
@@ -205,7 +289,15 @@ watch(
       @action="irNovo"
     />
 
-    <template v-else-if="servicos.length > 0">
+    <div v-else-if="servicos.length > 0 && servicosFiltrados.length === 0" class="servicos-feedback">
+      <div>
+        <strong>Nenhum serviço encontrado</strong>
+        <span>Tente outro termo ou remova os filtros aplicados.</span>
+      </div>
+      <button v-if="filtrosAtivos" type="button" @click="limparFiltros">Limpar filtros</button>
+    </div>
+
+    <template v-else-if="servicosFiltrados.length > 0">
       <div class="servicos-cards-grid">
         <ServicoCard
           v-for="servico in servicosPaginados"

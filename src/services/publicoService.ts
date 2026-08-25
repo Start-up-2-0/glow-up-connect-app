@@ -21,6 +21,14 @@ import type {
 import type { TipoAssinatura } from '@/types/assinatura.types'
 import type { ProfissionalVitrinePublico } from '@/types/negocio/profissionalVitrine.types'
 
+export interface ComodidadePublica {
+  id: number
+  nome: string
+  slug: string
+  icone: string
+  ordem: number
+}
+
 function unwrap<T>(response: { data: ApiSuccessResponse<T> }): T {
   return response.data.data
 }
@@ -43,6 +51,11 @@ function buildDisponibilidadeQueryParams(params: ConsultarDisponibilidadeParams)
 }
 
 export const publicoService = {
+  listarComodidades() {
+    return api
+      .get<ApiSuccessResponse<ComodidadePublica[]>>('/publico/comodidades')
+      .then(unwrap)
+  },
   listarProximos(params: ListarProximosParams) {
     return api
       .get<ApiSuccessResponse<EstabelecimentosProximosResponse>>(

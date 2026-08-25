@@ -52,6 +52,7 @@ const { assinatura } = storeToRefs(assinaturaStore)
 
 const {
   loading,
+  error,
   totalGanhoMes,
   totalGanhoHoje,
   variacaoReceitaMes,
@@ -224,6 +225,14 @@ watch(
       :percentual-desconto-permanente="assinatura?.percentualDescontoPermanente"
     />
 
+    <div v-if="error" class="dash-alert dash-alert--error" role="alert">
+      <div>
+        <p class="font-urbanist text-[14px] font-semibold text-glow-text">Não foi possível atualizar o painel</p>
+        <p class="font-urbanist text-[13px] text-glow-text-subtle">{{ error }}</p>
+      </div>
+      <BaseButton variant="secondary" size="sm" @click="carregar">Tentar novamente</BaseButton>
+    </div>
+
     <div
       v-if="estabelecimentoAtivo && assinaturaStatus === 'PendentePagamento'"
       class="dash-alert"
@@ -336,5 +345,9 @@ watch(
 .dash-alert--info {
   border-color: color-mix(in srgb, var(--glow-info, #2563eb) 25%, transparent);
   background: color-mix(in srgb, var(--glow-info, #2563eb) 8%, var(--glow-surface));
+}
+.dash-alert--error {
+  border-color: color-mix(in srgb, var(--glow-danger, #dc2626) 34%, transparent);
+  background: color-mix(in srgb, var(--glow-danger, #dc2626) 7%, var(--glow-surface));
 }
 </style>

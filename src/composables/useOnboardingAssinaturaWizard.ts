@@ -59,6 +59,7 @@ function emptyEstabelecimento(): OnboardingEstabelecimentoDraft {
     complemento: '',
     logoDataUrl: null,
     categoriaId: undefined,
+    comodidadeIds: [],
   }
 }
 
@@ -517,6 +518,7 @@ export function useOnboardingAssinaturaWizard(
                 telefone: telefoneToApi(negocio.telefone),
                 email: negocio.email.trim(),
                 categoriaId: negocio.categoriaId,
+                comodidadeIds: negocio.comodidadeIds,
                 endereco,
               },
               gateway: 'MercadoPago',
@@ -532,6 +534,7 @@ export function useOnboardingAssinaturaWizard(
                 telefone: telefoneToApi(negocio.telefone),
                 email: negocio.email.trim(),
                 categoriaId: negocio.categoriaId ?? undefined,
+                comodidadeIds: negocio.comodidadeIds,
                 endereco,
               },
               gateway: 'MercadoPago',

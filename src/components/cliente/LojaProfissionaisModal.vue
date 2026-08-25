@@ -1,14 +1,22 @@
 <script setup lang="ts">
 import { onUnmounted, watch } from 'vue'
-import { X } from 'lucide-vue-next'
+import { CalendarDays, Heart, X } from 'lucide-vue-next'
+import { RouterLink } from 'vue-router'
+import { lojaAgendarPath } from '@/constants/routes'
 import type { ProfissionalPublico } from '@/types/agendamento.types'
 import { lockBodyScroll, unlockBodyScroll } from '@/utils/bodyScrollLock'
 
 const open = defineModel<boolean>({ default: false })
 
-defineProps<{
+const props = defineProps<{
   profissionais: ProfissionalPublico[]
   lojaNome?: string
+  lojaPublicGuid: string
+  favoritos?: string[]
+}>()
+
+const emit = defineEmits<{
+  'toggle-favorito': [profissional: ProfissionalPublico]
 }>()
 
 function close() {
@@ -78,7 +86,7 @@ function iniciais(nome: string) {
               <thead>
                 <tr>
                   <th>Profissional</th>
-                  <th class="loja-lista-modal__th-right">Status</th>
+                  <th class="loja-lista-modal__th-right">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -98,7 +106,27 @@ function iniciais(nome: string) {
                     </div>
                   </td>
                   <td class="loja-lista-modal__td-right">
-                    <span class="loja-lista-modal__pill">Disponível</span>
+                    <div class="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        class="loja-lista-modal__pill"
+                        :aria-pressed="props.favoritos?.includes(prof.publicGuid)"
+                        :aria-label="props.favoritos?.includes(prof.publicGuid) ? 'Remover profissional dos favoritos' : 'Favoritar profissional'"
+                        @click="emit('toggle-favorito', prof)"
+                      >
+                        <Heart
+                          class="size-3.5"
+                          :fill="props.favoritos?.includes(prof.publicGuid) ? 'currentColor' : 'none'"
+                        />
+                      </button>
+                      <RouterLink
+                        :to="lojaAgendarPath(lojaPublicGuid, prof.publicGuid)"
+                        class="loja-lista-modal__pill"
+                        @click="close"
+                      >
+                        <CalendarDays class="size-3.5" /> Agendar
+                      </RouterLink>
+                    </div>
                   </td>
                 </tr>
               </tbody>

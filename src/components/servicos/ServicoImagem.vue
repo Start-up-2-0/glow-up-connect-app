@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import ServicoIcons from '@/components/servicos/ServicoIcons.vue'
+import { computed, ref, watch } from 'vue'
+import faviconUrl from '@/assets/logo/favicon.webp'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     imagem?: string | null
     alt?: string
@@ -13,6 +14,20 @@ withDefaults(
     size: 'md',
   },
 )
+
+const imagemComErro = ref(false)
+
+const imagemExibida = computed(() =>
+  props.imagem && !imagemComErro.value ? props.imagem : faviconUrl,
+)
+
+watch(() => props.imagem, () => {
+  imagemComErro.value = false
+})
+
+function handleImageError() {
+  if (imagemExibida.value !== faviconUrl) imagemComErro.value = true
+}
 </script>
 
 <template>
@@ -22,12 +37,12 @@ withDefaults(
     aria-hidden="true"
   >
     <img
-      v-if="imagem"
-      :src="imagem"
+      :src="imagemExibida"
       :alt="alt"
       class="servico-imagem__img"
+      :class="{ 'servico-imagem__img--fallback': !imagem || imagemComErro }"
+      @error="handleImageError"
     />
-    <ServicoIcons v-else name="empty" class="servico-imagem__fallback" />
   </div>
 </template>
 
@@ -63,9 +78,8 @@ withDefaults(
   object-fit: cover;
 }
 
-.servico-imagem__fallback {
-  width: 60%;
-  height: 60%;
-  color: var(--glow-text-subtle, #888);
+.servico-imagem__img--fallback {
+  object-fit: contain;
+  padding: 18%;
 }
 </style>

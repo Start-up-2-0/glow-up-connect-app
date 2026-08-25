@@ -7,9 +7,71 @@ import {
   MOCK_AVALIACAO_RESUMO,
   MOCK_AVALIACOES_NEGOCIO,
 } from '../seed/agenda'
+import { MOCK_PROFISSIONAIS, MOCK_SERVICOS } from '../seed/catalogo'
+
+function dashboardDate(daysFromNow: number): string {
+  const date = new Date()
+  date.setDate(date.getDate() + daysFromNow)
+  return date.toISOString().slice(0, 10)
+}
 
 export function registerAgendaRoutes(router: MockRouter) {
   const base = '/estabelecimentos/:estabelecimentoId'
+
+  /* ---------- Dashboard (negócio) ---------- */
+  router.on('get', `${base}/dashboard`, () => {
+    const hoje = MOCK_AGENDA_GERAL.filter((item) => {
+      const data = new Date(item.inicio)
+      const agora = new Date()
+      return data.toDateString() === agora.toDateString()
+    })
+    const realizados = MOCK_AGENDA_GERAL.filter((item) =>
+      ['Realizado', 'Concluido'].includes(item.status),
+    )
+    const receitaHoje = hoje
+      .filter((item) => item.status !== 'Cancelado')
+      .reduce((total, item) => total + item.valorTotal, 0)
+
+    return ok({
+      totalGanhoMes: 12840,
+      totalGanhoMesAnterior: 10950,
+      totalGanhoHoje: receitaHoje,
+      totalGanhoSemana: 3260,
+      totalGanhoSemanaAnterior: 2980,
+      agendamentosHoje: hoje.filter((item) => item.status !== 'Cancelado').length,
+      agendamentosOntem: 4,
+      agendamentosSemana: 27,
+      cancelamentosHoje: hoje.filter((item) => item.status === 'Cancelado').length,
+      clientesAtivos: 86,
+      servicosAtivos: MOCK_SERVICOS.filter((item) => item.ativo).length,
+      profissionais: MOCK_PROFISSIONAIS.map((item) => ({
+        id: item.id,
+        profissionalId: item.profissionalId,
+        nomePublico: item.nomePublico,
+        ativo: item.ativo,
+        podeReceberAgendamento: item.podeReceberAgendamento,
+        notaMedia: item.notaMedia,
+        agendamentosHoje: hoje.filter((agendamento) =>
+          agendamento.itens.some((servico) => servico.profissionalId === item.profissionalId),
+        ).length,
+      })),
+      ultimosAtendimentos: realizados,
+      proximosAtendimentos: hoje.filter((item) => item.status !== 'Cancelado'),
+      avaliacaoResumo: MOCK_AVALIACAO_RESUMO,
+      receitaUltimos7Dias: [
+        { data: dashboardDate(-6), valor: 410 }, { data: dashboardDate(-5), valor: 520 },
+        { data: dashboardDate(-4), valor: 380 }, { data: dashboardDate(-3), valor: 640 },
+        { data: dashboardDate(-2), valor: 590 }, { data: dashboardDate(-1), valor: 720 },
+        { data: dashboardDate(0), valor: receitaHoje },
+      ],
+      receitaUltimos30Dias: [],
+      distribuicaoServicos: [
+        { nome: 'Corte de Cabelo', quantidade: 18 },
+        { nome: 'Coloração', quantidade: 11 },
+        { nome: 'Escova Modeladora', quantidade: 9 },
+      ],
+    })
+  })
 
   /* ---------- Agenda (negócio) ---------- */
   router.on('get', `${base}/agenda`, () => {
@@ -88,7 +150,11 @@ export function registerAgendaRoutes(router: MockRouter) {
   })
   router.on('get', '/publico/avaliacoes/:token', () => ok({ status: 'Pendente', agendamentoId: 10, estabelecimentoPublicGuid: 'a1b2c3d4e5f6a7b8c9d0e1f2', estabelecimentoNome: 'Studio Glow Up', estabelecimentoLogo: '', profissionalId: 101, profissionalNome: 'Marina Alves', profissionalLogo: '', atendimentoInicio: new Date().toISOString(), atendimentoFim: new Date().toISOString(), avaliacao: null }))
   router.on('post', '/publico/avaliacoes/:token', () => ok({ status: 'Realizada', agendamentoId: 10, estabelecimentoPublicGuid: 'a1b2c3d4e5f6a7b8c9d0e1f2', estabelecimentoNome: 'Studio Glow Up', estabelecimentoLogo: '', profissionalId: 101, profissionalNome: 'Marina Alves', profissionalLogo: '', atendimentoInicio: new Date().toISOString(), atendimentoFim: new Date().toISOString(), avaliacao: { notaEstabelecimento: 5, notaProfissional: 5, avaliadoEm: new Date().toISOString() } }))
-  router.on('get', '/publico/avaliacoes/estabelecimentos/:publicGuid', () => {
-    return ok({ resumo: MOCK_AVALIACAO_RESUMO, total: 3, pagina: 1, tamanhoPagina: 10, itens: [{ nota: 5, comentario: 'Excelente atendimento!', avaliadoEm: new Date().toISOString(), clienteNome: 'Ana Paula' }] })
+  router.on('get', '/publico/avaliacoes/estabelecimentos/:publicGuid', (req: MockRequest) => {
+    const isCabeleleila = req.params.publicGuid === 'eeee-ffff-gggg'
+    const resumo = isCabeleleila
+      ? { notaMedia: 4.4, totalAvaliacoes: 22, janelaDias: 30, distribuicao: [{ nota: 1, quantidade: 1 }, { nota: 2, quantidade: 1 }, { nota: 3, quantidade: 2 }, { nota: 4, quantidade: 5 }, { nota: 5, quantidade: 13 }] }
+      : MOCK_AVALIACAO_RESUMO
+    return ok({ resumo, total: 3, pagina: 1, tamanhoPagina: 10, itens: [{ nota: 5, comentario: 'Excelente atendimento!', avaliadoEm: new Date().toISOString(), clienteNome: 'Ana Paula' }] })
   })
 }
