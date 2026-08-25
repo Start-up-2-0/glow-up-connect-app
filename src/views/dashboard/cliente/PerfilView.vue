@@ -459,7 +459,7 @@ async function handleSolicitarWhatsApp() {
                       rel="noopener noreferrer"
                       class="perfil-field__action"
                     >
-                      Confirmar número
+                      Abrir WhatsApp
                     </a>
                     <button
                       v-else
@@ -470,6 +470,15 @@ async function handleSolicitarWhatsApp() {
                     >
                       Confirmar número
                     </button>
+                    <a
+                      v-if="instrucoes?.linkConfirmacao"
+                      :href="instrucoes.linkConfirmacao"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="perfil-field__action"
+                    >
+                      Abrir link de confirmação
+                    </a>
                     <span v-if="polling" class="perfil-field__hint">Aguardando confirmação…</span>
                   </template>
                 </div>
